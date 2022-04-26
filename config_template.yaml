@@ -1,13 +1,12 @@
 ---
 ## Configuration file
-    
-    
-# File structure
-folder: ...
-neuropixel: ..._g0
-num_neuropixels: 1
-myomatrix: date_time
-kinarm: date_time.kinarm
+# Main parameters
+folder:
+neuropixel:
+num_neuropixels:
+myomatrix:
+kinarm:
+script_dir:
 
 # Registration parameters
 Registration:

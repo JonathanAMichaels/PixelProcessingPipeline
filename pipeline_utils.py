@@ -15,3 +15,5 @@ def find(pattern, path):
 
 def create_config(script_folder, folder):
     shutil.copyfile(script_folder + '/config_template.yaml', folder + '/config.yaml')
+
+
