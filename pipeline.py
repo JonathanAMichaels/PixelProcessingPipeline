@@ -1,8 +1,9 @@
 import sys
 import os
-import json
-from pipeline_utils import find
+import yaml
+from pipeline_utils import find, create_config
 
+script_folder = os.getcwd()
 opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
 args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
 
@@ -33,13 +34,19 @@ if "-full" in opts:
     myo_preprocess = True
 
 # Search working folder for existing configuration file
-config = find('*.json', folder)
-if len(config) > 1:
+config_file = find('*.yaml', folder)
+if len(config_file) > 1:
     SystemExit("There shouldn't be two config files in here (something went wrong)")
-elif len(config) == 0:
-    create_config = True
-else:
-    create_config = False
+elif len(config_file) == 0:
+    create_config(script_folder, folder)
+    config_file = find('*.yaml', folder)
+config_file = config_file[0]
+
+# Load config
+print(config_file)
+with open(config_file) as f:
+    config = yaml.load(f)
+    print(config)
 
 
 
