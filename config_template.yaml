@@ -1,0 +1,29 @@
+---
+## Configuration file
+    
+    
+# File structure
+folder: ...
+neuropixel: ..._g0
+num_neuropixels: 1
+myomatrix: date_time
+kinarm: date_time.kinarm
+
+# Registration parameters
+Registration:
+    detect_spikes: true
+    reg_win_num: 5 # default windowing
+    reg_block_num: 10 # default registration blocks
+    registration_type: non_rigid
+    # horizontal (time) smoothing. If you have jumps in the registration you can increase this value to smooth estimation over time (>50)
+    horz_smooth: 7
+    
+# Spike sorting parameters (Neuro)
+Neuro_sorting:
+
+# Spike sorting parameters (Myo)
+Myo_sorting:
+
+# Preprocessing parameters (Myo)
+Myo_preprocess:
+    broken_SNR: 2 # Haven't decided yet
