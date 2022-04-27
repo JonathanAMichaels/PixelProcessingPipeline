@@ -1,5 +1,6 @@
 import sys
-import os, glob
+import os
+import glob
 from ruamel import yaml
 from pipeline_utils import find, create_config
 from registration.registration import registration as registration_function
@@ -19,20 +20,20 @@ else:
 registration = False
 myo_sorting = False
 neuro_sorting = False
-myo_preprocess = False
 if "-registration" in opts:
     registration = True
 if "-myo_sorting" in opts:
     myo_sorting = True
 if "-neuro_sorting" in opts:
     neuro_sorting = True
-if "-myo_preprocess" in opts:
-    myo_preprocess = True
 if "-full" in opts:
     registration = True
     myo_sorting = True
     neuro_sorting = True
-    myo_preprocess = True
+if "-init" in opts:
+    registration = False
+    myo_sorting = False
+    neuro_sorting = False
 
 # Search working folder for existing configuration file
 config_file = find('*.yaml', folder)
@@ -81,8 +82,7 @@ if config['kinarm'] is None:
         config['kinarm'] = ''
     else:
         config['kinarm'] = temp
-if config['script_dir'] is None:
-    config['script_dir'] = script_folder
+config['script_dir'] = script_folder
 
 # Save config file with up-to-date information
 yaml.dump(config, open(config_file, 'w'), Dumper=yaml.RoundTripDumper)

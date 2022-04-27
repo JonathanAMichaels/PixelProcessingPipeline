@@ -1,28 +1,37 @@
 ---
 ## Configuration file
 # Main parameters
-folder:
-neuropixel:
-num_neuropixels:
-myomatrix:
-kinarm:
-script_dir:
+folder: # path of working directory (must be provided in command line)
+neuropixel: # path to neuropixel directory
+num_neuropixels: # number of neuropixels recorded
+myomatrix: # path to myomatrix directory
+kinarm: # path to .kinarm files
+script_dir: # path to pipeline.py script (always overwritten by program)
 
 # Registration parameters
 Registration:
     detect_spikes: true
     reg_win_num: 5 # default windowing
     reg_block_num: 10 # default registration blocks
-    registration_type: non_rigid
+    registration_type: non_rigid # non-rigid registration highly recommended
     # horizontal (time) smoothing. If you have jumps in the registration you can increase this value to smooth estimation over time (>50)
     horz_smooth: 7
-    
-# Spike sorting parameters (Neuro)
-Neuro_sorting:
 
-# Spike sorting parameters (Myo)
-Myo_sorting:
+Sorting:
+    # Common parameters that are not likely to change are stored in Kilosort_config.m
+    # Spike sorting parameters (Neuro)
+    Neuro_sorting:
+        overlap_s: 5e-4
+    # Spike sorting parameters (Myo)
+    Myo_sorting:
+        overlap_s: 0
+        broken_SNR: 1
 
-# Preprocessing parameters (Myo)
-Myo_preprocess:
-    broken_SNR: 2 # Haven't decided yet
+# Session-specific parameters
+Session:
+    trange:
+    myo_prefix:
+    myo_chan_list:
+    myo_analog_chan:
+    myo_muscle_list:
+    brain_area_list:
