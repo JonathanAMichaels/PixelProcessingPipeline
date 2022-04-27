@@ -1,6 +1,8 @@
 import sys
 import os
 import glob
+
+import scipy.io
 from ruamel import yaml
 from pipeline_utils import find, create_config
 from registration.registration import registration as registration_function
@@ -90,6 +92,24 @@ yaml.dump(config, open(config_file, 'w'), Dumper=yaml.RoundTripDumper)
 # Proceed with registration
 if registration:
     registration_function(config)
+
+# Proceed with neural spike sorting
+if neuro_sorting:
+    # DO FOR EACH PIXEL SEPARATELY
+    config_kilosort = yaml.safe_load(open(config_file, 'r'))
+    config_kilosort['type'] = 1
+    folders = glob.glob(config['neuropixel'] + '/*_g*')
+    for pixel in range(config['num_neuropixels']):
+        config_kilosort['neuropixel_folder'] = folder[pixel]
+        config_kilosort['neuropixel'] = glob.glob(folder[pixel] + '/*_t*.imec' + str(pixel) + '.ap.bin')
+        scipy.io.savemat('/tmp/config.mat', config_kilosort)
+        path_to_add = script_folder + '/sorting'
+        os.system('/usr/local/MATLAB/R2021a/bin/matlab -nodisplay -nosplash -nodesktop -r "addpath(\'' +
+                  path_to_add + '\'); Kilosort_run"')
+
+# Proceed with myo processing and spike sorting
+if myo_sorting:
+    print('asd')
 
 
 

@@ -30,8 +30,10 @@ Sorting:
 # Session-specific parameters
 Session:
     trange:
-    myo_prefix:
-    myo_chan_list:
-    myo_analog_chan:
-    myo_muscle_list:
-    brain_area_list:
+        - 0
+        - 0
+    myo_prefix: ''
+    myo_chan_list: ''
+    myo_analog_chan: ''
+    myo_muscle_list: ''
+    brain_area_list: ''
