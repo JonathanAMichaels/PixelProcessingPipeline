@@ -550,16 +550,9 @@ def register_data(reader, total_shift, geomarray,
     
     if registration_type == 'non_rigid':
         win_num = np.unique(ys).shape[0]
-
-        # get windows
-        window_list = []
-        for i in tqdm(range(n_chans)):
-            window = get_gaussian_window(D, T, ys[i], scale=D/(0.5*win_num))
-            window_list.append(window)
-
         estimated_displacement = np.zeros((n_chans, total_shift.shape[1]))
         for i in tqdm(range(n_chans)):
-            window = window_list[i]
+            window = get_gaussian_window(D, T, ys[i], scale=D/(0.5*win_num))
             w_disp = total_shift * window
             w_disp = w_disp.sum(0) / window.sum(0)
             estimated_displacement[i] = w_disp
