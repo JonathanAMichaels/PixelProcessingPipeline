@@ -120,10 +120,10 @@ if neuro_sorting:
 
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
         path_to_add = script_folder + '/sorting'
-        matlab_root = '/local/software/matlab/R2020b/bin/matlab'
-        #matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'
-        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
-                  path_to_add + '\'); Kilosort_run"')
+        #matlab_root = '/local/software/matlab/R2020b/bin/matlab'
+        matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'
+        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
+                  path_to_add + '\')); Kilosort_run"')
 
 # Proceed with myo processing and spike sorting
 if myo_sorting:
