@@ -36,7 +36,7 @@ def registration(config):
         if detect_spikes:
             # detect spikes
             raster = ed.check_raster(reader, geomarray, reader_type=reader_type, num_chans_per_spike=2,
-                                     detection_threshold=6,
+                                     detection_threshold=5.5,
                                      working_directory=registration_directory,
                                      save_raster_info=True)
 
@@ -45,11 +45,11 @@ def registration(config):
         total_shift = ed.estimate_displacement(reader, geomarray,
                                                reader_type=reader_type,
                                                num_chans_per_spike=2,
-                                               detection_threshold=6,
+                                               detection_threshold=5.5,
                                                horz_smooth=horz_smooth,
                                                reg_win_num=reg_win_num,
                                                reg_block_num=reg_block_num,
-                                               iteration_num=5,
+                                               iteration_num=4,
                                                resume_with_raster=True,
                                                working_directory=registration_directory)
 
