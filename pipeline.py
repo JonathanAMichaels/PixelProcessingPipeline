@@ -1,10 +1,9 @@
 import sys
 import os
 import glob
-
 import scipy.io
 from ruamel import yaml
-from pipeline_utils import find, create_config
+from pipeline_utils import find, create_config, extract_sync
 from registration.registration import registration as registration_function
 
 script_folder = os.path.dirname(os.path.realpath(__file__))
@@ -112,8 +111,14 @@ if neuro_sorting:
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
     for pixel in range(config['num_neuropixels']):
         config_kilosort['neuropixel_folder'] = neuro_folders[pixel]
-        config_kilosort['neuropixel'] = glob.glob(neuro_folders[pixel] + '/*_t*.imec' + str(pixel) + '.ap.bin')
+        tmp = glob.glob(neuro_folders[pixel] + '/*_t*.imec' + str(pixel) + '.ap.bin')
+        config_kilosort['neuropixel'] = tmp[0]
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
+
+        print('Extracting sync signal from ' + config_kilosort['neuropixel'] + ' and saving')
+        extract_sync(config_kilosort)
+
+        print('Starting spike sorting of ' + config_kilosort['neuropixel'])
         path_to_add = script_folder + '/sorting'
         os.system('/usr/local/MATLAB/R2021a/bin/matlab -nodisplay -nosplash -nodesktop -r "addpath(\'' +
                   path_to_add + '\'); Kilosort_run"')
