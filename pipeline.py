@@ -115,8 +115,11 @@ if neuro_sorting:
         config_kilosort['neuropixel'] = tmp[0]
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
 
-        print('Extracting sync signal from ' + config_kilosort['neuropixel'] + ' and saving')
-        extract_sync(config_kilosort)
+        if len(find('sync.mat', config_kilosort['neuropixel_folder'])) > 0:
+            print('Found existing sync file')
+        else:
+            print('Extracting sync signal from ' + config_kilosort['neuropixel'] + ' and saving')
+            extract_sync(config_kilosort)
 
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
         path_to_add = script_folder + '/sorting'
