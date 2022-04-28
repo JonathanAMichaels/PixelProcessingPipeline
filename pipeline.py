@@ -14,7 +14,7 @@ args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
 if "-f" in opts:
     folder = args[0]
     if os.path.isdir(folder):
-        print('Working folder: ' + folder)
+        print('Using working folder ' + folder)
     else:
         raise SystemExit("Provided folder is not valid (you had one job...)")
 else:
@@ -42,12 +42,15 @@ config_file = find('*.yaml', folder)
 if len(config_file) > 1:
     raise SystemExit("There shouldn't be two config files in here (something went wrong)")
 elif len(config_file) == 0:
+    print('No config file found - creating one now')
     create_config(script_folder, folder)
     config_file = find('*.yaml', folder)
 config_file = config_file[0]
 
 # Load config
+print('Using config file ' + config_file)
 config = yaml.load(open(config_file, 'r'), Loader=yaml.RoundTripLoader)
+
 
 # Check config for missing information and attempt to auto-fill
 if config['folder'] is None:
@@ -67,6 +70,8 @@ if config['neuropixel'] is None:
 if config['neuropixel'] != '':
     temp_folder = glob.glob(config['neuropixel'] + '/' + '*_g*')
     config['num_neuropixels'] = len(temp_folder)
+    print('Using neuropixel folder ' + config['neuropixel'] + ' containing ' +
+          str(config['num_neuropixels']) + ' neuropixel')
 if config['myomatrix'] is None:
     temp_folder = glob.glob(folder + '/*_myo')
     if len(temp_folder) > 1:
@@ -77,6 +82,8 @@ if config['myomatrix'] is None:
     else:
         if os.path.isdir(temp_folder[0]):
             config['myomatrix'] = temp_folder[0]
+if config['myomatrix'] != '':
+    print('Using myomatrix folder ' + config['myomatrix'])
 if config['kinarm'] is None:
     temp = glob.glob(folder + '/*.kinarm')
     if len(temp) == 0:
@@ -84,6 +91,8 @@ if config['kinarm'] is None:
         config['kinarm'] = ''
     else:
         config['kinarm'] = temp
+if config['kinarm'] != '':
+    print('Found kinarm data ' + config['kinarm'])
 config['script_dir'] = script_folder
 
 # Save config file with up-to-date information
@@ -93,15 +102,17 @@ yaml.dump(config, open(config_file, 'w'), Dumper=yaml.RoundTripDumper)
 if registration:
     registration_function(config)
 
+# Prepare common kilosort config
+config_kilosort = yaml.safe_load(open(config_file, 'r'))
+config_kilosort['myomatrix_number'] = 1
+config_kilosort['channel_list'] = 1
 # Proceed with neural spike sorting
 if neuro_sorting:
-    # DO FOR EACH PIXEL SEPARATELY
-    config_kilosort = yaml.safe_load(open(config_file, 'r'))
     config_kilosort['type'] = 1
-    folders = glob.glob(config['neuropixel'] + '/*_g*')
+    neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
     for pixel in range(config['num_neuropixels']):
-        config_kilosort['neuropixel_folder'] = folder[pixel]
-        config_kilosort['neuropixel'] = glob.glob(folder[pixel] + '/*_t*.imec' + str(pixel) + '.ap.bin')
+        config_kilosort['neuropixel_folder'] = neuro_folders[pixel]
+        config_kilosort['neuropixel'] = glob.glob(neuro_folders[pixel] + '/*_t*.imec' + str(pixel) + '.ap.bin')
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
         path_to_add = script_folder + '/sorting'
         os.system('/usr/local/MATLAB/R2021a/bin/matlab -nodisplay -nosplash -nodesktop -r "addpath(\'' +
@@ -109,7 +120,10 @@ if neuro_sorting:
 
 # Proceed with myo processing and spike sorting
 if myo_sorting:
-    print('asd')
+    config_kilosort = yaml.safe_load(open(config_file, 'r'))
+    config_kilosort['type'] = 2
+    config_kilosort['channel_list'] = range(16)
+    config_kilosort['myomatrix_number'] = 1
 
 
 
