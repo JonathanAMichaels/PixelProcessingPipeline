@@ -91,7 +91,7 @@ if config['kinarm'] is None:
     else:
         config['kinarm'] = temp
 if config['kinarm'] != '':
-    print('Found kinarm data ' + config['kinarm'])
+    print('Found kinarm data files')
 config['script_dir'] = script_folder
 
 # Save config file with up-to-date information
