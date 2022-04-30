@@ -8,3 +8,10 @@ The very first time you set up your virtual environment, follow these steps:
 
 Every time you start a new session, you will have to activate your virtual environement with
     source ~/pipeline/bin/activate
+    
+    
+type
+    nano ~/.bashrc
+scroll to bottom and add
+    export PATH="/usr/local/cuda-11.2/bin:$PATH"
+save and close. Start a new shell.
