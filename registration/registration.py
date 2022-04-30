@@ -35,7 +35,7 @@ def registration(config):
 
         if detect_spikes:
             # detect spikes
-            raster = ed.check_raster(reader, geomarray, reader_type=reader_type, num_chans_per_spike=2,
+            raster = ed.check_raster(reader, geomarray, reader_type=reader_type, num_chans_per_spike=4,
                                      detection_threshold=6,
                                      working_directory=registration_directory,
                                      save_raster_info=True)
@@ -44,7 +44,7 @@ def registration(config):
         # visualization will be saved to decentralized_raster/, shift will be saved as total_shift.npy
         total_shift = ed.estimate_displacement(reader, geomarray,
                                                reader_type=reader_type,
-                                               num_chans_per_spike=2,
+                                               num_chans_per_spike=4,
                                                detection_threshold=6,
                                                horz_smooth=horz_smooth,
                                                reg_win_num=reg_win_num,
