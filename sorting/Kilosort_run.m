@@ -125,19 +125,27 @@ end
 disp(ops.fbinary)
 
 rez                = preprocessDataSub(ops);
+disp('Finished preprocessing')
 rez                = datashift2(rez, 1);
+disp('Finished datashift')
 [rez, st3, tF]     = extract_spikes(rez);
+disp('Finished extract spikes')
 rez                = template_learning(rez, tF, st3);
+disp('Finished template learning')
 [rez, st3, tF]     = trackAndSort(rez);
+disp('Finished task and sort')
 rez                = final_clustering(rez, tF, st3);
+disp('Finished final clustering')
 
-ind = find(rez.st3(:,2) == 0);
-rez.st3(ind,:) = [];
-rez.xy(ind,:) = [];
-disp([num2str(length(ind)) ' deleted'])
+%ind = find(rez.st3(:,2) == 0);
+%rez.st3(ind,:) = [];
+%rez.xy(ind,:) = [];
+%disp([num2str(length(ind)) ' deleted'])
 
 rez = remove_ks2_duplicate_spikes(rez, 'overlap_s', overlap_s, 'channel_separation_um', channelSep);
+disp('Finished removing duplicates')
 rez                = find_merges(rez, 1);
+disp('Finished merges')
 
 fprintf('found %d good units \n', sum(rez.good>0))
 
