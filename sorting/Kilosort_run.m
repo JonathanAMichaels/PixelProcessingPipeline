@@ -132,8 +132,9 @@ disp('Finished datashift')
 disp('Finished extract spikes')
 rez                = template_learning(rez, tF, st3);
 disp('Finished template learning')
+clear st3 tF
 [rez, st3, tF]     = trackAndSort(rez);
-disp('Finished task and sort')
+disp('Finished track and sort')
 rez                = final_clustering(rez, tF, st3);
 disp('Finished final clustering')
 
