@@ -1,5 +1,5 @@
 # PixelProcessingPipeline
-The purpose of this toolbox is to easily and automatically process Neuropixels and Myomatrix data recorded during experiments.
+This toolbox easily and automatically processes Neuropixels and Myomatrix data recorded during experiments.
 
 This toolbox will:
 - Automatically generate a config file to keep track of experimental parameters
