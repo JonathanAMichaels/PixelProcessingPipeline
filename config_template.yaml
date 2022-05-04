@@ -1,19 +1,28 @@
 ---
-## Configuration file
-# Main parameters
-folder: # path of working directory (must be provided in command line)
-neuropixel: # path to neuropixel directory
-num_neuropixels: # number of neuropixels recorded
-myomatrix: # path to myomatrix directory
-kinarm: # path to .kinarm files
-script_dir: # path to pipeline.py script (always overwritten by program)
+# Configuration file
+# Auto-generated parameters
+# path of working directory (must be provided in command line)
+folder:
+# path to neuropixel directory
+neuropixel:
+# number of neuropixels recorded
+num_neuropixels:
+# path to myomatrix directory (should end in _myo)
+myomatrix:
+# path to .kinarm files
+kinarm:
+# path to pipeline.py script (always overwritten by program)
+script_dir:
 
 # Registration parameters
 Registration:
     detect_spikes: true
-    reg_win_num: 5 # default windowing
-    reg_block_num: 10 # default registration blocks
-    registration_type: non_rigid # non-rigid registration highly recommended
+    # default windowing
+    reg_win_num: 5
+    # default registration blocks
+    reg_block_num: 10
+    # non-rigid registration highly recommended
+    registration_type: non_rigid
     # horizontal (time) smoothing. If you have jumps in the registration you can increase this value to smooth estimation over time (>50)
     horz_smooth: 7
 
@@ -22,10 +31,11 @@ Sorting:
     # Spike sorting parameters (Neuro)
     Neuro_sorting:
         overlap_s: 5e-4
+        channel_sep: 100
     # Spike sorting parameters (Myo)
     Myo_sorting:
         overlap_s: 0
-        broken_SNR: 1
+        channel_sep: 4000
 
 # Session-specific parameters
 Session:
@@ -33,7 +43,10 @@ Session:
         - 0
         - 0
     myo_prefix: ''
-    myo_chan_list: ''
-    myo_analog_chan: ''
-    myo_muscle_list: ''
-    brain_area_list: ''
+    myo_chan_list:
+        - [1, 32]
+    myo_analog_chan: 33
+    myo_muscle_list:
+        - Muscle1
+    brain_area_list:
+        - [0, 0s]
