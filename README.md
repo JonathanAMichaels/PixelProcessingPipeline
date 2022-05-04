@@ -1,9 +1,9 @@
 # PixelProcessingPipeline
-The purpose of this toolbox is to easily and automatically process Neuropixels and Myomatrix data recorded during experiments
+The purpose of this toolbox is to easily and automatically process Neuropixels and Myomatrix data recorded during experiments.
 
-This toolbox can
-- Automatically generate a config file to keep track of experiment parameters
-- for Neuropixel data:
+This toolbox will:
+- Automatically generate a config file to keep track of experimental parameters
+- For Neuropixel data:
   - Perform registration of data over time to correct for drift in the recording
   - Extract and save the sync signal sent from the behavioural task
   - Perform spike sorting with Kilosort 3
@@ -58,7 +58,7 @@ The first time you process an experiment, call
 
     python3 pipeline.py -f /path_to_experiment_folder -init
 
-This will generate a config.yaml file in that directory with all the relevant parameters for that experiment generated automatically. Open that file with any text editor and add any session specific information to the Session parameter section. For example, if you collected Myomatrix data you must specify which channels belong to which electrode and which channel is contains the sync information, since this information cannot be generated automatically.
+This will generate a config.yaml file in that directory with all the relevant parameters for that experiment generated automatically. Open that file with any text editor and add any session specific information to the Session parameter section. For example, if you collected Myomatrix data you must specify which channels belong to which electrode and which channel contains the sync information, since this information cannot be generated automatically.
 
 If the config.yaml is correct, you can run the pipeline with all steps
 
@@ -75,3 +75,5 @@ to perform only those steps. Have fun!
 ## Extensions
 
 This code does not currently process .kinarm files or combine behavioural information with synced neural data. This may be added at a later date.
+
+The Neuropixels registration is based on https://github.com/evarol/NeuropixelsRegistration. While it works very well, I'm currently working on switching to an improved version.
