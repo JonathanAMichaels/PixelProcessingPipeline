@@ -94,6 +94,7 @@ if type == 2
         disp('Broken channels are:')
         brokenChan
         data(:,brokenChan) = 0;
+        clear data_filt
         
         % Generate "Bulk EMG" dataset
         notBroken = 1:size(data,2);
@@ -103,23 +104,20 @@ if type == 2
             topHalf = [1:8 17:24];
             bottomHalf(ismember(bottomHalf, brokenChan)) = [];
             topHalf(ismember(topHalf, brokenChan)) = [];
-            bEMG = mean(data(:,bottomHalf),2) - mean(data(:,topHalf),2);
+            bEMG = int16(mean(data(:,bottomHalf),2)) - int16(mean(data(:,topHalf),2));
         else
-            bEMG = mean(data(:,notBroken),2);
+            bEMG = int16(mean(data(:,notBroken),2));
         end
-        bEMGFilter = [10 500];
-        [b, a] = butter(2, bEMGFilter / (30000/2), 'bandpass');
-        bEMG = filtfilt(b, a, bEMG);
         
         if myomatrix_number == 1
             fileID = fopen([rootZ 'MyomatrixData.bin'], 'w');
-            save([rootZ 'bulkEMG'], 'bEMG', 'notBroken', 'dataChan', 'bEMGFilter')
+            save([rootZ 'bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
         else
             fileID = fopen([rootZ 'MyomatrixData' num2str(myomatrix_number) '.bin'], 'w');
-            save([rootZ 'bulkEMG-' num2str(myomatrix_number)], 'bEMG', 'notBroken', 'dataChan', 'bEMGFilter')
+            save([rootZ 'bulkEMG-' num2str(myomatrix_number)], 'bEMG', 'notBroken', 'dataChan')
         end
         disp('Saved generated bulk EMG')
-        fwrite(fileID, int16(data'), 'int16');
+        fwrite(fileID, data', 'int16');
         fclose(fileID);
         clear data
         disp('Saved myomatrix data binary')
