@@ -125,7 +125,7 @@ if neuro_sorting:
 
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
         path_to_add = script_folder + '/sorting'
-        os.system('module load matlab/R2021b')
+        os.system('module load matlab/2021b')
         matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
         #matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab' # something else for testing locally
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
@@ -141,7 +141,7 @@ if myo_sorting:
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
         print('Starting spike sorting of ' + config_kilosort['myomatrix'])
         path_to_add = script_folder + '/sorting'
-        os.system('module load matlab/R2021b')
+        os.system('module load matlab/2021b')
         matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
         #matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab' # something else for testing locally
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
