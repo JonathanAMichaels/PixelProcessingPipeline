@@ -90,7 +90,11 @@ if type == 2
             end
         end
         S = std(data_filt,[],1);
-        brokenChan = find(S > 150);
+        if length(dataChan) == 32
+            brokenChan = find(S > 150);
+        elseif length(dataChan) == 16
+            brokenChan = find(S > 20);
+        end
         disp('Broken channels are:')
         brokenChan
         data(:,brokenChan) = 0;
@@ -116,12 +120,14 @@ if type == 2
             fileID = fopen([rootZ 'MyomatrixData' num2str(myomatrix_number) '.bin'], 'w');
             save([rootZ 'bulkEMG-' num2str(myomatrix_number)], 'bEMG', 'notBroken', 'dataChan')
         end
+        clear bEMG
         disp('Saved generated bulk EMG')
         fwrite(fileID, data', 'int16');
         fclose(fileID);
         clear data
         disp('Saved myomatrix data binary')
         save([rootZ 'sync'], 'sync')
+        clear sync
         disp('Saved sync data')
     end
 end
