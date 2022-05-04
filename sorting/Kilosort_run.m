@@ -10,24 +10,17 @@ channelLabelsBipolar = [25, 26; 27, 28; 29, 30; 31, 32; ...
 pathToYourConfigFile = [script_dir '/sorting/Kilosort_config.m'];
 
 if type == 1
-    file = neuropixel;
     phyDir = 'phyData';
     chanMapFile = [script_dir '/geometries/neuropixPhase3B1_kilosortChanMap.mat'];
 else
-    file = myomatrix;
-end
-chanList = channel_list;
-
-
-if type == 2
-    if length(innerChanList) == 16
-        chanMapFile = [script_dir '/geormetries/bipolar_test_kilosortChanMap.mat'];
-    elseif length(innerChanList) == 32
-        chanMapFile = [script_dir '/geormetries/monopolar_test_kilosortChanMap.mat'];
+    chanList = Session.myo_chan_list(myomatrix_number,1) : Session.myo_chan_list(myomatrix_number,2);
+    if length(chanList) == 16
+        chanMapFile = [script_dir '/geometries/bipolar_test_kilosortChanMap.mat'];
+    elseif length(chanList) == 32
+        chanMapFile = [script_dir '/geometries/monopolar_test_kilosortChanMap.mat'];
     else
-        error('What.')
-    end
-    
+        error('Channel map not implemented')
+    end    
     if myomatrix_number == 1
         phyDir = 'phyDataMyo';
     else
@@ -39,7 +32,7 @@ disp(['Using this channel map: ' chanMapFile])
 
 rootZ = [neuropixel_folder '/'];
 rootH = [rootZ phyDir '/'];
-mkdir(rootH)
+mkdir(rootH);
 
 if Session.trange(2) == 0
     ops.trange = [0 Inf];
@@ -48,16 +41,17 @@ else
 end
 
 ops.NchanTOT  = 385; % total number of channels in your recording
-run(pathToYourConfigFile)
+run(pathToYourConfigFile);
 ops.fproc   = fullfile(rootH, 'temp_wh.dat');
 ops.chanMap = fullfile(chanMapFile);
 
 if type == 2
     checkFile = [rootZ 'MyomatrixData.bin'];
     if ~isfile(checkFile)
-        prefix = prefixList{subject};
-        postfix = postfixList{subject};
-        dataChan = innerChanList;
+        disp('Did not find myomatrix binary, building it')
+        prefix = Session.myo_prefix;
+        postfix = '';
+        dataChan = chanList;
         
         tempdata = cell(1,length(dataChan));
         for chan = 1:length(dataChan)
@@ -71,35 +65,65 @@ if type == 2
         if length(dataChan) == 32
             data = data(:,channelRemap);
         end
-        analogData = load_open_ephys_data([rootZ '100_' analogChanList{subject} postfix '.continuous']);
+        analogData = load_open_ephys_data([rootZ '100_' num2str(Session.myo_analog_chan) '.continuous']);
         analogData(analogData > 5) = 5;
         sync = logical(round(analogData / max(analogData)));
+        clear analogData
         
-        [b, a] = butter(4, [350 7500] / (30000/2), 'bandpass');
-        tRange = size(data,1) - 2000000 : size(data,1);
-        data_filt = zeros(length(tRange),size(data,2));
-        for i = 1:size(data,2)
-            data_filt(:,i) = filtfilt(b, a, data(tRange,i));
+        clf
+        for q = 1:2
+            if q == 1
+                [b, a] = butter(2, [350 7500] / (30000/2), 'bandpass');
+            elseif q == 2
+                [b, a] = butter(2, [10 200] / (30000/2), 'bandpass');
+            end
+            tRange = size(data,1) - (30000*60*3) : size(data,1) - (30000*60);
+            data_filt = zeros(length(tRange),size(data,2));
+            for i = 1:size(data,2)
+                data_filt(:,i) = filtfilt(b, a, data(tRange,i));
+            end
+            subplot(1,2,q)
+            hold on
+            for i = 1:size(data,2)
+                plot(data_filt(:,i) + i*2000)
+            end
+            drawnow
         end
-        hold on
-        for i = 1:size(data,2)
-            plot(data_filt(:,i) + i*500)
-        end
-        drawnow
-        pause
+        S = std(data_filt,[],1);
+        brokenChan = find(S > 150);
+        disp('Broken channel are:')
+        brokenChan
+        data(:,brokenChan) = 0;
         
-        data(:,innerBrokenList) = 0;
-        dataSave = int16(data');
-        whos dataSave
+        % Generate "Bulk EMG" dataset
+        notBroken = 1:size(data,2);
+        notBroken(brokenChan) = [];
+        if length(dataChan) == 32
+            bottomHalf = [9:16 25:32];
+            topHalf = [1:8 17:24];
+            bottomHalf(ismember(bottomHalf, brokenChan)) = [];
+            topHalf(ismember(topHalf, brokenChan)) = [];
+            bEMG = mean(data(:,bottomHalf),2) - mean(data(:,topHalf),2);
+        else
+            bEMG = mean(data(:,notBroken),2);
+        end
+        bEMGFilter = [10 500];
+        [b, a] = butter(2, bEMGFilter / (30000/2), 'bandpass');
+        bEMG = filtfilt(b, a, bEMG);
+        
         if myomatrix_number == 1
             fileID = fopen([rootZ 'MyomatrixData.bin'], 'w');
+            save([rootZ 'bulkEMG'], 'bEMG', 'notBroken', 'dataChan', 'bEMGFilter')
         else
-            fileID = fopen([rootZ 'MyomatrixData' num2str(myomatrix_number) '.bin'], 'w');
+            fileID = fopen([rootZ 'MyomatrixData-' num2str(myomatrix_number) '.bin'], 'w');
+            save([rootZ 'bulkEMG-' num2str(myomatrix_number)], 'bEMG', 'notBroken', 'dataChan', 'bEMGFilter')
         end
-        fwrite(fileID, dataSave, 'int16');
+        fwrite(fileID, int16(data'), 'int16');
         fclose(fileID);
-        save([rootZ 'syncData'], 'sync')
-        clear data dataSave
+        clear data
+        disp('Saved myomatrix data binary')
+        save([rootZ 'sync'], 'sync')
+        disp('Saved sync data')
     end
 end
 
@@ -107,19 +131,20 @@ end
 if type == 1
     fs          = dir(fullfile([rootZ 'NeuropixelsRegistration/registered/'], '*.bin'));
     ops.fbinary = fullfile([rootZ 'NeuropixelsRegistration/registered/'], fs(1).name);
-    channelSep = 100; % Default for Neuropixels
     overlap_s = Sorting.Neuro_sorting.overlap_s;
+    channel_sep = Sorting.Neuro_sorting.channel_sep;
     ops.CAR = 1;
 else
-    fs          = [dir(fullfile(rootZ, '*.bin')) dir(fullfile(rootZ, '*.dat'))];
-    ops.fbinary = fullfile(rootZ, fs(rr).name);
-    ops.NchanTOT  = length(innerChanList); % total number of channels in your recording
+    fs          = dir(fullfile(rootZ, 'Myo*.bin'));
+    ops.fbinary = fullfile(rootZ, fs(myomatrix_number).name);
+    ops.NchanTOT  = length(chanList); % total number of channels in your recording
     if ops.NchanTOT == 16
         ops.CAR = 0;
     else
         ops.CAR = 1;
     end
     overlap_s = Sorting.Myo_sorting.overlap_s;
+    channel_sep = Sorting.Myo_sorting.channel_sep;
     ops.sigmaMask = 1200;
 end
 disp(ops.fbinary)
@@ -138,18 +163,12 @@ disp('Finished track and sort')
 rez                = final_clustering(rez, tF, st3);
 disp('Finished final clustering')
 
-%ind = find(rez.st3(:,2) == 0);
-%rez.st3(ind,:) = [];
-%rez.xy(ind,:) = [];
-%disp([num2str(length(ind)) ' deleted'])
-
-rez = remove_ks2_duplicate_spikes(rez, 'overlap_s', overlap_s, 'channel_separation_um', channelSep);
+rez = remove_ks2_duplicate_spikes(rez, 'overlap_s', overlap_s, 'channel_separation_um', channel_sep);
 disp('Finished removing duplicates')
 rez                = find_merges(rez, 1);
 disp('Finished merges')
 
 fprintf('found %d good units \n', sum(rez.good>0))
-
 
 rootQ = fullfile(rootZ, 'kilosort3');
 if myomatrix_number ~= 1

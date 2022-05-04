@@ -6,7 +6,7 @@ ops.doFilter = 1;
 ops.sig = 20;  % spatial smoothness constant for registration
 ops.fshigh = 300; % high-pass more aggresively
 ops.nblocks = 0; % blocks for registration. 0 turns it off, 1 does rigid registration. Replaces "datashift" option.
-ops.CAR = 1
+ops.CAR = 1;
 
 % frequency for high pass filtering (150)
 ops.fshigh = 300;   
