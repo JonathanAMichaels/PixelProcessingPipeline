@@ -42,7 +42,8 @@ Save and close. Start a new shell.
 To set up Kilosort the first time, open matlab
 
     module load matlab/R2021b
-    ./srv/software/matlab/R2021b/bin/matlab
+    /srv/software/matlab/R2021b/bin/matlab
+
 Navigate to the Kilosort CUDA directory wherever you installed this code and run mexGPUall
 
     cd('location_of_toolbox/sorting/Kilosort/CUDA')
@@ -52,7 +53,7 @@ If all the files were built successfully, you are ready to go!
 
 ## Usage
 
-Organize each experiment into one directory with a Neuropixel folder inside (e.g. 050322_g0), a Myomatrix folder (e.g. 2022-04-14_09-48-02_myo, which must have _myo at the end) and any .kinarm data files generated. You do not need to have all of these present.
+Organize each experiment into one directory with a Neuropixel folder inside (e.g. 041422_g0), a Myomatrix folder (e.g. 2022-04-14_09-48-02_myo, which must have _myo at the end) and any .kinarm data files generated. You do not need to have all of these present.
 
 The first time you process an experiment, call
 
@@ -60,9 +61,9 @@ The first time you process an experiment, call
 
 This will generate a config.yaml file in that directory with all the relevant parameters for that experiment generated automatically. Open that file with any text editor and add any session specific information to the Session parameter section. For example, if you collected Myomatrix data you must specify which channels belong to which electrode and which channel contains the sync information, since this information cannot be generated automatically.
 
-If the config.yaml is correct, you can run the pipeline with all steps
+If the config.yaml is correct, you can run the pipeline with all steps, for example
 
-    python3 pipeline.py -f /path_to_experiment_folder -full
+    python3 pipeline.py -f /cifs/pruszynski/Malfoy/041422 -full
 
 Alternatively, you can call any combination of
 

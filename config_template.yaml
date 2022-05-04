@@ -49,4 +49,4 @@ Session:
     myo_muscle_list:
         - Muscle1
     brain_area_list:
-        - [0, 0s]
+        - [0, 0]

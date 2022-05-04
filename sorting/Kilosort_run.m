@@ -54,18 +54,15 @@ if type == 2
     if ~isfile(checkFile)
         disp('Did not find myomatrix binary, building it')
         prefix = Session.myo_prefix;
-        postfix = '';
         dataChan = chanList;
-        
-        tempdata = cell(1,length(dataChan));
-        for chan = 1:length(dataChan)
-            tempdata{chan} = load_open_ephys_data([rootZ '100_' prefix num2str(dataChan(chan)) postfix '.continuous']);
-        end
-        data = zeros(size(tempdata{1},1), length(dataChan));
-        for chan = 1:size(data,2)
-            data(:,chan) = tempdata{chan};
-        end
+   
+        tempdata = load_open_ephys_data([rootZ '100_' prefix num2str(dataChan(1)) '.continuous']);
+        tL = length(tempdata);
         clear tempdata
+        data = zeros(tL, length(dataChan), 'int16');
+        for chan = 1:length(dataChan)
+            data(:,chan) = load_open_ephys_data([rootZ '100_' prefix num2str(dataChan(chan)) '.continuous']);
+        end
         if length(dataChan) == 32
             data = data(:,channelRemap);
         end
@@ -84,14 +81,13 @@ if type == 2
             tRange = size(data,1) - (30000*60*3) : size(data,1) - (30000*60);
             data_filt = zeros(length(tRange),size(data,2));
             for i = 1:size(data,2)
-                data_filt(:,i) = filtfilt(b, a, data(tRange,i));
+                data_filt(:,i) = filtfilt(b, a, double(data(tRange,i)));
             end
             subplot(1,2,q)
             hold on
             for i = 1:size(data,2)
                 plot(data_filt(:,i) + i*2000)
             end
-            drawnow
         end
         S = std(data_filt,[],1);
         brokenChan = find(S > 150);
@@ -119,7 +115,7 @@ if type == 2
             fileID = fopen([rootZ 'MyomatrixData.bin'], 'w');
             save([rootZ 'bulkEMG'], 'bEMG', 'notBroken', 'dataChan', 'bEMGFilter')
         else
-            fileID = fopen([rootZ 'MyomatrixData-' num2str(myomatrix_number) '.bin'], 'w');
+            fileID = fopen([rootZ 'MyomatrixData' num2str(myomatrix_number) '.bin'], 'w');
             save([rootZ 'bulkEMG-' num2str(myomatrix_number)], 'bEMG', 'notBroken', 'dataChan', 'bEMGFilter')
         end
         disp('Saved generated bulk EMG')
