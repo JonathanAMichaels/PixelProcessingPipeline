@@ -46,7 +46,11 @@ ops.fproc   = fullfile(rootH, 'temp_wh.dat');
 ops.chanMap = fullfile(chanMapFile);
 
 if type == 2
-    checkFile = [rootZ 'MyomatrixData.bin'];
+    if myomatrix_number == 1
+        checkFile = [rootZ 'MyomatrixData.bin'];
+    else
+        checkFile = [rootZ 'MyomatrixData-' num2str(myomatrix_number) '.bin'];
+    end    
     if ~isfile(checkFile)
         disp('Did not find myomatrix binary, building it')
         prefix = Session.myo_prefix;
@@ -91,7 +95,7 @@ if type == 2
         end
         S = std(data_filt,[],1);
         brokenChan = find(S > 150);
-        disp('Broken channel are:')
+        disp('Broken channels are:')
         brokenChan
         data(:,brokenChan) = 0;
         
@@ -118,6 +122,7 @@ if type == 2
             fileID = fopen([rootZ 'MyomatrixData-' num2str(myomatrix_number) '.bin'], 'w');
             save([rootZ 'bulkEMG-' num2str(myomatrix_number)], 'bEMG', 'notBroken', 'dataChan', 'bEMGFilter')
         end
+        disp('Saved generated bulk EMG')
         fwrite(fileID, int16(data'), 'int16');
         fclose(fileID);
         clear data
@@ -147,7 +152,7 @@ else
     channel_sep = Sorting.Myo_sorting.channel_sep;
     ops.sigmaMask = 1200;
 end
-disp(ops.fbinary)
+disp(['Using ' ops.fbinary])
 
 rez                = preprocessDataSub(ops);
 disp('Finished preprocessing')
