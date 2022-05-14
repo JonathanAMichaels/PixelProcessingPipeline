@@ -13,6 +13,7 @@
 %   
 %   optional parameters:
 %   params.sr: sampling rate (Hz)
+%   params.userSorted: whether to load user-curated spike sorting or kilosort output
 %   params.savePlot: whether or not to save waveform plots
 %   params.crit: correlation threshold for merging clusters
 %   params.SNRThresold: SNR threshold for including units at the final step
@@ -31,6 +32,9 @@ xcoords = params.chanMap(:,1);
 ycoords = params.chanMap(:,2);
 if ~isfield(params, 'sr')
     params.sr = 30000;
+end
+if ~isfield(params, 'userSorted')
+    params.userSorted = false;
 end
 if ~isfield(params, 'savePlots')
     params.savePlots = false;
@@ -67,8 +71,12 @@ end
 disp('Reading kilosort output')
 T = readNPY([params.kiloDir '/spike_times.npy']);
 I = readNPY([params.kiloDir '/spike_clusters.npy']);
-clusterGroup = tdfread([params.kiloDir '/cluster_KSLabel.tsv']);
-clusterGroup.group = clusterGroup.KSLabel;
+if params.userSorted
+    clusterGroup = tdfread([params.kiloDir '/cluster_group.tsv']);
+else
+    clusterGroup = tdfread([params.kiloDir '/cluster_KSLabel.tsv']);
+    clusterGroup.group = clusterGroup.KSLabel;
+end
 % Take only 'good' single units as determined by kilosort with at least 20 spikes
 C = [];
 for i = 1:length(clusterGroup.cluster_id)
