@@ -135,7 +135,7 @@ if neuro_sorting:
 if myo_sorting:
     config_kilosort = yaml.safe_load(open(config_file, 'r'))
     config_kilosort['type'] = 2
-    config_kilosort['neuropixel_folder'] = config_kilosort['myomatrix'] + '/Record Node 102'
+    config_kilosort['neuropixel_folder'] = glob.glob(config_kilosort['myomatrix'] + '/Record Node*')
     if config['myomatrix'] != '':
         for pixel in range(len(config['Session']['myo_muscle_list'])):
             config_kilosort['myomatrix_number'] = pixel+1
