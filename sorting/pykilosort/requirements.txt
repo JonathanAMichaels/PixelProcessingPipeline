@@ -1,0 +1,14 @@
+click
+cupy
+matplotlib
+mock
+numba
+numpy
+ibllib
+phylib
+--pre phy
+pydantic
+pytest
+scipy
+spikeextractors
+tqdm
