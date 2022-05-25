@@ -4,7 +4,7 @@ import glob
 import scipy.io
 from ruamel import yaml
 from pipeline_utils import find, create_config, extract_sync
-from registration.registration import registration as registration_function
+from registration.registration_new import registration as registration_function
 
 script_folder = os.path.dirname(os.path.realpath(__file__))
 opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]

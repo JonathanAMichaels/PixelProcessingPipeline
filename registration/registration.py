@@ -1,6 +1,6 @@
 import os
 import glob
-from ibllib.io.spikeglx import Reader
+from spikeglx import Reader
 import registration.estimate_displacement as ed
 from registration.utils import mat2npy
 
