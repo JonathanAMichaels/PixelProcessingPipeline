@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import glob
 import spikeglx
@@ -34,10 +35,11 @@ def registration(config):
         file = glob.glob(working_directory + '*_t*.imec' + str(pixel) + '.ap.bin')
         if len(file) != 1:
             raise SystemExit('Invalid Neuropixel data: ' + str(file))
-        binary = Path(file)
+        binary = Path(file[0])
 
         print("Destriping", binary)
-        standardized_file = working_directory / f"{binary.stem}.normalized.bin"
+        folder = binary.parent
+        standardized_file = folder / f"{binary.stem}.normalized.bin"
 
         # run destriping
         sr = spikeglx.Reader(binary)
@@ -47,9 +49,7 @@ def registration(config):
             batch_size_secs = 1
             batch_intervals_secs = 50
             # scans the file at constant interval, with a demi batch starting offset
-            nbatches = int(
-                np.ceil((sr.rl - batch_size_secs) / batch_intervals_secs - 0.5)
-            )
+            nbatches = int(np.ceil((sr.rl - batch_size_secs) / batch_intervals_secs - 0.5))
             print(nbatches)
             wrots = np.zeros((nbatches, sr.nc - sr.nsync, sr.nc - sr.nsync))
             for ibatch in trange(nbatches, desc="destripe batches"):
@@ -84,18 +84,21 @@ def registration(config):
                 ),
             )
 
-        os.system('python ' + config['script_dir'] +
-                  'registration/spikes_localization_registration/scripts/subtract.py '
-                  + working_directory + standardized_file + ' ' + registration_directory +
-                  ' --noresidual --nowaveforms --dndetect --thresholds=12,10,8,6 --n_jobs=4')
+        file = glob.glob(registration_directory + 'subtraction_*.h5')
+        if len(file) == 0:
+            os.system('python ' + config['script_dir'] +
+                      '/registration/spikes_localization_registration/scripts/subtract.py '
+                      + str(standardized_file) + ' ' + registration_directory +
+                      ' --noresidual --nowaveforms --dndetect --thresholds=12,10,8,6 --n_jobs=4 --geom=' +
+                      config['script_dir'] +
+                      '/registration/spikes_localization_registration/channels_maps/np1_channel_map.npy')
 
         import h5py
-        import numpy as np
         import matplotlib.pyplot as plt
         from registration.spikes_localization_registration.subtraction_pipeline.ibme import fast_raster
 
-        registered_file = registration_directory + 'subtraction_' + standardized_file + '_t_0_None.h5'
-        with h5py.File(registered_file, "r") as f:
+        registered_file = glob.glob(registration_directory + 'subtraction_*.h5')
+        with h5py.File(registered_file[0], "r") as f:
             x = f["localizations"][:, 0]
             z_orig = f["localizations"][:, 2]
             z_reg = f["z_reg"][:]
@@ -107,8 +110,8 @@ def registration(config):
 
         fig, (aa, ab) = plt.subplots(2, 1, figsize=(10, 6), sharex=True, dpi=200)
 
-        aa.imshow(np.clip(r_orig, 3, 13), aspect=0.5 * r_orig.shape[1] / r_orig.shape[0], cmap=plt.cm.cubehelix)
-        ab.imshow(np.clip(r_reg, 3, 13), aspect=0.5 * r_reg.shape[1] / r_reg.shape[0], cmap=plt.cm.cubehelix)
+        aa.imshow(np.clip(r_orig, 3, 13), aspect=0.5 * r_orig.shape[1] / r_orig.shape[0], cmap=plt.cm.inferno)
+        ab.imshow(np.clip(r_reg, 3, 13), aspect=0.5 * r_reg.shape[1] / r_reg.shape[0], cmap=plt.cm.inferno)
 
         aa.set_ylabel("original depth")
         ab.set_ylabel("registered depth")
