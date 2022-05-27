@@ -1,17 +1,23 @@
 import numpy as np
 import os
+import sys
+
+script_folder = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(script_folder)
+
 import glob
 import spikeglx
-import registration.estimate_displacement as ed
+import estimate_displacement as ed
 from pathlib import Path
 from tqdm.auto import trange
 from neurodsp import voltage, utils
 import shutil
-from registration.utils import mat2npy
+from utils import mat2npy
 import h5py
 import matplotlib.pyplot as plt
 from spikes_localization_registration.subtraction_pipeline.ibme import fast_raster
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 
 def registration(config):
     # This implementation has been tested with Neuropixels 1.0
