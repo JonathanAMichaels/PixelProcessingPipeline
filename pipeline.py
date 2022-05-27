@@ -5,6 +5,7 @@ import scipy.io
 from ruamel import yaml
 from pipeline_utils import find, create_config, extract_sync
 from registration.registration_new import registration as registration_function
+from sorting.run_pykilosort import kilosort
 
 script_folder = os.path.dirname(os.path.realpath(__file__))
 opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
@@ -115,8 +116,6 @@ if neuro_sorting:
         config_kilosort['neuropixel_folder'] = neuro_folders[pixel]
         tmp = glob.glob(neuro_folders[pixel] + '/*_t*.imec' + str(pixel) + '.ap.bin')
         config_kilosort['neuropixel'] = tmp[0]
-        scipy.io.savemat('/tmp/config.mat', config_kilosort)
-
         if len(find('sync.mat', config_kilosort['neuropixel_folder'])) > 0:
             print('Found existing sync file')
         else:
@@ -124,12 +123,7 @@ if neuro_sorting:
             extract_sync(config_kilosort)
 
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
-        path_to_add = script_folder + '/sorting'
-        os.system('module load matlab/2021b')
-        matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
-        #matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab' # something else for testing locally
-        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
-                  path_to_add + '\')); Kilosort_run"')
+        kilosort(config_kilosort)
 
 # Proceed with myo processing and spike sorting
 if myo_sorting:
