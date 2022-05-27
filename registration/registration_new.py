@@ -8,7 +8,10 @@ from tqdm.auto import trange
 from neurodsp import voltage, utils
 import shutil
 from registration.utils import mat2npy
-
+import h5py
+import matplotlib.pyplot as plt
+from spikes_localization_registration.subtraction_pipeline.ibme import fast_raster
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 def registration(config):
     # This implementation has been tested with Neuropixels 1.0
@@ -96,10 +99,6 @@ def registration(config):
                   config['script_dir'] +
                   '/registration/spikes_localization_registration/channels_maps/np1_channel_map.npy')
 
-        import h5py
-        import matplotlib.pyplot as plt
-        from registration.spikes_localization_registration.subtraction_pipeline.ibme import fast_raster
-
         registered_file = glob.glob(registration_directory + 'subtraction_*.h5')
         with h5py.File(registered_file[0], "r") as f:
             x = f["localizations"][:, 0]
@@ -122,8 +121,6 @@ def registration(config):
         ab.set_xlabel("time (s)")
 
         plt.savefig(registration_directory + 'raster.png')
-
-        from mpl_toolkits.axes_grid1 import make_axes_locatable
 
         fig, ax = plt.subplots()
         divider = make_axes_locatable(ax)
