@@ -87,6 +87,7 @@ run(data_paths, dir_path=dir_path, probe=np2_probe(), low_memory=True)
 ```
 
 This is how to run for NP1.0 probe (for IBL)
+
 ```python
 import shutil
 from pathlib import Path
@@ -96,7 +97,7 @@ import pykilosort
 from pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
 
 INTEGRATION_DATA_PATH = Path("/datadisk/Data/spike_sorting/pykilosort_tests")
-SCRATCH_DIR = Path.home().joinpath("scratch", 'pykilosort')
+SCRATCH_DIR = Path.home().joinpath("scratch", '../../pykilosort')
 shutil.rmtree(SCRATCH_DIR, ignore_errors=True)
 SCRATCH_DIR.mkdir(exist_ok=True)
 DELETE = True  # delete the intermediate run products, if False they'll be copied over
@@ -106,7 +107,6 @@ ks_output_dir = INTEGRATION_DATA_PATH.joinpath("results")
 ks_output_dir.mkdir(parents=True, exist_ok=True)
 # this is the output standardized as per IBL standards (SI units, ALF convention)
 alf_path = ks_output_dir.joinpath('alf')
-
 
 params = ibl_pykilosort_params()
 run_spike_sorting_ibl(bin_file, delete=DELETE, scratch_dir=SCRATCH_DIR,

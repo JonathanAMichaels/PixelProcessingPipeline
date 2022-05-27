@@ -1,13 +1,15 @@
 import shutil
 from pathlib import Path
-from sorting.pykilosort.pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
+import glob
+from pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
 
 def kilosort(config):
     SCRATCH_DIR = Path(config['neuropixel_folder'] + '/pykilosort')
     shutil.rmtree(SCRATCH_DIR, ignore_errors=True)
     SCRATCH_DIR.mkdir(exist_ok=True)
     DELETE = True  # delete the intermediate run products, if False they'll be copied over
-    bin_file = Path(config['neuropixel'])
+    temp = glob.glob(config['neuropixel_folder'] + '/standardized/*normalized.bin')
+    bin_file = Path(temp[0])
     # this is the output of the pykilosort data, unprocessed after the spike sorter
     ks_output_dir = Path(config['neuropixel_folder'] + '/results')
     ks_output_dir.mkdir(parents=True, exist_ok=True)

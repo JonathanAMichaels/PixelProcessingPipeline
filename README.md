@@ -20,6 +20,8 @@ These installation instructions were tested on the Computational Brain Science G
 
 The very first time you set up your virtual environment, follow these steps:
 
+cupy??
+
     virtualenv ~/pipeline
     source ~/pipeline/bin/activate
     pip install scipy ruamel.yaml ibllib ibl-neuropixel PyWavelets scikit-image pyfftw
