@@ -1,9 +1,6 @@
 import shutil
 from pathlib import Path
-import numpy as np
-
-import pykilosort
-from pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
+from sorting.pykilosort.pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
 
 def kilosort(config):
     SCRATCH_DIR = Path(config['neuropixel_folder'] + '/pykilosort')
