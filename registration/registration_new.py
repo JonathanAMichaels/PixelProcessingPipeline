@@ -37,8 +37,11 @@ def registration(config):
             raise SystemExit('Invalid Neuropixel data: ' + str(file))
         binary = Path(file[0])
 
-        standardized_folder = Path(working_directory + 'standardized/')
-        standardized_file = standardized_folder / f"{binary.stem}.normalized.bin"
+        standardized_directory = working_directory + 'standardized/'
+        if not os.path.exists(standardized_directory):
+            os.makedirs(standardized_directory)
+        standardized_directory = Path(standardized_directory)
+        standardized_file = standardized_directory / f"{binary.stem}.normalized.bin"
 
         # run destriping
         sr = spikeglx.Reader(binary)
