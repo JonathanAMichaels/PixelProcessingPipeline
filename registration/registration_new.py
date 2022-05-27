@@ -37,15 +37,15 @@ def registration(config):
             raise SystemExit('Invalid Neuropixel data: ' + str(file))
         binary = Path(file[0])
 
-        print("Destriping", binary)
-        folder = binary.parent
-        standardized_file = folder / f"{binary.stem}.normalized.bin"
+        standardized_folder = Path(working_directory + 'standardized/')
+        standardized_file = standardized_folder / f"{binary.stem}.normalized.bin"
 
         # run destriping
         sr = spikeglx.Reader(binary)
         print(sr.nc, sr.nsync, sr.rl)
         h = sr.geometry
         if not standardized_file.exists():
+            print("Destriping", binary)
             batch_size_secs = 1
             batch_intervals_secs = 50
             # scans the file at constant interval, with a demi batch starting offset
