@@ -7,11 +7,12 @@ from pathlib import Path
 from tqdm.auto import trange
 from neurodsp import voltage, utils
 import shutil
+from registration.utils import mat2npy
 
 
 def registration(config):
     # This implementation has been tested with Neuropixels 1.0
-    geomarray = config['script_dir'] + 'registration/spikes_localization_registration/channels_maps/np1_channel_map.npy'
+    geomarray = mat2npy(config['script_dir'] + '/geometries/neuropixPhase3B1_kilosortChanMap.mat') # convert .mat chan file to .npy chan file
 
     # I've only tested the spikeglx data reader that's part of ibllib (pip install ibllib)
     # yass is the default reader, but I've removed any mandatory yass imports in case you don't have that
@@ -122,10 +123,17 @@ def registration(config):
 
         plt.savefig(registration_directory + 'raster.png')
 
-        fig, (aa) = plt.subplots(1, 1, figsize=(10, 6), sharex=True, dpi=200)
-        aa.imshow(dispmap, cmap=plt.cm.inferno)
-        aa.set_ylabel("displacement")
-        aa.set_xlabel("time (s)")
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+        fig, ax = plt.subplots()
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes('right', size='5%', pad=0.05)
+
+        im = ax.imshow(dispmap, cmap=plt.cm.inferno)
+
+        fig.colorbar(im, cax=cax, orientation='vertical')
+        ax.set_ylabel("displacement")
+        ax.set_xlabel("time (s)")
 
         plt.savefig(registration_directory + 'displacement.png')
 
