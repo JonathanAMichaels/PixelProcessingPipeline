@@ -142,3 +142,9 @@ def registration(config):
         ed.register(sr, geomarray, dispmap, reader_type=reader_type,
                     registration_type=registration_type,
                     working_directory=registration_directory)
+
+        # also copy the companion meta-data file
+        shutil.copy(
+            sr.file_meta_data,
+            registration_directory + 'registered/standardized.meta'
+        )

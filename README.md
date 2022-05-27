@@ -20,7 +20,7 @@ These installation instructions were tested on the Computational Brain Science G
 
 The very first time you set up your virtual environment, follow these steps:
 
-cupy??
+pip install cupy-cuda101 pydantic
 
     virtualenv ~/pipeline
     source ~/pipeline/bin/activate
