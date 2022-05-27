@@ -13,7 +13,7 @@ def kilosort(config):
     ks_output_dir = Path(config['neuropixel_folder'] + '/results')
     ks_output_dir.mkdir(parents=True, exist_ok=True)
 
-    params = ibl_pykilosort_params(bin_file)
+    params = ibl_pykilosort_params([bin_file])
     print(params)
     run_spike_sorting_ibl(bin_file, delete=DELETE, scratch_dir=SCRATCH_DIR,
                           ks_output_dir=ks_output_dir, log_level='DEBUG', params=params)
