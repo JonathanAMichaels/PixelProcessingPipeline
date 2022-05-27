@@ -14,6 +14,7 @@ def kilosort(config):
     ks_output_dir.mkdir(parents=True, exist_ok=True)
 
     params = ibl_pykilosort_params([bin_file])
+    params['nblocks'] = 0
     print(params)
     run_spike_sorting_ibl(bin_file, delete=DELETE, scratch_dir=SCRATCH_DIR,
                           ks_output_dir=ks_output_dir, log_level='DEBUG', params=params)
