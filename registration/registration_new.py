@@ -106,6 +106,7 @@ def registration(config):
             z_reg = f["z_reg"][:]
             time = f["spike_index"][:, 0] / 30_000
             maxptp = f["maxptps"][:]
+            dispmap = f["dispmap"][:]
 
         r_orig, *_ = fast_raster(maxptp, z_orig, time)
         r_reg, *_ = fast_raster(maxptp, z_reg, time)
@@ -121,9 +122,15 @@ def registration(config):
 
         plt.savefig(registration_directory + 'raster.png')
 
+        fig, (aa) = plt.subplots(1, 1, figsize=(10, 6), sharex=True, dpi=200)
+        aa.imshow(dispmap, cmap=plt.cm.inferno)
+        aa.set_ylabel("displacement")
+        aa.set_xlabel("time (s)")
+
+        plt.savefig(registration_directory + 'displacement.png')
 
         # create a new binary file with the drift corrected data ('standardized.bin')
         # this file does not contain the digital sync channel, so use your original file for that
-        ed.register(reader, geomarray, total_shift, reader_type=reader_type,
+        ed.register(sr, geomarray, dispmap, reader_type=reader_type,
                     registration_type=registration_type,
                     working_directory=registration_directory)
