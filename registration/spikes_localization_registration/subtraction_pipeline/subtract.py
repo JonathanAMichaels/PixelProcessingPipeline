@@ -856,7 +856,7 @@ def detect_and_subtract(
         **kwargs,
     )
     # print(threshold, len(spike_index), flush=True)
-    if len(spike_index.size()) == 0 or spike_index.size(dim=1) == 0:
+    if len(spike_index) == 0 or np.array(spike_index).shape[1] == 0:
         return [], raw, []
 
     # -- read waveforms
@@ -867,6 +867,7 @@ def detect_and_subtract(
         3 * spike_length_samples - trough_offset,
     )
     time_ix = spike_index[:, 0, None] + time_range[None, :]
+    print(np.array(spike_index).shape)
     chan_ix = extract_channel_index[spike_index[:, 1]]
     waveforms = padded_raw[time_ix[:, :, None], chan_ix[:, None, :]]
 
