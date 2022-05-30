@@ -1,8 +1,8 @@
 import cupy as cp
 import numpy as np
 from numba import jit
-from pykilosort.main import run_export, run_preprocess, run_spikesort
-from pykilosort.preprocess import get_good_channels, get_whitening_matrix, gpufilter
+from sorting.pykilosort.pykilosort.main import run_export, run_preprocess, run_spikesort
+from sorting.pykilosort.pykilosort import get_good_channels, get_whitening_matrix, gpufilter
 from PyQt5 import QtCore
 
 

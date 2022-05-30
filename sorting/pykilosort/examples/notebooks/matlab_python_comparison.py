@@ -144,10 +144,11 @@ os.listdir(MATLAB_SORTING_RESULTS_DIR)
 # In[40]:
 
 
-import pykilosort
+from sorting.pykilosort import pykilosort
 from pathlib import Path
 from importlib import reload
-from pykilosort import main
+from sorting.pykilosort.pykilosort import main
+
 reload(main)
 
 pykilosort.add_default_handler()

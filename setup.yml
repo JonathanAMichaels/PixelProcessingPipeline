@@ -2,7 +2,7 @@
 # they are required for pykilosort or the tests.
 
 
-name: pyks2
+name: pipeline
 channels:
   - defaults
   - conda-forge

@@ -64,14 +64,15 @@ To install version 10.0 for example run the following
 ### Example
 
 This is how to run for general users
+
 ```python
 from pathlib import Path
-from pykilosort import run, add_default_handler, np1_probe, np2_probe
+from sorting.pykilosort.pykilosort import run, add_default_handler, np1_probe, np2_probe
 
 # Run standard ks2.5 algorithm for a np1 probe
 data_path = Path('path/to/data/data.bin')
-dir_path = Path('path/to/output/folder') # by default uses the same folder as the dataset
-add_default_handler(level='INFO') # print output as the algorithm runs
+dir_path = Path('path/to/output/folder')  # by default uses the same folder as the dataset
+add_default_handler(level='INFO')  # print output as the algorithm runs
 run(data_path, dir_path=dir_path, probe=np1_probe())
 
 # Run chronic recordings for a np2 probe
@@ -81,7 +82,7 @@ data_paths = [
     Path('path/to/second/dataset/dataset.bin'),
     Path('path/to/third/dataset/dataset.bin'),
 ]
-dir_path = Path('path/to/output/folder') # by default uses the same folder as the first dataset
+dir_path = Path('path/to/output/folder')  # by default uses the same folder as the first dataset
 add_default_handler(level='INFO')
 run(data_paths, dir_path=dir_path, probe=np2_probe(), low_memory=True)
 ```
@@ -93,11 +94,11 @@ import shutil
 from pathlib import Path
 import numpy as np
 
-import pykilosort
-from pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
+from sorting.pykilosort import pykilosort
+from sorting.pykilosort.pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
 
 INTEGRATION_DATA_PATH = Path("/datadisk/Data/spike_sorting/pykilosort_tests")
-SCRATCH_DIR = Path.home().joinpath("scratch", '../../pykilosort')
+SCRATCH_DIR = Path.home().joinpath("scratch", 'pykilosort')
 shutil.rmtree(SCRATCH_DIR, ignore_errors=True)
 SCRATCH_DIR.mkdir(exist_ok=True)
 DELETE = True  # delete the intermediate run products, if False they'll be copied over

@@ -1,9 +1,9 @@
 import math
 
-from pykilosort import cupy as cu
+from sorting.pykilosort.pykilosort import cupy as cu
 import numpy as np
 
-from pykilosort import cluster, utils
+from sorting.pykilosort.pykilosort import utils, cluster
 
 
 def test_get_closest_channels():

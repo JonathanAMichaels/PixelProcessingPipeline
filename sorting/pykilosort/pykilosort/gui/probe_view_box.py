@@ -1,6 +1,6 @@
 import numpy as np
 import pyqtgraph as pg
-from pykilosort.gui.logger import setup_logger
+from sorting.pykilosort.pykilosort.gui.logger import setup_logger
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 logger = setup_logger(__name__)

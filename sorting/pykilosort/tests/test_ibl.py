@@ -1,6 +1,6 @@
 from pathlib import Path
 from ibllib.io import spikeglx
-from pykilosort.ibl import probe_geometry
+from sorting.pykilosort.pykilosort import probe_geometry
 INTEGRATION_DATA_PATH = Path("/datadisk/Data/spike_sorting/pykilosort_tests")
 bin_file = INTEGRATION_DATA_PATH.joinpath("imec_385_100s.ap.cbin")
 

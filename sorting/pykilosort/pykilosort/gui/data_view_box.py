@@ -2,11 +2,11 @@ import numpy as np
 import typing as t
 import pyqtgraph as pg
 from cupy import asnumpy
-from pykilosort.gui.logger import setup_logger
-from pykilosort.gui.minor_gui_elements import controls_popup_text
-from pykilosort.gui.palettes import COLORMAP_COLORS
-from pykilosort.gui.sorter import filter_and_whiten, get_predicted_traces
-from pykilosort.preprocess import get_whitening_matrix
+from sorting.pykilosort.pykilosort.gui.logger import setup_logger
+from sorting.pykilosort.pykilosort.gui.minor_gui_elements import controls_popup_text
+from sorting.pykilosort.pykilosort.gui.palettes import COLORMAP_COLORS
+from sorting.pykilosort.pykilosort.gui.sorter import filter_and_whiten, get_predicted_traces
+from sorting.pykilosort.pykilosort import get_whitening_matrix
 from PyQt5 import QtCore, QtWidgets
 
 logger = setup_logger(__name__)

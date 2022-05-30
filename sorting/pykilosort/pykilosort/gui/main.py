@@ -3,8 +3,8 @@ from pathlib import Path
 
 import numpy as np
 from phylib.io.traces import get_ephys_reader
-from pykilosort import __version__
-from pykilosort.gui import (
+from sorting.pykilosort.pykilosort import __version__
+from sorting.pykilosort.pykilosort.gui import (
     DataViewBox,
     HeaderBox,
     KiloSortWorker,
@@ -14,9 +14,9 @@ from pykilosort.gui import (
     SettingsBox,
     probes,
 )
-from pykilosort.gui.logger import setup_logger
-from pykilosort.params import KilosortParams
-from pykilosort.utils import Context
+from sorting.pykilosort.pykilosort.gui.logger import setup_logger
+from sorting.pykilosort.pykilosort import KilosortParams
+from sorting.pykilosort.pykilosort.utils import Context
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 logger = setup_logger(__name__)

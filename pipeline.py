@@ -5,7 +5,7 @@ import scipy.io
 from ruamel import yaml
 from pipeline_utils import find, create_config, extract_sync
 from registration.registration_new import registration as registration_function
-from sorting.run_pykilosort import kilosort
+from sorting.pykilosort.run_pykilosort import kilosort
 
 script_folder = os.path.dirname(os.path.realpath(__file__))
 opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]

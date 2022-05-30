@@ -80,3 +80,8 @@ to perform only those steps. Have fun!
 This code does not currently process .kinarm files or combine behavioural information with synced neural data. This may be added at a later date.
 
 The Neuropixels registration is based on https://github.com/evarol/NeuropixelsRegistration. While it works very well, I'm currently working on switching to an improved version.
+
+
+
+new installation
+install anaconda

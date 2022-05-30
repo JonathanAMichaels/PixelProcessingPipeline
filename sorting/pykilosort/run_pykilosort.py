@@ -1,6 +1,11 @@
+import os
+import sys
+
+script_folder = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(script_folder)
+
 import shutil
 from pathlib import Path
-import glob
 from pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
 
 def kilosort(config):

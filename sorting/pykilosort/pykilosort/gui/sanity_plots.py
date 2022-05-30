@@ -2,7 +2,7 @@ import numpy as np
 import typing as t
 from pyqtgraph import LayoutWidget, ColorMap, RemoteGraphicsView, PlotItem
 
-from pykilosort.gui import SANITY_PLOT_COLORS
+from sorting.pykilosort.pykilosort.gui import SANITY_PLOT_COLORS
 
 
 class SanityPlotWidget(LayoutWidget):

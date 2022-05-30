@@ -1,7 +1,7 @@
 import numpy as np
 
-from pykilosort.datashift2 import shift_data, align_block2, apply_drift_transform
-from pykilosort.utils import Bunch
+from sorting.pykilosort.pykilosort.datashift2 import shift_data, align_block2, apply_drift_transform
+from sorting.pykilosort.pykilosort.utils import Bunch
 
 def test_shift_data():
     data = np.asfortranarray(np.random.randint(-100, 100, size=(65000, 384), dtype=np.int16))

@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 
 from examples.utils import create_test_directory
-from pykilosort import Bunch, add_default_handler, run
+from sorting.pykilosort.pykilosort import Bunch, add_default_handler, run
 from spikeextractors.extractors import bindatrecordingextractor as dat
 
 # Config

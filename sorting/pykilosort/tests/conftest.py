@@ -1,12 +1,6 @@
-from math import ceil
-from pathlib import Path
-from pytest import fixture
+from sorting.pykilosort.pykilosort import Bunch, read_data
 
-import numpy as np
-
-from pykilosort.utils import Bunch, read_data
-
-from pykilosort import add_default_handler
+from sorting.pykilosort.pykilosort import add_default_handler
 add_default_handler(level='DEBUG')
 
 
