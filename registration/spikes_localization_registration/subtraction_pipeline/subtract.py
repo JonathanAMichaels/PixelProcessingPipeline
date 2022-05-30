@@ -856,7 +856,7 @@ def detect_and_subtract(
         **kwargs,
     )
     # print(threshold, len(spike_index), flush=True)
-    if np.array(spike_index).shape[1] == 0:
+    if len(spike_index.size()) == 0 or spike_index.size(dim=1) == 0:
         return [], raw, []
 
     # -- read waveforms
