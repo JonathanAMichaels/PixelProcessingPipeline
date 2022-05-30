@@ -85,3 +85,8 @@ The Neuropixels registration is based on https://github.com/evarol/NeuropixelsRe
 
 new installation
 install anaconda
+conda env create -f setup.yml
+conda activate setup
+conda develop .
+
+
