@@ -64,15 +64,14 @@ To install version 10.0 for example run the following
 ### Example
 
 This is how to run for general users
-
 ```python
 from pathlib import Path
-from sorting.pykilosort.pykilosort import run, add_default_handler, np1_probe, np2_probe
+from pykilosort import run, add_default_handler, np1_probe, np2_probe
 
 # Run standard ks2.5 algorithm for a np1 probe
 data_path = Path('path/to/data/data.bin')
-dir_path = Path('path/to/output/folder')  # by default uses the same folder as the dataset
-add_default_handler(level='INFO')  # print output as the algorithm runs
+dir_path = Path('path/to/output/folder') # by default uses the same folder as the dataset
+add_default_handler(level='INFO') # print output as the algorithm runs
 run(data_path, dir_path=dir_path, probe=np1_probe())
 
 # Run chronic recordings for a np2 probe
@@ -82,20 +81,19 @@ data_paths = [
     Path('path/to/second/dataset/dataset.bin'),
     Path('path/to/third/dataset/dataset.bin'),
 ]
-dir_path = Path('path/to/output/folder')  # by default uses the same folder as the first dataset
+dir_path = Path('path/to/output/folder') # by default uses the same folder as the first dataset
 add_default_handler(level='INFO')
 run(data_paths, dir_path=dir_path, probe=np2_probe(), low_memory=True)
 ```
 
 This is how to run for NP1.0 probe (for IBL)
-
 ```python
 import shutil
 from pathlib import Path
 import numpy as np
 
-from sorting.pykilosort import pykilosort
-from sorting.pykilosort.pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
+import pykilosort
+from pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
 
 INTEGRATION_DATA_PATH = Path("/datadisk/Data/spike_sorting/pykilosort_tests")
 SCRATCH_DIR = Path.home().joinpath("scratch", 'pykilosort')
@@ -108,6 +106,7 @@ ks_output_dir = INTEGRATION_DATA_PATH.joinpath("results")
 ks_output_dir.mkdir(parents=True, exist_ok=True)
 # this is the output standardized as per IBL standards (SI units, ALF convention)
 alf_path = ks_output_dir.joinpath('alf')
+
 
 params = ibl_pykilosort_params()
 run_spike_sorting_ibl(bin_file, delete=DELETE, scratch_dir=SCRATCH_DIR,

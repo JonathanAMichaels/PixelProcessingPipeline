@@ -1,8 +1,9 @@
 import shutil
 from pathlib import Path
+import numpy as np
 
-from sorting.pykilosort import pykilosort
-from sorting.pykilosort.pykilosort import run_spike_sorting_ibl
+import pykilosort
+from pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
 
 INTEGRATION_DATA_PATH = Path("/datadisk/Data/spike_sorting/pykilosort_tests")
 SCRATCH_DIR = Path.home().joinpath("scratch", 'pykilosort')
@@ -53,6 +54,7 @@ from brainbox.plot import driftmap
 from pathlib import Path
 from ibllib.io import spikeglx
 import numpy as np
+import scipy.signal
 from brainbox.metrics.single_units import quick_unit_metrics
 from easyqc.gui import viewseis
 INTEGRATION_DATA_PATH = Path("/datadisk/Data/spike_sorting/pykilosort_tests")

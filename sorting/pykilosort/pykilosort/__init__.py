@@ -2,9 +2,11 @@ import logging
 import os
 
 if os.getenv('MOCK_CUPY', False):
-    from sorting.pykilosort.pykilosort.testing.mock_cupyx import cupyx
+    from pykilosort.testing.mock_cupy import cupy 
+    from pykilosort.testing.mock_cupyx import cupyx
 else:
-    pass
+    import cupy
+    import cupyx
 
 from .utils import Bunch, memmap_binary_file, read_data, load_probe, plot_dissimilarity_matrices, plot_diagnostics
 from .main import run, run_export, run_spikesort, run_preprocess

@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from sorting.pykilosort.pykilosort.gui.sanity_plots import SanityPlotWidget
-from sorting.pykilosort.pykilosort.gui.sorter import KiloSortWorker
+from pykilosort.gui.sanity_plots import SanityPlotWidget
+from pykilosort.gui.sorter import KiloSortWorker
 
 
 class RunBox(QtWidgets.QGroupBox):

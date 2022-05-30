@@ -8,7 +8,7 @@
 
 from pytest import raises
 
-from sorting.pykilosort.pykilosort import EventEmitter
+from pykilosort.event import EventEmitter
 
 
 #------------------------------------------------------------------------------

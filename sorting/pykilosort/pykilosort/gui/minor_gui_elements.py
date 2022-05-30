@@ -1,9 +1,9 @@
 import json
 
 import numpy as np
-from sorting.pykilosort.pykilosort.gui.logger import setup_logger
-from sorting.pykilosort.pykilosort import KilosortParams
-from sorting.pykilosort.pykilosort.utils import Bunch
+from pykilosort.gui.logger import setup_logger
+from pykilosort.params import KilosortParams
+from pykilosort.utils import Bunch
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 logger = setup_logger(__name__)

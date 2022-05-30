@@ -1,7 +1,7 @@
 import sys
 
 import pyqtgraph as pg
-from sorting.pykilosort.pykilosort.gui import DarkPalette, KiloSortGUI
+from pykilosort.gui import DarkPalette, KiloSortGUI
 from PyQt5 import QtWidgets
 
 

@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 import numpy as np
 
-from sorting.pykilosort import pykilosort
+import pykilosort
 from deploy.serverpc.kilosort2.run_pykilosort import run_spike_sorting_ibl
 
 # Minimum recall to pass checks (percentage)

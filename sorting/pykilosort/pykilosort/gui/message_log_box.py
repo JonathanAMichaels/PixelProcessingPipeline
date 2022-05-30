@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from sorting.pykilosort.pykilosort.gui.logger import XStream
+from pykilosort.gui.logger import XStream
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 

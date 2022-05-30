@@ -4,10 +4,10 @@ import pprint
 from pathlib import Path
 
 import numpy as np
-from sorting.pykilosort.pykilosort.gui.logger import setup_logger
-from sorting.pykilosort.pykilosort.gui.minor_gui_elements import AdvancedOptionsEditor, ProbeBuilder
-from sorting.pykilosort.pykilosort import KilosortParams
-from sorting.pykilosort.pykilosort.utils import create_prb, load_probe
+from pykilosort.gui.logger import setup_logger
+from pykilosort.gui.minor_gui_elements import AdvancedOptionsEditor, ProbeBuilder
+from pykilosort.params import KilosortParams
+from pykilosort.utils import create_prb, load_probe
 from PyQt5 import QtCore, QtWidgets
 from scipy.io.matlab.miobase import MatReadError
 

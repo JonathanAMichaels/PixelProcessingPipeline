@@ -19,7 +19,7 @@ WORKDIR /root/pykilosort
 
 # Copy these into build context for install.
 # Don't add more files yet to preserve the cached layer.
-COPY ../../setup.yml ./
+COPY pyks2.yml ./
 COPY test_requirements.txt ./
 
 # Be great to do better at caching this.
