@@ -2,6 +2,7 @@
 ## 1.3.0
 -   Support for Neuropixel 2
 -   read geometry from the spikeglx metadata file
+-   GPU support for destriping
 
 # 1.2
 ## 1.2.1

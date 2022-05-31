@@ -86,9 +86,13 @@ The Neuropixels registration is based on https://github.com/evarol/NeuropixelsRe
 new installation
 install anaconda
 conda env create -f setup.yml
-conda activate setup
+conda activate pipeline
 conda develop .
 
 # make sure PyQt5 is not installed
 conda install -c anaconda pyqt
 pip3 install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+
+cd registration/spike_localization_registration
+python3 setup.py build_ext --inplace
+pip install -e .

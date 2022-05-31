@@ -52,20 +52,18 @@ print('Using config file ' + config_file)
 config = yaml.load(open(config_file, 'r'), Loader=yaml.RoundTripLoader)
 
 # Check config for missing information and attempt to auto-fill
-if config['folder'] is None:
-    config['folder'] = folder
-if config['neuropixel'] is None:
-    temp_folder = glob.glob(folder + "/*_g0")
-    if len(temp_folder) > 1:
-        raise SystemExit("There shouldn't be more than one Neuropixel folder")
-    elif len(temp_folder) == 0:
-        print('No Neuropixel data in this recording session')
-        config['neuropixel'] = ''
+config['folder'] = folder
+temp_folder = glob.glob(folder + "/*_g0")
+if len(temp_folder) > 1:
+    raise SystemExit("There shouldn't be more than one Neuropixel folder")
+elif len(temp_folder) == 0:
+    print('No Neuropixel data in this recording session')
+    config['neuropixel'] = ''
+else:
+    if os.path.isdir(temp_folder[0]):
+        config['neuropixel'] = temp_folder[0]
     else:
-        if os.path.isdir(temp_folder[0]):
-            config['neuropixel'] = temp_folder[0]
-        else:
-            raise SystemExit("Provided folder is not valid")
+        raise SystemExit("Provided folder is not valid")
 if config['neuropixel'] != '':
     temp_folder = glob.glob(config['neuropixel'] + '/' + '*_g*')
     config['num_neuropixels'] = len(temp_folder)
@@ -73,25 +71,23 @@ if config['neuropixel'] != '':
           str(config['num_neuropixels']) + ' neuropixel')
 else:
     config['num_neuropixels'] = 0
-if config['myomatrix'] is None:
-    temp_folder = glob.glob(folder + '/*_myo')
-    if len(temp_folder) > 1:
-        SystemExit("There shouldn't be more than one Myomatrix folder")
-    elif len(temp_folder) == 0:
-        print('No Myomatrix data in this recording session')
-        config['myomatrix'] = ''
-    else:
-        if os.path.isdir(temp_folder[0]):
-            config['myomatrix'] = temp_folder[0]
+temp_folder = glob.glob(folder + '/*_myo')
+if len(temp_folder) > 1:
+    SystemExit("There shouldn't be more than one Myomatrix folder")
+elif len(temp_folder) == 0:
+    print('No Myomatrix data in this recording session')
+    config['myomatrix'] = ''
+else:
+    if os.path.isdir(temp_folder[0]):
+        config['myomatrix'] = temp_folder[0]
 if config['myomatrix'] != '':
     print('Using myomatrix folder ' + config['myomatrix'])
-if config['kinarm'] is None:
-    temp = glob.glob(folder + '/*.kinarm')
-    if len(temp) == 0:
-        print('No kinarm data in this recording session')
-        config['kinarm'] = ''
-    else:
-        config['kinarm'] = temp
+temp = glob.glob(folder + '/*.kinarm')
+if len(temp) == 0:
+    print('No kinarm data in this recording session')
+    config['kinarm'] = ''
+else:
+    config['kinarm'] = temp
 if config['kinarm'] != '':
     print('Found kinarm data files')
 config['script_dir'] = script_folder

@@ -8,6 +8,7 @@ import cupy as cp
 from tqdm.auto import tqdm
 
 from .cptools import lfilter, median
+from neurodsp.voltage import decompress_destripe_cbin
 
 logger = logging.getLogger(__name__)
 
@@ -193,30 +194,31 @@ def get_whitening_matrix(raw_data=None, probe=None, params=None, nSkipCov=None):
     # Nchan is obtained after the bad channels have been removed
     CC = cp.zeros((Nchan, Nchan))
 
-    for ibatch in tqdm(range(0, Nbatch, nSkipCov), desc="Computing the whitening matrix"):
+    nbatches_cov = np.arange(0, Nbatch, nSkipCov).size
+    CCall = cp.zeros((nbatches_cov, Nchan, Nchan))
+
+    for icc, ibatch in enumerate(tqdm(range(0, Nbatch, nSkipCov), desc="Computing the whitening matrix")):
         i = max(0, NT * ibatch - ntbuff)
         # WARNING: we no longer use Fortran order, so raw_data is nsamples x NchanTOT
         buff = raw_data[i:i + NTbuff]
         assert buff.shape[0] > buff.shape[1]
         assert buff.flags.c_contiguous
+
         nsampcurr = buff.shape[0]
         if nsampcurr < NTbuff:
             buff = np.concatenate(
                 (buff, np.tile(buff[nsampcurr - 1], (NTbuff - nsampcurr, 1))), axis=0)
 
-        if False and params.preprocessing_function == 'destriping':
-            from ibllib.dsp.voltage import destripe
-            datr = destripe(buff[:, :chanMap.size].T, fs=fs, channel_labels=True,
-                            butter_kwargs={'N': 3, 'Wn': fshigh / fs * 2, 'btype': 'highpass'})
-            datr = cp.asarray(datr.T)
-        else:
-            buff_g = cp.asarray(buff, dtype=np.float32)
-            # apply filters and median subtraction
-            datr = gpufilter(buff_g, fs=fs, fshigh=fshigh, chanMap=chanMap)
-        assert datr.flags.c_contiguous
-        CC = CC + cp.dot(datr.T, datr) / NT  # sample covariance
+        buff_g = cp.asarray(buff, dtype=np.float32)
 
-    CC = CC / max(ceil((Nbatch - 1) / nSkipCov), 1)
+        # apply filters and median subtraction
+        datr = gpufilter(buff_g, fs=fs, fshigh=fshigh, chanMap=chanMap)
+
+        # remove buffers on either side of the data batch
+        datr = datr[ntbuff: NT + ntbuff]
+        assert datr.flags.c_contiguous
+        CCall[icc, :, :] = cp.dot(datr.T, datr) / datr.shape[0]
+    CC = cp.median(CCall, axis=0)
 
     if params.do_whitening:
         if whiteningRange < np.inf:
@@ -233,11 +235,11 @@ def get_whitening_matrix(raw_data=None, probe=None, params=None, nSkipCov=None):
         Wrot = cp.diag(cp.diag(CC) ** (-0.5))
 
     Wrot = Wrot * scaleproc
-
-    logger.info("Computed the whitening matrix.")
-
+    condition_number = np.linalg.cond(cp.asnumpy(Wrot))
+    logger.info(f"Computed the whitening matrix cond = {condition_number}.")
+    if condition_number > 50:
+        logger.warning("high conditioning of the whitening matrix can result in noisy and poor results")
     return Wrot
-
 
 def get_good_channels(raw_data=None, probe=None, params=None):
     """
@@ -330,14 +332,13 @@ def get_Nbatch(raw_data, params):
 def destriping(ctx):
     """IBL destriping - multiprocessing CPU version for the time being, although leveraging the GPU
     for the many FFTs performed would probably be quite beneficial """
-    from ibllib.dsp.voltage import decompress_destripe_cbin, detect_bad_channels_cbin
     probe = ctx.probe
     raw_data = ctx.raw_data
     ir = ctx.intermediate
     wrot = cp.asnumpy(ir.Wrot)
     # get the bad channels
     # detect_bad_channels_cbin
-    kwargs = dict(output_file=ir.proc_path, wrot=wrot, nc_out=probe.Nchan, h=probe,
+    kwargs = dict(output_file=ir.proc_path, wrot=wrot, nc_out=probe.Nchan, h=probe.h,
                   butter_kwargs={'N': 3, 'Wn': ctx.params.fshigh / ctx.params.fs * 2, 'btype': 'highpass'})
 
     logger.info("Pre-processing: applying destriping option to the raw data")

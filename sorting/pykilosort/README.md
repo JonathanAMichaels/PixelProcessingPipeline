@@ -1,10 +1,15 @@
 # Python port of KiloSort2
 
-This is a work-in-progress literal Python port of the original MATLAB version of Kilosort 2, written by Marius Pachitariu.
+This is a Python port of the original MATLAB version of [Kilosort 2.5](https://github.com/MouseLand/Kilosort), written by Marius Pachitariu, with Neuropixel specific improvements and software engineering enhancements.
 
-## Authors
+The modifications are described in [this white paper](https://doi.org/10.6084/m9.figshare.19705522.v3).
 
-Kush Banga, Cyrille Rossant, Olivier Winter
+
+## Scope
+### Why an IBL port of pykilosort? (draft)
+
+Preprocessing functions and standardization of outputs (white paper coming last week of 2021).
+Kush Banga, Mayo Faulkner, Cyrille Rossant, Olivier Winter
 
 ## Installation 
 

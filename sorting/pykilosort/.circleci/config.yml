@@ -11,11 +11,11 @@ jobs:
       #  Uncomment the next two lines to enable caching of the conda environment 
       #  ** This will speed up tests a lot **
       #- restore_cache:
-      #    key: deps-{{ .Branch }}-{{ checksum "setup.yml" }}
+      #    key: deps-{{ .Branch }}-{{ checksum "pyks2.yml" }}
       - run: conda env create -f pyks2_test.yml
       # And these ones.
       #- save_cached:
-      #    key: deps-{{ .Branch }}-{{ checksum "setup.yml" }}
+      #    key: deps-{{ .Branch }}-{{ checksum "pyks2.yml" }}
       #    paths:
       #      - "??"
       - run: 

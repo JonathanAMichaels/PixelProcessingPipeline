@@ -140,11 +140,15 @@ def registration(config):
 
         plt.savefig(registration_directory + 'displacement.png')
 
-        # create a new binary file with the drift corrected data ('standardized.bin')
-        # this file does not contain the digital sync channel, so use your original file for that
-        ed.register(sr, geomarray, dispmap, reader_type=reader_type,
-                    registration_type=registration_type,
-                    working_directory=registration_directory)
+        registered_file = Path(working_directory + '/NeuropixelsRegistration2/registered/standardized.bin')
+        if not registered_file.exists():
+            # create a new binary file with the drift corrected data ('standardized.bin')
+            # this file does not contain the digital sync channel, so use your original file for that
+            ed.register(sr, geomarray, dispmap, reader_type=reader_type,
+                        registration_type=registration_type,
+                        working_directory=registration_directory)
+        else:
+            print('Found registered file, skipping registration')
 
         # also copy the companion meta-data file
         shutil.copy(
