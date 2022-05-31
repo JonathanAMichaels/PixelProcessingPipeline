@@ -65,6 +65,7 @@ g.add_argument(
     default=[10],
     type=lambda x: list(map(int, x.split(","))),
 )
+g.add_argument("--disp", default=2000, type=int)
 
 g = ap.add_argument_group("Chunking and parallelism")
 g.add_argument("--n_sec_chunk", type=int, default=1)
@@ -133,7 +134,7 @@ sub_h5 = subtract.subtraction(
     loc_workers=args.n_loc_workers,
     localize_radius=args.localize_radius,
     save_waveforms=not args.nowaveforms,
-    overwrite=args.overwrite,
+    overwrite=False,
 )
 
 
@@ -162,6 +163,7 @@ if not args.nolocalize and not args.noregister:
                 z_abs,
                 samples / 30000,
                 n_windows=args.n_windows,
+                disp=args.disp
             )
             z_reg -= (z_reg - z_abs).mean()
             dispmap -= dispmap.mean()
