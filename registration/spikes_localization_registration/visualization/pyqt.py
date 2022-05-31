@@ -3,7 +3,7 @@ import scipy.signal
 import seaborn as sns
 
 from ibllib.atlas import BrainRegions
-from ibllib.dsp import voltage
+from neurodsp import voltage
 from viewephys.gui import viewephys
 from brainbox.io.spikeglx import stream
 

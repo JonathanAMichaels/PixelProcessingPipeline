@@ -17,8 +17,8 @@ import tqdm
 import shutil
 import tqdm
 
-from ibllib.dsp import voltage
-from ibllib.io import spikeglx
+from neurodsp import voltage
+import spikeglx
 
 from detect.run import find_channel_neighbors, make_channel_index
 from detect.deduplication import deduplicate_gpu

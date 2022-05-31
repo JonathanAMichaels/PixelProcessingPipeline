@@ -1,7 +1,7 @@
 PyWavelets
 cython
 h5py
-ibllib
+ibl-neuropixel
 parmap
 scikit-image
 torch

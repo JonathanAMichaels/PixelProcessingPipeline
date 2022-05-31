@@ -1,5 +1,6 @@
 import concurrent.futures
 import contextlib
+from pathlib import Path
 import h5py
 import numpy as np
 import signal
@@ -7,12 +8,10 @@ import time
 import torch
 
 from collections import namedtuple
-from spikeglx import _geometry_from_meta, read_meta_data
-from pathlib import Path
 from scipy.spatial.distance import pdist, squareform
 from sklearn.decomposition import PCA
 from tqdm.auto import tqdm
-
+import spikeglx
 from . import denoise, detect, localize_index
 
 
@@ -856,7 +855,7 @@ def detect_and_subtract(
         **kwargs,
     )
     # print(threshold, len(spike_index), flush=True)
-    if len(spike_index) == 0 or np.array(spike_index).shape[1] == 0:
+    if not len(spike_index):
         return [], raw, []
 
     # -- read waveforms
@@ -867,7 +866,6 @@ def detect_and_subtract(
         3 * spike_length_samples - trough_offset,
     )
     time_ix = spike_index[:, 0, None] + time_range[None, :]
-    print(np.array(spike_index).shape)
     chan_ix = extract_channel_index[spike_index[:, 1]]
     waveforms = padded_raw[time_ix[:, :, None], chan_ix[:, None, :]]
 
@@ -1199,7 +1197,7 @@ def read_geom_from_meta(bin_file):
     meta = Path(bin_file.parent) / (bin_file.stem + ".meta")
     if not meta.exists():
         raise ValueError("Expected", meta, "to exist.")
-    header = _geometry_from_meta(read_meta_data(meta))
+    header = spikeglx.read_geometry(meta)
     geom = np.c_[header["x"], header["y"]]
     return geom
 
@@ -1219,8 +1217,6 @@ def read_data(bin_file, dtype, s_start, s_end, n_channels):
 
 
 # -- utils
-
-
 class timer:
     def __init__(self, name="timer"):
         self.name = name
