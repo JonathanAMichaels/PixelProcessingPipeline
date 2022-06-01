@@ -6,6 +6,7 @@ import numpy as np
 import signal
 import time
 import torch
+import multiprocessing
 
 from collections import namedtuple
 from scipy.spatial.distance import pdist, squareform
@@ -264,6 +265,7 @@ def subtraction(
                 "you're on CPU, use a large n_jobs for parallelism.)"
             )
             loc_workers = 1
+        n_jobs = multiprocessing.cpu_count() # override n_jobs for cpu
         Pool = concurrent.futures.ThreadPoolExecutor
 
     # parallel batches

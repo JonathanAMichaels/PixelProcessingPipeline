@@ -104,7 +104,7 @@ def registration(config):
                   ' --noresidual --nowaveforms --dndetect --thresholds=12,10,8,6 --n_jobs=1 --geom=' +
                   config['script_dir'] +
                   '/registration/spikes_localization_registration/channels_maps/np1_channel_map.npy --n_windows=5 ' +
-                  '--disp=2000')
+                  '--disp=2000 --overwrite')
 
         registered_file = glob.glob(registration_directory + 'subtraction_*.h5')
         with h5py.File(registered_file[0], "r") as f:
