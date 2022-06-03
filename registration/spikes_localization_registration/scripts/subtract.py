@@ -163,7 +163,7 @@ if not args.nolocalize and not args.noregister:
                 z_abs,
                 samples / 30000,
                 n_windows=args.n_windows,
-                disp=args.disp
+                disp=args.disp,
             )
             z_reg -= (z_reg - z_abs).mean()
             dispmap -= dispmap.mean()

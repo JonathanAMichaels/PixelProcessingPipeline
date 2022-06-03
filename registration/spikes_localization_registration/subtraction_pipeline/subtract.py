@@ -265,6 +265,7 @@ def subtraction(
                 "you're on CPU, use a large n_jobs for parallelism.)"
             )
             loc_workers = 1
+        print('Setting n_jobs to number of cores')
         n_jobs = multiprocessing.cpu_count() # override n_jobs for cpu
         Pool = concurrent.futures.ThreadPoolExecutor
 
