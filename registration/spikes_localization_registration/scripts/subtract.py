@@ -36,7 +36,7 @@ g = ap.add_argument_group("Subtraction configuration")
 g.add_argument(
     "--thresholds",
     default=[12, 10, 8, 6, 5, 4],
-    type=lambda x: list(map(float, x.split(","))),
+    type=lambda x: list(map(int, x.split(","))),
 )
 g.add_argument("--nndetect", action="store_true")
 g.add_argument("--dndetect", action="store_true")
@@ -164,6 +164,7 @@ if not args.nolocalize and not args.noregister:
                 samples / 30000,
                 n_windows=args.n_windows,
                 disp=args.disp,
+                corr_threshold=0.6
             )
             z_reg -= (z_reg - z_abs).mean()
             dispmap -= dispmap.mean()
