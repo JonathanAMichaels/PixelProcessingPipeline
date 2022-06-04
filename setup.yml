@@ -13,8 +13,6 @@ dependencies:
  - numpy
  # Cupy needs some thought on whether to pin and/or which version to pin.
  # It may be hard to get a version that works for a good range of hardware.
- - cudatoolkit == 10.0
- - cupy
  - matplotlib
  - tqdm
  - click

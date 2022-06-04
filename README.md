@@ -20,38 +20,24 @@ These installation instructions were tested on the Computational Brain Science G
 
 The very first time you set up your virtual environment, follow these steps:
 
-pip install cupy-cuda101 pydantic
+Install anaconda: https://docs.anaconda.com/anaconda/install/linux/
 
-    virtualenv ~/pipeline
-    source ~/pipeline/bin/activate
-    pip install scipy ruamel.yaml ibllib ibl-neuropixel PyWavelets scikit-image pyfftw
-    pip3 install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+Create and setup the environment 
 
-Every time you start a new shell session, you will have to activate your virtual environement with
+    conda env create -f setup.yml
+    conda activate pipeline
+    conda develop .
 
-    source ~/pipeline/bin/activate
-    
-By default the incorrect version of nvcc is on the path. To fix that permanently, we need to modify our bashrc file
+Install pytorch
 
-    nano ~/.bashrc
+    pip3 install torch==1.9.0+cu112 torchvision==0.10.0+cu112 -f https://download.pytorch.org/whl/torch_stable.html
 
-Scroll to bottom and add
+Compile codes necessary for drift correction
 
-    export PATH="/usr/local/cuda-11.2/bin:$PATH"
-
-Save and close. Start a new shell.
-
-To set up Kilosort the first time, open matlab
-
-    module load matlab/R2021b
-    /srv/software/matlab/R2021b/bin/matlab
-
-Navigate to the Kilosort CUDA directory wherever you installed this code and run mexGPUall
-
-    cd('location_of_toolbox/sorting/Kilosort/CUDA')
-    mexGPUAll
-
-If all the files were built successfully, you are ready to go!
+    cd registration/spike_localization_registration
+    python3 setup.py build_ext --inplace
+    pip install -e .
+ 
 
 ## Usage
 
@@ -81,18 +67,3 @@ This code does not currently process .kinarm files or combine behavioural inform
 
 The Neuropixels registration is based on https://github.com/evarol/NeuropixelsRegistration. While it works very well, I'm currently working on switching to an improved version.
 
-
-
-new installation
-install anaconda
-conda env create -f setup.yml
-conda activate pipeline
-conda develop .
-
-# make sure PyQt5 is not installed
-conda install -c anaconda pyqt
-pip3 install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
-
-cd registration/spike_localization_registration
-python3 setup.py build_ext --inplace
-pip install -e .
