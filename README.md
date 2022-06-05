@@ -37,6 +37,9 @@ Compile codes necessary for drift correction
     cd registration/spike_localization_registration
     python3 setup.py build_ext --inplace
     pip install -e .
+
+    conda install -c conda-forge cupy cudatoolkit=10.0
+    conda install -c conda-forge "pyfftw=0.13.0=py39h51d1ae8_0"
  
 
 ## Usage
