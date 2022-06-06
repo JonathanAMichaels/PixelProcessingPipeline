@@ -633,8 +633,6 @@ def datashift2(ctx):
     for i in range(disp_map.shape[1]):
         new_disp_map[:, i] = np.interp(batch_spacing, np.arange(disp_map.shape[0]), disp_map[:, i])
     disp_map = new_disp_map
-    print(disp_map.shape)
-    print(disp_map)
 
     ir.xc, ir.yc = probe.xc, probe.yc
 

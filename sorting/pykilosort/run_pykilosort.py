@@ -11,9 +11,9 @@ from pathlib import Path
 from pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
 
 def kilosort(config):
-    SCRATCH_DIR = Path(config['neuropixel_folder'] + '/pykilosort')
     bin_file = Path(config['neuropixel'])
     ks_output_dir = Path(config['neuropixel_folder'] + '/sorted')
+    scratch_dir = ks_output_dir
     ks_output_dir.mkdir(parents=True, exist_ok=True)
 
     params = ibl_pykilosort_params([bin_file])
@@ -24,5 +24,5 @@ def kilosort(config):
         dispmap = f["dispmap"][:]
 
     params['disp_map'] = dispmap.tolist()
-    run_spike_sorting_ibl(bin_file, delete=False, scratch_dir=SCRATCH_DIR,
+    run_spike_sorting_ibl(bin_file, delete=True, scratch_dir=scratch_dir,
                           ks_output_dir=ks_output_dir, log_level='INFO', params=params)
