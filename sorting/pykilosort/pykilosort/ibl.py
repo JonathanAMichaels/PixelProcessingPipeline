@@ -90,8 +90,8 @@ def run_spike_sorting_ibl(bin_file, scratch_dir=None, delete=True,
     try:
         _logger.info(f"Starting Pykilosort version {__version__}, output in {bin_file.parent}")
         run(bin_file, dir_path=scratch_dir, output_dir=ks_output_dir, **params)
-        post_file = glob.glob(str(scratch_dir) + '/.kilosort/' + bin_file[0] + '*/proc.dat')
-        shutil.move(post_file[0], ks_output_dir.joinpath("proc.dat"))
+        post_file = glob.glob(str(scratch_dir) + '/.kilosort/*/proc.dat')
+        shutil.move(post_file[0], str(ks_output_dir) + '/proc.dat')
         if delete:
             shutil.rmtree(scratch_dir.joinpath(".kilosort"), ignore_errors=True)
     except Exception as e:
