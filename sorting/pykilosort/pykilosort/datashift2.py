@@ -612,18 +612,16 @@ def datashift2(ctx):
     raw_data = ctx.raw_data
     ir = ctx.intermediate
     Nbatch = ir.Nbatch
-    print(Nbatch)
-
-    disp_map = np.array(ctx.params.disp_map)
+    disp_map = np.array(params.disp_map)
 
     D, T = disp_map.shape
-    ys = ctx.params.yc
+    ys = probe.yc
     n_chans = ys.shape[0]
     win_num = np.unique(ys).shape[0]
     estimated_displacement = np.zeros((n_chans, T))
     for i in range(n_chans):
         window = get_gaussian_window(D, T, ys[i], scale=D / (0.5 * win_num))
-        w_disp = total_shift * window
+        w_disp = disp_map * window
         w_disp = w_disp.sum(0) / window.sum(0)
         estimated_displacement[i] = w_disp
 
@@ -631,9 +629,10 @@ def datashift2(ctx):
     disp_map = np.transpose(estimated_displacement)
 
     # re-interpolate dispmap to match the number of batches
+    batch_spacing = np.linspace(start=0, stop=disp_map.shape[0]-1, num=Nbatch)
     for i in range(disp_map.shape[1]):
-        disp_map[:,i] = np.interp(np.linspace(0, disp_map.shape[0]-1, num=Nbatch),
-                                  np.arange(disp_map.shape[0]), disp_map[:,i])
+        new_disp_map[:, i] = np.interp(batch_spacing, np.arange(disp_map.shape[0]), disp_map[:, i])
+    disp_map = new_disp_map
     print(disp_map.shape)
 
     ir.xc, ir.yc = probe.xc, probe.yc
