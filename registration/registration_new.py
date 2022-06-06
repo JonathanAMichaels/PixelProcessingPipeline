@@ -20,20 +20,6 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 def registration(config):
-    # This implementation has been tested with Neuropixels 1.0
-    geomarray = mat2npy(config['script_dir'] + '/geometries/neuropixPhase3B1_kilosortChanMap.mat') # convert .mat chan file to .npy chan file
-
-    # I've only tested the spikeglx data reader that's part of ibllib (pip install ibllib)
-    # yass is the default reader, but I've removed any mandatory yass imports in case you don't have that
-    reader_type = 'spikeglx'
-    # We only have to detect spikes once per dataset, then we can run the registration multiple times to test parameters
-    detect_spikes = config['Registration']['detect_spikes']
-    # I've found non-rigid registration to be optimal, but it can introduce artifacts for some datasets
-    reg_win_num = config['Registration']['reg_win_num']
-    reg_block_num = config['Registration']['reg_block_num']
-    registration_type = config['Registration']['registration_type']
-    horz_smooth = config['Registration']['horz_smooth']
-
     folders = glob.glob(config['neuropixel'] + '/*_g*')
     for pixel in range(config['num_neuropixels']):
         working_directory = folders[pixel] + '/'
@@ -141,18 +127,18 @@ def registration(config):
 
         plt.savefig(registration_directory + 'displacement.png')
 
-        registered_file = Path(working_directory + '/NeuropixelsRegistration2/registered/standardized.bin')
-        if not registered_file.exists():
-            # create a new binary file with the drift corrected data ('standardized.bin')
-            # this file does not contain the digital sync channel, so use your original file for that
-            ed.register(sr, geomarray, dispmap, reader_type=reader_type,
-                        registration_type=registration_type,
-                        working_directory=registration_directory)
-        else:
-            print('Found registered file, skipping registration')
+        #registered_file = Path(working_directory + '/NeuropixelsRegistration2/registered/standardized.bin')
+        #if not registered_file.exists():
+        #    # create a new binary file with the drift corrected data ('standardized.bin')
+        #    # this file does not contain the digital sync channel, so use your original file for that
+        #    ed.register(sr, geomarray, dispmap, reader_type=reader_type,
+        #                registration_type=registration_type,
+        #                working_directory=registration_directory)
+        #else:
+        #    print('Found registered file, skipping registration')
 
         # also copy the companion meta-data file
-        shutil.copy(
-            sr.file_meta_data,
-            registration_directory + 'registered/standardized.meta'
-        )
+        #shutil.copy(
+        #    sr.file_meta_data,
+        #    registration_directory + 'registered/standardized.meta'
+        #)
