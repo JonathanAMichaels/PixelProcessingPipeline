@@ -390,8 +390,7 @@ def apply_drift_transform(dat, shifts_in, ysamp, probe, sig):
     """
 
     # upsample to get shifts for each channel
-    #shifts = interpolate_1D(shifts_in, ysamp, probe.yc)
-    shifts = shifts_in
+    shifts = interpolate_1D(shifts_in, ysamp, probe.yc)
 
     # kernel prediction matrix
     kernel_matrix = get_kernel_matrix(probe, shifts, sig)
@@ -612,21 +611,21 @@ def datashift2(ctx):
     raw_data = ctx.raw_data
     ir = ctx.intermediate
     Nbatch = ir.Nbatch
-    disp_map = np.array(params.disp_map)
+    disp_map = np.transpose(np.array(params.disp_map))
 
-    D, T = disp_map.shape
-    ys = probe.yc
-    n_chans = ys.shape[0]
-    win_num = np.unique(ys).shape[0]
-    estimated_displacement = np.zeros((n_chans, T))
-    for i in range(n_chans):
-        window = get_gaussian_window(D, T, ys[i], scale=D / (0.5 * win_num))
-        w_disp = disp_map * window
-        w_disp = w_disp.sum(0) / window.sum(0)
-        estimated_displacement[i] = w_disp
+    #D, T = disp_map.shape
+    #ys = probe.yc
+    #n_chans = ys.shape[0]
+    #win_num = np.unique(ys).shape[0]
+    #estimated_displacement = np.zeros((n_chans, T))
+    #for i in range(n_chans):
+    #    window = get_gaussian_window(D, T, ys[i], scale=D / (0.5 * win_num))
+    #    w_disp = disp_map * window
+    #    w_disp = w_disp.sum(0) / window.sum(0)
+    #    estimated_displacement[i] = w_disp
 
-    print(estimated_displacement.shape)
-    disp_map = np.transpose(estimated_displacement)
+    #print(estimated_displacement.shape)
+    #disp_map = np.transpose(estimated_displacement)
 
     # re-interpolate dispmap to match the number of batches
     batch_spacing = np.linspace(start=0, stop=disp_map.shape[0]-1, num=Nbatch)
@@ -675,7 +674,7 @@ def datashift2(ctx):
     #    wTEMP, wPCA, params.nPCs, yup, xup, Nbatch, ir.data_loader, probe, params
     #)
 
-    if params.save_drift_spike_detections:
+    if False: #params.save_drift_spike_detections:
         drift_path = ctx.context_path / 'drift'
         if not os.path.isdir(drift_path):
             os.mkdir(drift_path)
@@ -684,7 +683,7 @@ def datashift2(ctx):
         np.save(drift_path / 'spike_amps.npy', spikes.amps)
 
     #dshift, yblk = get_drift(spikes, probe, Nbatch, params.nblocks, params.genericSpkTh)
-    yblk = []
+    yblk = np.arange(disp_map.shape[1])
     dshift = disp_map
 
     # sort in case we still want to do "tracking"
