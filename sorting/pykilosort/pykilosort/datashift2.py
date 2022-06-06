@@ -389,7 +389,8 @@ def apply_drift_transform(dat, shifts_in, ysamp, probe, sig):
     """
 
     # upsample to get shifts for each channel
-    shifts = interpolate_1D(shifts_in, ysamp, probe.yc)
+    #shifts = interpolate_1D(shifts_in, ysamp, probe.yc)
+    shifts = shifts_in
 
     # kernel prediction matrix
     kernel_matrix = get_kernel_matrix(probe, shifts, sig)
@@ -605,6 +606,13 @@ def datashift2(ctx):
     Nbatch = ir.Nbatch
     print(Nbatch)
 
+    dispmap = ctx.params.dispmap
+    print(dispmap.shape)
+    # re-interpolate dispmap to match the number of batches
+    for i in range(dispmap.shape[1]):
+        dispmap[:,i] = np.interp(np.linspace(0, dispmap.shape[0], Nbatch), range(dispmap.shape[0]), disp[:,i])
+    print(dispmap.shape)
+
     ir.xc, ir.yc = probe.xc, probe.yc
 
     # The min and max of the y and x ranges of the channels
@@ -633,15 +641,15 @@ def datashift2(ctx):
         np.random.seed(params.seed)
 
     # determine prototypical timecourses by clustering of simple threshold crossings.
-    wTEMP, wPCA = extractTemplatesfromSnippets(
-        data_loader=ir.data_loader, probe=probe, params=params, Nbatch=Nbatch
-    )
+    #wTEMP, wPCA = extractTemplatesfromSnippets(
+    #    data_loader=ir.data_loader, probe=probe, params=params, Nbatch=Nbatch
+    #)
 
     # Extract all the spikes across the recording that are captured by the
     # generic templates. Very few real spikes are missed in this way.
-    spikes = standalone_detector(
-        wTEMP, wPCA, params.nPCs, yup, xup, Nbatch, ir.data_loader, probe, params
-    )
+    #spikes = standalone_detector(
+    #    wTEMP, wPCA, params.nPCs, yup, xup, Nbatch, ir.data_loader, probe, params
+    #)
 
     if params.save_drift_spike_detections:
         drift_path = ctx.context_path / 'drift'
@@ -651,7 +659,9 @@ def datashift2(ctx):
         np.save(drift_path / 'spike_depths.npy', spikes.depths)
         np.save(drift_path / 'spike_amps.npy', spikes.amps)
 
-    dshift, yblk = get_drift(spikes, probe, Nbatch, params.nblocks, params.genericSpkTh)
+    #dshift, yblk = get_drift(spikes, probe, Nbatch, params.nblocks, params.genericSpkTh)
+    yblk = []
+    dshift = dispmap
 
     # sort in case we still want to do "tracking"
     iorig = np.argsort(np.mean(dshift, axis=1))

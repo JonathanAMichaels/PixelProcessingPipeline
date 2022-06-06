@@ -1,5 +1,7 @@
 import os
 import sys
+import glob
+import h5py
 
 script_folder = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(script_folder)
@@ -24,5 +26,5 @@ def kilosort(config):
 
     print(params)
     params['dispmap'] = dispmap
-    #run_spike_sorting_ibl(bin_file, delete=False, scratch_dir=SCRATCH_DIR,
-    #                      ks_output_dir=ks_output_dir, log_level='INFO', params=params)
+    run_spike_sorting_ibl(bin_file, delete=False, scratch_dir=SCRATCH_DIR,
+                          ks_output_dir=ks_output_dir, log_level='INFO', params=params)
