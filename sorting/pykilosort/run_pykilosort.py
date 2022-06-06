@@ -23,6 +23,6 @@ def kilosort(config):
     with h5py.File(registered_file[0], "r") as f:
         dispmap = f["dispmap"][:]
 
-    params['disp_map'] = dispmap
+    params['disp_map'] = dispmap.tolist()
     run_spike_sorting_ibl(bin_file, delete=False, scratch_dir=SCRATCH_DIR,
                           ks_output_dir=ks_output_dir, log_level='INFO', params=params)

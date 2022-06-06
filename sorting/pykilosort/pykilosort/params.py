@@ -60,7 +60,7 @@ class DatashiftParams(BaseModel):
 
 class KilosortParams(BaseModel):
 
-    disp_map: np.ndarray
+    disp_map: list = Field([], 'Required displacement map (um x T)')
 
     low_memory: bool = Field(
         False, description='low memory setting for running chronic recordings'

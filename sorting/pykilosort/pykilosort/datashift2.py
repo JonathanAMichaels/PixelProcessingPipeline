@@ -614,7 +614,7 @@ def datashift2(ctx):
     Nbatch = ir.Nbatch
     print(Nbatch)
 
-    disp_map = ctx.params.disp_map
+    disp_map = np.array(ctx.params.disp_map)
 
     D, T = disp_map.shape
     ys = ctx.params.yc
