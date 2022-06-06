@@ -603,6 +603,7 @@ def datashift2(ctx):
     raw_data = ctx.raw_data
     ir = ctx.intermediate
     Nbatch = ir.Nbatch
+    print(Nbatch)
 
     ir.xc, ir.yc = probe.xc, probe.yc
 
