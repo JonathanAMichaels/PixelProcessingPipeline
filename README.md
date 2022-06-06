@@ -20,6 +20,15 @@ These installation instructions were tested on the Computational Brain Science G
 
 The very first time you set up your virtual environment, follow these steps:
 
+    virtualenv -p /usr/bin/python3.8 ~/pipeline
+    source ~/pipeline/bin/activate
+    pip3 install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+    pip install scipy ruamel.yaml ibl-neuropixel PyWavelets scikit-image pyfftw==0.12.0 cython pydantic
+    pip install cupy-cuda101
+
+
+
+
 Install anaconda: https://docs.anaconda.com/anaconda/install/linux/
 
 Create and setup the environment 

@@ -4,5 +4,4 @@ h5py
 ibl-neuropixel
 parmap
 scikit-image
-torch
 viewephys
