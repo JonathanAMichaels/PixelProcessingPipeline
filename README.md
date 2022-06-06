@@ -28,18 +28,15 @@ Create and setup the environment
     conda activate pipeline
     conda develop .
 
-Install pytorch
-
-    pip3 install torch==1.9.0+cu112 torchvision==0.10.0+cu112 -f https://download.pytorch.org/whl/torch_stable.html
-
 Compile codes necessary for drift correction
 
     cd registration/spike_localization_registration
     python3 setup.py build_ext --inplace
     pip install -e .
 
-    conda install -c conda-forge cupy cudatoolkit=10.0
-    conda install -c conda-forge "pyfftw=0.13.0=py39h51d1ae8_0"
+Ensure proper versions are installed
+
+    conda install -c conda-forge cupy=10.5.0 cudatoolkit=10.2.89 "pyfftw=0.13.0=py39h51d1ae8_0"
  
 
 ## Usage
