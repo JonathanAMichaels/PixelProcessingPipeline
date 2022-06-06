@@ -25,6 +25,7 @@ def kilosort(config):
 
 
     print(params)
-    params['dispmap'] = dispmap
+    print(dispmap)
+    params['disp_map'] = dispmap
     run_spike_sorting_ibl(bin_file, delete=False, scratch_dir=SCRATCH_DIR,
                           ks_output_dir=ks_output_dir, log_level='INFO', params=params)

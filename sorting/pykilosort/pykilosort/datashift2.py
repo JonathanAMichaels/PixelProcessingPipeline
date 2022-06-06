@@ -606,12 +606,12 @@ def datashift2(ctx):
     Nbatch = ir.Nbatch
     print(Nbatch)
 
-    dispmap = ctx.params.dispmap
-    print(dispmap.shape)
+    disp_map = ctx.params.disp_map
+    print(disp_map.shape)
     # re-interpolate dispmap to match the number of batches
-    for i in range(dispmap.shape[1]):
-        dispmap[:,i] = np.interp(np.linspace(0, dispmap.shape[0], Nbatch), range(dispmap.shape[0]), disp[:,i])
-    print(dispmap.shape)
+    for i in range(disp_map.shape[1]):
+        disp_map[:,i] = np.interp(np.linspace(0, disp_map.shape[0], Nbatch), range(disp_map.shape[0]), disp_map[:,i])
+    print(disp_map.shape)
 
     ir.xc, ir.yc = probe.xc, probe.yc
 
@@ -661,7 +661,7 @@ def datashift2(ctx):
 
     #dshift, yblk = get_drift(spikes, probe, Nbatch, params.nblocks, params.genericSpkTh)
     yblk = []
-    dshift = dispmap
+    dshift = disp_map
 
     # sort in case we still want to do "tracking"
     iorig = np.argsort(np.mean(dshift, axis=1))
