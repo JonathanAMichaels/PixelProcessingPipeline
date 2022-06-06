@@ -606,7 +606,7 @@ def datashift2(ctx):
     Nbatch = ir.Nbatch
     print(Nbatch)
 
-    disp_map = ctx.params.disp_map
+    disp_map = np.array(ctx.params.disp_map)
     print(disp_map.shape)
     # re-interpolate dispmap to match the number of batches
     for i in range(disp_map.shape[1]):
