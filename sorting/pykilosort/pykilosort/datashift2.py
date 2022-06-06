@@ -610,7 +610,8 @@ def datashift2(ctx):
     print(disp_map.shape)
     # re-interpolate dispmap to match the number of batches
     for i in range(disp_map.shape[1]):
-        disp_map[:,i] = np.interp(np.linspace(0, disp_map.shape[0], Nbatch), range(disp_map.shape[0]), disp_map[:,i])
+        disp_map[:,i] = np.interp(np.linspace(0, disp_map.shape[0]-1, num=Nbatch),
+                                  np.arange(disp_map.shape[0]), disp_map[:,i])
     print(disp_map.shape)
 
     ir.xc, ir.yc = probe.xc, probe.yc

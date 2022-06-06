@@ -12,7 +12,7 @@ from pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
 
 def kilosort(config):
     SCRATCH_DIR = Path(config['neuropixel_folder'] + '/pykilosort')
-    bin_file = Path(config['neuropixel_folder'] + '/NeuropixelsRegistration2/registered/standardized.bin')
+    bin_file = Path(config['neuropixel'])
     ks_output_dir = Path(config['neuropixel_folder'] + '/sorted')
     ks_output_dir.mkdir(parents=True, exist_ok=True)
 
