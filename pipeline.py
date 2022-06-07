@@ -3,10 +3,12 @@ import os
 import glob
 import scipy.io
 from ruamel import yaml
+from pathlib import Path
+import datetime
 from pipeline_utils import find, create_config, extract_sync
 from registration.registration import registration as registration_function
 from sorting.pykilosort.run_pykilosort import kilosort
-from pathlib import Path
+
 
 script_folder = os.path.dirname(os.path.realpath(__file__))
 opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
@@ -50,14 +52,14 @@ if cluster:
     child_folder = str(child_folder.stem)
     with open(home + 'scratch/slurm_job.sh', 'w') as f:
         f.write("#!/bin/bash\n#SBATCH --gres=gpu:1\n#SBATCH --nodes=1\n#SBATCH --cpus-per-task=3\n" +
-                "#SBATCH --mem=16G\n#SBATCH --time=0-03:00\n#SBATCH --account=def-andpru\n" +
+                "#SBATCH --mem=16G\n#SBATCH --time=0-18:00\n#SBATCH --account=def-andpru\n" +
                 "module purge\nnvidia-smi\nsource ~/pipeline/bin/activate\n" +
                 "scp -r " + folder + " $SLURM_TMPDIR/" + child_folder + "\n" +
                 "module load gcc/9.3.0 arrow python/3.8.10 scipy-stack\n" +
                 "python3 ~/PixelProcessingPipeline/pipeline.py -f $SLURM_TMPDIR/" + child_folder +
                 " -registration -in_cluster"
                 )
-    os.system("cd ~/scratch")
+    os.chdir(home + 'scratch')
     os.system("sbatch slurm_job.sh")
     registration = False
     myo_sorting = False
@@ -169,3 +171,4 @@ if myo_sorting:
                       path_to_add + '\')); Kilosort_run"')
 
 print('Pipeline finished! You\'ve earned a break.')
+print(datetime.datetime.now())
