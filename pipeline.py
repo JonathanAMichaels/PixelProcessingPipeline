@@ -44,6 +44,7 @@ if "-in_cluster" in opts:
     in_cluster = True
 
 if cluster:
+    os.system('touch ~/scratch/slurm_job.sh')
     with open('~/scratch/slurm_job.sh', 'w') as f:
         f.write("#!/bin/bash\n#SBATCH --gres=gpu:1\n#SBATCH --nodes=1\n#SBATCH --cpus-per-task=3\n" +
                 "#SBATCH --mem=16G\n#SBATCH --time=0-00:45\n#SBATCH --account=def-andpru\n" +
@@ -53,7 +54,6 @@ if cluster:
                 "python3 ~/PixelProcessingPipeline/pipeline.py -f $SLURM_TMPDIR/" + folder +
                 " -registration -in_cluster"
                 )
-        f.close()
     os.system('sbatch ~/scratch/slurm_job.sh')
     registration = False
     myo_sorting = False
