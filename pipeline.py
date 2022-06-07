@@ -22,6 +22,8 @@ else:
 registration = False
 myo_sorting = False
 neuro_sorting = False
+cluster = False
+in_cluster = False
 if "-registration" in opts:
     registration = True
 if "-myo_sorting" in opts:
@@ -33,6 +35,26 @@ if "-full" in opts:
     myo_sorting = True
     neuro_sorting = True
 if "-init" in opts:
+    registration = False
+    myo_sorting = False
+    neuro_sorting = False
+if "-cluster" in opts:
+    cluster = True
+if "-in_cluster" in opts:
+    in_cluster = True
+
+if cluster:
+    with open('~/scratch/slurm_job.sh', 'w') as f:
+        f.write("#!/bin/bash\n#SBATCH --gres=gpu:1\n#SBATCH --nodes=1\n#SBATCH --cpus-per-task=3\n" +
+                "#SBATCH --mem=16G\n#SBATCH --time=0-00:45\n#SBATCH --account=def-andpru\n" +
+                "nvidia-smi\nsource ~/pipeline/bin/activate\n" +
+                "scp -r ~/scratch/" + folder + " $SLURM_TMPDIR/\n" +
+                "module load gcc/9.3.0 arrow python scipy-stack\n" +
+                "python3 ~/PixelProcessingPipeline/pipeline.py -f $SLURM_TMPDIR/" + folder +
+                " -registration -in_cluster"
+                )
+        f.close()
+    os.system('sbatch ~/scratch/slurm_job.sh')
     registration = False
     myo_sorting = False
     neuro_sorting = False
@@ -91,6 +113,10 @@ else:
 if config['kinarm'] != '':
     print('Found kinarm data files')
 config['script_dir'] = script_folder
+if in_cluster:
+    config['in_cluster'] = True
+else:
+    config['in_cluster'] = False
 
 # Save config file with up-to-date information
 yaml.dump(config, open(config_file, 'w'), Dumper=yaml.RoundTripDumper)

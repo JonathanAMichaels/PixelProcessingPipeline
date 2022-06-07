@@ -83,11 +83,10 @@ def registration(config):
                 ),
             )
 
-
         os.system('python ' + config['script_dir'] +
                   '/registration/spikes_localization_registration/scripts/subtract.py '
                   + str(standardized_file) + ' ' + registration_directory +
-                  ' --noresidual --nowaveforms --dndetect --thresholds=10,8,6 --n_jobs=1 --geom=' +
+                  ' --noresidual --nowaveforms --dndetect --thresholds=10,8,6 --n_jobs=4 --geom=' +
                   config['script_dir'] +
                   '/registration/spikes_localization_registration/channels_maps/np1_channel_map.npy --n_windows=5 ' +
                   '--disp=1500 --overwrite')
@@ -126,6 +125,11 @@ def registration(config):
         ax.set_xlabel("time (s)")
 
         plt.savefig(registration_directory + 'displacement.png')
+
+        if config['in_cluster']:
+            move_dir = '~/scratch/' + config['folder'] + '/' + str(pixel)
+            mkdir(move_dir)
+            os.system('scp -r ' + registration_directory + ' ' + move_dir + '/NeuropixelsRegistration2')
 
         #registered_file = Path(working_directory + '/NeuropixelsRegistration2/registered/standardized.bin')
         #if not registered_file.exists():
