@@ -23,7 +23,9 @@ The very first time you set up your virtual environment, follow these steps:
 
 for canada comp0ute
 
-    module load gcc/9.3.0 arrow python scipy-stack
+    module load gcc/9.3.0 arrow python/3.8.10 scipy-stack
+
+
     virtualenv ~/pipeline
     source ~/pipeline/bin/activate
     pip install --upgrade pip setuptools wheel

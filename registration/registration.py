@@ -130,9 +130,9 @@ def registration(config):
             home = os.path.expanduser('~/')
             child_folder = Path(config['folder'])
             child_folder = str(child_folder.stem)
-            move_dir = home + 'scratch/' + child_folder + '/' + str(pixel)
-            mkdir(move_dir)
-            os.system('scp -r ' + registration_directory + ' ' + move_dir + '/NeuropixelsRegistration2')
+            target_folder = home + 'scratch/' + child_folder + '/' + child_folder + '_g0/' + \
+                            child_folder + '_g0_imec' + str(pixel)
+            os.system('scp -r ' + registration_directory + ' ' + target_folder + '/NeuropixelsRegistration2')
 
         #registered_file = Path(working_directory + '/NeuropixelsRegistration2/registered/standardized.bin')
         #if not registered_file.exists():

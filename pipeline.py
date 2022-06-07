@@ -50,14 +50,15 @@ if cluster:
     child_folder = str(child_folder.stem)
     with open(home + 'scratch/slurm_job.sh', 'w') as f:
         f.write("#!/bin/bash\n#SBATCH --gres=gpu:1\n#SBATCH --nodes=1\n#SBATCH --cpus-per-task=3\n" +
-                "#SBATCH --mem=16G\n#SBATCH --time=0-00:45\n#SBATCH --account=def-andpru\n" +
-                "nvidia-smi\nsource ~/pipeline/bin/activate\n" +
+                "#SBATCH --mem=16G\n#SBATCH --time=0-03:00\n#SBATCH --account=def-andpru\n" +
+                "module purge\nnvidia-smi\nsource ~/pipeline/bin/activate\n" +
                 "scp -r " + folder + " $SLURM_TMPDIR/" + child_folder + "\n" +
-                "module load gcc/9.3.0 arrow python scipy-stack\n" +
+                "module load gcc/9.3.0 arrow python/3.8.10 scipy-stack\n" +
                 "python3 ~/PixelProcessingPipeline/pipeline.py -f $SLURM_TMPDIR/" + child_folder +
                 " -registration -in_cluster"
                 )
-    os.system('sbatch ~/scratch/slurm_job.sh')
+    os.system("cd ~/scratch")
+    os.system("sbatch slurm_job.sh")
     registration = False
     myo_sorting = False
     neuro_sorting = False
