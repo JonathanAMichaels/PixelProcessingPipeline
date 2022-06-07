@@ -127,7 +127,10 @@ def registration(config):
         plt.savefig(registration_directory + 'displacement.png')
 
         if config['in_cluster']:
-            move_dir = '~/scratch/' + config['folder'] + '/' + str(pixel)
+            home = os.path.expanduser('~/')
+            child_folder = Path(config['folder'])
+            child_folder = str(child_folder.stem)
+            move_dir = home + 'scratch/' + child_folder + '/' + str(pixel)
             mkdir(move_dir)
             os.system('scp -r ' + registration_directory + ' ' + move_dir + '/NeuropixelsRegistration2')
 
