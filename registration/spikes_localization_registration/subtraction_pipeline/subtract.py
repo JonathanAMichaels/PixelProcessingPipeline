@@ -601,7 +601,7 @@ def subtraction_batch(
             device=device,
             probe=probe,
         )
-        if len(spind):
+        if subwfs:
             subtracted_wfs.append(subwfs)
             spike_index.append(spind)
 
