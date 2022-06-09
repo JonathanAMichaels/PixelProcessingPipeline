@@ -68,7 +68,7 @@ if cluster:
 # Search working folder for existing configuration file
 config_file = find('*.yaml', folder)
 if len(config_file) > 1:
-    raise SystemExit("There shouldn't be two config files in here (something went wrong)")
+    raise SystemExit("There shouldn't be more than one config file in here (something went wrong)")
 elif len(config_file) == 0:
     print('No config file found - creating one now')
     create_config(script_folder, folder)
