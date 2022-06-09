@@ -5,7 +5,7 @@ import scipy.io
 from ruamel import yaml
 from pathlib import Path
 import datetime
-from pipeline_utils import find, create_config, extract_sync
+from pipeline_utils import create_config, extract_sync
 from registration.registration import registration as registration_function
 from sorting.pykilosort.run_pykilosort import kilosort
 
