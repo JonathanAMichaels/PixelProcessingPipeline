@@ -685,7 +685,7 @@ def datashift2(ctx):
     yblk2 = np.arange(disp_map.shape[1])
     dshift2 = disp_map
 
-    import scipy.io.savemat as savemat
+    from scipy.io import savemat
     drift_data = {'yblk': yblk, 'dshift': dshift, 'yblk2': yblk2, 'dshift2': dshift2}
     savemat('/cifs/pruszynski/Malfoy/drift_test/drift_data.mat', drift_data)
 
