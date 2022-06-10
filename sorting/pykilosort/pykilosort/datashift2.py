@@ -662,17 +662,17 @@ def datashift2(ctx):
         np.random.seed(params.seed)
 
     # determine prototypical timecourses by clustering of simple threshold crossings.
-    #wTEMP, wPCA = extractTemplatesfromSnippets(
-    #    data_loader=ir.data_loader, probe=probe, params=params, Nbatch=Nbatch
-    #)
+    wTEMP, wPCA = extractTemplatesfromSnippets(
+        data_loader=ir.data_loader, probe=probe, params=params, Nbatch=Nbatch
+    )
 
     # Extract all the spikes across the recording that are captured by the
     # generic templates. Very few real spikes are missed in this way.
-    #spikes = standalone_detector(
-    #    wTEMP, wPCA, params.nPCs, yup, xup, Nbatch, ir.data_loader, probe, params
-    #)
+    spikes = standalone_detector(
+        wTEMP, wPCA, params.nPCs, yup, xup, Nbatch, ir.data_loader, probe, params
+    )
 
-    if False: #params.save_drift_spike_detections:
+    if params.save_drift_spike_detections:
         drift_path = ctx.context_path / 'drift'
         if not os.path.isdir(drift_path):
             os.mkdir(drift_path)
@@ -680,9 +680,14 @@ def datashift2(ctx):
         np.save(drift_path / 'spike_depths.npy', spikes.depths)
         np.save(drift_path / 'spike_amps.npy', spikes.amps)
 
-    #dshift, yblk = get_drift(spikes, probe, Nbatch, params.nblocks, params.genericSpkTh)
-    yblk = np.arange(disp_map.shape[1])
-    dshift = disp_map
+    dshift, yblk = get_drift(spikes, probe, Nbatch, params.nblocks, params.genericSpkTh)
+
+    yblk2 = np.arange(disp_map.shape[1])
+    dshift2 = disp_map
+
+    import scipy.io.savemat as savemat
+    drift_data = {'yblk': yblk, 'dshift': dshift, 'yblk2': yblk2, 'dshift2': dshift2}
+    savemat('/cifs/pruszynski/Malfoy/drift_test/drift_data.mat', drift_data)
 
     # sort in case we still want to do "tracking"
     iorig = np.argsort(np.mean(dshift, axis=1))
