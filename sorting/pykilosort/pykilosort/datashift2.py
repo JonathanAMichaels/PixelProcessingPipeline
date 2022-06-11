@@ -675,12 +675,15 @@ def datashift2(ctx):
 
     dshift, yblk = get_drift(spikes, probe, Nbatch, params.nblocks, params.genericSpkTh)
 
-    yblk2 = np.arange(disp_map.shape[1])
+    yblk2 = batch_spacing
     dshift2 = disp_map
 
     from scipy.io import savemat
     drift_data = {'yblk': yblk, 'dshift': dshift, 'yblk2': yblk2, 'dshift2': dshift2}
     savemat('/cifs/pruszynski/Malfoy/drift_test/drift_data.mat', drift_data)
+
+    dshift = dshift2
+    yblk = yblk2
 
     # sort in case we still want to do "tracking"
     iorig = np.argsort(np.mean(dshift, axis=1))
