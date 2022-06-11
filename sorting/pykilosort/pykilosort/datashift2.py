@@ -675,7 +675,7 @@ def datashift2(ctx):
 
     dshift, yblk = get_drift(spikes, probe, Nbatch, params.nblocks, params.genericSpkTh)
 
-    yblk2 = batch_spacing
+    yblk2 = batch_spacing + ymin
     dshift2 = -disp_map
 
     from scipy.io import savemat
