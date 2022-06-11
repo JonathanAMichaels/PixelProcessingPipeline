@@ -613,25 +613,18 @@ def datashift2(ctx):
     Nbatch = ir.Nbatch
     disp_map = np.transpose(np.array(params.disp_map))
 
-    #D, T = disp_map.shape
-    #ys = probe.yc
-    #n_chans = ys.shape[0]
-    #win_num = np.unique(ys).shape[0]
-    #estimated_displacement = np.zeros((n_chans, T))
-    #for i in range(n_chans):
-    #    window = get_gaussian_window(D, T, ys[i], scale=D / (0.5 * win_num))
-    #    w_disp = disp_map * window
-    #    w_disp = w_disp.sum(0) / window.sum(0)
-    #    estimated_displacement[i] = w_disp
-
-    #print(estimated_displacement.shape)
-    #disp_map = np.transpose(estimated_displacement)
-
     # re-interpolate dispmap to match the number of batches
-    batch_spacing = np.linspace(start=0, stop=disp_map.shape[0]-1, num=Nbatch)
+    batch_spacing = np.linspace(start=0, stop=disp_map.shape[0] - 1, num=Nbatch)
     new_disp_map = np.zeros((Nbatch, disp_map.shape[1]))
     for i in range(disp_map.shape[1]):
         new_disp_map[:, i] = np.interp(batch_spacing, np.arange(disp_map.shape[0]), disp_map[:, i])
+    disp_map = new_disp_map
+
+    # re-interpolate dispmap to match nblock * 2 -1
+    batch_spacing = np.linspace(start=0, stop=disp_map.shape[1] - 1, num=params.nblocks * 2 - 1)
+    new_disp_map = np.zeros((disp_map.shape[0], params.nblocks * 2 - 1))
+    for i in range(disp_map.shape[0]):
+        new_disp_map[i, :] = np.interp(batch_spacing, np.arange(disp_map.shape[1]), disp_map[i, :])
     disp_map = new_disp_map
 
     ir.xc, ir.yc = probe.xc, probe.yc
