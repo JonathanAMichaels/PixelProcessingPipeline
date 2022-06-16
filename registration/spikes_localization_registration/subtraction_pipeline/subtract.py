@@ -861,7 +861,7 @@ def detect_and_subtract(
     )
     # print(threshold, len(spike_index), flush=True)
     if len(spike_index) == 0 or np.array(spike_index).shape[1] == 0:
-        return np.array([[0, 0]]), raw, np.array([[0, 0]])
+        return np.zeros((1, 121, 40)), raw, np.zeros((1, 2))
 
     # -- read waveforms
     padded_raw = np.pad(raw, [(0, 0), (0, 1)], constant_values=np.nan)
