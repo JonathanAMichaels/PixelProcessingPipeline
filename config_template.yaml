@@ -39,6 +39,8 @@ Session:
     myo_analog_chan: 33
     myo_muscle_list:
         - Muscle1
-    brain_area_list:
+    brain_coord_list:
         - [1, 1]
+    brain_area_list:
+        - {'M1','PMd'}
 

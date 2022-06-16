@@ -51,7 +51,7 @@ if cluster:
     child_folder = Path(folder)
     child_folder = str(child_folder.stem)
     with open(home + 'scratch/slurm_job.sh', 'w') as f:
-        f.write("#!/bin/bash\n#SBATCH --gres=gpu:1\n#SBATCH --nodes=1\n#SBATCH --cpus-per-task=16\n" +
+        f.write("#!/bin/bash\n#SBATCH --gres=gpu:1\n#SBATCH --cpus-per-task=16\n" +
                 "#SBATCH --mem=32G\n#SBATCH --time=1-00:00\n#SBATCH --account=def-andpru\n" +
                 "module purge\nnvidia-smi\nsource ~/pipeline/bin/activate\n" +
                 "scp -r " + folder + " $SLURM_TMPDIR/" + child_folder + "\n" +
