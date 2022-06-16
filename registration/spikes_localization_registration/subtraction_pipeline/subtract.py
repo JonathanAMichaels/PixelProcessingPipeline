@@ -602,10 +602,11 @@ def subtraction_batch(
             probe=probe,
         )
         if len(subwfs) > 0:
-            print(subwfs.shape)
-            print(spind.shape)
             subtracted_wfs.append(subwfs)
             spike_index.append(spind)
+
+    print(subtracted_wfs.shape)
+    print(spike_index.shape)
 
     subtracted_wfs = np.concatenate(subtracted_wfs, axis=0)
     spike_index = np.concatenate(spike_index, axis=0)
@@ -861,7 +862,7 @@ def detect_and_subtract(
     )
     # print(threshold, len(spike_index), flush=True)
     if len(spike_index) == 0 or np.array(spike_index).shape[1] == 0:
-        return np.zeros((1, 121, 40)), raw, np.zeros((1, 2))
+        return [], raw, []
 
     # -- read waveforms
     padded_raw = np.pad(raw, [(0, 0), (0, 1)], constant_values=np.nan)
