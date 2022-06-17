@@ -605,6 +605,26 @@ def subtraction_batch(
             subtracted_wfs.append(subwfs)
             spike_index.append(spind)
 
+    if len(spike_index) == 0:
+        subwfs, residual, spind = detect_and_subtract(
+            residual,
+            5,
+            radial_parents,
+            tpca,
+            dedup_channel_index,
+            extract_channel_index,
+            detector=detector,
+            denoiser=denoiser,
+            denoiser_detector=dn_detector,
+            trough_offset=trough_offset,
+            spike_length_samples=spike_length_samples,
+            device=device,
+            probe=probe,
+        )
+        if len(subwfs) > 0:
+            subtracted_wfs.append(subwfs)
+            spike_index.append(spind)
+
     print(subtracted_wfs)
     print(spike_index)
 
