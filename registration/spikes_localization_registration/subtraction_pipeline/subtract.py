@@ -625,8 +625,8 @@ def subtraction_batch(
             subtracted_wfs.append(subwfs)
             spike_index.append(spind)
 
-    print(subtracted_wfs)
-    print(spike_index)
+    #print(subtracted_wfs)
+    #print(spike_index)
 
     subtracted_wfs = np.concatenate(subtracted_wfs, axis=0)
     spike_index = np.concatenate(spike_index, axis=0)
