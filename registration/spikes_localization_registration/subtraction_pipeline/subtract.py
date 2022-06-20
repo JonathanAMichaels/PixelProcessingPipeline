@@ -605,10 +605,12 @@ def subtraction_batch(
             subtracted_wfs.append(subwfs)
             spike_index.append(spind)
 
-    if len(spike_index) == 0:
+    thresh_walk = 6
+    while len(spike_index) == 0 and thresh_walk > 1:
+        thresh_walk = thresh_walk - 1
         subwfs, residual, spind = detect_and_subtract(
             residual,
-            5,
+            thresh_walk,
             radial_parents,
             tpca,
             dedup_channel_index,
