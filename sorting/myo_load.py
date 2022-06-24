@@ -31,3 +31,19 @@ def myo_load(config):
             np.array(session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]).astype('int')
         scipy.io.savemat(directory + '/sync.mat', sync_data, do_compression=True)
 
+        bin_file = Path(bin_file)
+        ks_output_dir = Path(directory + '/sorted')
+        scratch_dir = ks_output_dir
+        ks_output_dir.mkdir(parents=True, exist_ok=True)
+        params = ibl_pykilosort_params([bin_file])
+        print(params)
+        params['do_drift_correction'] = False
+        run_spike_sorting_ibl(bin_file, delete=True, scratch_dir=scratch_dir,
+                              ks_output_dir=ks_output_dir, log_level='INFO', params=params)
+
+        # correct params.py to point to the shifted data
+        with open(str(ks_output_dir) + '/params.py', 'w') as f:
+            f.write("dat_path = 'proc.dat'\nn_channels_dat = " + len(chans) +
+                    "\ndtype = 'int16'\noffset = 0\n" +
+                    "hp_filtered = True\nsample_rate = 30000\ntemplate_scaling = 20.0")
+
