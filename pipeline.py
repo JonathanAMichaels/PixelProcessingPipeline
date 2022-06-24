@@ -7,7 +7,7 @@ from pathlib import Path
 import datetime
 from pipeline_utils import find, create_config, extract_sync
 from registration.registration import registration as registration_function
-from sorting.myo_load import myo_load as myo_function
+from sorting.pykilosort.run_myo_pykilosort import myo_sort as myo_function
 from sorting.pykilosort.run_pykilosort import kilosort
 
 

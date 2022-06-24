@@ -1,14 +1,19 @@
 import os
+import sys
+
+script_folder = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(script_folder)
+
 import glob
 from pathlib import Path
 from open_ephys.analysis import Session
 import numpy as np
 import scipy.io
 import shutil
-from sorting.pykilosort.pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
+from pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
 
 
-def myo_load(config):
+def myo_sort(config):
     directory = config['myomatrix']
     session = Session(directory)
     chan_list = config['Session']['myo_chan_list']
