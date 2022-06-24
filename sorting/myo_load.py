@@ -5,7 +5,7 @@ from open_ephys.analysis import Session
 import numpy as np
 import scipy.io
 import shutil
-from pykilosort.pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
+from sorting.pykilosort.pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
 
 
 def myo_load(config):
