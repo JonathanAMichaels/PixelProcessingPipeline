@@ -26,7 +26,7 @@ def myo_load(config):
                 # for each set
                 for i in range(len(segs)-1):
                     trange = range(segs[i], segs[i+1])
-                    data = session.recordnodes[0].recordings[0].continuous[0].samples[trange, chans]
+                    data = session.recordnodes[0].recordings[0].continuous[0].samples[np.ix_(trange, chans)]
                     f.write(np.int16(data))
             f.close()
             sync = session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]
