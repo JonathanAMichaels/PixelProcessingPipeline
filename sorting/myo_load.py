@@ -12,7 +12,8 @@ def myo_load(config):
     print(sync_chan)
     num_myomatrix = len(chan_list)
     for myomatrix in range(num_myomatrix):
-        chans = range(chan_list[myomatrix][0], chan_list[myomatrix][1]) - 1
+        chans = range(chan_list[myomatrix][0] - 1, chan_list[myomatrix][1] - 1)
+        print(chans)
         # for each set
         data = session.recordnodes[0].recordings[0].continuous[0].samples[:, chans]
         sync = session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]
