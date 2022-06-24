@@ -18,7 +18,7 @@ def myo_load(config):
         print(chans)
         fs = 30000
         ts = len(session.recordnodes[0].recordings[0].continuous[0].timestamps)
-        segs = np.round(np.linspace(0, ts, num=100, endpoint=True))
+        segs = int(np.round(np.linspace(0, ts, num=100, endpoint=True)))
         bin_file = directory + '/data.bin'
         if not os.path.isfile(bin_file):
             with open(bin_file, 'wb') as f:
