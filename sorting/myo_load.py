@@ -29,5 +29,5 @@ def myo_load(config):
         sync_data = dict([])
         sync_data['sync'] = \
             np.array(session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]).astype('int')
-        scipy.io.savemat(directory + '/sync.mat', sync_data)
+        scipy.io.savemat(directory + '/sync.mat', sync_data, do_compression=True)
 
