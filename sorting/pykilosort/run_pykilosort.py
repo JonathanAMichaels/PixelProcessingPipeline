@@ -9,7 +9,7 @@ sys.path.append(script_folder)
 
 import shutil
 from pathlib import Path
-from kilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
+from pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
 
 def kilosort(config):
     bin_file = Path(config['neuropixel'])
