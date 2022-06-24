@@ -9,8 +9,9 @@ def myo_load(config):
     chan_list = config['Session']['myo_chan_list']
     sync_chan = int(config['Session']['myo_analog_chan'])
     print(chan_list)
+    print(len(chan_list))
     # for each set
-    data = session.recordingnodes[0].recordings[0].continuous[0].samples[:, 0]
-    sync = session.recordingnodes[0].recordings[0].continuous[0].samples[:, sync_chan]
+    data = session.recordnodes[0].recordings[0].continuous[0].samples[:, 0]
+    sync = session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]
 
 
