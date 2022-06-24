@@ -3,7 +3,7 @@ import glob
 from pathlib import Path
 from open_ephys.analysis import Session
 import numpy as np
-import scipy.io.savemat as savemat
+import scipy.io
 
 def myo_load(config):
     directory = config['myomatrix']
@@ -30,5 +30,5 @@ def myo_load(config):
             f.close()
         sync_data = dict([])
         sync_data['sync'] = session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]
-        savemat(directory + '/sync.mat', sync_data)
+        scipy.io.savemat(directory + '/sync.mat', sync_data)
 
