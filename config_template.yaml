@@ -17,16 +17,8 @@ script_dir:
 # Registration parameters
 Registration:
 
+# Sorting parameters
 Sorting:
-    # Common parameters that are not likely to change are stored in Kilosort_config.m
-    # Spike sorting parameters (Neuro)
-    Neuro_sorting:
-        overlap_s: 5e-4
-        channel_sep: 100
-    # Spike sorting parameters (Myo)
-    Myo_sorting:
-        overlap_s: 0
-        channel_sep: 4000
 
 # Session-specific parameters
 Session:
@@ -35,12 +27,16 @@ Session:
         - 0
     myo_prefix: ''
     myo_chan_list:
-        - [1, 32]
-    myo_analog_chan: 33
+        - [1, 16]
+        - [17, 32]
+    myo_analog_chan: CH33
     myo_muscle_list:
-        - Muscle1
+        - Bicep
+        - Tricep
     brain_coord_list:
         - [1, 1]
+        - [2, 2]
     brain_area_list:
-        - {'M1','PMd'}
+        - M1
+        - PMd
 
