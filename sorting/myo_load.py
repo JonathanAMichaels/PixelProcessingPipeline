@@ -7,11 +7,14 @@ def myo_load(config):
     session = Session(directory)
 
     chan_list = config['Session']['myo_chan_list']
-    sync_chan = int(config['Session']['myo_analog_chan'])
+    sync_chan = int(config['Session']['myo_analog_chan']) - 1
     print(chan_list)
-    print(len(chan_list))
-    # for each set
-    data = session.recordnodes[0].recordings[0].continuous[0].samples[:, 0]
-    sync = session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]
+    print(sync_chan)
+    num_myomatrix = len(chan_list)
+    for myomatrix in range(num_myomatrix):
+        chans = range(chan_list[myomatrix][0], chan_list[myomatrix][1]) - 1
+        # for each set
+        data = session.recordnodes[0].recordings[0].continuous[0].samples[:, chans]
+        sync = session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]
 
 
