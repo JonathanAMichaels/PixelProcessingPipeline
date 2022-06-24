@@ -1,10 +1,3 @@
-import numpy as np
-import os
-import sys
-
-script_folder = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(script_folder)
-
 import glob
 from pathlib import Path
 from open_ephys.analysis import Session
