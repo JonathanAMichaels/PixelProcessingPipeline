@@ -20,7 +20,7 @@ def myo_sort(config):
     sync_chan = int(config['Session']['myo_analog_chan']) - 1
     num_myomatrix = len(chan_list)
     for myomatrix in range(num_myomatrix):
-        chans = range(chan_list[myomatrix][0] - 1, chan_list[myomatrix][1] - 1)
+        chans = range(chan_list[myomatrix][0] - 1, chan_list[myomatrix][1])
         ts = session.recordnodes[0].recordings[0].continuous[0].timestamps.shape[0]
         segs = np.round(np.linspace(0, ts, num=100, endpoint=True)).astype('int')
         bin_file = directory + '/data.bin'
