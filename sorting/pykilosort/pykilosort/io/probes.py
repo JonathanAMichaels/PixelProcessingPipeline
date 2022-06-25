@@ -27,6 +27,26 @@ def np2_probe():
     return probe
 
 
+def myomatrix_bipolar_probe():
+    probe = Bunch()
+    probe.NchanTOT = 16
+    probe.chanMap = np.arange(16)
+    probe.xc = np.tile(np.array([43., 11., 59., 27.]), 96)
+    probe.yc = np.repeat(np.arange(20, 3841, 20.), 2)
+    probe.kcoords = np.zeros(16)
+    return probe
+
+
+def myomatrix_unipolar_probe():
+    probe = Bunch()
+    probe.NchanTOT = 32
+    probe.chanMap = np.arange(32)
+    probe.xc = np.tile(np.array([43., 11., 59., 27.]), 96)
+    probe.yc = np.repeat(np.arange(20, 3841, 20.), 2)
+    probe.kcoords = np.zeros(32)
+    return probe
+
+
 def get_4shank_channels_np2(shank):
     """
     Returns the channel indices for a given shank on a np2 4 shank probe

@@ -10,7 +10,7 @@ from open_ephys.analysis import Session
 import numpy as np
 import scipy.io
 import shutil
-from pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
+from pykilosort import run, add_default_handler, myomatrix_bipolar_probe, myomatrix_unipolar_probe
 
 
 def myo_sort(config):
@@ -38,18 +38,16 @@ def myo_sort(config):
             np.array(session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]).astype('int')
         scipy.io.savemat(directory + '/sync.mat', sync_data, do_compression=True)
 
-        bin_file = Path(bin_file)
-        ks_output_dir = Path(directory + '/sorted')
-        scratch_dir = ks_output_dir
-        ks_output_dir.mkdir(parents=True, exist_ok=True)
-        params = ibl_pykilosort_params([bin_file])
-        print(params)
-        params['perform_drift_registration'] = False
-        run_spike_sorting_ibl(bin_file, delete=True, scratch_dir=scratch_dir,
-                              ks_output_dir=ks_output_dir, log_level='INFO', params=params)
+        params = {'perform_drift_registration': False}
+        data_path = Path(bin_file)
+        dir_path = Path(directory + '/sorted')  # by default uses the same folder as the dataset
+        output_dir = dir_path
+        add_default_handler(level='INFO')  # print output as the algorithm runs
+        run(data_path, dir_path=dir_path, output_dir=output_dir,
+            probe=myomatrix_bipolar_probe(), low_memory=False, **params)
 
         # correct params.py to point to the shifted data
-        with open(str(ks_output_dir) + '/params.py', 'w') as f:
+        with open(str(output_dir) + '/params.py', 'w') as f:
             f.write("dat_path = 'proc.dat'\nn_channels_dat = " + len(chans) +
                     "\ndtype = 'int16'\noffset = 0\n" +
                     "hp_filtered = True\nsample_rate = 30000\ntemplate_scaling = 20.0")
