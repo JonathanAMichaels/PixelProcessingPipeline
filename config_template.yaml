@@ -25,11 +25,10 @@ Session:
     trange:
         - 0
         - 0
-    myo_prefix: ''
     myo_chan_list:
         - [1, 16]
         - [17, 32]
-    myo_analog_chan: CH33
+    myo_analog_chan: 33
     myo_muscle_list:
         - Bicep
         - Tricep

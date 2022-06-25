@@ -24,15 +24,15 @@ def myo_sort(config):
         ts = session.recordnodes[0].recordings[0].continuous[0].timestamps.shape[0]
         segs = np.round(np.linspace(0, ts, num=100, endpoint=True)).astype('int')
         bin_file = directory + '/data.bin'
-        if not os.path.isfile(bin_file):
-            with open(bin_file, 'wb') as f:
-                # segment time into managable chunks
-                # for each set
-                for i in range(len(segs)-1):
-                    trange = range(segs[i], segs[i+1])
-                    data = session.recordnodes[0].recordings[0].continuous[0].samples[np.ix_(trange, chans)]
-                    f.write(np.int16(data))
-            f.close()
+        os.remove(bin_file)
+        with open(bin_file, 'wb') as f:
+            # segment time into manageable chunks
+            # for each set
+            for i in range(len(segs)-1):
+                trange = range(segs[i], segs[i+1])
+                data = session.recordnodes[0].recordings[0].continuous[0].samples[np.ix_(trange, chans)]
+                f.write(np.int16(data))
+        f.close()
         sync_data = dict([])
         sync_data['sync'] = \
             np.array(session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]).astype('int')
@@ -55,3 +55,4 @@ def myo_sort(config):
                     "\ndtype = 'int16'\noffset = 0\n" +
                     "hp_filtered = True\nsample_rate = 30000\ntemplate_scaling = 20.0")
 
+        os.remove(bin_file)
