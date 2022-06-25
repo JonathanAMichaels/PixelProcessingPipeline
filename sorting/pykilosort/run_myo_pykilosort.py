@@ -34,8 +34,7 @@ def myo_sort(config):
                 f.write(np.int16(data))
         f.close()
         sync_data = dict([])
-        sync_data['sync'] = \
-            np.array(session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]).astype('int')
+        sync_data['sync'] = session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]
         scipy.io.savemat(directory + '/sync.mat', sync_data, do_compression=True)
 
         params = {'perform_drift_registration': False, 'n_channels': len(chans)}
