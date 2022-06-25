@@ -39,7 +39,7 @@ def myo_sort(config):
 
         params = {'perform_drift_registration': False, 'n_channels': len(chans)}
         data_path = Path(bin_file)
-        dir_path = Path(directory + '/sorted')  # by default uses the same folder as the dataset
+        dir_path = Path(directory + '/sorted' + str(myomatrix))  # by default uses the same folder as the dataset
         output_dir = dir_path
         add_default_handler(level='INFO')  # print output as the algorithm runs
         if len(chans) == 16:
