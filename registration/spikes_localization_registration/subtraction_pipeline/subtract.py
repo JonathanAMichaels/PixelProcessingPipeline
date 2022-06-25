@@ -606,10 +606,8 @@ def subtraction_batch(
             spike_index.append(spind)
 
     thresh_walk = 6
-    while len(subtracted_wfs) == 0 and thresh_walk > -1:
-        print('gotta reduce')
+    while len(subtracted_wfs) == 0 and thresh_walk > 1:
         thresh_walk = thresh_walk - 1
-        print(thresh_walk)
         subwfs, residual, spind = detect_and_subtract(
             residual,
             thresh_walk,
