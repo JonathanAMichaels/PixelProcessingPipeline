@@ -21,7 +21,7 @@ def myo_sort(config):
     num_myomatrix = len(chan_list)
     for myomatrix in range(num_myomatrix):
         chans = range(chan_list[myomatrix][0] - 1, chan_list[myomatrix][1] - 1)
-        ts = len(session.recordnodes[0].recordings[0].continuous[0].timestamps)
+        ts = session.recordnodes[0].recordings[0].continuous[0].timestamps.shape[0]
         segs = np.round(np.linspace(0, ts, num=100, endpoint=True)).astype('int')
         bin_file = directory + '/data.bin'
         if not os.path.isfile(bin_file):
