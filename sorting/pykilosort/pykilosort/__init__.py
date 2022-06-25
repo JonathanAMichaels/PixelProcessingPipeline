@@ -10,7 +10,7 @@ else:
 
 from .utils import Bunch, memmap_binary_file, read_data, load_probe, plot_dissimilarity_matrices, plot_diagnostics
 from .main import run, run_export, run_spikesort, run_preprocess
-from .io.probes import np1_probe, np2_probe, np2_4shank_probe
+from .io.probes import np1_probe, np2_probe, np2_4shank_probe, myomatrix_bipolar_probe, myomatrix_unipolar_probe
 
 
 __version__ = 'ibl_1.3.0'
