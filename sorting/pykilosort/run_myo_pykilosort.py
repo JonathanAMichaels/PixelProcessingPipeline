@@ -48,7 +48,7 @@ def myo_sort(config):
 
         # correct params.py to point to the shifted data
         with open(str(output_dir) + '/params.py', 'w') as f:
-            f.write("dat_path = 'proc.dat'\nn_channels_dat = " + len(chans) +
+            f.write("dat_path = 'proc.dat'\nn_channels_dat = " + str(len(chans)) +
                     "\ndtype = 'int16'\noffset = 0\n" +
                     "hp_filtered = True\nsample_rate = 30000\ntemplate_scaling = 20.0")
 
