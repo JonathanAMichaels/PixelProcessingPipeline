@@ -44,7 +44,7 @@ def myo_sort(config):
         ks_output_dir.mkdir(parents=True, exist_ok=True)
         params = ibl_pykilosort_params([bin_file])
         print(params)
-        params['do_drift_correction'] = False
+        params['perform_drift_registration'] = False
         run_spike_sorting_ibl(bin_file, delete=True, scratch_dir=scratch_dir,
                               ks_output_dir=ks_output_dir, log_level='INFO', params=params)
 
