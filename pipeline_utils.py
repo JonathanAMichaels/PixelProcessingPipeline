@@ -33,5 +33,5 @@ def extract_sync(config_kilosort):
     rawData = makeMemMapRaw(Path(config_kilosort['neuropixel']), meta)
     sync_data = dict([])
     sync_data['sync'] = ExtractDigital(rawData, firstSamp, lastSamp, 0, [6], meta)
-    scipy.io.savemat(config_kilosort['neuropixel_folder'] + '/sync.mat', sync_data)
+    scipy.io.savemat(config_kilosort['neuropixel_folder'] + '/sync.mat', sync_data, do_compression=True)
 
