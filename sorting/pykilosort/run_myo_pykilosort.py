@@ -45,6 +45,9 @@ def myo_sort(config):
         add_default_handler(level='INFO')  # print output as the algorithm runs
         run(data_path, dir_path=dir_path, output_dir=output_dir,
             probe=myomatrix_bipolar_probe(), low_memory=False, **params)
+        post_file = glob.glob(str(dir_path) + '/.kilosort/*/proc.dat')
+        shutil.move(post_file[0], str(dir_path) + '/proc.dat')
+        shutil.rmtree(dir_path.joinpath(".kilosort"), ignore_errors=True)
 
         # correct params.py to point to the shifted data
         with open(str(output_dir) + '/params.py', 'w') as f:
