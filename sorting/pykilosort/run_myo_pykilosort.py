@@ -38,7 +38,7 @@ def myo_sort(config):
             np.array(session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]).astype('int')
         scipy.io.savemat(directory + '/sync.mat', sync_data, do_compression=True)
 
-        params = {'perform_drift_registration': False}
+        params = {'perform_drift_registration': False, 'n_channels': len(chans)}
         data_path = Path(bin_file)
         dir_path = Path(directory + '/sorted')  # by default uses the same folder as the dataset
         output_dir = dir_path
