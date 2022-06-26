@@ -165,7 +165,7 @@ if myo_sorting:
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
         print('Starting resorting of ' + config_kilosort['myomatrix_folder'])
-        path_to_add = script_folder + '/sorting/myomatrix/'
+        path_to_add = script_folder + '/sorting/'
         os.system('module load matlab/2021b')
         matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
         # matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab' # something else for testing locally
