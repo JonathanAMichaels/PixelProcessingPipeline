@@ -24,7 +24,8 @@ def myo_sort(config):
         ts = session.recordnodes[0].recordings[0].continuous[0].timestamps.shape[0]
         segs = np.round(np.linspace(0, ts, num=100, endpoint=True)).astype('int')
         bin_file = directory + '/data.bin'
-        os.remove(bin_file)
+        if os.path.isfile(bin_file):
+            os.remove(bin_file)
         with open(bin_file, 'wb') as f:
             # segment time into manageable chunks
             # for each set
