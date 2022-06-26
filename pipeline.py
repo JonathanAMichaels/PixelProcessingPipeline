@@ -156,7 +156,7 @@ if neuro_sorting:
 
 # Proceed with myo processing and spike sorting
 if myo_sorting:
-    myo_function(config)
+    #myo_function(config)
     config_kilosort = {'myomatrix': config['myomatrix'], 'script_dir': config['script_dir']}
     for myomatrix in range(len(config['Session']['myo_chan_list'])):
         f = glob.glob(config_kilosort['myomatrix'] + '/sorted' + str(myomatrix))

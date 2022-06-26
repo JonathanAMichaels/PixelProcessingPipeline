@@ -228,8 +228,53 @@ for j = 1:size(mdata,3)
     inc = abs(mode(diff(ycoords)))*yScale;
     set(gca, 'YLim', [min(ycoords)*yScale-inc max(ycoords)*yScale+inc])
     if params.savePlots
-        mkdir([params.kiloDir '/Plots'])
+        if ~exist([params.kiloDir '/Plots'], 'dir')
+            mkdir([params.kiloDir '/Plots'])
+        end
         print([params.kiloDir '/Plots/' num2str(j) '.png'], '-dpng')
+        print([params.kiloDir '/Plots/' num2str(j) '.svg'], '-dsvg')
+    end
+end
+
+
+% Plot average waveform from beginning and end of recording
+for j = 1:size(mdata,3)
+    firstNan = find(isnan(squeeze(data(1,1,:,j))),1) - 1;
+    if isempty(firstNan)
+        firstNan = size(data,3);
+    end
+    if firstNan < 200
+        firstBunch = 1:round(firstNan/2);
+        lastBunch = round(firstNan/2)+1:firstNan;
+    else
+        firstBunch = 1:100;
+        lastBunch = firstNan-99:firstNan;
+    end
+    temp = mdata(:,:,j);
+    yScale = (max(temp(:))-min(temp(:)))/700;
+    figure(j+100)
+    set(gcf, 'Position', [j*50 1 250 400])
+    clf
+    ttl = sprintf(['Spikes: ' num2str(spkCount(j)) '\nmax-SNR: ' num2str(SNR(j))]);
+    title(ttl)
+    hold on
+    for e = 1:size(mdata,2)
+        thisTemplate = squeeze(mean(data(:,e,firstBunch,j),3));
+        plot((1:size(thisTemplate,1)) + xcoords(e)/2, ...
+            thisTemplate + ycoords(e)*yScale, 'LineWidth', 2, 'Color', [0 0 0.7])
+        thisTemplate = squeeze(mean(data(:,e,lastBunch,j),3));
+        plot((1:size(thisTemplate,1)) + xcoords(e)/2, ...
+            thisTemplate + ycoords(e)*yScale, 'LineWidth', 2, 'Color', [0.7 0 0])
+    end
+    axis off
+    inc = abs(mode(diff(ycoords)))*yScale;
+    set(gca, 'YLim', [min(ycoords)*yScale-inc max(ycoords)*yScale+inc])
+    if params.savePlots
+        if ~exist([params.kiloDir '/Plots'], 'dir')
+            mkdir([params.kiloDir '/Plots'])
+        end
+        print([params.kiloDir '/Plots/' num2str(j) '-wavecomp.png'], '-dpng')
+        print([params.kiloDir '/Plots/' num2str(j) '-wavecomp.svg'], '-dsvg')
     end
 end
 
