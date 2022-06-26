@@ -12,6 +12,8 @@ import scipy.io
 import shutil
 from pykilosort import run, add_default_handler, myomatrix_bipolar_probe, myomatrix_unipolar_probe
 
+channelRemap = [23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8,
+                24, 25, 26, 27, 28, 29, 30, 31, 0, 1, 2, 3, 4, 5, 6, 7]
 
 def myo_sort(config):
     directory = config['myomatrix']
@@ -32,6 +34,8 @@ def myo_sort(config):
             for i in range(len(segs)-1):
                 trange = range(segs[i], segs[i+1])
                 data = session.recordnodes[0].recordings[0].continuous[0].samples[np.ix_(trange, chans)]
+                if len(chans) == 32:
+                    data = data[:, channelRemap]
                 f.write(np.int16(data))
         f.close()
         sync_data = dict([])
