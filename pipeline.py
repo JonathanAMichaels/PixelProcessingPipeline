@@ -156,13 +156,13 @@ if neuro_sorting:
 
 # Proceed with myo processing and spike sorting
 if myo_sorting:
-    myo_function(config)
+    #myo_function(config)
     config_kilosort = yaml.safe_load(open(config_file, 'r'))
     for myomatrix in range(len(config['Session']['myo_chan_list'])):
         f = glob.glob(config_kilosort['myomatrix'] + '/sorted' + str(myomatrix))
         config_kilosort['myomatrix_folder'] = f[0]
-        config_kilosort['num_chans'] = config_kilosort['myo_chan_list'][myomatrix][1] - \
-                                       config_kilosort['myo_chan_list'][myomatrix][0] + 1
+        config_kilosort['num_chans'] = config_kilosort['Session']['myo_chan_list'][myomatrix][1] - \
+                                       config_kilosort['Session']['myo_chan_list'][myomatrix][0] + 1
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
         print('Starting resorting of ' + config_kilosort['myomatrix_folder'])
         path_to_add = script_folder + '/sorting/myomatrix/'
