@@ -161,8 +161,8 @@ if myo_sorting:
     for myomatrix in range(len(config['Session']['myo_chan_list'])):
         f = glob.glob(config_kilosort['myomatrix'] + '/sorted' + str(myomatrix))
         config_kilosort['myomatrix_folder'] = f[0]
-        config_kilosort['num_chans'] = config_kilosort['Session']['myo_chan_list'][myomatrix][1] - \
-                                       config_kilosort['Session']['myo_chan_list'][myomatrix][0] + 1
+        config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
+                                       config['Session']['myo_chan_list'][myomatrix][0] + 1
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
         print('Starting resorting of ' + config_kilosort['myomatrix_folder'])
         path_to_add = script_folder + '/sorting/myomatrix/'
