@@ -75,8 +75,8 @@ elseif length(dataChan) == 16
     brokenChan = find(S > 20);
 end
 disp('Broken channels are:')
-brokenChan
-data(:,brokenChan) = 0;
+%brokenChan
+%data(:,brokenChan) = 0;
 clear data_filt
 
 % Generate "Bulk EMG" dataset
