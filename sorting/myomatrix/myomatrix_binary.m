@@ -28,7 +28,7 @@ ff = dir([myomatrix_data '/100_CH*' num2str(dataChan(1)) '.continuous']);
 if isempty(ff)
     prefix = [];
 else
-    prefix = 'CH'
+    prefix = 'CH';
 end
 tempdata = load_open_ephys_data([myomatrix_data '/100_' prefix num2str(dataChan(1)) '.continuous']);
 tL = length(tempdata);
@@ -88,7 +88,7 @@ else
     bEMG = int16(mean(data(:,notBroken),2));
 end
 
-fileID = fopen([myomatrix '/MyomatrixData.bin'], 'w');
+fileID = fopen([myomatrix '/data.bin'], 'w');
 save([myomatrix '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
 
 clear bEMG
