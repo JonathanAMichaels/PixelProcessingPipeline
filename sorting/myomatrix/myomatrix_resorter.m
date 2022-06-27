@@ -94,6 +94,7 @@ end
 % calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
+C = C(SNR > 10 | C_ident == 1);
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
