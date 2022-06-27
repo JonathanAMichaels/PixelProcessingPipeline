@@ -81,22 +81,24 @@ end
 C = []; C_ident = [];
 for i = 1:length(clusterGroup.cluster_id)
     sp = find(I == clusterGroup.cluster_id(i));
-    if length(sp) > 20 && (strcmp(clusterGroup.group(i,1:3), 'goo'))
+   % if length(sp) > 20 && (strcmp(clusterGroup.group(i,1:3), 'goo'))
         C(end+1) = clusterGroup.cluster_id(i);
         C_ident(end+1) = strcmp(clusterGroup.group(i,1:3), 'goo');
-    end
+   % end
 end
+
+
+% Extract individual waveforms from kilosort binary
+[mdata, data] = extractWaveforms(params, T, I, C);
+    
+% calc stats
+[SNR, spkCount] = calcStats(mdata, data, T, I, C);
+
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
 I = I(keepSpikes);
 T = T(keepSpikes);
-
-% Extract individual waveforms from kilosort binary
-%[mdata, data] = extractWaveforms(params, T, I, C);
-    
-% calc stats
-%[SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
 % Remove clusters that don't meet inclusion criteria
 %saveUnits = find(C_ident == 1);

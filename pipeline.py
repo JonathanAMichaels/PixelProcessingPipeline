@@ -6,6 +6,7 @@ from ruamel import yaml
 from pathlib import Path
 import datetime
 import numpy as np
+import shutil
 from pipeline_utils import find, create_config, extract_sync
 from registration.registration import registration as registration_function
 from sorting.pykilosort.run_myo_pykilosort import myo_sort as myo_function
