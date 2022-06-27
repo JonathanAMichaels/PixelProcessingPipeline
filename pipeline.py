@@ -168,10 +168,11 @@ if myo_sorting:
         if os.path.isfile(config['myomatrix'] + '/data.bin'):
             os.remove(config['myomatrix'] + '/data.bin')
         config_kilosort['myomatrix_folder'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
-        config_kilosort['chans'] = config['Session']['myo_chan_list'][myomatrix]
+        config_kilosort['chans'] = np.array(config['Session']['myo_chan_list'][myomatrix])
         config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
+        print(config_kilosort)
 
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
                   path_to_add + '\')); myomatrix_binary"')
