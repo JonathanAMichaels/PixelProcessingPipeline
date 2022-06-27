@@ -24,17 +24,20 @@ else
 end
 
 dataChan = chanList;
-tempdata = load_open_ephys_data(dir([myomatrix_data '/100_*' num2str(dataChan(1)) '*.continuous']).name);
+ff = dir([myomatrix_data '/100_*' num2str(dataChan(1)) '.continuous'])
+tempdata = load_open_ephys_data(ff(1).name);
 tL = length(tempdata);
 clear tempdata
 data = zeros(tL, length(dataChan), 'int16');
 for chan = 1:length(dataChan)
-    data(:,chan) = load_open_ephys_data([myomatrix_data '/100_*' num2str(dataChan(chan)) '*.continuous']);
+    ff = dir([myomatrix_data '/100_*' num2str(dataChan(chan)) '.continuous'])
+    data(:,chan) = load_open_ephys_data(ff(1).name);
 end
 if length(dataChan) == 32
     data = data(:,channelRemap);
 end
-analogData = load_open_ephys_data([myomatrix_data '100_*' num2str(sync_chan) '*.continuous']);
+ff = dir([myomatrix_data '100_*' num2str(sync_chan) '.continuous'])
+analogData = load_open_ephys_data(ff(1).name);
 analogData(analogData > 5) = 5;
 sync = logical(round(analogData / max(analogData)));
 clear analogData
