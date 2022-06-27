@@ -180,6 +180,7 @@ if myo_sorting:
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
                   path_to_add + '\')); myomatrix_binary"')
 
+        shutil.rmtree(config_kilosort['myomatrix_folder'], ignore_errors=True)
         myo_function(config_kilosort)
 
         print('Starting resorting of ' + config_kilosort['myomatrix_folder'])
