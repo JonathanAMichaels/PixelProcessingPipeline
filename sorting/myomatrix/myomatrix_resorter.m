@@ -78,11 +78,12 @@ else
     clusterGroup.group = clusterGroup.KSLabel;
 end
 % Take only 'good' single units as determined by kilosort with at least 20 spikes
-C = [];
+C = []; C_ident = [];
 for i = 1:length(clusterGroup.cluster_id)
     sp = find(I == clusterGroup.cluster_id(i));
     if length(sp) > 20 && (strcmp(clusterGroup.group(i,1:3), 'goo'))
         C(end+1) = clusterGroup.cluster_id(i);
+        C_ident(end+1) = strcmp(clusterGroup.group(i,1:3), 'goo');
     end
 end
 
@@ -90,6 +91,19 @@ end
 keepSpikes = find(ismember(I,C));
 I = I(keepSpikes);
 T = T(keepSpikes);
+
+% Extract individual waveforms from kilosort binary
+%[mdata, data] = extractWaveforms(params, T, I, C);
+    
+% calc stats
+%[SNR, spkCount] = calcStats(mdata, data, T, I, C);
+
+% Remove clusters that don't meet inclusion criteria
+%saveUnits = find(C_ident == 1);
+%keepSpikes = find(ismember(I, saveUnits));
+%T = T(keepSpikes);
+%I = I(keepSpikes);
+%C = C(saveUnits);
 
 disp(['Number of clusters to work with: ' num2str(length(C))])
 disp(['Number of spikes to work with: ' num2str(length(I))])
@@ -187,7 +201,6 @@ for j = 1:length(C)
     T(ind(delInd)) = [];
 end
 
-
 % Re-extract
 [mdata, data] = extractWaveforms(params, T, I, C);
 
@@ -205,6 +218,8 @@ data = data(:,:,:,saveUnits);
 SNR = SNR(saveUnits);
 spkCount = spkCount(saveUnits);
 
+disp(['Keeping ' num2str(length(C)) ' Units'])
+
 % Plot waveforms for each unit
 for j = 1:size(mdata,3)
     firstNan = find(isnan(squeeze(data(1,1,:,j))),1) - 1;
@@ -212,7 +227,7 @@ for j = 1:size(mdata,3)
         firstNan = size(data,3);
     end
     temp = mdata(:,:,j);
-    yScale = (max(temp(:))-min(temp(:)))/700;
+    yScale = (max(temp(:))-min(temp(:)))/1000;
     figure(j)
     set(gcf, 'Position', [j*50 1 250 400])
     clf
@@ -243,15 +258,15 @@ for j = 1:size(mdata,3)
     if isempty(firstNan)
         firstNan = size(data,3);
     end
-    if firstNan < 200
+    if firstNan < 1000
         firstBunch = 1:round(firstNan/2);
         lastBunch = round(firstNan/2)+1:firstNan;
     else
-        firstBunch = 1:100;
-        lastBunch = firstNan-99:firstNan;
+        firstBunch = 1:500;
+        lastBunch = firstNan-499:firstNan;
     end
     temp = mdata(:,:,j);
-    yScale = (max(temp(:))-min(temp(:)))/700;
+    yScale = (max(temp(:))-min(temp(:)))/1000;
     figure(j+100)
     set(gcf, 'Position', [j*50 1 250 400])
     clf
@@ -327,10 +342,8 @@ data = nan(params.backSp + params.forwardSp, nChan, params.waveCount, length(C))
 for j = 1:length(C)
     disp(['Extracting unit ' num2str(j) ' of ' num2str(length(C))])
     times = T(I == C(j));
-    % randomly select subset of waveforms
-    temp = randperm(length(times));
     innerWaveCount = min([params.waveCount length(times)]);
-    useTimes = times(temp(1:innerWaveCount));
+    useTimes = times(round(linspace(1, length(times), innerWaveCount)));
     for t = 1:length(useTimes)
         fseek(f, (useTimes(t)-params.backSp) * spt, 'bof');
         data(:,:,t,j) = fread(f, [nChan, params.backSp+params.forwardSp], '*int16')';

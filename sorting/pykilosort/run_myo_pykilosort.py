@@ -50,9 +50,12 @@ def myo_sort(config):
     else:
         error('No probe configuration available')
     run(data_path, dir_path=dir_path, output_dir=output_dir,
-        probe=probe, low_memory=False, **params)
+        probe=probe, low_memory=True, **params)
     post_file = glob.glob(str(dir_path) + '/.kilosort/*/proc.dat')
-    shutil.move(post_file[0], str(dir_path) + '/proc.dat')
+    try:
+        shutil.move(post_file[0], str(dir_path) + '/proc.dat')
+    except OSError:
+        pass
     shutil.rmtree(dir_path.joinpath(".kilosort"), ignore_errors=True)
 
     # correct params.py to point to the shifted data
