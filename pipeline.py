@@ -158,7 +158,8 @@ if neuro_sorting:
 # Proceed with myo processing and spike sorting
 if myo_sorting:
     config_kilosort = {'myomatrix': config['myomatrix'], 'script_dir': config['script_dir'],
-                       'trange': config['Session']['trange'], 'sync_chan': int(config['Session']['myo_analog_chan'])}
+                       'trange': np.array(config['Session']['trange']),
+                       'sync_chan': int(config['Session']['myo_analog_chan'])}
     path_to_add = script_folder + '/sorting/'
     os.system('module load matlab/2021b')
     matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
