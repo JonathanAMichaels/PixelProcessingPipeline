@@ -46,6 +46,10 @@ analogData(analogData > 5) = 5;
 sync = logical(round(analogData / max(analogData)));
 clear analogData
 
+save([myomatrix '/sync'], 'sync')
+clear sync
+disp('Saved sync data')
+
 clf
 for q = 1:2
     if q == 1
@@ -87,17 +91,12 @@ if length(dataChan) == 32
 else
     bEMG = int16(mean(data(:,notBroken),2));
 end
-
-fileID = fopen([myomatrix '/data.bin'], 'w');
 save([myomatrix '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
-
 clear bEMG
 disp('Saved generated bulk EMG')
+fileID = fopen([myomatrix '/data.bin'], 'w');
 fwrite(fileID, data', 'int16');
 fclose(fileID);
 clear data
 disp('Saved myomatrix data binary')
-save([myomatrix '/sync'], 'sync')
-clear sync
-disp('Saved sync data')
 quit
