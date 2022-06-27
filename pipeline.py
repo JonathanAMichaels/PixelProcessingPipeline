@@ -167,8 +167,10 @@ if myo_sorting:
     for myomatrix in range(len(config['Session']['myo_chan_list'])):
         f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
         config_kilosort['myomatrix_data'] = f[0]
-        if os.path.isfile(config['myomatrix'] + '/data.bin'):
+        try:
             os.remove(config['myomatrix'] + '/data.bin')
+        except OSError:
+            pass
         config_kilosort['myomatrix_folder'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
         config_kilosort['chans'] = np.array(config['Session']['myo_chan_list'][myomatrix])
         config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
