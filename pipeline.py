@@ -156,21 +156,32 @@ if neuro_sorting:
 
 # Proceed with myo processing and spike sorting
 if myo_sorting:
-    myo_function(config)
-    config_kilosort = {'myomatrix': config['myomatrix'], 'script_dir': config['script_dir']}
+    config_kilosort = {'myomatrix': config['myomatrix'], 'script_dir': config['script_dir'],
+                       'trange': config['Session']['trange'], 'sync_chan': int(config['Session']['myo_analog_chan'])}
+    path_to_add = script_folder + '/sorting/'
+    os.system('module load matlab/2021b')
+    matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
+    # matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab' # something else for testing locally
     for myomatrix in range(len(config['Session']['myo_chan_list'])):
-        f = glob.glob(config_kilosort['myomatrix'] + '/sorted' + str(myomatrix))
-        config_kilosort['myomatrix_folder'] = f[0]
+        f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
+        config_kilosort['myomatrix_data'] = f[0]
+        if os.path.isfile(config['myomatrix'] + '/data.bin'):
+            os.remove(config['myomatrix'] + '/data.bin')
+        config_kilosort['myomatrix_folder'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
+        config_kilosort['chans'] = config['Session']['myo_chan_list'][myomatrix]
         config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
-        print('Starting resorting of ' + config_kilosort['myomatrix_folder'])
-        path_to_add = script_folder + '/sorting/'
-        os.system('module load matlab/2021b')
-        matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
-        # matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab' # something else for testing locally
+
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
-                  path_to_add + '\')); Myomatrix_call"')
+                  path_to_add + '\')); myomatrix_binary"')
+
+        myo_function(config)
+
+        print('Starting resorting of ' + config_kilosort['myomatrix_folder'])
+
+        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
+                  path_to_add + '\')); myomatrix_call"')
 
 print('Pipeline finished! You\'ve earned a break.')
 print(datetime.datetime.now())

@@ -261,10 +261,10 @@ for j = 1:size(mdata,3)
     for e = 1:size(mdata,2)
         thisTemplate = squeeze(mean(data(:,e,firstBunch,j),3));
         plot((1:size(thisTemplate,1)) + xcoords(e)/2, ...
-            thisTemplate + ycoords(e)*yScale, 'LineWidth', 2, 'Color', [0 0 0.7])
+            thisTemplate + ycoords(e)*yScale, 'LineWidth', 2, 'Color', [0 0 0.7 0.5])
         thisTemplate = squeeze(mean(data(:,e,lastBunch,j),3));
         plot((1:size(thisTemplate,1)) + xcoords(e)/2, ...
-            thisTemplate + ycoords(e)*yScale, 'LineWidth', 2, 'Color', [0.7 0 0])
+            thisTemplate + ycoords(e)*yScale, 'LineWidth', 2, 'Color', [0.7 0 0 0.5])
     end
     axis off
     inc = abs(mode(diff(ycoords)))*yScale;

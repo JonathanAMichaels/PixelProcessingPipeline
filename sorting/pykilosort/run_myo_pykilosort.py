@@ -17,30 +17,28 @@ channelRemap = [23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8,
 
 def myo_sort(config):
     directory = config['myomatrix']
-    session = Session(directory)
+    #session = Session(directory)
     chan_list = config['Session']['myo_chan_list']
     sync_chan = int(config['Session']['myo_analog_chan']) - 1
     num_myomatrix = len(chan_list)
     for myomatrix in range(num_myomatrix):
         chans = range(chan_list[myomatrix][0] - 1, chan_list[myomatrix][1])
-        ts = session.recordnodes[0].recordings[0].continuous[0].timestamps.shape[0]
-        segs = np.round(np.linspace(0, ts, num=100, endpoint=True)).astype('int')
+        #ts = session.recordnodes[0].recordings[0].continuous[0].timestamps.shape[0]
+        #segs = np.round(np.linspace(0, ts, num=100, endpoint=True)).astype('int')
         bin_file = directory + '/data.bin'
-        if os.path.isfile(bin_file):
-            os.remove(bin_file)
-        with open(bin_file, 'wb') as f:
+        #with open(bin_file, 'wb') as f:
             # segment time into manageable chunks
             # for each set
-            for i in range(len(segs)-1):
-                trange = range(segs[i], segs[i+1])
-                data = session.recordnodes[0].recordings[0].continuous[0].samples[np.ix_(trange, chans)]
-                if len(chans) == 32:
-                    data = data[:, channelRemap]
-                f.write(np.int16(data))
-        f.close()
-        sync_data = dict([])
-        sync_data['sync'] = session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]
-        scipy.io.savemat(directory + '/sync.mat', sync_data, do_compression=True)
+        #    for i in range(len(segs)-1):
+        #        trange = range(segs[i], segs[i+1])
+        #        data = session.recordnodes[0].recordings[0].continuous[0].samples[np.ix_(trange, chans)]
+        #        if len(chans) == 32:
+        #            data = data[:, channelRemap]
+        #        f.write(np.int16(data))
+        #f.close()
+        #sync_data = dict([])
+        #sync_data['sync'] = session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]
+        #scipy.io.savemat(directory + '/sync.mat', sync_data, do_compression=True)
 
         params = {'perform_drift_registration': False, 'n_channels': len(chans)}
         data_path = Path(bin_file)
