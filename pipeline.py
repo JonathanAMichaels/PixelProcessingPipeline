@@ -176,8 +176,8 @@ if myo_sorting:
         config_kilosort['chans'] = np.array(config['Session']['myo_chan_list'][myomatrix])
         config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
-        scipy.io.savemat('/tmp/config.mat', config_kilosort)
 
+        scipy.io.savemat('/tmp/config.mat', config_kilosort)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
                   path_to_add + '\')); myomatrix_binary"')
 
@@ -185,7 +185,7 @@ if myo_sorting:
         myo_function(config_kilosort)
 
         print('Starting resorting of ' + config_kilosort['myomatrix_folder'])
-
+        scipy.io.savemat('/tmp/config.mat', config_kilosort)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
                   path_to_add + '\')); myomatrix_call"')
 
