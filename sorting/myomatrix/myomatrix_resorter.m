@@ -49,7 +49,7 @@ if ~isfield(params, 'SNRThreshold')
 end
 % Spikes below this refractory time limit will be considered duplicates
 if ~isfield(params, 'refractoryLim')
-    params.refractoryLim = 4;
+    params.refractoryLim = 5;
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
@@ -77,16 +77,12 @@ else
     clusterGroup = tdfread([params.kiloDir '/cluster_KSLabel.tsv']);
     clusterGroup.group = clusterGroup.KSLabel;
 end
-% Take only 'good' single units as determined by kilosort with at least 20 spikes
 C = []; C_ident = [];
 for i = 1:length(clusterGroup.cluster_id)
     sp = find(I == clusterGroup.cluster_id(i));
-   % if length(sp) > 20 && (strcmp(clusterGroup.group(i,1:3), 'goo'))
-        C(end+1) = clusterGroup.cluster_id(i);
-        C_ident(end+1) = strcmp(clusterGroup.group(i,1:3), 'goo');
-   % end
+    C(end+1) = clusterGroup.cluster_id(i);
+    C_ident(end+1) = strcmp(clusterGroup.group(i,1:3), 'goo');
 end
-
 
 % Extract individual waveforms from kilosort binary
 [mdata, data] = extractWaveforms(params, T, I, C);
@@ -94,7 +90,9 @@ end
 % calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
-C = C(SNR > 10 | C_ident == 1);
+% Take only 'good' single units as determined by kilosort, or units with
+% an SNR > 12, and that have at least 100 spikes
+C = C((SNR > 12 | C_ident == 1) & spkCount > 100);
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
@@ -230,7 +228,7 @@ for j = 1:size(mdata,3)
         firstNan = size(data,3);
     end
     temp = mdata(:,:,j);
-    yScale = (max(temp(:))-min(temp(:)))/1000;
+    yScale = (max(temp(:))-min(temp(:)))/1500;
     figure(j)
     set(gcf, 'Position', [j*50 1 250 400])
     clf
@@ -254,7 +252,6 @@ for j = 1:size(mdata,3)
     end
 end
 
-
 % Plot average waveform from beginning and end of recording
 for j = 1:size(mdata,3)
     firstNan = find(isnan(squeeze(data(1,1,:,j))),1) - 1;
@@ -269,7 +266,7 @@ for j = 1:size(mdata,3)
         lastBunch = firstNan-499:firstNan;
     end
     temp = mdata(:,:,j);
-    yScale = (max(temp(:))-min(temp(:)))/1000;
+    yScale = (max(temp(:))-min(temp(:)))/1500;
     figure(j+100)
     set(gcf, 'Position', [j*50 1 250 400])
     clf
@@ -307,6 +304,12 @@ for j = 1:length(C)
     box off
     xlabel('Inter-spike time (ms)')
     ylabel('Count')
+    if params.savePlots
+        if ~exist([params.kiloDir '/Plots'], 'dir')
+            mkdir([params.kiloDir '/Plots'])
+        end
+        print([params.kiloDir '/Plots/' num2str(j) '-histogram.png'], '-dpng')
+    end
 end
 
 disp(['Number of clusters: ' num2str(length(C))])
