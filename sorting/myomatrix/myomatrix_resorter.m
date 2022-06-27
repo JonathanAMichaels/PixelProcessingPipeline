@@ -303,13 +303,13 @@ for j = 1:length(C)
     histogram(dt, 0:1:150, 'EdgeColor', 'none')
     box off
     xlabel('Inter-spike time (ms)')
-    ylabel('Count')
-    if params.savePlots
-        if ~exist([params.kiloDir '/Plots'], 'dir')
-            mkdir([params.kiloDir '/Plots'])
-        end
-        print([params.kiloDir '/Plots/' num2str(j) '-histogram.png'], '-dpng')
+    ylabel('Count')  
+end
+if params.savePlots
+    if ~exist([params.kiloDir '/Plots'], 'dir')
+        mkdir([params.kiloDir '/Plots'])
     end
+    print([params.kiloDir '/Plots/histogram.png'], '-dpng')
 end
 
 disp(['Number of clusters: ' num2str(length(C))])
