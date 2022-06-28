@@ -60,7 +60,7 @@ for q = 1:2
     tRange = size(data,1) - (30000*60*40) : size(data,1) - (30000*60*30);
     data_filt = zeros(length(tRange),size(data,2),'single');
     for i = 1:size(data,2)
-        data_filt(:,i) = single(filtfilt(b, a, data(tRange,i)));
+        data_filt(:,i) = single(filtfilt(b, a, double(data(tRange,i))));
     end
     subplot(1,2,q)
     hold on
