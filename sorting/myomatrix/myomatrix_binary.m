@@ -94,7 +94,11 @@ end
 save([myomatrix '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
 clear bEMG
 disp('Saved generated bulk EMG')
-fileID = fopen([myomatrix '/data.bin'], 'w');
+fileID = -1;
+while fildID == -1
+    delete([myomatrix '/data.bin'])
+    fileID = fopen([myomatrix '/data.bin'], 'w');
+end
 fwrite(fileID, data', 'int16');
 fclose(fileID);
 clear data
