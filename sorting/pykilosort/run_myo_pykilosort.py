@@ -63,5 +63,3 @@ def myo_sort(config):
         f.write("dat_path = 'proc.dat'\nn_channels_dat = " + str(len(chans)) +
                 "\ndtype = 'int16'\noffset = 0\n" +
                 "hp_filtered = True\nsample_rate = 30000\ntemplate_scaling = 20.0")
-
-    os.remove(bin_file)
