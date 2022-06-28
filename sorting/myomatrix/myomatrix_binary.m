@@ -33,7 +33,7 @@ end
 tempdata = load_open_ephys_data([myomatrix_data '/100_' prefix num2str(dataChan(1)) '.continuous']);
 tL = length(tempdata);
 clear tempdata
-data = zeros(tL, length(dataChan), 'int16');
+data = zeros(tL, length(dataChan), 'single');
 for chan = 1:length(dataChan)
     data(:,chan) = load_open_ephys_data([myomatrix_data '/100_' prefix num2str(dataChan(chan)) '.continuous']);
 end
@@ -58,9 +58,9 @@ for q = 1:2
         [b, a] = butter(2, [10 200] / (30000/2), 'bandpass');
     end
     tRange = size(data,1) - (30000*60*40) : size(data,1) - (30000*60*30);
-    data_filt = zeros(length(tRange),size(data,2));
+    data_filt = zeros(length(tRange),size(data,2),'single');
     for i = 1:size(data,2)
-        data_filt(:,i) = filtfilt(b, a, double(data(tRange,i)));
+        data_filt(:,i) = single(filtfilt(b, a, data(tRange,i)));
     end
     subplot(1,2,q)
     hold on
@@ -68,16 +68,17 @@ for q = 1:2
         plot(data_filt(:,i) + i*2000)
     end
 end
+print([myomatrix '/brokenchan.png'], '-dpng')
 S = std(data_filt,[],1);
 if length(dataChan) == 32
-    brokenChan = find(S > 150);
+    brokenChan = find(S > 80);
 elseif length(dataChan) == 16
-    S
-    brokenChan = find(S > 20);
+    brokenChan = find(S > 10);
 end
+S
 disp('Broken channels are:')
 brokenChan
-data(:,brokenChan) = int16(randn(size(data,1), length(brokenChan)));
+data(:,brokenChan) = single(randn(size(data,1), length(brokenChan)) * 1e-5);
 clear data_filt
 
 % Generate "Bulk EMG" dataset
@@ -96,7 +97,7 @@ save([myomatrix '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
 clear bEMG
 disp('Saved generated bulk EMG')
 fileID = fopen([myomatrix '/data' num2str(myomatrix_num) '.bin'], 'w');
-fwrite(fileID, data', 'int16');
+fwrite(fileID, int16(data'), 'int16');
 fclose(fileID);
 clear data
 disp('Saved myomatrix data binary')
