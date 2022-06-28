@@ -38,7 +38,7 @@ def myo_sort(config):
     #sync_data['sync'] = session.recordnodes[0].recordings[0].continuous[0].samples[:, sync_chan]
     #scipy.io.savemat(directory + '/sync.mat', sync_data, do_compression=True)
 
-    params = {'perform_drift_registration': False, 'n_channels': len(chans)}
+    params = {'perform_drift_registration': False, 'n_channels': len(chans), 'minfr_goodchannels': 0.1}
     data_path = Path(bin_file)
     dir_path = Path(config['myomatrix_folder'])  # by default uses the same folder as the dataset
     output_dir = dir_path

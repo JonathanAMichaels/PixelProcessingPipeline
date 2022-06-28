@@ -72,11 +72,11 @@ S = std(data_filt,[],1);
 if length(dataChan) == 32
     brokenChan = find(S > 150);
 elseif length(dataChan) == 16
+    S
     brokenChan = find(S > 20);
 end
 disp('Broken channels are:')
 brokenChan
-pause
 data(:,brokenChan) = int16(randn(size(data,1), length(brokenChan)));
 clear data_filt
 
