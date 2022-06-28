@@ -57,7 +57,7 @@ for q = 1:2
     elseif q == 2
         [b, a] = butter(2, [10 200] / (30000/2), 'bandpass');
     end
-    tRange = size(data,1) - (30000*60*3) : size(data,1) - (30000*60);
+    tRange = size(data,1) - (30000*60*40) : size(data,1) - (30000*60*30);
     data_filt = zeros(length(tRange),size(data,2));
     for i = 1:size(data,2)
         data_filt(:,i) = filtfilt(b, a, double(data(tRange,i)));
@@ -75,8 +75,9 @@ elseif length(dataChan) == 16
     brokenChan = find(S > 20);
 end
 disp('Broken channels are:')
-%brokenChan
-%data(:,brokenChan) = 0;
+brokenChan
+pause
+data(:,brokenChan) = int16(randn(size(data,1), length(brokenChan)));
 clear data_filt
 
 % Generate "Bulk EMG" dataset
