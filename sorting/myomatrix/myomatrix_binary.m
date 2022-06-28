@@ -33,7 +33,7 @@ end
 tempdata = load_open_ephys_data([myomatrix_data '/100_' prefix num2str(dataChan(1)) '.continuous']);
 tL = length(tempdata);
 clear tempdata
-data = zeros(tL, length(dataChan), 'single');
+data = zeros(tL, length(dataChan), 'int16');
 for chan = 1:length(dataChan)
     data(:,chan) = load_open_ephys_data([myomatrix_data '/100_' prefix num2str(dataChan(chan)) '.continuous']);
 end
@@ -78,7 +78,7 @@ end
 S
 disp('Broken channels are:')
 brokenChan
-data(:,brokenChan) = single(randn(size(data,1), length(brokenChan)) * 1e-5);
+data(:,brokenChan) = randn(size(data,1), length(brokenChan));
 clear data_filt
 
 % Generate "Bulk EMG" dataset
