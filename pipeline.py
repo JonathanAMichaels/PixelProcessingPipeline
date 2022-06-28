@@ -169,6 +169,7 @@ if myo_sorting:
         f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
         config_kilosort['myomatrix_data'] = f[0]
         config_kilosort['myomatrix_folder'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
+        config_kilosort['myomatrix_num'] = myomatrix
         config_kilosort['chans'] = np.array(config['Session']['myo_chan_list'][myomatrix])
         config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1

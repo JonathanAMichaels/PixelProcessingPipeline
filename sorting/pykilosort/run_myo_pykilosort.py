@@ -23,7 +23,7 @@ def myo_sort(config):
     chans = range(0, config['num_chans'])
     #ts = session.recordnodes[0].recordings[0].continuous[0].timestamps.shape[0]
     #segs = np.round(np.linspace(0, ts, num=100, endpoint=True)).astype('int')
-    bin_file = directory + '/data.bin'
+    bin_file = directory + '/data' + str(config['myomatrix_num']) + '.bin'
     #with open(bin_file, 'wb') as f:
         # segment time into manageable chunks
         # for each set
@@ -63,3 +63,5 @@ def myo_sort(config):
         f.write("dat_path = 'proc.dat'\nn_channels_dat = " + str(len(chans)) +
                 "\ndtype = 'int16'\noffset = 0\n" +
                 "hp_filtered = True\nsample_rate = 30000\ntemplate_scaling = 20.0")
+
+    os.remove(bin_file)
