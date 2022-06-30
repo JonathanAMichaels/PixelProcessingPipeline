@@ -153,8 +153,8 @@ if neuro_sorting:
             print('Extracting sync signal from ' + config_kilosort['neuropixel'] + ' and saving')
             extract_sync(config_kilosort)
 
-        #print('Starting spike sorting of ' + config_kilosort['neuropixel'])
-        #kilosort(config_kilosort)
+        print('Starting spike sorting of ' + config_kilosort['neuropixel'])
+        kilosort(config_kilosort)
 
 # Proceed with myo processing and spike sorting
 if myo_sorting:
