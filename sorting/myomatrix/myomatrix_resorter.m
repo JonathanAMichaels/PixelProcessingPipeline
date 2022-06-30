@@ -41,11 +41,14 @@ if ~isfield(params, 'savePlots')
 end
 % minimum correlation to be considered as originating from one cluster
 if ~isfield(params, 'crit')
-    params.crit = 0.7;
+    params.crit = 0.8;
 end
 % SNR threshold for keeping clusters at the end
 if ~isfield(params, 'SNRThreshold')
-    params.SNRThreshold = 3;
+    params.SNRThreshold = 4;
+end
+if ~isfield(params, 'multiSNRThreshold')
+    params.multiSNRThreshold = 8;
 end
 % Spikes below this refractory time limit will be considered duplicates
 if ~isfield(params, 'refractoryLim')
@@ -92,7 +95,9 @@ end
 
 % Take only 'good' single units as determined by kilosort, or units with
 % an SNR > 12, and that have at least 100 spikes
-C = C((SNR > 12 | C_ident == 1) & spkCount > 100);
+C = C((SNR > params.multiSNRThreshold | C_ident == 1) & spkCount > 100);
+SNR
+C_ident
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
@@ -236,9 +241,10 @@ for j = 1:size(mdata,3)
     title(ttl)
     hold on
     for e = 1:size(mdata,2)
-        thisTemplate = squeeze(data(:,e,round(linspace(1,firstNan,200)),j));
+        %thisTemplate = squeeze(data(:,e,round(linspace(1,firstNan,200)),j));
+        thisTemplate = mdata(:,e,j);
         plot((1:size(thisTemplate,1)) + xcoords(e)/2, ...
-            thisTemplate + ycoords(e)*yScale, 'LineWidth', 1.5, 'Color', [0 0 0 0.015])
+            thisTemplate + ycoords(e)*yScale, 'LineWidth', 1.5, 'Color', [0 0 0])%[0 0 0 0.015])
     end
     axis off
     inc = abs(mode(diff(ycoords)))*yScale;
