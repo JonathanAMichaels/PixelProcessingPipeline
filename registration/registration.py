@@ -43,7 +43,7 @@ def registration(config):
         sr = spikeglx.Reader(binary)
         print(sr.nc, sr.nsync, sr.rl)
         h = sr.geometry
-        if False:#not standardized_file.exists():
+        if not standardized_file.exists():
             print("Destriping", binary)
             batch_size_secs = 1
             batch_intervals_secs = 50
