@@ -78,7 +78,7 @@ end
 S
 disp('Broken channels are:')
 brokenChan
-data(:,brokenChan) = randn(size(data,1), length(brokenChan)) * 1e-3;
+data(:,brokenChan) = randn(size(data,1), length(brokenChan)) * 3e-1;
 clear data_filt
 
 % Generate "Bulk EMG" dataset
