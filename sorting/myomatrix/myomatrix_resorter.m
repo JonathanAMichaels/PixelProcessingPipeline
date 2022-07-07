@@ -41,7 +41,7 @@ if ~isfield(params, 'savePlots')
 end
 % minimum correlation to be considered as originating from one cluster
 if ~isfield(params, 'crit')
-    params.crit = 0.8;
+    params.crit = 0.75;
 end
 % SNR threshold for keeping clusters at the end
 if ~isfield(params, 'SNRThreshold')
@@ -67,7 +67,7 @@ if ~isfield(params, 'corrRange')
 end
 % Max number of random spikes to extract per cluster
 if ~isfield(params, 'waveCount')
-    params.waveCount = 5000;
+    params.waveCount = 3000;
 end
 
 % Read data from kilosort output
@@ -351,6 +351,7 @@ nChan = size(params.chanMap,1);
 spt = recordSize*nChan;
 % Extract each waveform
 data = nan(params.backSp + params.forwardSp, nChan, params.waveCount, length(C));
+mdata = zeros(params.backSp + params.forwardSp, nChan, length(C));
 for j = 1:length(C)
     disp(['Extracting unit ' num2str(j) ' of ' num2str(length(C))])
     times = T(I == C(j));
@@ -360,9 +361,9 @@ for j = 1:length(C)
         fseek(f, (useTimes(t)-params.backSp) * spt, 'bof');
         data(:,:,t,j) = fread(f, [nChan, params.backSp+params.forwardSp], '*int16')';
     end
+    mdata(:,:,j) = squeeze(mean(data(:,:,1:length(useTimes),j),3));
 end
 fclose(f);
-mdata = squeeze(nanmean(data,3));
 end
 
 function [r, lags] = calcCrossCorr(params, mdata)
