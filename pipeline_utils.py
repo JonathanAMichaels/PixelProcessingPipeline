@@ -48,14 +48,10 @@ def extract_LFP(config_kilosort):
     for j in range(data.nc):
         start = time.time()
         print(j)
-        #temp = data._raw[:, j].astype(np.int16, copy=True)
-        temp_memmap = data._raw[:, j]
-        temp = np.empty(temp_memmap.shape, dtype=np.int16)
-        temp[:] = temp_memmap
         #temp = data.read(nsel=slice(0, data.ns), csel=j, sync=False)
-        #temp = signal.sosfilt(sos, data.read(nsel=slice(0, data.ns), csel=j, sync=False))
-        #temp = temp[::30]  # down-sample
-        #all_data[:, j] = temp[0:all_data.shape[0]]
+        temp = signal.sosfilt(sos, data.read(nsel=slice(0, data.ns), csel=j, sync=False))
+        temp = temp[::30]  # down-sample
+        all_data[:, j] = temp[0:all_data.shape[0]]
         end = time.time()
         print(end-start)
     data.close()
