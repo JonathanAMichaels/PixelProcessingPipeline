@@ -4,7 +4,9 @@ import shutil
 from pathlib import Path
 import numpy as np
 from sorting.readSGLX import readMeta, SampRate, makeMemMapRaw, ExtractDigital
+import spikeglx
 import scipy.io
+from scipy import signal
 
 
 def find(pattern, path):
@@ -34,4 +36,22 @@ def extract_sync(config_kilosort):
     sync_data = dict([])
     sync_data['sync'] = ExtractDigital(rawData, firstSamp, lastSamp, 0, [6], meta)
     scipy.io.savemat(config_kilosort['neuropixel_folder'] + '/sync.mat', sync_data, do_compression=True)
+
+
+def extract_LFP(config_kilosort):
+    data = spikeglx.Reader(Path(config_kilosort['neuropixel']))
+    data.open()
+    sos = signal.butter(4, (0.5, 300), fs=int(data.fs), btype='bandpass', output='sos')  # 300Hz lowpass filter
+    all_data = np.zeros((int(data.ns/30), data.nc))
+    for j in range(data.nc):
+        print(j)
+        temp = signal.sosfilt(sos, data.read(nsel=slice(0, data.ns), csel=j, sync=False))
+        all_data[:, j] = temp[::30]  # down-sample
+    data.close()
+    save_data = dict([])
+    save_data['LFP'] = all_data
+    scipy.io.savemat(config_kilosort['neuropixel_folder'] + '/LFP.mat', save_data, do_compression=True)
+
+
+
 

@@ -6,7 +6,7 @@ sys.path.append(script_folder)
 
 import glob
 from pathlib import Path
-from open_ephys.analysis import Session
+#from open_ephys.analysis import Session
 import numpy as np
 import scipy.io
 import shutil

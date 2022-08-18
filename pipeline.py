@@ -7,7 +7,7 @@ from pathlib import Path
 import datetime
 import numpy as np
 import shutil
-from pipeline_utils import find, create_config, extract_sync
+from pipeline_utils import find, create_config, extract_sync, extract_LFP
 from registration.registration import registration as registration_function
 from sorting.pykilosort.run_myo_pykilosort import myo_sort as myo_function
 from sorting.pykilosort.run_pykilosort import kilosort
@@ -28,6 +28,7 @@ else:
 registration = False
 myo_sorting = False
 neuro_sorting = False
+lfp_extract = False
 cluster = False
 in_cluster = False
 if "-registration" in opts:
@@ -36,14 +37,18 @@ if "-myo_sorting" in opts:
     myo_sorting = True
 if "-neuro_sorting" in opts:
     neuro_sorting = True
+if "-lfp_extract" in opts:
+    lfp_extract = True
 if "-full" in opts:
     registration = True
     myo_sorting = True
     neuro_sorting = True
+    lfp_extract = True
 if "-init" in opts:
     registration = False
     myo_sorting = False
     neuro_sorting = False
+    lfp_extract = False
 if "-cluster" in opts:
     cluster = True
 if "-in_cluster" in opts:
@@ -185,6 +190,21 @@ if myo_sorting:
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
                   path_to_add + '\')); myomatrix_call"')
+
+# Proceed with LFP extraction
+if lfp_extract:
+    config_kilosort['type'] = 1
+    neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
+    for pixel in range(config['num_neuropixels']):
+        config_kilosort['neuropixel_folder'] = neuro_folders[pixel]
+        tmp = glob.glob(neuro_folders[pixel] + '/*_t*.imec' + str(pixel) + '.ap.bin')
+        config_kilosort['neuropixel'] = tmp[0]
+        if len(find('lfp.mat', config_kilosort['neuropixel_folder'])) > 0:
+            print('Found existing LFP file')
+        else:
+            print('Extracting LFP from ' + config_kilosort['neuropixel'] + ' and saving')
+            extract_LFP(config_kilosort)
+
 
 print('Pipeline finished! You\'ve earned a break.')
 print(datetime.datetime.now())
