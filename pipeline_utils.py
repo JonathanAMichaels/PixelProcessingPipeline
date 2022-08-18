@@ -53,9 +53,9 @@ def extract_LFP(config_kilosort):
         print(i)
         I[0] = intervals[i]
         if i == len(intervals):
-            I[2] = data.ns
+            I[1] = data.ns
         else:
-            I[2] = intervals[i+1]
+            I[1] = intervals[i+1]
         temp = signal.sosfilt(sos,
                               data.read(nsel=slice(I[0], I[1]), csel=slice(0, data.nc), sync=False),
                               axis=0)
