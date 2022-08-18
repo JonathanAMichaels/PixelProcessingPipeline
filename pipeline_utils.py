@@ -46,16 +46,22 @@ def extract_LFP(config_kilosort):
     sos = signal.butter(4, (0.5, 300), fs=int(data.fs), btype='bandpass', output='sos')  # 300Hz lowpass filter
     all_data = np.zeros((int(data.ns/30), data.nc))
     all = list(range(data.ns))
-    intervals = all[0: int(data.ns): 300000]
+    intervals = all[0: int(data.ns): 3000000]
+    I = np.zeros(2)
     for i in range(len(intervals)):
         start = time.time()
         print(i)
-        #temp = data.read(nsel=slice(0, data.ns), csel=j, sync=False)
+        I[0] = intervals[i]
+        if i == len(intervals):
+            I[2] = data.ns
+        else:
+            I[2] = intervals[i+1]
         temp = signal.sosfilt(sos,
-                              data.read(nsel=slice(intervals[i], intervals[i+1]), csel=slice(0, data.nc), sync=False),
+                              data.read(nsel=slice(I[0], I[1]), csel=slice(0, data.nc), sync=False),
                               axis=0)
         temp = temp[::30, :]  # down-sample
-        #all_data[:, j] = temp[0:all_data.shape[0]]
+        ind = list(range(int(I[0]/30), int(I[1]/30)))
+        all_data[ind, :] = temp[0:len(ind)]
         end = time.time()
         print(end-start)
     data.close()
