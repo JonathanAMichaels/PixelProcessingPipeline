@@ -46,7 +46,8 @@ def extract_LFP(config_kilosort):
     for j in range(data.nc):
         print(j)
         temp = signal.sosfilt(sos, data.read(nsel=slice(0, data.ns), csel=j, sync=False))
-        all_data[:, j] = temp[::30]  # down-sample
+        temp = temp[::30]  # down-sample
+        all_data[:, j] = temp[0:all_data.shape[0]]
     data.close()
     save_data = dict([])
     save_data['LFP'] = all_data
