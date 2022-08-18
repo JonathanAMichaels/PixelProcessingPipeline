@@ -7,6 +7,7 @@ from sorting.readSGLX import readMeta, SampRate, makeMemMapRaw, ExtractDigital
 import spikeglx
 import scipy.io
 from scipy import signal
+import time
 
 
 def find(pattern, path):
@@ -45,12 +46,15 @@ def extract_LFP(config_kilosort):
     sos = signal.butter(4, (0.5, 300), fs=int(data.fs), btype='bandpass', output='sos')  # 300Hz lowpass filter
     all_data = np.zeros((int(data.ns/30), data.nc))
     for j in range(data.nc):
+        start = time.time()
         print(j)
         temp = data._raw[:, j].astype(np.int16, copy=True)
         #temp = data.read(nsel=slice(0, data.ns), csel=j, sync=False)
         #temp = signal.sosfilt(sos, data.read(nsel=slice(0, data.ns), csel=j, sync=False))
-        temp = temp[::30]  # down-sample
-        all_data[:, j] = temp[0:all_data.shape[0]]
+        #temp = temp[::30]  # down-sample
+        #all_data[:, j] = temp[0:all_data.shape[0]]
+        end = time.time()
+        print(end-start)
     data.close()
     save_data = dict([])
     save_data['LFP'] = all_data
