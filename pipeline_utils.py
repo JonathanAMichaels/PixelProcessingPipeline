@@ -48,13 +48,13 @@ def extract_LFP(config_kilosort):
     all = list(range(data.ns))
     intervals = all[0: int(data.ns): 3000000]
     print(intervals)
-    I = np.zeros(2)
+    I = np.zeros(2, dtype=np.int16)
     for i in range(len(intervals)):
         start = time.time()
         print(i)
         I[0] = intervals[i]
         if i == len(intervals):
-            I[1] = data.ns
+            I[1] = int(data.ns)
         else:
             I[1] = intervals[i+1]
         temp = signal.sosfilt(sos,
