@@ -48,7 +48,7 @@ def extract_LFP(config_kilosort):
     all = list(range(data.ns))
     intervals = all[0: int(data.ns): 300000]
     print(intervals)
-    I = np.zeros(2, dtype=np.int16)
+    I = np.zeros(2, dtype=np.int64)
     for i in range(len(intervals)):
         start = time.time()
         print(i)
