@@ -82,9 +82,7 @@ def extract_LFP(config_kilosort):
         end = time.time()
         print(end-start)
     data.close()
-    save_data = dict([])
-    save_data['LFP'] = all_data
-    scipy.io.savemat(config_kilosort['neuropixel_folder'] + '/LFP.mat', save_data, do_compression=True)
+    scipy.io.savemat(config_kilosort['neuropixel_folder'] + '/LFP.mat', {'LFP': all_data}, do_compression=True)
 
 
 
