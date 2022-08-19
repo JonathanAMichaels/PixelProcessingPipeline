@@ -45,6 +45,7 @@ def extract_LFP(config_kilosort):
     print(meta)
     sos = signal.butter(4, (0.5, 300), fs=int(data.fs), btype='bandpass', output='sos')  # 300Hz lowpass filter
     all_data = np.zeros((int(data.ns/30), data.nc), dtype=np.float32)
+    print(all_data.shape)
     all = list(range(data.ns))
     buffer_size = 30000
     intervals = all[0: int(data.ns): 500000]
