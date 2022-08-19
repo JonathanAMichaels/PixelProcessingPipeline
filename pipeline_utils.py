@@ -50,14 +50,14 @@ def extract_LFP(config_kilosort):
     intervals = all[0: int(data.ns): 500000]
     print(intervals)
     I = np.zeros(2, dtype=np.int64)
-    for i in range(len(intervals)):
+    for i in range(len(intervals)-1):
         start = time.time()
         print(i)
         if i == 0:
             I[0] = intervals[i]
         else:
             I[0] = intervals[i] - buffer_size
-        if i == len(intervals):
+        if i == len(intervals)-1:
             I[1] = int(data.ns)
         else:
             I[1] = intervals[i+1] + buffer_size
@@ -68,7 +68,7 @@ def extract_LFP(config_kilosort):
         if i == 0:
             temp = temp[0:-buffer_size]
             ind = list(range(int(intervals[i] / 30), int((intervals[i + 1] - buffer_size)/30)))
-        elif i == len(intervals):
+        elif i == len(intervals)-1:
             temp = temp[buffer_size:]
             ind = list(range(int(intervals[i] + buffer_size / 30), int((intervals[i + 1]) / 30)))
         else:
