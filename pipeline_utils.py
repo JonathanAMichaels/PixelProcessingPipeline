@@ -67,12 +67,14 @@ def extract_LFP(config_kilosort):
                               axis=0)
         if i == 0:
             temp = temp[0:-buffer_size]
+            ind = list(range(int(intervals[i] / 30), int((intervals[i + 1] - buffer_size)/30)))
         elif i == len(intervals):
             temp = temp[buffer_size:]
+            ind = list(range(int(intervals[i] + buffer_size / 30), int((intervals[i + 1]) / 30)))
         else:
             temp = temp[buffer_size: -buffer_size]
+            ind = list(range(int(intervals[i] + buffer_size / 30), int((intervals[i + 1] - buffer_size) / 30)))
         temp = temp[::30, :]  # down-sample
-        ind = list(range(int(I[0]/30), int(I[1]/30)))
         all_data[ind, :] = temp[0:len(ind)]
         end = time.time()
         print(end-start)
