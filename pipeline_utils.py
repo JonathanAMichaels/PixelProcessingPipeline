@@ -47,7 +47,7 @@ def extract_LFP(config_kilosort):
     all_data = np.zeros((int(data.ns/30), data.nc), dtype=np.float32)
     print(all_data.shape)
     all = list(range(data.ns))
-    buffer_size = 60000
+    buffer_size = 70000
     intervals = all[0: int(data.ns): 800000]
     print(intervals)
     I = np.zeros(2, dtype=np.int64)
