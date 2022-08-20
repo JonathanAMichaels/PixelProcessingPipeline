@@ -48,7 +48,7 @@ def extract_LFP(config_kilosort):
     print(all_data.shape)
     all = list(range(data.ns))
     buffer_size = int(30000*4.2)
-    intervals = all[0: int(data.ns): 600000]
+    intervals = all[0: int(data.ns) - buffer_size: 600000]
     print(intervals)
     I = np.zeros(2, dtype=np.int64)
     for i in range(len(intervals)):
@@ -67,13 +67,13 @@ def extract_LFP(config_kilosort):
                               data.read(nsel=slice(I[0], I[1]), csel=slice(0, data.nc), sync=False),
                               axis=0)
         if i == 0:
-            temp = temp[0:-buffer_size]
+            temp = temp[0:-buffer_size, :]
             ind = list(range(int(intervals[i] / 30), int(intervals[i + 1] / 30)))
         elif i == len(intervals)-1:
-            temp = temp[buffer_size:]
+            temp = temp[buffer_size:, :]
             ind = list(range(int(intervals[i] / 30), int(data.ns / 30)))
         else:
-            temp = temp[buffer_size: -buffer_size]
+            temp = temp[buffer_size: -buffer_size, :]
             ind = list(range(int(intervals[i] / 30), int(intervals[i + 1] / 30)))
         temp = temp[::30, :]  # down-sample
         print(len(ind))
