@@ -42,7 +42,10 @@ def extract_sync(config_kilosort):
 def extract_LFP(config_kilosort):
     data = spikeglx.Reader(Path(config_kilosort['neuropixel']))
     meta = data.geometry
-    sos = signal.butter(4, (0.5, 400), fs=int(data.fs), btype='bandpass', output='sos')  # 300Hz lowpass filter
+    params = {'LFP filter type': 'scipy.signal.sosfiltfilt', 'bandpass frequency': (0.5, 400), 'butterworth order': 4,
+              'sampling rate': 1000}
+    sos = signal.butter(params['butterworth order'], params['bandpass frequency'],
+                        fs=int(data.fs), btype='bandpass', output='sos')
     all_data = np.zeros((int(data.ns/30), data.nc-1), dtype=np.float32)
     all = list(range(data.ns))
     buffer_size = int(30000*4.2)
@@ -73,8 +76,10 @@ def extract_LFP(config_kilosort):
         temp = temp[::30, :]  # down-sample
         all_data[ind, :] = temp[0:len(ind), :]
     data.close()
-    with open(config_kilosort['neuropixel_folder'] + '/LFP.npy', 'wb') as f:
-        np.save(f, {'LFP': all_data, 'sample_shift': meta['sample_shift'], 'x': meta['x'], 'y': meta['y']})
+
+    with open(config_kilosort['neuropixel_folder'] + '/LFP.npy', 'w') as f:
+        np.save(f, {'LFP': all_data, 'sample shift': meta['sample_shift'], 'electrode x (um)': meta['x'],
+                    'electrode y (um)': meta['y'], 'params': params})
 
 
 
