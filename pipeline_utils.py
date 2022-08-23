@@ -77,7 +77,7 @@ def extract_LFP(config_kilosort):
         all_data[ind, :] = temp[0:len(ind), :]
     data.close()
 
-    with open(config_kilosort['neuropixel_folder'] + '/LFP.npy', 'w') as f:
+    with open(config_kilosort['neuropixel_folder'] + '/LFP.npy', 'wb') as f:
         np.save(f, {'LFP': all_data, 'sample shift': meta['sample_shift'], 'electrode x (um)': meta['x'],
                     'electrode y (um)': meta['y'], 'params': params})
 
