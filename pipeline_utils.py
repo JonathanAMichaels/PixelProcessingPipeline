@@ -42,18 +42,14 @@ def extract_sync(config_kilosort):
 def extract_LFP(config_kilosort):
     data = spikeglx.Reader(Path(config_kilosort['neuropixel']))
     meta = data.geometry
-    print(meta)
     sos = signal.butter(4, (0.5, 400), fs=int(data.fs), btype='bandpass', output='sos')  # 300Hz lowpass filter
     all_data = np.zeros((int(data.ns/30), data.nc-1), dtype=np.float32)
-    print(all_data.shape)
     all = list(range(data.ns))
     buffer_size = int(30000*4.2)
     intervals = all[0: int(data.ns) - buffer_size: 600000]
-    print(intervals)
     I = np.zeros(2, dtype=np.int64)
     for i in range(len(intervals)):
-        start = time.time()
-        print(i)
+        print('Time bin ' + str(i) + ' of ' + str(len(intervals)))
         if i == 0:
             I[0] = intervals[i]
         else:
@@ -62,7 +58,6 @@ def extract_LFP(config_kilosort):
             I[1] = int(data.ns)
         else:
             I[1] = intervals[i+1] + buffer_size
-        print(I)
         temp = signal.sosfilt(sos,
                               data.read(nsel=slice(I[0], I[1]), csel=slice(0, data.nc-1), sync=False),
                               axis=0)
@@ -76,14 +71,10 @@ def extract_LFP(config_kilosort):
             temp = temp[buffer_size: -buffer_size, :]
             ind = list(range(int(intervals[i] / 30), int(intervals[i + 1] / 30)))
         temp = temp[::30, :]  # down-sample
-        print(len(ind))
-        print(temp.shape)
         all_data[ind, :] = temp[0:len(ind), :]
-        end = time.time()
-        print(end-start)
     data.close()
     with open(config_kilosort['neuropixel_folder'] + '/LFP.npy', 'wb') as f:
-        np.save(f, all_data)
+        np.save(f, {'LFP': all_data, 'sample_shift': meta['sample_shift'], 'x': meta['x'], 'y': meta['y']})
 
 
 
