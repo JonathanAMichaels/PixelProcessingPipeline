@@ -7,7 +7,8 @@ from sorting.readSGLX import readMeta, SampRate, makeMemMapRaw, ExtractDigital
 import spikeglx
 import scipy.io
 from scipy import signal
-import time
+import h5py
+import glob
 
 
 def find(pattern, path):
@@ -79,10 +80,11 @@ def extract_LFP(config_kilosort):
 
     with open(config_kilosort['neuropixel_folder'] + '/LFP.npy', 'wb') as f:
         np.save(f, all_data)
+    registered_file = glob.glob(config_kilosort['neuropixel_folder'] + '/NeuropixelsRegistration2/' + 'subtraction_*.h5')
+    with h5py.File(registered_file[0], "r") as f:
+        disp_map = f["dispmap"][:]
     with open(config_kilosort['neuropixel_folder'] + '/LFP_params.npy', 'wb') as f:
         np.save(f, {'sample_shift': meta['sample_shift'], 'electrode_x_um': meta['x'],
-                    'electrode_y_um': meta['y'], 'params': params})
-
-
+                    'electrode_y_um': meta['y'], 'params': params, 'displacement_map': disp_map})
 
 

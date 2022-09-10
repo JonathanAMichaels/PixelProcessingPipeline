@@ -22,6 +22,7 @@ def kilosort(config):
     registered_file = glob.glob(config['neuropixel_folder'] + '/NeuropixelsRegistration2/' + 'subtraction_*.h5')
     with h5py.File(registered_file[0], "r") as f:
         dispmap = f["dispmap"][:]
+    np.save('dispmap', dispmap)
 
     params['nblocks'] = 200
     params['disp_map'] = dispmap.tolist()
