@@ -74,6 +74,8 @@ end
 disp('Reading kilosort output')
 T = readNPY([params.kiloDir '/spike_times.npy']);
 I = readNPY([params.kiloDir '/spike_clusters.npy']);
+Wrot = readNPY([params.kiloDir '/whitening_mat_inv.npy']);
+
 if params.userSorted
     clusterGroup = tdfread([params.kiloDir '/cluster_group.tsv']);
 else
@@ -88,7 +90,7 @@ for i = 1:length(clusterGroup.cluster_id)
 end
 
 % Extract individual waveforms from kilosort binary
-[mdata, data] = extractWaveforms(params, T, I, C);
+[mdata, data] = extractWaveforms(params, T, I, C, Wrot);
     
 % calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
@@ -96,8 +98,6 @@ end
 % Take only 'good' single units as determined by kilosort, or units with
 % an SNR > 12, and that have at least 100 spikes
 C = C((SNR > params.multiSNRThreshold | C_ident == 1) & spkCount > 100);
-SNR
-C_ident
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
@@ -119,7 +119,7 @@ disp(['Number of spikes to work with: ' num2str(length(I))])
 keepGoing = 1;
 while keepGoing
     % Extract individual waveforms from kilosort binary
-    [mdata, ~] = extractWaveforms(params, T, I, C);
+    [mdata, ~] = extractWaveforms(params, T, I, C, Wrot);
     
     % calculate cross-correlation
     [bigR, lags] = calcCrossCorr(params, mdata);
@@ -208,7 +208,7 @@ for j = 1:length(C)
 end
 
 % Re-extract
-[mdata, data] = extractWaveforms(params, T, I, C);
+[mdata, data] = extractWaveforms(params, T, I, C, Wrot);
 
 % Re-calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
@@ -343,7 +343,7 @@ for j = 1:size(mdata,3)
 end
 end
 
-function [mdata, data] = extractWaveforms(params, T, I, C)
+function [mdata, data] = extractWaveforms(params, T, I, C, Wrot)
 disp('Extracting waveforms from binary')
 f = fopen(params.binaryFile, 'r');
 recordSize = 2; % 2 bytes for int16
@@ -360,6 +360,7 @@ for j = 1:length(C)
     for t = 1:length(useTimes)
         fseek(f, (useTimes(t)-params.backSp) * spt, 'bof');
         data(:,:,t,j) = fread(f, [nChan, params.backSp+params.forwardSp], '*int16')';
+        data(:,:,t,j) = data(:,:,t,j) / Wrot; % unwhiten and rescale data to uV
     end
     mdata(:,:,j) = squeeze(mean(data(:,:,1:length(useTimes),j),3));
 end
