@@ -71,6 +71,10 @@ for q = 1:2
         [b, a] = butter(2, [10 200] / (30000/2), 'bandpass');
     end
     tRange = size(data,1) - (30000*60*40) : size(data,1) - (30000*60*30);
+    if tRange(1) < 1
+        tRange = size(data,1) - (30000*60) : size(data,1);
+    end
+
     data_filt = zeros(length(tRange),size(data,2),'single');
     for i = 1:size(data,2)
         data_filt(:,i) = single(filtfilt(b, a, double(data(tRange,i))));
@@ -83,6 +87,7 @@ for q = 1:2
 end
 print([myomatrix '/brokenchan.png'], '-dpng')
 S = std(data_filt,[],1);
+disp(S)
 if length(dataChan) == 32
     brokenChan = find(S > 80);
 elseif length(dataChan) == 16
