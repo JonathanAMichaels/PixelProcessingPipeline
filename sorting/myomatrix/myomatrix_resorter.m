@@ -96,8 +96,8 @@ end
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
 % Take only 'good' single units as determined by kilosort, or units with
-% an SNR > 12, and that have at least 100 spikes
-C = C((SNR > params.multiSNRThreshold | C_ident == 1) & spkCount > 100);
+% an SNR > 12, and that have at least 50 spikes
+C = C((SNR > params.multiSNRThreshold | C_ident == 1) & spkCount > 50);
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));

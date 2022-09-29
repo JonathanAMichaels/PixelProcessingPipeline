@@ -70,7 +70,10 @@ for q = 1:2
     elseif q == 2
         [b, a] = butter(2, [10 200] / (30000/2), 'bandpass');
     end
-    tRange = size(data,1) - (30000*60*40) : size(data,1) - (30000*60*30);
+    tRange = size(data,1) - (30000*60*15) : size(data,1) - (30000*60*5);
+    if tRange(1) < 1
+        tRange = size(data,1) - (30000*60*2) : size(data,1);
+    end
     if tRange(1) < 1
         tRange = size(data,1) - (30000*60) : size(data,1);
     end
@@ -91,7 +94,7 @@ disp(S)
 if length(dataChan) == 32
     brokenChan = find(S > 80);
 elseif length(dataChan) == 16
-    brokenChan = find(S > 10);
+    brokenChan = find(S > 14);
 end
 S
 disp('Broken channels are:')
