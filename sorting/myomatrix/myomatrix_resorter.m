@@ -213,6 +213,9 @@ end
 % Re-calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
+SNR
+spkCount
+
 % Remove clusters that don't meet inclusion criteria
 saveUnits = find(SNR > params.SNRThreshold & spkCount > 20);
 keepSpikes = find(ismember(I, saveUnits));
