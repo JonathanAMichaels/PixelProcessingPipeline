@@ -24,19 +24,31 @@ else
 end
 
 dataChan = chanList;
-ff = dir([myomatrix_data '/100_CH*' num2str(dataChan(1)) '.continuous']);
-if isempty(ff)
-    prefix = [];
+
+% Check if we're dealing with .dat or .continuous
+oebin = dir([myomatrix_data '/structure.oebin']);
+if isempty(oebin)
+    ff = dir([myomatrix_data '/100_CH*' num2str(dataChan(1)) '.continuous']);
+    if isempty(ff)
+        prefix = [];
+    else
+        prefix = 'CH';
+    end
+    tempdata = load_open_ephys_data([myomatrix_data '/100_' prefix num2str(dataChan(1)) '.continuous']);
+    tL = length(tempdata);
+    clear tempdata
+    data = zeros(tL, length(dataChan), 'int16');
+    for chan = 1:length(dataChan)
+        data(:,chan) = load_open_ephys_data([myomatrix_data '/100_' prefix num2str(dataChan(chan)) '.continuous']);
+    end
 else
-    prefix = 'CH';
+    tempdata = load_open_ephys_binary(oebin(1).name, 'continuous', dataChan);
+    disp(size(tempdata))
+
+
+
 end
-tempdata = load_open_ephys_data([myomatrix_data '/100_' prefix num2str(dataChan(1)) '.continuous']);
-tL = length(tempdata);
-clear tempdata
-data = zeros(tL, length(dataChan), 'int16');
-for chan = 1:length(dataChan)
-    data(:,chan) = load_open_ephys_data([myomatrix_data '/100_' prefix num2str(dataChan(chan)) '.continuous']);
-end
+
 if length(dataChan) == 32
     data = data(:,channelRemap);
 end
