@@ -41,19 +41,20 @@ if isempty(oebin)
     for chan = 1:length(dataChan)
         data(:,chan) = load_open_ephys_data([myomatrix_data '/100_' prefix num2str(dataChan(chan)) '.continuous']);
     end
+    ff = dir([myomatrix_data '/100_*' num2str(sync_chan) '.continuous']);
+    analogData = load_open_ephys_data([ff(1).folder '/' ff(1).name]);
 else
-    tempdata = load_open_ephys_binary([oebin(1).folder '/' oebin(1).name], 'continuous', dataChan);
-    disp(size(tempdata))
-
-
-
+    tempdata = load_open_ephys_binary([oebin(1).folder '/' oebin(1).name], 'continuous', 1);
+    data = zeros(size(tempdata.Data,2), length(dataChan), 'int16');
+    data(:,:) = tempdata.Data(dataChan,:)';
+    analogData = tempdata.Data(sync_chan,:)';
+    clear tempdata
 end
 
 if length(dataChan) == 32
     data = data(:,channelRemap);
 end
-ff = dir([myomatrix_data '/100_*' num2str(sync_chan) '.continuous']);
-analogData = load_open_ephys_data([ff(1).folder '/' ff(1).name]);
+
 analogData(analogData > 5) = 5;
 sync = logical(round(analogData / max(analogData)));
 clear analogData
