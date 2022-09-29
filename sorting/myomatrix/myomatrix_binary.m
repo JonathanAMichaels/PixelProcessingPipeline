@@ -42,7 +42,7 @@ if isempty(oebin)
         data(:,chan) = load_open_ephys_data([myomatrix_data '/100_' prefix num2str(dataChan(chan)) '.continuous']);
     end
 else
-    tempdata = load_open_ephys_binary(oebin(1).name, 'continuous', dataChan);
+    tempdata = load_open_ephys_binary([oebin(1).folder '/' oebin(1).name], 'continuous', dataChan);
     disp(size(tempdata))
 
 
