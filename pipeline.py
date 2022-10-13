@@ -168,8 +168,10 @@ if myo_sorting:
                        'sync_chan': int(config['Session']['myo_analog_chan'])}
     path_to_add = script_folder + '/sorting/'
     os.system('module load matlab/2021b')
-    matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
-    # matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab' # something else for testing locally
+    if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
+        matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
+    else:
+        matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
     for myomatrix in range(len(config['Session']['myo_chan_list'])):
         f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
         config_kilosort['myomatrix_data'] = f[0]

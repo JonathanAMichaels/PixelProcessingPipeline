@@ -63,43 +63,55 @@ save([myomatrix '/sync'], 'sync')
 clear sync
 disp('Saved sync data')
 
+disp(['Total recording time: ' num2str(size(data,1)/30000/60) ' minutes'])
+
 clf
-for q = 1:2
+S = zeros(size(data,2), 3);
+for q = 1:3
     if q == 1
-        [b, a] = butter(2, [350 7500] / (30000/2), 'bandpass');
+        [b, a] = butter(2, [300 7500] / (30000/2), 'bandpass');
     elseif q == 2
-        [b, a] = butter(2, [10 200] / (30000/2), 'bandpass');
+        [b, a] = butter(2, [8000 14000] / (30000/2), 'bandpass');
+    elseif q == 3
+        [b, a] = butter(2, [2 60] / (30000/2), 'bandpass');
     end
-    tRange = size(data,1) - (30000*60*15) : size(data,1) - (30000*60*5);
-    if tRange(1) < 1
-        tRange = size(data,1) - (30000*60*2) : size(data,1);
+    useSeconds = 30;
+    tRange = size(data,1) - (30000*(120+useSeconds)) : size(data,1) - (30000*120);
+    if isempty(tRange)
+        tRange = -1;
     end
-    if tRange(1) < 1
-        tRange = size(data,1) - (30000*60) : size(data,1);
+    while (tRange(1) < 1)
+        useSeconds = useSeconds - 1;
+        tRange = size(data,1) - (30000*useSeconds) : size(data,1);
     end
 
     data_filt = zeros(length(tRange),size(data,2),'single');
     for i = 1:size(data,2)
         data_filt(:,i) = single(filtfilt(b, a, double(data(tRange,i))));
     end
-    subplot(1,2,q)
+    subplot(1,3,q)
     hold on
     for i = 1:size(data,2)
-        plot(data_filt(:,i) + i*2000)
+        if size(data_filt,1) < 120000
+            plot_range = 1:size(data_filt,1);
+        else
+            plot_range = 1:120000;
+        end
+        plot(data_filt(plot_range,i) + i*1500)
     end
+    S(:,q) = std(data_filt,[],1);
 end
 print([myomatrix '/brokenchan.png'], '-dpng')
-S = std(data_filt,[],1);
-disp(S)
+crit = sum(S(:,2),2)';
+crit
 if length(dataChan) == 32
-    brokenChan = find(S > 80);
+    brokenChan = find(crit > 16);
 elseif length(dataChan) == 16
-    brokenChan = find(S > 14);
+    brokenChan = find(crit > 16);
 end
-S
 disp('Broken channels are:')
 brokenChan
-data(:,brokenChan) = randn(size(data,1), length(brokenChan)) * 3e-1;
+data(:,brokenChan) = randn(size(data,1), length(brokenChan))*3e-1;
 clear data_filt
 
 % Generate "Bulk EMG" dataset

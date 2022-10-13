@@ -45,14 +45,14 @@ if ~isfield(params, 'crit')
 end
 % SNR threshold for keeping clusters at the end
 if ~isfield(params, 'SNRThreshold')
-    params.SNRThreshold = 3.5;
+    params.SNRThreshold = 3.0;
 end
 if ~isfield(params, 'multiSNRThreshold')
     params.multiSNRThreshold = 8;
 end
 % Spikes below this refractory time limit will be considered duplicates
 if ~isfield(params, 'refractoryLim')
-    params.refractoryLim = 5;
+    params.refractoryLim = 4;
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
@@ -90,14 +90,16 @@ for i = 1:length(clusterGroup.cluster_id)
 end
 
 % Extract individual waveforms from kilosort binary
-[mdata, data] = extractWaveforms(params, T, I, C, Wrot);
+[mdata, data] = extractWaveforms(params, T, I, C, Wrot, true);
     
 % calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
+SNR
+
 % Take only 'good' single units as determined by kilosort, or units with
-% an SNR > 12, and that have at least 50 spikes
-C = C((SNR > params.multiSNRThreshold | C_ident == 1) & spkCount > 50);
+% an SNR > 12, and that have at least 30 spikes
+C = C((SNR > params.multiSNRThreshold | C_ident == 1) & spkCount > 30);
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
@@ -119,7 +121,7 @@ disp(['Number of spikes to work with: ' num2str(length(I))])
 keepGoing = 1;
 while keepGoing
     % Extract individual waveforms from kilosort binary
-    [mdata, ~] = extractWaveforms(params, T, I, C, Wrot);
+    [mdata, ~] = extractWaveforms(params, T, I, C, Wrot, true);
     
     % calculate cross-correlation
     [bigR, lags] = calcCrossCorr(params, mdata);
@@ -208,7 +210,7 @@ for j = 1:length(C)
 end
 
 % Re-extract
-[mdata, data] = extractWaveforms(params, T, I, C, Wrot);
+[mdata, data] = extractWaveforms(params, T, I, C, Wrot, true);
 
 % Re-calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
@@ -346,12 +348,14 @@ for j = 1:size(mdata,3)
 end
 end
 
-function [mdata, data] = extractWaveforms(params, T, I, C, Wrot)
+function [mdata, data] = extractWaveforms(params, T, I, C, Wrot, unwhiten)
 disp('Extracting waveforms from binary')
 f = fopen(params.binaryFile, 'r');
 recordSize = 2; % 2 bytes for int16
 nChan = size(params.chanMap,1);
 spt = recordSize*nChan;
+% Zero out channels that are bad
+badChan = find(diag(Wrot) < 5);
 % Extract each waveform
 data = nan(params.backSp + params.forwardSp, nChan, params.waveCount, length(C));
 mdata = zeros(params.backSp + params.forwardSp, nChan, length(C));
@@ -363,7 +367,10 @@ for j = 1:length(C)
     for t = 1:length(useTimes)
         fseek(f, (useTimes(t)-params.backSp) * spt, 'bof');
         data(:,:,t,j) = fread(f, [nChan, params.backSp+params.forwardSp], '*int16')';
-        data(:,:,t,j) = data(:,:,t,j) / Wrot; % unwhiten and rescale data to uV
+        if unwhiten
+            data(:,:,t,j) = data(:,:,t,j) / Wrot; % unwhiten and rescale data to uV
+        end
+        data(:,badChan,t,j) = 0; 
     end
     mdata(:,:,j) = squeeze(mean(data(:,:,1:length(useTimes),j),3));
 end
