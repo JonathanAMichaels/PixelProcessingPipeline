@@ -45,8 +45,8 @@ else
     else
         ops.trange = trange*30000 + 1;
     end
-    data = tempdata.Data.Data(1).mapped(dataChan,ops.trange)';
-    analogData = tempdata.Data.Data(1).mapped(sync_chan,ops.trange)';
+    data = tempdata.Data.Data(1).mapped(dataChan,ops.trange(1):ops.trange(2))';
+    analogData = tempdata.Data.Data(1).mapped(sync_chan,ops.trange(1):ops.trange(2))';
     clear tempdata
 end
 
