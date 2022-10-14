@@ -17,12 +17,6 @@ else
 end
 disp(['Using this channel map: ' chanMapFile])
 
-if trange(2) == 0
-    ops.trange = [0 Inf];
-else
-    ops.trange = trange;
-end
-
 dataChan = chanList;
 
 % Check if we're dealing with .dat or .continuous
@@ -46,8 +40,13 @@ if isempty(oebin)
 else
     tempdata = load_open_ephys_binary([oebin(1).folder '/' oebin(1).name], 'continuous', 1, 'mmap');
     %data = zeros(size(tempdata.Data,2), length(dataChan), 'int16');
-    data = tempdata.Data.Data(1).mapped(dataChan,trange*30000)';
-    analogData = tempdata.Data.Data(1).mapped(sync_chan,trange*30000)';
+    if trange(2) == 0
+        ops.trange = [1 size(tempdata.Data.Data(1).mapped,2)];
+    else
+        ops.trange = trange*30000 + 1;
+    end
+    data = tempdata.Data.Data(1).mapped(dataChan,ops.trange)';
+    analogData = tempdata.Data.Data(1).mapped(sync_chan,ops.trange)';
     clear tempdata
 end
 
