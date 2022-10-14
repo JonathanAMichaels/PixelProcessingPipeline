@@ -48,7 +48,7 @@ if ~isfield(params, 'SNRThreshold')
     params.SNRThreshold = 3.0;
 end
 if ~isfield(params, 'multiSNRThreshold')
-    params.multiSNRThreshold = 8;
+    params.multiSNRThreshold = 3.5; % 8
 end
 % Spikes below this refractory time limit will be considered duplicates
 if ~isfield(params, 'refractoryLim')
@@ -90,7 +90,7 @@ for i = 1:length(clusterGroup.cluster_id)
 end
 
 % Extract individual waveforms from kilosort binary
-[mdata, data] = extractWaveforms(params, T, I, C, Wrot, true);
+[mdata, data] = extractWaveforms(params, T, I, C, Wrot, false);
     
 % calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
@@ -121,7 +121,7 @@ disp(['Number of spikes to work with: ' num2str(length(I))])
 keepGoing = 1;
 while keepGoing
     % Extract individual waveforms from kilosort binary
-    [mdata, ~] = extractWaveforms(params, T, I, C, Wrot, true);
+    [mdata, ~] = extractWaveforms(params, T, I, C, Wrot, false);
     
     % calculate cross-correlation
     [bigR, lags] = calcCrossCorr(params, mdata);
