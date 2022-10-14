@@ -72,7 +72,7 @@ for q = 1:3
     elseif q == 2
         [b, a] = butter(2, [8000 14000] / (30000/2), 'bandpass');
     elseif q == 3
-        [b, a] = butter(2, [2 60] / (30000/2), 'bandpass');
+        [b, a] = butter(2, [20 80] / (30000/2), 'bandpass');
     end
     useSeconds = 30;
     tRange = size(data,1) - (30000*(120+useSeconds)) : size(data,1) - (30000*120);
