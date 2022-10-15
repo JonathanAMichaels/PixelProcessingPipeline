@@ -105,9 +105,9 @@ print([myomatrix '/brokenchan.png'], '-dpng')
 S
 
 if length(dataChan) == 32
-    brokenChan = find(S(:,1) > 16 | S(:,2) > 16);
+    brokenChan = find(S(:,2) > 16 | S(:,3) > 16);
 elseif length(dataChan) == 16
-    brokenChan = find(S(:,1) > 16 | S(:,2) > 16);
+    brokenChan = find(S(:,2) > 16 | S(:,3) > 16);
 end
 disp('Broken channels are:')
 brokenChan
