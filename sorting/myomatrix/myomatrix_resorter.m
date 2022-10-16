@@ -70,7 +70,7 @@ if ~isfield(params, 'corrRange')
 end
 % Max number of random spikes to extract per cluster
 if ~isfield(params, 'waveCount')
-    params.waveCount = 10000;
+    params.waveCount = 5000;
 end
 
 % Read data from kilosort output
@@ -370,7 +370,7 @@ spt = recordSize*nChan;
 % Zero out channels that are bad
 badChan = find(diag(Wrot) < 5);
 % Extract each waveform
-data = nan(params.backSp + params.forwardSp, nChan, params.waveCount, length(C));
+data = nan(params.backSp + params.forwardSp, nChan, params.waveCount, length(C), 'single');
 mdata = zeros(params.backSp + params.forwardSp, nChan, length(C));
 for j = 1:length(C)
     disp(['Extracting unit ' num2str(j) ' of ' num2str(length(C))])
