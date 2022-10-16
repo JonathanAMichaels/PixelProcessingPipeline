@@ -104,7 +104,7 @@ R
 % spike times to be close together.
 % Take only 'good' single units as determined by kilosort, or units with
 % an SNR > 12, and that have at least 30 spikes
-C = C((SNR > params.multiSNRThreshold | C_ident == 1) & spkCount > 30);
+C = C((SNR > params.multiSNRThreshold & R > 0.6) | C_ident == 1);
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
@@ -220,11 +220,15 @@ end
 % Re-calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
+% Check waveform consistency
+R = calcWaveformConsistency(data, 500);
+
 SNR
 spkCount
+R
 
 % Remove clusters that don't meet inclusion criteria
-saveUnits = find(SNR > params.SNRThreshold & spkCount > 20);
+saveUnits = find(SNR > params.SNRThreshold & spkCount > 20 & R > 0.6);
 keepSpikes = find(ismember(I, saveUnits));
 T = T(keepSpikes);
 I = I(keepSpikes);
@@ -233,6 +237,7 @@ mdata = mdata(:,:,saveUnits);
 data = data(:,:,:,saveUnits);
 SNR = SNR(saveUnits);
 spkCount = spkCount(saveUnits);
+R = R(saveUnits);
 
 disp(['Keeping ' num2str(length(C)) ' Units'])
 
@@ -286,7 +291,7 @@ for j = 1:size(mdata,3)
     figure(j+100)
     set(gcf, 'Position', [j*50 1 250 400])
     clf
-    ttl = sprintf(['Spikes: ' num2str(spkCount(j)) '\nmax-SNR: ' num2str(SNR(j))]);
+    ttl = sprintf(['Spikes: ' num2str(spkCount(j)) '\nmax-SNR: ' num2str(SNR(j)) '\nwaveform-R: ' num2str(R(j))]);
     title(ttl)
     hold on
     for e = 1:size(mdata,2)

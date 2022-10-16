@@ -100,7 +100,7 @@ for q = 1:3
     end
     S(:,q) = std(data_filt,[],1);
 end
-print([myomatrix '/brokenchan.png'], '-dpng')
+print([myomatrix '/brokenchan' num2str(myomatrix_num) '.png'], '-dpng')
 
 S
 
@@ -126,7 +126,7 @@ if length(dataChan) == 32
 else
     bEMG = int16(mean(data(:,notBroken),2));
 end
-save([myomatrix '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
+save([myomatrix '/bulkEMG' num2str(myomatrix_num)], 'bEMG', 'notBroken', 'dataChan')
 clear bEMG
 disp('Saved generated bulk EMG')
 fileID = fopen([myomatrix '/data' num2str(myomatrix_num) '.bin'], 'w');
