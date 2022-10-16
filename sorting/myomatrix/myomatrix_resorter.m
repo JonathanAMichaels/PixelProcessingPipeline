@@ -50,6 +50,9 @@ end
 if ~isfield(params, 'multiSNRThreshold')
     params.multiSNRThreshold = 3.0; % 8
 end
+if ~isfield(params, 'consistencyThreshold')
+    params.consistencyThreshold = 0.5;
+end
 % Spikes below this refractory time limit will be considered duplicates
 if ~isfield(params, 'refractoryLim')
     params.refractoryLim = 4;
@@ -104,7 +107,7 @@ R
 % spike times to be close together.
 % Take only 'good' single units as determined by kilosort, or units with
 % an SNR > 12, and that have at least 30 spikes
-C = C((SNR > params.multiSNRThreshold & R > 0.6) | C_ident == 1);
+C = C((SNR > params.multiSNRThreshold & R > params.consistencyThreshold) | C_ident == 1);
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
@@ -228,7 +231,7 @@ spkCount
 R
 
 % Remove clusters that don't meet inclusion criteria
-saveUnits = find(SNR > params.SNRThreshold & spkCount > 20 & R > 0.6);
+saveUnits = find(SNR > params.SNRThreshold & spkCount > 20 & R > params.consistencyThreshold);
 keepSpikes = find(ismember(I, saveUnits));
 T = T(keepSpikes);
 I = I(keepSpikes);
