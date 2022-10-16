@@ -70,7 +70,7 @@ if ~isfield(params, 'corrRange')
 end
 % Max number of random spikes to extract per cluster
 if ~isfield(params, 'waveCount')
-    params.waveCount = 3000;
+    params.waveCount = 10000;
 end
 
 % Read data from kilosort output
@@ -100,7 +100,7 @@ end
 
 SNR
 
-R = calcWaveformConsistency(data, 500);
+R = calcWaveformConsistency(data, 2000);
 R
 
 % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
@@ -224,7 +224,7 @@ end
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
 % Check waveform consistency
-R = calcWaveformConsistency(data, 500);
+R = calcWaveformConsistency(data, 2000);
 
 SNR
 spkCount
