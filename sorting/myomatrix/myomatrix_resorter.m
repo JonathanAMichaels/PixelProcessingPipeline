@@ -97,6 +97,11 @@ end
 
 SNR
 
+R = calcWaveformConsistency(data, 200);
+R
+
+% Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
+% spike times to be close together.
 % Take only 'good' single units as determined by kilosort, or units with
 % an SNR > 12, and that have at least 30 spikes
 C = C((SNR > params.multiSNRThreshold | C_ident == 1) & spkCount > 30);
@@ -390,5 +395,25 @@ function [r, lags] = calcCrossCorr(params, mdata)
     r = reshape(r, [size(r,1) size(mdata,3) size(mdata,3)]);
     for z = 1:size(r,1)
         r(z, logical(eye(size(r,2), size(r,3)))) = 0;
+    end
+end
+
+function R = calcWaveformConsistency(data, spikesPerBin)
+    R = zeros(1,size(data,4));
+    for j = 1:size(data,4)
+        firstNan = find(isnan(squeeze(data(1,1,:,j))),1) - 1;
+        if isempty(firstNan)
+            firstNan = size(data,3);
+        end
+        if firstNan < spikesPerBin*2
+            firstBunch = 1:round(firstNan/2);
+            lastBunch = round(firstNan/2)+1:firstNan;
+        else
+            firstBunch = 1:spikesPerBin;
+            lastBunch = firstNan-(spikesPerBin-1):firstNan;
+        end
+        A = mean(data(:,:,firstBunch,j),3);
+        B = mean(data(:,:,lastBunch,j),3);
+        R(j) = corr(A(:), B(:));
     end
 end
