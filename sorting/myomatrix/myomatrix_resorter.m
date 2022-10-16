@@ -100,7 +100,7 @@ end
 
 SNR
 
-R = calcWaveformConsistency(data, 2000);
+R = calcWaveformConsistency(data, 1000);
 R
 
 % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
@@ -224,7 +224,7 @@ end
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
 % Check waveform consistency
-R = calcWaveformConsistency(data, 2000);
+R = calcWaveformConsistency(data, 1000);
 
 SNR
 spkCount
@@ -422,6 +422,9 @@ function R = calcWaveformConsistency(data, spikesPerBin)
         end
         A = mean(data(:,:,firstBunch,j),3);
         B = mean(data(:,:,lastBunch,j),3);
-        R(j) = corr(A(:), B(:));
+        disp(length(firstBunch))
+        disp(length(lastBunch))
+        %R(j) = corr(A(:), B(:));
+        R(j) = 1 - (sum((A(:) - B(:)).^2) / sum(B(:).^2));
     end
 end
