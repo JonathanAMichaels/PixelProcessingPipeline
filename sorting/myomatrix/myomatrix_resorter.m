@@ -100,14 +100,14 @@ end
 
 SNR
 
-R = calcWaveformConsistency(data, 200);
+R = calcWaveformConsistency(data, 500);
 R
 
 % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
 % spike times to be close together.
 % Take only 'good' single units as determined by kilosort, or units with
 % an SNR > 12, and that have at least 30 spikes
-C = C((SNR > params.multiSNRThreshold & R > params.consistencyThreshold) | C_ident == 1);
+C = C((SNR > params.multiSNRThreshold & R > params.consistencyThreshold & spkCount > 20) | C_ident == 1);
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
