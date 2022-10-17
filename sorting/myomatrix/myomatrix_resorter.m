@@ -51,7 +51,7 @@ if ~isfield(params, 'multiSNRThreshold')
     params.multiSNRThreshold = 3.0; % 8
 end
 if ~isfield(params, 'consistencyThreshold')
-    params.consistencyThreshold = 0.3;
+    params.consistencyThreshold = 0.2;
 end
 % Spikes below this refractory time limit will be considered duplicates
 if ~isfield(params, 'refractoryLim')
@@ -100,6 +100,7 @@ end
 
 % calc waveform consistency R-Sqaure
 R = calcWaveformConsistency(data, 1000);
+R
 
 % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
 % spike times to be close together.
@@ -413,6 +414,10 @@ function R = calcWaveformConsistency(data, spikesPerBin)
         end
         A = mean(data(:,:,firstBunch,j),3);
         B = mean(data(:,:,lastBunch,j),3);
-        R(j) = 1 - (sum((A(:) - B(:)).^2) / sum(B(:).^2));
+        R1 = 1 - (sum((A(:) - B(:)).^2) / sum(B(:).^2));
+        R2 = 1 - (sum((A(:) - B(:)).^2) / sum(A(:).^2));
+        disp(R1)
+        disp(R2)
+        R(j) = mean([R1 R2]);
     end
 end
