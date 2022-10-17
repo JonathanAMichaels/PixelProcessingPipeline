@@ -51,7 +51,7 @@ if ~isfield(params, 'multiSNRThreshold')
     params.multiSNRThreshold = 3.0; % 8
 end
 if ~isfield(params, 'consistencyThreshold')
-    params.consistencyThreshold = 0.5;
+    params.consistencyThreshold = 0.3;
 end
 % Spikes below this refractory time limit will be considered duplicates
 if ~isfield(params, 'refractoryLim')
