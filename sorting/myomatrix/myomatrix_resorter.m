@@ -98,28 +98,19 @@ end
 % calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
-SNR
-
+% calc waveform consistency R-Sqaure
 R = calcWaveformConsistency(data, 1000);
-R
 
 % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
 % spike times to be close together.
-% Take only 'good' single units as determined by kilosort, or units with
-% an SNR > 12, and that have at least 30 spikes
+% Take only 'good' single units as determined by kilosort, units with sufficient SNR, and units with sufficient
+% waveform consistency
 C = C((SNR > params.multiSNRThreshold & R > params.consistencyThreshold & spkCount > 20) | C_ident == 1);
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
 I = I(keepSpikes);
 T = T(keepSpikes);
-
-% Remove clusters that don't meet inclusion criteria
-%saveUnits = find(C_ident == 1);
-%keepSpikes = find(ismember(I, saveUnits));
-%T = T(keepSpikes);
-%I = I(keepSpikes);
-%C = C(saveUnits);
 
 disp(['Number of clusters to work with: ' num2str(length(C))])
 disp(['Number of spikes to work with: ' num2str(length(I))])
@@ -223,7 +214,7 @@ end
 % Re-calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
-% Check waveform consistency
+% Re-calc waveform consistency R-Square
 R = calcWaveformConsistency(data, 1000);
 
 SNR
@@ -324,7 +315,7 @@ for j = 1:length(C)
     subplot(ceil(sqrt(length(C))),ceil(sqrt(length(C))),j)
     times = T(I == C(j));
     dt = diff(times/(params.sr/1000));
-    histogram(dt, 0:1:150, 'EdgeColor', 'none')
+    histogram(dt, 0:2:150, 'EdgeColor', 'none')
     box off
     xlabel('Inter-spike time (ms)')
     ylabel('Count')  
@@ -422,9 +413,6 @@ function R = calcWaveformConsistency(data, spikesPerBin)
         end
         A = mean(data(:,:,firstBunch,j),3);
         B = mean(data(:,:,lastBunch,j),3);
-        disp(length(firstBunch))
-        disp(length(lastBunch))
-        %R(j) = corr(A(:), B(:));
         R(j) = 1 - (sum((A(:) - B(:)).^2) / sum(B(:).^2));
     end
 end
