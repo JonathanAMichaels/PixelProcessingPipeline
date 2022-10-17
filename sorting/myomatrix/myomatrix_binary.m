@@ -47,9 +47,11 @@ else
     end
     data = tempdata.Data.Data(1).mapped(dataChan,ops.trange(1):ops.trange(2))';
     analogData = tempdata.Data.Data(1).mapped(sync_chan,ops.trange(1):ops.trange(2))';
+    analogData(analogData < 10000) = 0;
+    analodData(analogData >= 10000) = 1;
     clear tempdata
 end
-dfsdfsfsdfs
+
 if length(dataChan) == 32
     data = data(:,channelRemap);
 end
