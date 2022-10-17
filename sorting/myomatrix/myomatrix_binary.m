@@ -49,7 +49,7 @@ else
     analogData = tempdata.Data.Data(1).mapped(sync_chan,ops.trange(1):ops.trange(2))';
     clear tempdata
 end
-
+dfsdfsfsdfs
 if length(dataChan) == 32
     data = data(:,channelRemap);
 end
