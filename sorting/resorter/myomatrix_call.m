@@ -10,5 +10,5 @@ params.binaryFile = [myomatrix_folder '/proc.dat'];
 params.userSorted = true;
 params.savePlots = true;
 
-myomatrix_resorter(params)
+resorter(params)
 quit;

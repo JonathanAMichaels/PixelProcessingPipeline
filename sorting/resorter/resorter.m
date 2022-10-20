@@ -36,6 +36,9 @@ end
 if ~isfield(params, 'userSorted')
     params.userSorted = false;
 end
+if ~isfield(params, 'doPlots')
+    params.doPlots = true;
+end
 if ~isfield(params, 'savePlots')
     params.savePlots = false;
 end
@@ -51,7 +54,7 @@ if ~isfield(params, 'multiSNRThreshold')
     params.multiSNRThreshold = 3.0; % 8
 end
 if ~isfield(params, 'consistencyThreshold')
-    params.consistencyThreshold = 0.2;
+    params.consistencyThreshold = 0.7;
 end
 % Spikes below this refractory time limit will be considered duplicates
 if ~isfield(params, 'refractoryLim')
@@ -66,11 +69,19 @@ if ~isfield(params, 'forwardSp')
 end
 % Time range for cross-correlation
 if ~isfield(params, 'corrRange')
-    params.corrRange = 140;
+    params.corrRange = floor((params.backSp + params.forwardSp) / 2);
 end
 % Max number of random spikes to extract per cluster
 if ~isfield(params, 'waveCount')
-    params.waveCount = 5000;
+    params.waveCount = 1000;
+end
+% Max number of spikes for consistency check split
+if ~isfield(params, 'consistencyWaveCount')
+    params.consistencyWaveCount = floor(params.waveCount / 2);
+end
+% Mininum fraction of recording unit must be present for
+if ~isfield(params, 'temporalThreshold')
+    params.temporalThreshold = 0.6;
 end
 
 % Read data from kilosort output
@@ -99,7 +110,7 @@ end
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
 % calc waveform consistency R-Sqaure
-R = calcWaveformConsistency(data, 1000);
+R = calcWaveformConsistency(data, params.consistencyWaveCount);
 R
 
 % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
@@ -216,14 +227,47 @@ end
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
 % Re-calc waveform consistency R-Square
-R = calcWaveformConsistency(data, 1000);
+R = calcWaveformConsistency(data, params.consistencyWaveCount);
 
-SNR
-spkCount
-R
+% Calculate temporal extent of each unit
+totalT = double(max(T));
+temporalFraction = zeros(1,length(C));
+for j = 1:length(C)
+    times = T(I == C(j));
+    temporalFraction(j) = double(max(times) - min(times)) / totalT;
+end
+temporalFraction
+
+sigChan = cell(1,length(C));
+for j = 1:length(C)
+    innerData = mdata(:,:,j);
+    [m, ind] = sort(max(abs(mdata(:,:,j)),[],1), 'descend');
+    thresh = std(innerData(:))*3.5;
+    sigChan{j} = ind(m > thresh);
+end
+
+
+goodChan = [];
+for j = 1:length(C)
+    if R(j) > 0.8 && temporalFraction(j) > 0.95
+        goodChan = cat(2, goodChan, sigChan{j});
+    end
+end
+goodChan = unique(goodChan);
+
+goodUnit = zeros(1,length(C));
+for j = 1:length(C)
+    if sum(ismember(sigChan{j}, goodChan)) > 0
+        goodUnit(j) = 1;
+    else
+        goodUnit(j) = 0;
+    end
+end
 
 % Remove clusters that don't meet inclusion criteria
-saveUnits = find(SNR > params.SNRThreshold & spkCount > 20 & R > params.consistencyThreshold);
+saveUnits = find(SNR > params.SNRThreshold & spkCount > 20 & ...
+    R > params.consistencyThreshold & temporalFraction > params.temporalThreshold & ...
+    goodUnit == 1);
 keepSpikes = find(ismember(I, saveUnits));
 T = T(keepSpikes);
 I = I(keepSpikes);
@@ -236,101 +280,103 @@ R = R(saveUnits);
 
 disp(['Keeping ' num2str(length(C)) ' Units'])
 
-% Plot waveforms for each unit
-for j = 1:size(mdata,3)
-    firstNan = find(isnan(squeeze(data(1,1,:,j))),1) - 1;
-    if isempty(firstNan)
-        firstNan = size(data,3);
+if params.doPlots
+    % Plot waveforms for each unit
+    for j = 1:size(mdata,3)
+        firstNan = find(isnan(squeeze(data(1,1,:,j))),1) - 1;
+        if isempty(firstNan)
+            firstNan = size(data,3);
+        end
+        temp = mdata(:,:,j);
+        yScale = (max(temp(:))-min(temp(:)))/1500;
+        figure(j)
+        set(gcf, 'Position', [j*50 1 250 400])
+        clf
+        ttl = sprintf(['Spikes: ' num2str(spkCount(j)) '\nmax-SNR: ' num2str(SNR(j))]);
+        title(ttl)
+        hold on
+        for e = 1:size(mdata,2)
+            %thisTemplate = squeeze(data(:,e,round(linspace(1,firstNan,200)),j));
+            thisTemplate = mdata(:,e,j);
+            plot((1:size(thisTemplate,1)) + xcoords(e)/2, ...
+                thisTemplate + ycoords(e)*yScale, 'LineWidth', 1.5, 'Color', [0 0 0])%[0 0 0 0.015])
+        end
+        axis off
+        inc = abs(mode(diff(ycoords)))*yScale;
+        set(gca, 'YLim', [min(ycoords)*yScale-inc max(ycoords)*yScale+inc])
+        if params.savePlots
+            if ~exist([params.kiloDir '/Plots'], 'dir')
+                mkdir([params.kiloDir '/Plots'])
+            end
+            print([params.kiloDir '/Plots/' num2str(j) '.png'], '-dpng')
+            print([params.kiloDir '/Plots/' num2str(j) '.svg'], '-dsvg')
+        end
     end
-    temp = mdata(:,:,j);
-    yScale = (max(temp(:))-min(temp(:)))/1500;
-    figure(j)
-    set(gcf, 'Position', [j*50 1 250 400])
+
+    % Plot average waveform from beginning and end of recording
+    for j = 1:size(mdata,3)
+        firstNan = find(isnan(squeeze(data(1,1,:,j))),1) - 1;
+        if isempty(firstNan)
+            firstNan = size(data,3);
+        end
+        if firstNan < 1000
+            firstBunch = 1:round(firstNan/2);
+            lastBunch = round(firstNan/2)+1:firstNan;
+        else
+            firstBunch = 1:500;
+            lastBunch = firstNan-499:firstNan;
+        end
+        temp = mdata(:,:,j);
+        yScale = (max(temp(:))-min(temp(:)))/1500;
+        figure(j+100)
+        set(gcf, 'Position', [j*50 1 250 400])
+        clf
+        ttl = sprintf(['Spikes: ' num2str(spkCount(j)) '\nmax-SNR: ' num2str(SNR(j)) '\nwaveform-R: ' num2str(R(j))]);
+        title(ttl)
+        hold on
+        for e = 1:size(mdata,2)
+            thisTemplate = squeeze(mean(data(:,e,firstBunch,j),3));
+            plot((1:size(thisTemplate,1)) + xcoords(e)/2, ...
+                thisTemplate + ycoords(e)*yScale, 'LineWidth', 2, 'Color', [0 0 0.7 0.5])
+            thisTemplate = squeeze(mean(data(:,e,lastBunch,j),3));
+            plot((1:size(thisTemplate,1)) + xcoords(e)/2, ...
+                thisTemplate + ycoords(e)*yScale, 'LineWidth', 2, 'Color', [0.7 0 0 0.5])
+        end
+        axis off
+        inc = abs(mode(diff(ycoords)))*yScale;
+        set(gca, 'YLim', [min(ycoords)*yScale-inc max(ycoords)*yScale+inc])
+        if params.savePlots
+            if ~exist([params.kiloDir '/Plots'], 'dir')
+                mkdir([params.kiloDir '/Plots'])
+            end
+            print([params.kiloDir '/Plots/' num2str(j) '-wavecomp.png'], '-dpng')
+            print([params.kiloDir '/Plots/' num2str(j) '-wavecomp.svg'], '-dsvg')
+        end
+    end
+
+    % Plot histogram of inter-spike times
+    figure(1000)
     clf
-    ttl = sprintf(['Spikes: ' num2str(spkCount(j)) '\nmax-SNR: ' num2str(SNR(j))]);
-    title(ttl)
-    hold on
-    for e = 1:size(mdata,2)
-        %thisTemplate = squeeze(data(:,e,round(linspace(1,firstNan,200)),j));
-        thisTemplate = mdata(:,e,j);
-        plot((1:size(thisTemplate,1)) + xcoords(e)/2, ...
-            thisTemplate + ycoords(e)*yScale, 'LineWidth', 1.5, 'Color', [0 0 0])%[0 0 0 0.015])
+    for j = 1:length(C)
+        subplot(ceil(sqrt(length(C))),ceil(sqrt(length(C))),j)
+        times = T(I == C(j));
+        dt = diff(times/(params.sr/1000));
+        histogram(dt, 0:2:150, 'EdgeColor', 'none')
+        box off
+        xlabel('Inter-spike time (ms)')
+        ylabel('Count')
     end
-    axis off
-    inc = abs(mode(diff(ycoords)))*yScale;
-    set(gca, 'YLim', [min(ycoords)*yScale-inc max(ycoords)*yScale+inc])
     if params.savePlots
         if ~exist([params.kiloDir '/Plots'], 'dir')
             mkdir([params.kiloDir '/Plots'])
         end
-        print([params.kiloDir '/Plots/' num2str(j) '.png'], '-dpng')
-        print([params.kiloDir '/Plots/' num2str(j) '.svg'], '-dsvg')
+        print([params.kiloDir '/Plots/histogram.png'], '-dpng')
     end
-end
-
-% Plot average waveform from beginning and end of recording
-for j = 1:size(mdata,3)
-    firstNan = find(isnan(squeeze(data(1,1,:,j))),1) - 1;
-    if isempty(firstNan)
-        firstNan = size(data,3);
-    end
-    if firstNan < 1000
-        firstBunch = 1:round(firstNan/2);
-        lastBunch = round(firstNan/2)+1:firstNan;
-    else
-        firstBunch = 1:500;
-        lastBunch = firstNan-499:firstNan;
-    end
-    temp = mdata(:,:,j);
-    yScale = (max(temp(:))-min(temp(:)))/1500;
-    figure(j+100)
-    set(gcf, 'Position', [j*50 1 250 400])
-    clf
-    ttl = sprintf(['Spikes: ' num2str(spkCount(j)) '\nmax-SNR: ' num2str(SNR(j)) '\nwaveform-R: ' num2str(R(j))]);
-    title(ttl)
-    hold on
-    for e = 1:size(mdata,2)
-        thisTemplate = squeeze(mean(data(:,e,firstBunch,j),3));
-        plot((1:size(thisTemplate,1)) + xcoords(e)/2, ...
-            thisTemplate + ycoords(e)*yScale, 'LineWidth', 2, 'Color', [0 0 0.7 0.5])
-        thisTemplate = squeeze(mean(data(:,e,lastBunch,j),3));
-        plot((1:size(thisTemplate,1)) + xcoords(e)/2, ...
-            thisTemplate + ycoords(e)*yScale, 'LineWidth', 2, 'Color', [0.7 0 0 0.5])
-    end
-    axis off
-    inc = abs(mode(diff(ycoords)))*yScale;
-    set(gca, 'YLim', [min(ycoords)*yScale-inc max(ycoords)*yScale+inc])
-    if params.savePlots
-        if ~exist([params.kiloDir '/Plots'], 'dir')
-            mkdir([params.kiloDir '/Plots'])
-        end
-        print([params.kiloDir '/Plots/' num2str(j) '-wavecomp.png'], '-dpng')
-        print([params.kiloDir '/Plots/' num2str(j) '-wavecomp.svg'], '-dsvg')
-    end
-end
-
-% Plot histogram of inter-spike times
-figure(1000)
-clf
-for j = 1:length(C)
-    subplot(ceil(sqrt(length(C))),ceil(sqrt(length(C))),j)
-    times = T(I == C(j));
-    dt = diff(times/(params.sr/1000));
-    histogram(dt, 0:2:150, 'EdgeColor', 'none')
-    box off
-    xlabel('Inter-spike time (ms)')
-    ylabel('Count')  
-end
-if params.savePlots
-    if ~exist([params.kiloDir '/Plots'], 'dir')
-        mkdir([params.kiloDir '/Plots'])
-    end
-    print([params.kiloDir '/Plots/histogram.png'], '-dpng')
 end
 
 disp(['Number of clusters: ' num2str(length(C))])
 disp(['Number of spikes: ' num2str(length(I))])
-save([params.kiloDir '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR');
+save([params.kiloDir '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'R');
 end
 
 
@@ -360,7 +406,12 @@ recordSize = 2; % 2 bytes for int16
 nChan = size(params.chanMap,1);
 spt = recordSize*nChan;
 % Zero out channels that are bad
-badChan = find(diag(Wrot) < 5);
+if nChan <= 32
+    badChan = find(diag(Wrot) < 5);
+else
+    badChan = [];
+end
+totalT = max(T);
 % Extract each waveform
 data = nan(params.backSp + params.forwardSp, nChan, params.waveCount, length(C), 'single');
 mdata = zeros(params.backSp + params.forwardSp, nChan, length(C));
@@ -414,10 +465,14 @@ function R = calcWaveformConsistency(data, spikesPerBin)
         end
         A = mean(data(:,:,firstBunch,j),3);
         B = mean(data(:,:,lastBunch,j),3);
-        R1 = 1 - (sum((A(:) - B(:)).^2) / sum(B(:).^2));
-        R2 = 1 - (sum((A(:) - B(:)).^2) / sum(A(:).^2));
-        disp(R1)
-        disp(R2)
+        M = mean(cat(3,A,B),3);
+        [m, ind] = sort(max(abs(M),[],1), 'descend');
+        useA = A(:,ind(1:16));
+        useB = B(:,ind(1:16));
+        useA = useA(:) - mean(useA(:));
+        useB = useB(:) - mean(useB(:));
+        R1 = 1 - (sum((useA(:) - useB(:)).^2) / sum(useB(:).^2));
+        R2 = 1 - (sum((useA(:) - useB(:)).^2) / sum(useA(:).^2));
         R(j) = mean([R1 R2]);
     end
 end

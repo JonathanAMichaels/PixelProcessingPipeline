@@ -28,6 +28,7 @@ else:
 registration = False
 myo_sorting = False
 neuro_sorting = False
+neuro_post = False
 lfp_extract = False
 cluster = False
 in_cluster = False
@@ -37,18 +38,16 @@ if "-myo_sorting" in opts:
     myo_sorting = True
 if "-neuro_sorting" in opts:
     neuro_sorting = True
+if "-neuro_post" in ops:
+    neuro_post = True
 if "-lfp_extract" in opts:
     lfp_extract = True
 if "-full" in opts:
     registration = True
     myo_sorting = True
     neuro_sorting = True
+    neuro_post = True
     lfp_extract = True
-if "-init" in opts:
-    registration = False
-    myo_sorting = False
-    neuro_sorting = False
-    lfp_extract = False
 if "-cluster" in opts:
     cluster = True
 if "-in_cluster" in opts:
@@ -160,6 +159,20 @@ if neuro_sorting:
 
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
         kilosort(config_kilosort)
+
+if neuro_post:
+    config_kilosort = {'script_dir': config['script_dir']}
+    neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
+    path_to_add = script_folder + '/sorting/'
+    if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
+        matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
+    else:
+        matlab_root = '/local/software/matlab/R2020b/bin/matlab'
+    for pixel in range(config['num_neuropixels']):
+        config_kilosort['neuropixel_folder'] = neuro_folders[pixel] + '/sorted'
+        scipy.io.savemat('/tmp/config.mat', config_kilosort)
+        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
+                  path_to_add + '\')); neuropixel_call"')
 
 # Proceed with myo processing and spike sorting
 if myo_sorting:
