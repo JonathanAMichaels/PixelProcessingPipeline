@@ -10,7 +10,6 @@ params.temporalThreshold = 0.6;
 params.waveCount = 500;
 params.backSp = 51;
 params.forwardSp = 51;
-params.crit = 0.7;
 
 resorter(params)
 quit;

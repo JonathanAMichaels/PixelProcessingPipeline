@@ -38,7 +38,7 @@ if "-myo_sorting" in opts:
     myo_sorting = True
 if "-neuro_sorting" in opts:
     neuro_sorting = True
-if "-neuro_post" in ops:
+if "-neuro_post" in opts:
     neuro_post = True
 if "-lfp_extract" in opts:
     lfp_extract = True
