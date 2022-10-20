@@ -236,16 +236,14 @@ for j = 1:length(C)
     times = T(I == C(j));
     temporalFraction(j) = double(max(times) - min(times)) / totalT;
 end
-temporalFraction
 
 sigChan = cell(1,length(C));
 for j = 1:length(C)
     innerData = mdata(:,:,j);
     [m, ind] = sort(max(abs(mdata(:,:,j)),[],1), 'descend');
-    thresh = std(innerData(:))*3.5;
+    thresh = std(innerData(:))*5;
     sigChan{j} = ind(m > thresh);
 end
-
 
 goodChan = [];
 for j = 1:length(C)
@@ -257,7 +255,7 @@ goodChan = unique(goodChan);
 
 goodUnit = zeros(1,length(C));
 for j = 1:length(C)
-    if sum(ismember(sigChan{j}, goodChan)) > 0
+    if sum(ismember(sigChan{j}, goodChan)) > 0 || temporalFraction(j) > 0.95
         goodUnit(j) = 1;
     else
         goodUnit(j) = 0;
@@ -277,6 +275,8 @@ data = data(:,:,:,saveUnits);
 SNR = SNR(saveUnits);
 spkCount = spkCount(saveUnits);
 R = R(saveUnits);
+temporalFraction = temporalFraction(saveUnits);
+sigChan = sigChan(saveUnits);
 
 disp(['Keeping ' num2str(length(C)) ' Units'])
 
@@ -376,7 +376,7 @@ end
 
 disp(['Number of clusters: ' num2str(length(C))])
 disp(['Number of spikes: ' num2str(length(I))])
-save([params.kiloDir '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'R');
+save([params.kiloDir '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'R', 'temporalFraction', 'sigChan');
 end
 
 
