@@ -104,19 +104,19 @@ for i = 1:length(clusterGroup.cluster_id)
 end
 
 % Extract individual waveforms from kilosort binary
-[mdata, data] = extractWaveforms(params, T, I, C, Wrot, false);
+[mdata, data, R] = extractWaveforms(params, T, I, C, Wrot, false);
+% use first vs last quartel as consistency check
+RR = squeeze(R(1,end,:))';
     
 % calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
-% calc waveform consistency R-Sqaure
-R = calcWaveformConsistency(data, params.consistencyWaveCount);
 
 % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
 % spike times to be close together.
 % Take only 'good' single units as determined by kilosort, units with sufficient SNR, and units with sufficient
 % waveform consistency
-C = C((SNR > params.multiSNRThreshold & R > params.consistencyThreshold & spkCount > 20) | C_ident == 1);
+C = C((SNR > params.multiSNRThreshold & RR > params.consistencyThreshold & spkCount > 20) | C_ident == 1);
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
@@ -131,11 +131,12 @@ disp(['Number of spikes to work with: ' num2str(length(I))])
 keepGoing = 1;
 while keepGoing
     % Extract individual waveforms from kilosort binary
-    [mdata, ~] = extractWaveforms(params, T, I, C, Wrot, false);
+    [mdata, ~, ~] = extractWaveforms(params, T, I, C, Wrot, false);
 
     % calculate cross-correlation
     [bigR, lags] = calcCrossCorr(params, mdata);
     
+    disp('Combining units and re-assigning spikes')
     % Find lags with maximum correlation
     [m, mL] = max(bigR,[],1);
     m = squeeze(m); mL = squeeze(mL);
@@ -220,13 +221,12 @@ for j = 1:length(C)
 end
 
 % Re-extract
-[mdata, data] = extractWaveforms(params, T, I, C, Wrot, true);
+[mdata, data, R] = extractWaveforms(params, T, I, C, Wrot, true);
+% use first vs last quartel as consistency check
+RR = squeeze(R(1,end,:))';
 
 % Re-calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
-
-% Re-calc waveform consistency R-Square
-R = calcWaveformConsistency(data, params.consistencyWaveCount);
 
 % Calculate temporal extent of each unit
 totalT = double(max(T));
@@ -263,8 +263,7 @@ end
 
 % Remove clusters that don't meet inclusion criteria
 saveUnits = find(SNR > params.SNRThreshold & spkCount > 20 & ...
-    R > params.consistencyThreshold & temporalFraction > params.temporalThreshold & ...
-    goodUnit == 1);
+    RR > params.consistencyThreshold);
 keepSpikes = find(ismember(I, saveUnits));
 T = T(keepSpikes);
 I = I(keepSpikes);
@@ -273,7 +272,7 @@ mdata = mdata(:,:,saveUnits);
 data = data(:,:,:,saveUnits);
 SNR = SNR(saveUnits);
 spkCount = spkCount(saveUnits);
-R = R(saveUnits);
+R = R(:,:,saveUnits);
 temporalFraction = temporalFraction(saveUnits);
 sigChan = sigChan(saveUnits);
 
@@ -375,7 +374,7 @@ end
 
 disp(['Number of clusters: ' num2str(length(C))])
 disp(['Number of spikes: ' num2str(length(I))])
-save([params.kiloDir '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'R', 'temporalFraction', 'sigChan');
+save([params.kiloDir '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'R', 'sigChan');
 end
 
 
@@ -398,7 +397,7 @@ for j = 1:size(mdata,3)
 end
 end
 
-function [mdata, data] = extractWaveforms(params, T, I, C, Wrot, unwhiten)
+function [mdata, data, R] = extractWaveforms(params, T, I, C, Wrot, unwhiten)
 disp('Extracting waveforms from binary')
 f = fopen(params.binaryFile, 'r');
 recordSize = 2; % 2 bytes for int16
@@ -410,24 +409,41 @@ if nChan <= 32
 else
     badChan = [];
 end
-totalT = max(T);
+totalT = double(max(T));
+quartels = linspace(1, totalT, 5);
+waveParcel = floor(params.waveCount/4);
 % Extract each waveform
 data = nan(params.backSp + params.forwardSp, nChan, params.waveCount, length(C), 'single');
-mdata = zeros(params.backSp + params.forwardSp, nChan, length(C));
+mdata = zeros(params.backSp + params.forwardSp, nChan, length(C), 'single');
+R = zeros(4,4,length(C),'single');
 for j = 1:length(C)
     disp(['Extracting unit ' num2str(j) ' of ' num2str(length(C))])
-    times = T(I == C(j));
-    innerWaveCount = min([params.waveCount length(times)]);
-    useTimes = times(round(linspace(1, length(times), innerWaveCount)));
-    for t = 1:length(useTimes)
-        fseek(f, (useTimes(t)-params.backSp) * spt, 'bof');
-        data(:,:,t,j) = fread(f, [nChan, params.backSp+params.forwardSp], '*int16')';
-        if unwhiten
-            data(:,:,t,j) = data(:,:,t,j) / Wrot; % unwhiten and rescale data to uV
+    tempdata = nan(params.backSp + params.forwardSp, nChan, waveParcel, 4, 'single');
+    for q = 1:4
+        times = T(I == C(j));
+        times = times(times >= quartels(q) & times < quartels(q+1)); % trim times
+        innerWaveCount = min([waveParcel length(times)]);
+        useTimes = times(round(linspace(1, length(times), innerWaveCount)));
+        for t = 1:length(useTimes)
+            fseek(f, (useTimes(t)-params.backSp) * spt, 'bof');
+            tempdata(:,:,t,q) = fread(f, [nChan, params.backSp+params.forwardSp], '*int16')';
+            if unwhiten
+                data(:,:,t,q) = data(:,:,t,q) / Wrot; % unwhiten and rescale data to uV
+            end
+            data(:,badChan,t,q) = 0;
         end
-        data(:,badChan,t,j) = 0; 
     end
-    mdata(:,:,j) = squeeze(mean(data(:,:,1:length(useTimes),j),3));
+    data(:,:,1:size(tempdata,3)*size(tempdata,4),j) = tempdata(:,:,:);
+    mdata(:,:,j) = nanmean(data(:,:,:,j),3);
+    
+    % consistency check
+    tempm = squeeze(nanmean(tempdata,3));
+    ucheck = permute(tempm, [2 1 3]);
+    ucheck = ucheck(:,:);
+    [m, ind] = sort(max(abs(ucheck),[],2), 'descend');
+    tempm = permute(tempm(:,ind(1:16),:), [3 1 2]);
+    tempm = tempm(:,:)';
+    R(:,:,j) = corr(tempm);
 end
 fclose(f);
 end
