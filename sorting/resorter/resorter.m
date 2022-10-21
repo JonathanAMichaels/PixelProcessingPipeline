@@ -224,6 +224,7 @@ end
 [mdata, data, R] = extractWaveforms(params, T, I, C, Wrot, true);
 % use first vs last quartel as consistency check
 RR = squeeze(R(1,end,:))';
+RR
 
 % Re-calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
