@@ -111,7 +111,6 @@ end
 
 % calc waveform consistency R-Sqaure
 R = calcWaveformConsistency(data, params.consistencyWaveCount);
-R
 
 % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
 % spike times to be close together.
@@ -133,7 +132,7 @@ keepGoing = 1;
 while keepGoing
     % Extract individual waveforms from kilosort binary
     [mdata, ~] = extractWaveforms(params, T, I, C, Wrot, false);
-    
+
     % calculate cross-correlation
     [bigR, lags] = calcCrossCorr(params, mdata);
     
@@ -443,6 +442,7 @@ function [r, lags] = calcCrossCorr(params, mdata)
         catdata = cat(1, catdata, zeros(params.corrRange, size(mdata,3)));
     end
     [r, lags] = xcorr(catdata, params.corrRange, 'normalized');
+    clear catdata
     r = reshape(r, [size(r,1) size(mdata,3) size(mdata,3)]);
     for z = 1:size(r,1)
         r(z, logical(eye(size(r,2), size(r,3)))) = 0;

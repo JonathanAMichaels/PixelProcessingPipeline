@@ -104,15 +104,12 @@ for q = 1:3
 end
 print([myomatrix '/brokenchan' num2str(myomatrix_num) '.png'], '-dpng')
 
-S
-
 if length(dataChan) == 32
     brokenChan = find(S(:,2) > 16 | S(:,3) > 100);
 elseif length(dataChan) == 16
     brokenChan = find(S(:,2) > 16 | S(:,3) > 20);
 end
-disp('Broken channels are:')
-brokenChan
+disp(['Broken channels are: ' num2str(brokenChan)])
 data(:,brokenChan) = randn(size(data,1), length(brokenChan))*3e-1;
 clear data_filt
 
