@@ -267,7 +267,7 @@ saveUnits = find(SNR > params.SNRThreshold & spkCount > 20 & ...
 keepSpikes = find(ismember(I, saveUnits));
 T = T(keepSpikes);
 I = I(keepSpikes);
-C = C(saveUnits);
+C = unique(I);
 mdata = mdata(:,:,saveUnits);
 data = data(:,:,:,saveUnits);
 SNR = SNR(saveUnits);
@@ -294,7 +294,6 @@ if params.doPlots
         title(ttl)
         hold on
         for e = 1:size(mdata,2)
-            %thisTemplate = squeeze(data(:,e,round(linspace(1,firstNan,200)),j));
             thisTemplate = mdata(:,e,j);
             plot((1:size(thisTemplate,1)) + xcoords(e)/2, ...
                 thisTemplate + ycoords(e)*yScale, 'LineWidth', 1.5, 'Color', [0 0 0])%[0 0 0 0.015])
@@ -329,7 +328,7 @@ if params.doPlots
         figure(j+100)
         set(gcf, 'Position', [j*50 1 250 400])
         clf
-        ttl = sprintf(['Spikes: ' num2str(spkCount(j)) '\nmax-SNR: ' num2str(SNR(j)) '\nwaveform-R: ' num2str(R(j))]);
+        ttl = sprintf(['Spikes: ' num2str(spkCount(j)) '\nmax-SNR: ' num2str(SNR(j))]);
         title(ttl)
         hold on
         for e = 1:size(mdata,2)
