@@ -425,9 +425,9 @@ for j = 1:length(C)
             fseek(f, (useTimes(t)-params.backSp) * spt, 'bof');
             tempdata(:,:,t,q) = fread(f, [nChan, params.backSp+params.forwardSp], '*int16')';
             if unwhiten
-                data(:,:,t,q) = data(:,:,t,q) / Wrot; % unwhiten and rescale data to uV
+                tempdata(:,:,t,q) = tempdata(:,:,t,q) / Wrot; % unwhiten and rescale data to uV
             end
-            data(:,badChan,t,q) = 0;
+            tempdata(:,badChan,t,q) = 0;
         end
     end
     data(:,:,1:size(tempdata,3)*size(tempdata,4),j) = tempdata(:,:,:);
