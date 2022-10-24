@@ -62,10 +62,10 @@ if ~isfield(params, 'refractoryLim')
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
-    params.backSp = 141;
+    params.backSp = 121;
 end
 if ~isfield(params, 'forwardSp')
-    params.forwardSp = 141;
+    params.forwardSp = 121;
 end
 % Time range for cross-correlation
 if ~isfield(params, 'corrRange')
@@ -73,15 +73,11 @@ if ~isfield(params, 'corrRange')
 end
 % Max number of random spikes to extract per cluster
 if ~isfield(params, 'waveCount')
-    params.waveCount = 1000;
+    params.waveCount = 400;
 end
 % Max number of spikes for consistency check split
 if ~isfield(params, 'consistencyWaveCount')
     params.consistencyWaveCount = floor(params.waveCount / 2);
-end
-% Mininum fraction of recording unit must be present for
-if ~isfield(params, 'temporalThreshold')
-    params.temporalThreshold = 0.6;
 end
 
 % Read data from kilosort output
