@@ -9,6 +9,7 @@ params.kiloDir = myomatrix_folder;
 params.binaryFile = [myomatrix_folder '/proc.dat'];
 params.userSorted = true;
 params.savePlots = true;
+params.waveCount = 2000;
 
 resorter(params)
 quit;

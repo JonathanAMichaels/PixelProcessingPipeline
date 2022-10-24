@@ -62,10 +62,10 @@ if ~isfield(params, 'refractoryLim')
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
-    params.backSp = 121;
+    params.backSp = 141;
 end
 if ~isfield(params, 'forwardSp')
-    params.forwardSp = 121;
+    params.forwardSp = 141;
 end
 % Time range for cross-correlation
 if ~isfield(params, 'corrRange')
@@ -103,7 +103,8 @@ end
 [mdata, data, R] = extractWaveforms(params, T, I, C, Wrot, false);
 % use first vs last quartel as consistency check
 RR = squeeze(R(1,end,:))';
-    
+RR
+
 % calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
 
