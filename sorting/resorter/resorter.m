@@ -69,7 +69,7 @@ if ~isfield(params, 'forwardSp')
 end
 % Time range for cross-correlation
 if ~isfield(params, 'corrRange')
-    params.corrRange = floor((params.backSp + params.forwardSp) / 2);
+    params.corrRange = floor((params.backSp + params.forwardSp) / 1.1);
 end
 % Max number of random spikes to extract per cluster
 if ~isfield(params, 'waveCount')
@@ -100,20 +100,19 @@ for i = 1:length(clusterGroup.cluster_id)
 end
 
 % Extract individual waveforms from kilosort binary
-[mdata, data, R] = extractWaveforms(params, T, I, C, Wrot, false);
+[mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
 % use first vs last quartel as consistency check
-RR = squeeze(R(1,end,:))';
+RR = squeeze(consistency.R(1,end,:))';
 RR
 
 % calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
-SNR
 
 % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
 % spike times to be close together.
 % Take only 'good' single units as determined by kilosort, units with sufficient SNR, and units with sufficient
 % waveform consistency
-C = C((SNR > params.multiSNRThreshold & RR > params.consistencyThreshold & spkCount > 20) | C_ident == 1);
+C = C((SNR > params.multiSNRThreshold & spkCount > 20) | C_ident == 1);
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
@@ -150,8 +149,12 @@ while keepGoing
     bins = conncomp(J);
     figure(999)
     clf
-    title('Graph of connected clusters')
+    subplot(1,2,1)
+    imagesc(m)
+    colorbar
+    subplot(1,2,2)
     hold on
+    title('Graph of connected clusters')
     plot(J)
     axis off
     drawnow
@@ -218,46 +221,13 @@ for j = 1:length(C)
 end
 
 % Re-extract
-[mdata, data, R] = extractWaveforms(params, T, I, C, Wrot, true);
+[mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 % use first vs last quartel as consistency check
-RR = squeeze(R(1,end,:))';
+RR = squeeze(consistency.R(1,end,:))';
 RR
 
 % Re-calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
-
-% Calculate temporal extent of each unit
-totalT = double(max(T));
-temporalFraction = zeros(1,length(C));
-for j = 1:length(C)
-    times = T(I == C(j));
-    temporalFraction(j) = double(max(times) - min(times)) / totalT;
-end
-
-sigChan = cell(1,length(C));
-for j = 1:length(C)
-    innerData = mdata(:,:,j);
-    [m, ind] = sort(max(abs(mdata(:,:,j)),[],1), 'descend');
-    thresh = std(innerData(:))*5;
-    sigChan{j} = ind(m > thresh);
-end
-
-goodChan = [];
-for j = 1:length(C)
-    if R(j) > 0.8 && temporalFraction(j) > 0.95
-        goodChan = cat(2, goodChan, sigChan{j});
-    end
-end
-goodChan = unique(goodChan);
-
-goodUnit = zeros(1,length(C));
-for j = 1:length(C)
-    if sum(ismember(sigChan{j}, goodChan)) > 0 || temporalFraction(j) > 0.95
-        goodUnit(j) = 1;
-    else
-        goodUnit(j) = 0;
-    end
-end
 
 % Remove clusters that don't meet inclusion criteria
 saveUnits = find(SNR > params.SNRThreshold & spkCount > 20 & ...
@@ -270,9 +240,9 @@ mdata = mdata(:,:,saveUnits);
 data = data(:,:,:,saveUnits);
 SNR = SNR(saveUnits);
 spkCount = spkCount(saveUnits);
-R = R(:,:,saveUnits);
-temporalFraction = temporalFraction(saveUnits);
-sigChan = sigChan(saveUnits);
+consistency.R = consistency.R(:,:,saveUnits);
+consistency.wave = consistency.wave(:,:,:,saveUnits);
+consistency.channel = consistency.channel(:,saveUnits);
 
 disp(['Keeping ' num2str(length(C)) ' Units'])
 
@@ -371,7 +341,7 @@ end
 
 disp(['Number of clusters: ' num2str(length(C))])
 disp(['Number of spikes: ' num2str(length(I))])
-save([params.kiloDir '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'R', 'sigChan');
+save([params.kiloDir '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'consistency');
 end
 
 
@@ -394,7 +364,7 @@ for j = 1:size(mdata,3)
 end
 end
 
-function [mdata, data, R] = extractWaveforms(params, T, I, C, Wrot, unwhiten)
+function [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, unwhiten)
 disp('Extracting waveforms from binary')
 f = fopen(params.binaryFile, 'r');
 recordSize = 2; % 2 bytes for int16
@@ -413,9 +383,11 @@ waveParcel = floor(params.waveCount/4);
 data = nan(params.backSp + params.forwardSp, nChan, params.waveCount, length(C), 'single');
 mdata = zeros(params.backSp + params.forwardSp, nChan, length(C), 'single');
 R = zeros(4,4,length(C),'single');
+consistency = struct('R',[],'wave',[],'channel',[]);
 for j = 1:length(C)
     disp(['Extracting unit ' num2str(j) ' of ' num2str(length(C))])
     tempdata = nan(params.backSp + params.forwardSp, nChan, waveParcel, 4, 'single');
+    waveStep = 0;
     for q = 1:4
         times = T(I == C(j));
         times = times(times >= quartels(q) & times < quartels(q+1)); % trim times
@@ -429,20 +401,24 @@ for j = 1:length(C)
             end
             tempdata(:,badChan,t,q) = 0;
         end
+        data(:,:,waveStep+1 : waveStep+innerWaveCount,j) = tempdata(:,:,1:innerWaveCount,q);
+        waveStep = waveStep+innerWaveCount;
     end
-    data(:,:,1:size(tempdata,3)*size(tempdata,4),j) = tempdata(:,:,:);
     mdata(:,:,j) = nanmean(data(:,:,:,j),3);
     
     % consistency check
     tempm = squeeze(nanmean(tempdata,3));
     ucheck = permute(tempm, [2 1 3]);
     ucheck = ucheck(:,:);
-    [m, ind] = sort(max(abs(ucheck),[],2), 'descend');
+    [~, ind] = sort(max(abs(ucheck),[],2), 'descend');
+    consistency.wave(:,:,:,j) = tempm(:,ind(1:8),:);
+    consistency.channel(:,j) = ind(1:8);
     tempm = permute(tempm(:,ind(1:8),:), [3 1 2]);
     tempm = tempm(:,:)';
     R(:,:,j) = corr(tempm);
 end
 fclose(f);
+consistency.R = R;
 end
 
 function [r, lags] = calcCrossCorr(params, mdata)
@@ -452,7 +428,7 @@ function [r, lags] = calcCrossCorr(params, mdata)
     catdata = cat(1, catdata, zeros(params.corrRange, size(mdata,3)));
     for j = 1:size(mdata,2)
         catdata = cat(1, catdata, squeeze(mdata(:,j,:)));
-        catdata = cat(1, catdata, zeros(params.corrRange, size(mdata,3)));
+        catdata = cat(1, catdata, zeros(params.corrRange+1, size(mdata,3)));
     end
     [r, lags] = xcorr(catdata, params.corrRange, 'normalized');
     clear catdata
