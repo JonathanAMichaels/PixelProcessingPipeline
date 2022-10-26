@@ -423,6 +423,7 @@ end
 
 function [r, lags] = calcCrossCorr(params, mdata)
     disp('Calculating waveform cross-correlations')
+    mdata = single(mdata);
     % concatenate channels together while keeping a buffer between them
     catdata = [];
     catdata = cat(1, catdata, zeros(params.corrRange, size(mdata,3)));
@@ -430,6 +431,7 @@ function [r, lags] = calcCrossCorr(params, mdata)
         catdata = cat(1, catdata, squeeze(mdata(:,j,:)));
         catdata = cat(1, catdata, zeros(params.corrRange+1, size(mdata,3)));
     end
+    catdata = single(catdata);
     [r, lags] = xcorr(catdata, params.corrRange, 'normalized');
     clear catdata
     r = reshape(r, [size(r,1) size(mdata,3) size(mdata,3)]);
