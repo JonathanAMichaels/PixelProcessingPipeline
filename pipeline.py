@@ -217,6 +217,8 @@ if myo_post:
         f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
 
         config_kilosort['myomatrix_folder'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
+        config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
+                                       config['Session']['myo_chan_list'][myomatrix][0] + 1
 
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
 
