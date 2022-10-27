@@ -25,8 +25,10 @@ if "-f" in opts:
         raise SystemExit("Provided folder is not valid (you had one job...)")
 else:
     raise SystemExit(f"Usage: {sys.argv[0]} -f argument must be present")
+
 registration = False
 myo_sorting = False
+myo_post = False
 neuro_sorting = False
 neuro_post = False
 lfp_extract = False
@@ -36,6 +38,8 @@ if "-registration" in opts:
     registration = True
 if "-myo_sorting" in opts:
     myo_sorting = True
+if "-myo_post" in opts:
+    myo_post = True
 if "-neuro_sorting" in opts:
     neuro_sorting = True
 if "-neuro_post" in opts:
@@ -45,9 +49,9 @@ if "-lfp_extract" in opts:
 if "-full" in opts:
     registration = True
     myo_sorting = True
+    myo_post = True
     neuro_sorting = True
     neuro_post = True
-    lfp_extract = True
 if "-cluster" in opts:
     cluster = True
 if "-in_cluster" in opts:
@@ -160,6 +164,7 @@ if neuro_sorting:
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
         kilosort(config_kilosort)
 
+# Proceed with neuro post-processing
 if neuro_post:
     config_kilosort = {'script_dir': config['script_dir']}
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
@@ -180,7 +185,6 @@ if myo_sorting:
                        'trange': np.array(config['Session']['trange']),
                        'sync_chan': int(config['Session']['myo_analog_chan'])}
     path_to_add = script_folder + '/sorting/'
-    #os.system('module load matlab/2021b')
     if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
         matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
     else:
@@ -200,6 +204,21 @@ if myo_sorting:
 
         shutil.rmtree(config_kilosort['myomatrix_folder'], ignore_errors=True)
         myo_function(config_kilosort)
+
+# Proceed with myo post-processing
+if myo_post:
+    config_kilosort = {'script_dir': config['script_dir']}
+    path_to_add = script_folder + '/sorting/'
+    if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
+        matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
+    else:
+        matlab_root = '/local/software/matlab/R2020b/bin/matlab'
+    for myomatrix in range(len(config['Session']['myo_chan_list'])):
+        f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
+
+        config_kilosort['myomatrix_folder'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
+
+        scipy.io.savemat('/tmp/config.mat', config_kilosort)
 
         print('Starting resorting of ' + config_kilosort['myomatrix_folder'])
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
