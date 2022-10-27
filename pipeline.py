@@ -207,7 +207,7 @@ if myo_sorting:
 
 # Proceed with myo post-processing
 if myo_post:
-    config_kilosort = {'script_dir': config['script_dir']}
+    config_kilosort = {'script_dir': config['script_dir'], 'myomatrix': config['myomatrix']}
     path_to_add = script_folder + '/sorting/'
     if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
         matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
