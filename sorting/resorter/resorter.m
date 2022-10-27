@@ -407,13 +407,22 @@ for j = 1:length(C)
     mdata(:,:,j) = nanmean(data(:,:,:,j),3);
     
     % consistency check
+    if nChan >= 384
+        grabChannels = 8;
+    elseif nChan == 32
+        grabChannels = 4;
+    elseif nChan == 16
+        grabChannels = 4;
+    else
+        grabChannels = 8;
+    end
     tempm = squeeze(nanmean(tempdata,3));
     ucheck = permute(tempm, [2 1 3]);
     ucheck = ucheck(:,:);
     [~, ind] = sort(max(abs(ucheck),[],2), 'descend');
-    consistency.wave(:,:,:,j) = tempm(:,ind(1:8),:);
-    consistency.channel(:,j) = ind(1:8);
-    tempm = permute(tempm(:,ind(1:8),:), [3 1 2]);
+    consistency.wave(:,:,:,j) = tempm(:,ind(1:grabChannels),:);
+    consistency.channel(:,j) = ind(1:grabChannels);
+    tempm = permute(tempm(:,ind(1:grabChannels),:), [3 1 2]);
     tempm = tempm(:,:)';
     R(:,:,j) = corr(tempm);
 end
