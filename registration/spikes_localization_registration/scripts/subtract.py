@@ -68,7 +68,7 @@ g.add_argument(
 g.add_argument("--disp", default=2000, type=int)
 
 g = ap.add_argument_group("Chunking and parallelism")
-g.add_argument("--n_sec_chunk", type=int, default=3)
+g.add_argument("--n_sec_chunk", type=int, default=2)
 g.add_argument("--n_jobs", type=int, default=1)
 g.add_argument("--n_loc_workers", type=int, default=4)
 g.add_argument("--nogpu", action="store_true")
