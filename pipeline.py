@@ -151,7 +151,7 @@ config_kilosort['channel_list'] = 1
 if neuro_sorting:
     config_kilosort['type'] = 1
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
-    for pixel in range(config['num_neuropixels']):
+    for pixel in [1]:#range(config['num_neuropixels']):
         config_kilosort['neuropixel_folder'] = neuro_folders[pixel]
         tmp = glob.glob(neuro_folders[pixel] + '/*_t*.imec' + str(pixel) + '.ap.bin')
         config_kilosort['neuropixel'] = tmp[0]
@@ -173,7 +173,7 @@ if neuro_post:
         matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
     else:
         matlab_root = '/local/software/matlab/R2020b/bin/matlab'
-    for pixel in range(config['num_neuropixels']):
+    for pixel in [1]:#range(config['num_neuropixels']):
         config_kilosort['neuropixel_folder'] = neuro_folders[pixel] + '/sorted'
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
