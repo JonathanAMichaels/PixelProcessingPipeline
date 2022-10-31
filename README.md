@@ -21,16 +21,16 @@ These installation instructions were tested on the Computational Brain Science G
 
 The first time you set up your virtual environment, follow these steps:
 
-Extra step if you're on canada compute
-
-    module load gcc/9.3.0 arrow python/3.8.10 scipy-stack
-
     virtualenv ~/pipeline
     source ~/pipeline/bin/activate
     pip install --upgrade pip setuptools wheel
     pip3 install torch torchvision
     pip install scipy ruamel.yaml ibl-neuropixel PyWavelets scikit-image pyfftw==0.12.0 cython pydantic
     pip install cupy
+
+Extra step if you're on canada compute
+
+    module load gcc/9.3.0 arrow python/3.8.10 scipy-stack
 
 Compile codes necessary for drift correction
 
