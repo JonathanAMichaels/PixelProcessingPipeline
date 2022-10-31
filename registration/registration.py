@@ -21,7 +21,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 def registration(config):
     folders = glob.glob(config['neuropixel'] + '/*_g*')
-    for pixel in [1]:#range(config['num_neuropixels']):
+    for pixel in range(config['num_neuropixels']):
         working_directory = folders[pixel] + '/'
         registration_directory = working_directory + 'NeuropixelsRegistration2/'
         if not os.path.exists(registration_directory):
@@ -94,7 +94,7 @@ def registration(config):
                   ' --noresidual --nowaveforms --dndetect --thresholds=12,10,7 --n_jobs=' + str(n_jobs) +  # 12,10,8,6
                   ' --geom=' + config['script_dir'] +
                   '/registration/spikes_localization_registration/channels_maps/np1_channel_map.npy ' +
-                  '--n_windows=7 ' +
+                  '--n_windows=5 ' +
                   '--disp=1500 --overwrite')  # 5, 1500 / 4, 1500
 
         registered_file = glob.glob(registration_directory + 'subtraction_*.h5')
