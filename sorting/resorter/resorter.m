@@ -441,8 +441,16 @@ function [r, lags] = calcCrossCorr(params, mdata)
         catdata = cat(1, catdata, zeros(params.corrRange+1, size(mdata,3)));
     end
     catdata = single(catdata);
-    [r, lags] = xcorr(catdata, params.corrRange, 'normalized');
-    clear catdata
+
+    % xcorr can handle this without a for-loop, but it uses too much memory that way...
+    count = 1;
+    r = zeros(params.corrRange*2 + 1, size(catdata,2)^2, 'single');
+    for i = 1:size(catdata,2)
+        for j = 1:size(catdata,2)
+            [r(:,count), lags] = xcorr(catdata(:,i), catdata(:,j), params.corrRange, 'normalized');
+            count = count + 1;
+        end
+    end
     r = reshape(r, [size(r,1) size(mdata,3) size(mdata,3)]);
     for z = 1:size(r,1)
         r(z, logical(eye(size(r,2), size(r,3)))) = 0;
