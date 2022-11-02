@@ -48,10 +48,10 @@ if ~isfield(params, 'crit')
 end
 % SNR threshold for keeping clusters at the end
 if ~isfield(params, 'SNRThreshold')
-    params.SNRThreshold = 3.0;
+    params.SNRThreshold = 2.0;
 end
 if ~isfield(params, 'multiSNRThreshold')
-    params.multiSNRThreshold = 3.0; % 8
+    params.multiSNRThreshold = 3.0;
 end
 if ~isfield(params, 'consistencyThreshold')
     params.consistencyThreshold = 0.7;
@@ -101,9 +101,6 @@ end
 
 % Extract individual waveforms from kilosort binary
 [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
-% use first vs last quartel as consistency check
-RR = squeeze(consistency.R(1,end,:))';
-RR
 
 % calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
@@ -224,10 +221,13 @@ end
 [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 % use first vs last quartel as consistency check
 RR = squeeze(consistency.R(1,end,:))';
+disp('waveform consistency')
 RR
 
 % Re-calc stats
 [SNR, spkCount] = calcStats(mdata, data, T, I, C);
+disp('SNR')
+SNR
 
 % Remove clusters that don't meet inclusion criteria
 saveUnits = find(SNR > params.SNRThreshold & spkCount > 20 & ...
