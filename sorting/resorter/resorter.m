@@ -102,19 +102,19 @@ for i = 1:length(clusterGroup.cluster_id)
     C_ident(end+1) = strcmp(clusterGroup.group(i,1:3), 'goo');
 end
 
-% Extract individual waveforms from kilosort binary
-[mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
-
-% calc stats
-[SNR, spkCount] = calcStats(mdata, data, T, I, C);
-
-% Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
-% spike times to be close together.
-% Take only 'good' single units as determined by kilosort, units with sufficient SNR, and units with sufficient
-% waveform consistency
 if params.singleOnly
     C = C(C_ident == 1);
 else
+    % Extract individual waveforms from kilosort binary
+    [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
+
+    % calc stats
+    [SNR, spkCount] = calcStats(mdata, data, T, I, C);
+
+    % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
+    % spike times to be close together.
+    % Take only 'good' single units as determined by kilosort, units with sufficient SNR, and units with sufficient
+    % waveform consistency
     C = C((SNR > params.multiSNRThreshold & spkCount > 20) | C_ident == 1);
 end
 
