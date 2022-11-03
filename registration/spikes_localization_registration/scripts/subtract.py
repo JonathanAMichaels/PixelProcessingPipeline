@@ -112,6 +112,8 @@ else:
 if args.nogpu:
     os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
+print(args)
+
 sub_h5 = subtract.subtraction(
     args.standardized_bin,
     args.out_folder,
