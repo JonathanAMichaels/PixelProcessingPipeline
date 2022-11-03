@@ -10,7 +10,7 @@ params.waveCount = 800;
 params.backSp = 35;
 params.forwardSp = 35;
 params.corrRange = 20;
-params.crit = 0.8;
+params.crit = 0.6; % 0.8
 params.consistencyThreshold = 0.7;
 params.singleOnly = true;
 
