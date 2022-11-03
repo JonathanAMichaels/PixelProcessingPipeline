@@ -145,7 +145,7 @@ def subtraction(
     nn_detector_path = None
     if nn_detect:
         nn_detector_path = (
-            Path(__file__).parent.parent / f"pretrained/detect_{probe}.pt"
+            Path(__file__).parent.parent / f"pretrained_detector/detect_{probe}.pt"
         )
         print("Using pretrained detector for", probe, "from", nn_detector_path)
         detection_kind = "voltage->NN"
