@@ -79,6 +79,9 @@ end
 if ~isfield(params, 'consistencyWaveCount')
     params.consistencyWaveCount = floor(params.waveCount / 2);
 end
+if ~isfield(params, 'singleOnly')
+    params.singleOnly = false;
+end
 
 % Read data from kilosort output
 disp('Reading kilosort output')
@@ -109,7 +112,11 @@ end
 % spike times to be close together.
 % Take only 'good' single units as determined by kilosort, units with sufficient SNR, and units with sufficient
 % waveform consistency
-C = C((SNR > params.multiSNRThreshold & spkCount > 20) | C_ident == 1);
+if params.singleOnly
+    C = C(C_ident == 1);
+else
+    C = C((SNR > params.multiSNRThreshold & spkCount > 20) | C_ident == 1);
+end
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
