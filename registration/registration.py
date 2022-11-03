@@ -91,7 +91,7 @@ def registration(config):
         os.system('python ' + config['script_dir'] +
                   '/registration/spikes_localization_registration/scripts/subtract.py '
                   + str(standardized_file) + ' ' + registration_directory +
-                  ' --noresidual --nowaveforms --nndetect --thresholds=12,10,8 --n_jobs=' + str(n_jobs) +  # 12,10,8,6
+                  ' --noresidual --nowaveforms --dndetect --thresholds=12,10,8 --n_jobs=' + str(n_jobs) +  # 12,10,8,6
                   ' --geom=' + config['script_dir'] +
                   '/registration/spikes_localization_registration/channels_maps/np1_channel_map.npy ' +
                   '--n_windows=3 ' +
