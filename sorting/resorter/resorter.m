@@ -62,10 +62,10 @@ if ~isfield(params, 'refractoryLim')
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
-    params.backSp = 141;
+    params.backSp = 101;
 end
 if ~isfield(params, 'forwardSp')
-    params.forwardSp = 141;
+    params.forwardSp = 101;
 end
 % Time range for cross-correlation
 if ~isfield(params, 'corrRange')
@@ -73,11 +73,7 @@ if ~isfield(params, 'corrRange')
 end
 % Max number of random spikes to extract per cluster
 if ~isfield(params, 'waveCount')
-    params.waveCount = 400;
-end
-% Max number of spikes for consistency check split
-if ~isfield(params, 'consistencyWaveCount')
-    params.consistencyWaveCount = floor(params.waveCount / 2);
+    params.waveCount = 800;
 end
 if ~isfield(params, 'singleOnly')
     params.singleOnly = false;
@@ -131,10 +127,10 @@ disp(['Number of spikes to work with: ' num2str(length(I))])
 keepGoing = 1;
 while keepGoing
     % Extract individual waveforms from kilosort binary
-    [mdata, ~, ~] = extractWaveforms(params, T, I, C, Wrot, false);
+    [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
 
     % calculate cross-correlation
-    [bigR, lags] = calcCrossCorr(params, mdata);
+    [bigR, lags] = calcCrossCorr(params, mdata, consistency);
     
     disp('Combining units and re-assigning spikes')
     % Find lags with maximum correlation
@@ -439,9 +435,15 @@ fclose(f);
 consistency.R = R;
 end
 
-function [r, lags] = calcCrossCorr(params, mdata)
+function [r, lags] = calcCrossCorr(params, mdata, consistency)
     disp('Calculating waveform cross-correlations')
     mdata = single(mdata);
+    % Let's focus on the top channels only
+    for j = 1:size(mdata,3)
+        allChan = 1:size(mdata,2);
+        allChan(consistency.channel(:,j)) = [];
+        mdata(:,allChan,j) = 0;
+    end
     % concatenate channels together while keeping a buffer between them
     catdata = [];
     catdata = cat(1, catdata, zeros(params.corrRange, size(mdata,3)));
