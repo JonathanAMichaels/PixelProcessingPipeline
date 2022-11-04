@@ -423,10 +423,10 @@ for j = 1:length(C)
     else
         grabChannels = 8;
     end
-    tempm = squeeze(nanmean(tempdata,3));
+    tempm = squeeze(nanmean(tempdata(:,:,:,[1 end]),3));
     ucheck = permute(tempm, [2 1 3]);
     ucheck = ucheck(:,:);
-    [~, ind] = sort(max(abs(ucheck),[],2), 'descend');
+    [~, ind] = sort(range(ucheck),2), 'descend');
     consistency.wave(:,:,:,j) = tempm(:,ind(1:grabChannels),:);
     consistency.channel(:,j) = ind(1:grabChannels);
     tempm = permute(tempm(:,ind(1:grabChannels),:), [3 1 2]);

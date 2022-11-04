@@ -56,7 +56,7 @@ g.add_argument("--t_end", type=int, default=None)
 
 g = ap.add_argument_group("Temporal PCA")
 g.add_argument("--tpca_rank", type=int, default=8)
-g.add_argument("--n_sec_pca", type=int, default=20)
+g.add_argument("--n_sec_pca", type=int, default=60)  # 20
 
 g = ap.add_argument_group("Registration")
 g.add_argument("--noregister", action="store_true")
@@ -68,7 +68,7 @@ g.add_argument(
 g.add_argument("--disp", default=2000, type=int)
 
 g = ap.add_argument_group("Chunking and parallelism")
-g.add_argument("--n_sec_chunk", type=int, default=1)
+g.add_argument("--n_sec_chunk", type=int, default=2)
 g.add_argument("--n_jobs", type=int, default=1)
 g.add_argument("--n_loc_workers", type=int, default=4)
 g.add_argument("--nogpu", action="store_true")
