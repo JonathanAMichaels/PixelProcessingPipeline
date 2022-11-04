@@ -21,7 +21,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 def registration(config):
     folders = glob.glob(config['neuropixel'] + '/*_g*')
-    for pixel in range(config['num_neuropixels']):
+    for pixel in [1]:#range(config['num_neuropixels']):
         working_directory = folders[pixel] + '/'
         registration_directory = working_directory + 'NeuropixelsRegistration2/'
         if not os.path.exists(registration_directory):

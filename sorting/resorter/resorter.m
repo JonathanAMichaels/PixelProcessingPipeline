@@ -385,19 +385,21 @@ else
 end
 totalT = double(max(T));
 quartels = linspace(1, totalT, 5);
-waveParcel = floor(params.waveCount/4);
+quartelPacks{1} = quartels(1:2);
+quartelPacks{2} = quartels(4:5);
+waveParcel = floor(params.waveCount/2);
 % Extract each waveform
 data = nan(params.backSp + params.forwardSp, nChan, params.waveCount, length(C), 'single');
 mdata = zeros(params.backSp + params.forwardSp, nChan, length(C), 'single');
-R = zeros(4,4,length(C),'single');
+R = zeros(2,2,length(C),'single');
 consistency = struct('R',[],'wave',[],'channel',[]);
 for j = 1:length(C)
     disp(['Extracting unit ' num2str(j) ' of ' num2str(length(C))])
-    tempdata = nan(params.backSp + params.forwardSp, nChan, waveParcel, 4, 'single');
+    tempdata = nan(params.backSp + params.forwardSp, nChan, waveParcel, 2, 'single');
     waveStep = 0;
-    for q = 1:4
+    for q = 1:2
         times = T(I == C(j));
-        times = times(times >= quartels(q) & times < quartels(q+1)); % trim times
+        times = times(times >= quartelPacks{q}(1) & times < quartelPacks{q}(2)); % trim times
         innerWaveCount = min([waveParcel length(times)]);
         useTimes = times(round(linspace(1, length(times), innerWaveCount)));
         for t = 1:length(useTimes)
@@ -426,7 +428,7 @@ for j = 1:length(C)
     tempm = squeeze(nanmean(tempdata(:,:,:,[1 end]),3));
     ucheck = permute(tempm, [2 1 3]);
     ucheck = ucheck(:,:);
-    [~, ind] = sort(range(ucheck),2), 'descend');
+    [~, ind] = sort(range(ucheck,2), 'descend');
     consistency.wave(:,:,:,j) = tempm(:,ind(1:grabChannels),:);
     consistency.channel(:,j) = ind(1:grabChannels);
     tempm = permute(tempm(:,ind(1:grabChannels),:), [3 1 2]);
