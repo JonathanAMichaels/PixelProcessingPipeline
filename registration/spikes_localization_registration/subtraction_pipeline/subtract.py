@@ -963,8 +963,9 @@ def full_denoising(
                 .cpu()
                 .numpy()
             )
-        wfs_in_probe = np.concatenate(results, axis=0)
-        del results
+        if results:
+            wfs_in_probe = np.concatenate(results, axis=0)
+            del results
 
     # everyone to numpy now, if we were torch
     if torch.is_tensor(waveforms):
