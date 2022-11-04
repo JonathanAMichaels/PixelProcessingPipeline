@@ -12,6 +12,7 @@ params.forwardSp = 35;
 params.corrRange = 20;
 params.crit = 0.9; % 0.8
 params.consistencyThreshold = 0.7;
+params.SNRThreshold = 2;
 params.singleOnly = true;
 
 resorter(params)
