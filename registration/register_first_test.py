@@ -5,7 +5,7 @@ import glob
 import h5py
 
 # This implementation has been tested with Neuropixels 1.0
-geomarray = mat2npy('~/PixelProcessingPipeline/geometries/neuropixPhase3B1_kilosortChanMap.mat') # convert .mat chan file to .npy chan file
+geomarray = mat2npy('/home/ROBARTS/jmichaels/PixelProcessingPipeline/geometries/neuropixPhase3B1_kilosortChanMap.mat') # convert .mat chan file to .npy chan file
 reader = Reader('/cifs/pruszynski/Malfoy/011322/011322_g0/011322_g0_imec0/011322_g0_t0.imec0.ap.bin')
 
 registration_directory = '/cifs/pruszynski/Malfoy/011322/011322_g0/011322_g0_imec0/NeuropixelsRegistration2/'
