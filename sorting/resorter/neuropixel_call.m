@@ -6,14 +6,14 @@ params.binaryFile = [neuropixel_folder '/proc.dat'];
 params.userSorted = false;
 params.savePlots = false;
 params.doPlots = false;
-params.waveCount = 800;
+params.waveCount = 600;
 params.backSp = 35;
 params.forwardSp = 35;
 params.corrRange = 10;
-params.crit = 0.9; % 0.8
-params.consistencyThreshold = 0.7;
-params.SNRThreshold = 2;
-params.singleOnly = false;
+params.crit = 0.9;
+params.consistencyThreshold = 0;
+params.SNRThreshold = 0;
+params.skipFilter = true;
 
 resorter(params)
 quit;

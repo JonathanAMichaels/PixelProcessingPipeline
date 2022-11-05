@@ -75,8 +75,8 @@ end
 if ~isfield(params, 'waveCount')
     params.waveCount = 800;
 end
-if ~isfield(params, 'singleOnly')
-    params.singleOnly = false;
+if ~isfield(params, 'skipFilter')
+    params.skipFilter = false;
 end
 
 % Read data from kilosort output
@@ -98,9 +98,7 @@ for i = 1:length(clusterGroup.cluster_id)
     C_ident(end+1) = strcmp(clusterGroup.group(i,1:3), 'goo');
 end
 
-if params.singleOnly
-    C = C(C_ident == 1);
-else
+if ~params.skipFilter
     % Extract individual waveforms from kilosort binary
     [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
 
@@ -127,7 +125,7 @@ disp(['Number of spikes to work with: ' num2str(length(I))])
 keepGoing = 1;
 while keepGoing
     % Extract individual waveforms from kilosort binary
-    [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
+    [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
 
     % calculate cross-correlation
     [bigR, lags] = calcCrossCorr(params, mdata, consistency);
