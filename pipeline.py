@@ -151,7 +151,7 @@ config_kilosort['channel_list'] = 1
 if neuro_sorting:
     config_kilosort['type'] = 1
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
-    for pixel in [1]:#range(config['num_neuropixels']):
+    for pixel in range(config['num_neuropixels']):
         config_kilosort['neuropixel_folder'] = neuro_folders[pixel]
         tmp = glob.glob(neuro_folders[pixel] + '/*_t*.imec' + str(pixel) + '.ap.bin')
         config_kilosort['neuropixel'] = tmp[0]
