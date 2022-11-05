@@ -1,4 +1,4 @@
-from ibllib.io.spikeglx import Reader
+from spikeglx import Reader
 import estimate_displacement as ed
 from utils import mat2npy
 import glob

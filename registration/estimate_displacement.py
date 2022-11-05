@@ -24,7 +24,7 @@ from scipy.spatial.distance import cdist
 
 from scipy.interpolate import griddata
 
-from registration.utils import merge_filtered_files
+from utils import merge_filtered_files
 
 # function that wraps around all functions
 # reader: yass reader
