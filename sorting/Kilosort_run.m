@@ -18,11 +18,13 @@ else
     ops.trange = trange;
 end
 
-%ops.NchanTOT  = 385; % total number of channels in your recording
 run([script_dir '/sorting/Kilosort_config_3.m']);
 ops.fproc   = fullfile(rootH, 'shifted.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.nblocks = 3;
+
+
+ops.NchanTOT  = 385; % total number of channels in your recording
 
 ops.trange = [0 120];
 
@@ -36,7 +38,6 @@ rez                = preprocessDataSub(ops);
 disp('Finished preprocessing')
 rez                = datashift2(rez, 1);
 disp('Finished datashift')
-rezToPhy2(rez, rootH);
 
 clear ops
 
@@ -51,6 +52,7 @@ run([script_dir '/sorting/Kilosort_config_2.m']);
 % preprocess data to create temp_wh.dat
 %rez = preprocessDataSub(ops);
 
+asdsdsds
 
 % time-reordering as a function of drift
 rez = clusterSingleBatches(rez);
