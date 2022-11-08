@@ -55,6 +55,8 @@ ops.chanMap = fullfile(chanMapFile);
 % find the binary file
 ops.fbinary = shifted_location;
 
+rez_orig = rez;
+
 into = rez.ops;
 from = ops;
 %MERGESTRUCT merge all the fields of scalar structure from into scalar structure into
@@ -72,8 +74,11 @@ from = ops;
     end
 rez.ops = into;
 
+ops.fproc   = fullfile(rootH, 'temp_wh.dat');
 % preprocess data to create temp_wh.dat
-%rez = preprocessDataSub(ops);
+rez = preprocessDataSub(ops);
+
+sadsds
 
 % time-reordering as a function of drift
 rez = clusterSingleBatches(rez);
