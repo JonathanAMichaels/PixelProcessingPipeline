@@ -10,9 +10,7 @@ phyDir = 'sortednew';
 
 rootZ = [neuropixel_folder '/'];
 rootH = [rootZ phyDir '/'];
-rootHs = [rootH '/shift/'];
 mkdir(rootH);
-mkdir(rootHs)
 
 if trange(2) == 0
     ops.trange = [0 Inf];
@@ -20,8 +18,10 @@ else
     ops.trange = trange;
 end
 
+ops.trange = [0 200];
+
 run([script_dir '/sorting/Kilosort_config_3.m']);
-ops.fproc   = fullfile(rootHs, 'shifted.dat');
+ops.fproc   = fullfile(rootH, 'shifted.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.nblocks = 3;
 
@@ -37,11 +37,9 @@ rez                = preprocessDataSub(ops);
 disp('Finished preprocessing')
 rez                = datashift2(rez, 1);
 disp('Finished datashift')
-rezToPhy2(rez, rootHs);
 
 dshift = rez.dshift;
 Nchan = size(rez.Wrot,1);
-Wrot_shift = rez.Wrot;
 shifted_location = ops.fproc;
 clear ops
 
@@ -53,12 +51,11 @@ run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.NchanTOT = Nchan;
 ops.trange = [0 Inf];
 ops.chanMap = fullfile(chanMapFile);
-ops.fproc       = fullfile(rootH, 'temp_wh.dat'); % proc file on a fast SSD
 % find the binary file
-ops.fbinary = shifted_location;
+%ops.fbinary = shifted_location;
 
 % preprocess data to create temp_wh.dat
-rez = preprocessDataSub(ops);
+%rez = preprocessDataSub(ops);
 
 
 % time-reordering as a function of drift
