@@ -149,7 +149,7 @@ config_kilosort['channel_list'] = 1
 
 # Proceed with neural spike sorting
 if neuro_sorting:
-    config_kilosort = {'script_dir': config['script_dir']}
+    config_kilosort = {'script_dir': config['script_dir'], 'trange': np.array(config['Session']['trange'])}
     config_kilosort['type'] = 1
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
 
