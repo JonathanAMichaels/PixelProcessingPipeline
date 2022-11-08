@@ -1,6 +1,6 @@
 load('/tmp/config.mat')
 
-
+rmpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 
 chanMapFile = [script_dir '/geometries/neuropixPhase3B1_kilosortChanMap.mat'];
@@ -22,6 +22,7 @@ ops.NchanTOT  = 385; % total number of channels in your recording
 run([script_dir '/sorting/Kilosort_config_3.m']);
 ops.fproc   = fullfile(rootH, 'shifted.dat');
 ops.chanMap = fullfile(chanMapFile);
+ops.nblocks = 3;
 
 % find the binary file
 fs          = dir(fullfile(rootZ, '*.bin'));
