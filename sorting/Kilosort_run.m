@@ -39,6 +39,8 @@ disp('Finished preprocessing')
 rez                = datashift2(rez, 1);
 disp('Finished datashift')
 
+Nchan = rez.Nchan;
+shifted_location = ops.fproc;
 clear ops
 
 rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
@@ -46,13 +48,14 @@ addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
 run([script_dir '/sorting/Kilosort_config_2.m']);
 
+ops.NchanTOT = Nchan;
+
 % find the binary file
-%ops.fbinary = shifted_location;
+ops.fbinary = shifted_location;
 
 % preprocess data to create temp_wh.dat
-%rez = preprocessDataSub(ops);
+rez = preprocessDataSub(ops);
 
-asdsdsds
 
 % time-reordering as a function of drift
 rez = clusterSingleBatches(rez);
