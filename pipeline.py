@@ -174,7 +174,7 @@ if neuro_sorting:
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
         #kilosort(config_kilosort)
 
-
+        print(config_kilosort)
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
                   path_to_add + '\'); Kilosort_run"')
