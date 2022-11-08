@@ -3,7 +3,6 @@ load('/tmp/config.mat')
 
 addpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 
-pathToYourConfigFile = ;
 chanMapFile = [script_dir '/geometries/neuropixPhase3B1_kilosortChanMap.mat'];
 disp(['Using this channel map: ' chanMapFile])
 
