@@ -26,7 +26,6 @@ ops.nblocks = 3;
 
 ops.NchanTOT  = 385; % total number of channels in your recording
 
-ops.trange = [0 120];
 
 % find the binary file
 fs          = dir(fullfile(rootZ, '*.bin'));
@@ -39,7 +38,9 @@ disp('Finished preprocessing')
 rez                = datashift2(rez, 1);
 disp('Finished datashift')
 
-Nchan = rez.Nchan;
+dshift = rez.dshift;
+Nchan = size(rez.Wrot,1);
+Wrot_shift = rez.Wrot;
 shifted_location = ops.fproc;
 clear ops
 
@@ -49,7 +50,9 @@ addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 run([script_dir '/sorting/Kilosort_config_2.m']);
 
 ops.NchanTOT = Nchan;
-
+ops.trange = [0 Inf];
+ops.chanMap = fullfile(chanMapFile);
+ops.fproc       = fullfile(rootH, 'temp_wh.dat'); % proc file on a fast SSD
 % find the binary file
 ops.fbinary = shifted_location;
 
@@ -85,6 +88,6 @@ fprintf('found %d good units \n', sum(rez.good>0))
 fprintf('Saving results to Phy  \n')
 rezToPhy(rez, rootH);
 dshift = rez.dshift;
-save([rootH 'drift'], 'dshift');
+save([rootH 'drift'], 'dshift', 'Wrot_shift');
 
 quit;
