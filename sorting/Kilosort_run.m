@@ -1,6 +1,5 @@
 load('/tmp/config.mat')
 
-rmpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 
 chanMapFile = [script_dir '/geometries/neuropixPhase3B1_kilosortChanMap.mat'];
@@ -12,7 +11,7 @@ rootZ = [neuropixel_folder '/'];
 rootH = [rootZ phyDir '/'];
 mkdir(rootH);
 
-if Session.trange(2) == 0
+if trange(2) == 0
     ops.trange = [0 Inf];
 else
     ops.trange = Session.trange;
