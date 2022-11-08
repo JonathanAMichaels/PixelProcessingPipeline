@@ -157,7 +157,8 @@ if neuro_sorting:
     if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
         matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
     else:
-        matlab_root = '/local/software/matlab/R2020b/bin/matlab'
+        os.system('module load matlab/2021b')
+        matlab_root = 'matlab';
 
 
     for pixel in range(config['num_neuropixels']):
