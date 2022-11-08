@@ -5,7 +5,7 @@ ops.fs = 30000;
 ops.fshigh = 300;
 
 % minimum firing rate on a "good" channel (0 to skip)
-ops.minfr_goodchannels = 0.01;
+ops.minfr_goodchannels = 0;
 
 % threshold on projections (like in Kilosort1, can be different for last pass like [10 4])
 ops.Th = [10 4];

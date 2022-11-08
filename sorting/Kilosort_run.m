@@ -1,6 +1,7 @@
 load('/tmp/config.mat')
 
 addpath(genpath([script_dir '/sorting/Kilosort-3.0']))
+addpath(genpath([script_dir '/sorting/npy-matlab']))
 
 chanMapFile = [script_dir '/geometries/neuropixPhase3B1_kilosortChanMap.mat'];
 disp(['Using this channel map: ' chanMapFile])
@@ -11,10 +12,11 @@ rootZ = [neuropixel_folder '/'];
 rootH = [rootZ phyDir '/'];
 mkdir(rootH);
 
+trange = [0 120];
 if trange(2) == 0
     ops.trange = [0 Inf];
 else
-    ops.trange = Session.trange;
+    ops.trange = trange;
 end
 
 ops.NchanTOT  = 385; % total number of channels in your recording
@@ -33,15 +35,15 @@ rez                = preprocessDataSub(ops);
 disp('Finished preprocessing')
 rez                = datashift2(rez, 1);
 disp('Finished datashift')
+rezToPhy2(rez, rootH);
 
-
-shifted_location = ops.fproc;
 clear ops
 
 rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
 run([script_dir '/sorting/Kilosort_config_2.m']);
+
 % find the binary file
 %ops.fbinary = shifted_location;
 
@@ -76,5 +78,7 @@ fprintf('found %d good units \n', sum(rez.good>0))
 % write to Phy
 fprintf('Saving results to Phy  \n')
 rezToPhy(rez, rootH);
+dshift = rez.dshift;
+save([rootH 'drift'], 'dshift');
 
 quit;
