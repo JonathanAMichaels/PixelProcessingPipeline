@@ -51,12 +51,29 @@ run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.NchanTOT = Nchan;
 ops.trange = [0 Inf];
 ops.chanMap = fullfile(chanMapFile);
+
 % find the binary file
-%ops.fbinary = shifted_location;
+ops.fbinary = shifted_location;
+
+into = rez.ops;
+from = ops;
+%MERGESTRUCT merge all the fields of scalar structure from into scalar structure into
+    validateattributes(from, {'struct'}, {'scalar'});
+    validateattributes(into, {'struct'}, {'scalar'});
+    fns = fieldnames(from);
+    for fn = fns.'
+     if isstruct(from.(fn{1})) && isfield(into, fn{1})
+          %nested structure where the field already exist, merge again
+          into.(fn{1}) = mergestruct(into.(fn{1}), from.(fn{1}));
+     else
+         %non structure field, or nested structure field that does not already exist, simply copy
+         into.(fn{1}) = from.(fn{1});
+     end
+    end
+rez.ops = into;
 
 % preprocess data to create temp_wh.dat
 %rez = preprocessDataSub(ops);
-
 
 % time-reordering as a function of drift
 rez = clusterSingleBatches(rez);
@@ -85,7 +102,7 @@ fprintf('found %d good units \n', sum(rez.good>0))
 % write to Phy
 fprintf('Saving results to Phy  \n')
 rezToPhy(rez, rootH);
-dshift = rez.dshift;
-save([rootH 'drift'], 'dshift', 'Wrot_shift');
+
+save([rootH 'drift'], 'dshift');
 
 quit;
