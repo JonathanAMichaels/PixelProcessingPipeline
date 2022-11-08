@@ -146,10 +146,10 @@ if registration:
 config_kilosort = yaml.safe_load(open(config_file, 'r'))
 config_kilosort['myomatrix_number'] = 1
 config_kilosort['channel_list'] = 1
-config_kilosort['script_dir'] = config['script_dir']
 
 # Proceed with neural spike sorting
 if neuro_sorting:
+    config_kilosort = {'script_dir': config['script_dir']}
     config_kilosort['type'] = 1
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
 
