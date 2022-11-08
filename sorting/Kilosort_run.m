@@ -12,18 +12,19 @@ rootZ = [neuropixel_folder '/'];
 rootH = [rootZ phyDir '/'];
 mkdir(rootH);
 
-trange = [0 120];
 if trange(2) == 0
     ops.trange = [0 Inf];
 else
     ops.trange = trange;
 end
 
-ops.NchanTOT  = 385; % total number of channels in your recording
+%ops.NchanTOT  = 385; % total number of channels in your recording
 run([script_dir '/sorting/Kilosort_config_3.m']);
 ops.fproc   = fullfile(rootH, 'shifted.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.nblocks = 3;
+
+ops.trange = [0 120];
 
 % find the binary file
 fs          = dir(fullfile(rootZ, '*.bin'));
