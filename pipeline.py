@@ -151,6 +151,14 @@ config_kilosort['channel_list'] = 1
 if neuro_sorting:
     config_kilosort['type'] = 1
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
+
+    path_to_add = script_folder + '/sorting/'
+    if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
+        matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
+    else:
+        matlab_root = '/local/software/matlab/R2020b/bin/matlab'
+
+
     for pixel in range(config['num_neuropixels']):
         config_kilosort['neuropixel_folder'] = neuro_folders[pixel]
         tmp = glob.glob(neuro_folders[pixel] + '/*_t*.imec' + str(pixel) + '.ap.bin')
@@ -162,7 +170,12 @@ if neuro_sorting:
             extract_sync(config_kilosort)
 
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
-        kilosort(config_kilosort)
+        #kilosort(config_kilosort)
+
+
+        scipy.io.savemat('/tmp/config.mat', config_kilosort)
+        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
+                  path_to_add + '\'); Kilosort_run"')
 
 # Proceed with neuro post-processing
 if neuro_post:

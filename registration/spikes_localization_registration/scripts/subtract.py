@@ -168,8 +168,8 @@ if not args.nolocalize and not args.noregister:
                 disp=args.disp,
                 corr_threshold=0.6,  # 0.5, 0.65
             )
-            #z_reg -= (z_reg - z_abs).mean()
-            #dispmap -= dispmap.mean()
+            z_reg -= (z_reg - z_abs).mean()
+            dispmap -= dispmap.mean()
             h5.create_dataset("z_reg", data=z_reg)
             h5.create_dataset("dispmap", data=dispmap)
 
