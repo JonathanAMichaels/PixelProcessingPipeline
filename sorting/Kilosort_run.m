@@ -18,7 +18,7 @@ else
     ops.trange = trange;
 end
 
-ops.trange = [0 160];
+%ops.trange = [0 160];
 
 run([script_dir '/sorting/Kilosort_config_3.m']);
 ops.fproc   = fullfile(rootH, 'shifted.dat');
@@ -47,7 +47,8 @@ addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 % preprocess data to create temp_wh.dat
 %rez = preprocessDataSub(ops);
 
-ops.Th = [10 4];
+rez.ops.Th = [10 4];
+rez.ops.NchanTOT = 384;
 
 % time-reordering as a function of drift
 rez = clusterSingleBatches(rez);
