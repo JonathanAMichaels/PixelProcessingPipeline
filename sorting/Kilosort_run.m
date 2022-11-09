@@ -45,7 +45,7 @@ addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 %run([script_dir '/sorting/Kilosort_config_2.m']);
 
 % preprocess data to create temp_wh.dat
-#rez = preprocessDataSub(ops);
+%rez = preprocessDataSub(ops);
 
 ops.Th = [10 4];
 
