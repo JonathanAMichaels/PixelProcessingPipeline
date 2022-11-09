@@ -54,7 +54,7 @@ addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
 run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = [rootS 'shifted.dat'];
-ops.fproc = [rootS 'shifted.dat'];
+ops.fproc = [rootH 'proc.dat'];
 ops.NchanTOT = length(chanMap);
 ops.chanMap = fullfile([rootS 'chanmap.mat']);
 %rez = rmfield(rez, {'wTEMP','wPCA','iC','dist','dshift','st0','F','F0','F0m'});
