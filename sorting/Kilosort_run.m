@@ -50,6 +50,8 @@ save([rootS 'Wrot'], 'Wrot')
 rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
+ops = rez.ops;
+
 run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fproc = [rootS 'shifted.dat'];
 ops.NchanTOT = rez.ops.Nchan;
