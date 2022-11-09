@@ -20,7 +20,7 @@ else
     ops.trange = trange;
 end
 
-ops.trange = [0 160];
+ops.trange = [0 120];
 
 run([script_dir '/sorting/Kilosort_config_3.m']);
 ops.fproc   = fullfile(rootS, 'shifted.dat');
@@ -43,8 +43,9 @@ dshift = rez.dshift;
 chanMap = 1:length(rez.ops.chanMap);
 xcoords = rez.xcoords;
 ycoords = rez.ycoords;
-save([rootS 'chanmap'], 'xcoords', 'ycoords', 'chanMap');
-rezToPhy2(rez, rootS)
+Wrot = rez.Wrot;
+%save([rootS 'chanmap'], 'xcoords', 'ycoords', 'chanMap');
+save([rootS 'Wrot'], 'Wrot')
 
 rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
@@ -53,7 +54,6 @@ run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = rez.ops.fproc;
 ops.fproc = [rootH 'proc.dat'];
 ops.NchanTOT = rez.ops.Nchan;
-ops.chanMap = fullfile([rootS 'chanmap.mat']);
 
 % preprocess data to create temp_wh.dat
 rez = preprocessDataSub(ops);
