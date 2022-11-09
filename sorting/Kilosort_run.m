@@ -23,7 +23,7 @@ end
 ops.trange = [0 120];
 
 run([script_dir '/sorting/Kilosort_config_3.m']);
-ops.fproc   = fullfile(rootH, 'shifted.dat');
+ops.fproc   = fullfile(rootH, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.nblocks = 2;
 
@@ -37,7 +37,7 @@ disp(['Using ' ops.fbinary])
 
 rez                = preprocessDataSub(ops);
 disp('Finished preprocessing')
-rez                = datashift2(rez, 1);
+rez                = datashift2(rez, 0);
 disp('Finished datashift')
 dshift = rez.dshift;
 
@@ -50,30 +50,15 @@ rez.ops.fproc
 %save([rootS 'chanmap'], 'xcoords', 'ycoords', 'chanMap');
 %save([rootS 'Wrot'], 'Wrot')
 
+clear rez ops
 rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
-% frequency for high pass filtering (150)
-rez.ops.fshigh = 300;
+run([script_dir '/sorting/Kilosort_config_2.m']);
+ops.fbinary = fullfile(rootZ, fs(1).name);
+ops.fproc   = fullfile(rootH, 'proc.dat');
+ops.NchanTOT = 385;
 
-% minimum firing rate on a "good" channel (0 to skip)
-rez.ops.minfr_goodchannels = 0;
-
-% threshold on projections (like in Kilosort1, can be different for last pass like [10 4])
-rez.ops.Th = [10 4];
-
-% how important is the amplitude penalty (like in Kilosort1, 0 means not used, 10 is average, 50 is a lot)
-rez.ops.lam = 10;
-
-% splitting a cluster at the end requires at least this much isolation for each sub-cluster (max = 1)
-rez.ops.AUCsplit = 0.9;
-
-% minimum spike rate (Hz), if a cluster falls below this for too long it gets removed
-rez.ops.minFR = 1/50;
-
-%ops = rez.ops;
-%clear ops rez
-%run([script_dir '/sorting/Kilosort_config_2.m']);
 %ops.fbinary = [rootS 'shifted.dat'];
 %ops.fproc = [rootH 'proc.dat'];
 %ops.NchanTOT = 384;
@@ -83,7 +68,7 @@ rez.ops.minFR = 1/50;
 %rez.ops = ops;
 
 % preprocess data to create temp_wh.dat
-%rez = preprocessDataSub(ops);
+rez = preprocessDataSub(ops);
 
 % time-reordering as a function of drift
 rez = clusterSingleBatches(rez);
