@@ -20,8 +20,6 @@ else
     ops.trange = trange;
 end
 
-ops.trange = [0 120];
-
 run([script_dir '/sorting/Kilosort_config_3.m']);
 ops.fproc   = fullfile(rootH, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
@@ -41,7 +39,6 @@ rez                = datashift2(rez, 0);
 disp('Finished datashift')
 dshift = rez.dshift;
 
-rez.ops.fproc
 
 %chanMap = 1:length(rez.ops.chanMap);
 %xcoords = rez.xcoords;
@@ -65,7 +62,6 @@ if trange(2) == 0
 else
     ops.trange = trange;
 end
-ops.trange = [0 120];
 
 %ops.fbinary = [rootS 'shifted.dat'];
 %ops.fproc = [rootH 'proc.dat'];
