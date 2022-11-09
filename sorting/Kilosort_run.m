@@ -12,6 +12,7 @@ rootZ = [neuropixel_folder '/'];
 rootH = [rootZ phyDir '/'];
 rootS = [rootZ phyDir '/shifted/'];
 mkdir(rootH);
+mkdir(rootS);
 
 if trange(2) == 0
     ops.trange = [0 Inf];
