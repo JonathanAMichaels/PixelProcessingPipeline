@@ -59,6 +59,13 @@ ops.fbinary = fullfile(rootZ, fs(1).name);
 ops.fproc   = fullfile(rootH, 'proc.dat');
 ops.NchanTOT = 385;
 
+if trange(2) == 0
+    ops.trange = [0 Inf];
+else
+    ops.trange = trange;
+end
+ops.trange = [0 120];
+
 %ops.fbinary = [rootS 'shifted.dat'];
 %ops.fproc = [rootH 'proc.dat'];
 %ops.NchanTOT = 384;
