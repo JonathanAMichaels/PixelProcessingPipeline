@@ -51,10 +51,12 @@ rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
 run([script_dir '/sorting/Kilosort_config_2.m']);
-ops.fbinary = rez.ops.fproc;
-ops.fproc = [rootH 'proc.dat'];
+ops.fproc = [rootS 'shifted.dat'];
 ops.NchanTOT = rez.ops.Nchan;
+ops.Nchan = rez.ops.Nchan;
 ops.chanMap = fullfile([rootS 'chanmap.mat']);
+rez = rmfield(rez, {'wTEMP','wPCA','iC','dist','dshift','st0','F','F0','F0m'});
+rez.ops = ops;
 
 % preprocess data to create temp_wh.dat
 %rez = preprocessDataSub(ops);
