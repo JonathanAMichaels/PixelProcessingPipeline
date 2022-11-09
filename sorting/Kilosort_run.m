@@ -10,6 +10,7 @@ phyDir = 'sortednew';
 
 rootZ = [neuropixel_folder '/'];
 rootH = [rootZ phyDir '/'];
+rootS = [rootZ phyDir '/shifted/'];
 mkdir(rootH);
 
 if trange(2) == 0
@@ -18,12 +19,12 @@ else
     ops.trange = trange;
 end
 
-%ops.trange = [0 160];
+ops.trange = [0 160];
 
 run([script_dir '/sorting/Kilosort_config_3.m']);
-ops.fproc   = fullfile(rootH, 'shifted.dat');
+ops.fproc   = fullfile(rootS, 'shifted.dat');
 ops.chanMap = fullfile(chanMapFile);
-ops.nblocks = 3;
+ops.nblocks = 2;
 
 ops.NchanTOT  = 385; % total number of channels in your recording
 
@@ -38,17 +39,19 @@ disp('Finished preprocessing')
 rez                = datashift2(rez, 1);
 disp('Finished datashift')
 
+xcoords = rez.xcoords;
+ycoords = rez.ycoords
+asd
 
 rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
-%run([script_dir '/sorting/Kilosort_config_2.m']);
+run([script_dir '/sorting/Kilosort_config_2.m']);
+ops.fbinary = rez.ops.fproc;
+ops.NchanTOT = rez.ops.Nchan;
 
 % preprocess data to create temp_wh.dat
-%rez = preprocessDataSub(ops);
-
-rez.ops.Th = [10 4];
-rez.ops.NchanTOT = 384;
+rez = preprocessDataSub(ops);
 
 % time-reordering as a function of drift
 rez = clusterSingleBatches(rez);

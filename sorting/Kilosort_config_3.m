@@ -4,14 +4,13 @@ ops.fs = 30000;
 ops.doFilter = 1;
 
 ops.sig = 20;  % spatial smoothness constant for registration
-ops.nblocks = 3; % blocks for registration. 0 turns it off, 1 does rigid registration. Replaces "datashift" option.
 ops.CAR = 1;
 
 % frequency for high pass filtering
 ops.fshigh = 300;   
 
 % minimum firing rate on a "good" channel (0 to skip)
-ops.minfr_goodchannels = 0;
+ops.minfr_goodchannels = 0.05;
 
 % threshold on projections (like in Kilosort1, can be different for last pass like [10 4])
 ops.Th = [9 9];
