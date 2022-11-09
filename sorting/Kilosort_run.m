@@ -54,7 +54,7 @@ ops = rez.ops;
 
 run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fproc = [rootS 'shifted.dat'];
-ops.NchanTOT = rez.ops.Nchan;
+ops.NchanTOT = rez.ops.NchanTOT;
 ops.Nchan = rez.ops.Nchan;
 ops.chanMap = fullfile([rootS 'chanmap.mat']);
 rez = rmfield(rez, {'wTEMP','wPCA','iC','dist','dshift','st0','F','F0','F0m'});
