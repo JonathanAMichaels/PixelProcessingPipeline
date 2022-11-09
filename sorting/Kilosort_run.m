@@ -61,7 +61,6 @@ rez.ops = ops;
 % preprocess data to create temp_wh.dat
 %rez = preprocessDataSub(ops);
 
-asd
 
 % time-reordering as a function of drift
 rez = clusterSingleBatches(rez);
