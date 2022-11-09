@@ -20,7 +20,7 @@ else
     ops.trange = trange;
 end
 
-ops.trange = [0 120];
+ops.trange = [0 300];
 
 run([script_dir '/sorting/Kilosort_config_3.m']);
 ops.fproc   = fullfile(rootS, 'shifted.dat');
@@ -56,6 +56,7 @@ run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = [rootS 'shifted.dat'];
 ops.fproc = [rootH 'proc.dat'];
 ops.NchanTOT = 384;
+ops.trange = [0 Inf];
 ops.chanMap = fullfile(chanMapFile);
 %rez = rmfield(rez, {'wTEMP','wPCA','iC','dist','dshift','st0','F','F0','F0m'});
 %rez.ops = ops;
