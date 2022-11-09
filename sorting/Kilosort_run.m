@@ -39,8 +39,8 @@ rez                = preprocessDataSub(ops);
 disp('Finished preprocessing')
 rez                = datashift2(rez, 1);
 disp('Finished datashift')
-
-chanMap = rez.ops.chanMap;
+dshift = rez.dshift;
+chanMap = 1:length(rez.ops.chanMap);
 xcoords = rez.xcoords;
 ycoords = rez.ycoords;
 save([rootS 'chanmap'], 'xcoords', 'ycoords', 'chanMap');
@@ -50,6 +50,7 @@ addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
 run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = rez.ops.fproc;
+ops.fproc = [rootH 'proc.dat'];
 ops.NchanTOT = rez.ops.Nchan;
 ops.chanMap = fullfile([rootS 'chanmap.mat']);
 
@@ -83,7 +84,7 @@ fprintf('found %d good units \n', sum(rez.good>0))
 % write to Phy
 fprintf('Saving results to Phy  \n')
 rezToPhy(rez, rootH);
-dshift = rez.dshift;
+
 save([rootH 'drift'], 'dshift');
 
 quit;
