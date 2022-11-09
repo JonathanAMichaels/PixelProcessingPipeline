@@ -44,6 +44,7 @@ chanMap = 1:length(rez.ops.chanMap);
 xcoords = rez.xcoords;
 ycoords = rez.ycoords;
 save([rootS 'chanmap'], 'xcoords', 'ycoords', 'chanMap');
+rezToPhy2(rez, rootS)
 
 rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
