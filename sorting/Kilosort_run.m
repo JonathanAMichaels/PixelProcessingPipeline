@@ -18,7 +18,7 @@ else
     ops.trange = trange;
 end
 
-ops.trange = [0 200];
+ops.trange = [0 160];
 
 run([script_dir '/sorting/Kilosort_config_3.m']);
 ops.fproc   = fullfile(rootH, 'shifted.dat');
@@ -38,47 +38,16 @@ disp('Finished preprocessing')
 rez                = datashift2(rez, 1);
 disp('Finished datashift')
 
-dshift = rez.dshift;
-Nchan = size(rez.Wrot,1);
-shifted_location = ops.fproc;
-clear ops
 
 rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
-run([script_dir '/sorting/Kilosort_config_2.m']);
+#run([script_dir '/sorting/Kilosort_config_2.m']);
 
-ops.NchanTOT = Nchan;
-ops.trange = [0 Inf];
-ops.chanMap = fullfile(chanMapFile);
-
-% find the binary file
-ops.fbinary = shifted_location;
-
-rez_orig = rez;
-
-into = rez.ops;
-from = ops;
-%MERGESTRUCT merge all the fields of scalar structure from into scalar structure into
-    validateattributes(from, {'struct'}, {'scalar'});
-    validateattributes(into, {'struct'}, {'scalar'});
-    fns = fieldnames(from);
-    for fn = fns.'
-     if isstruct(from.(fn{1})) && isfield(into, fn{1})
-          %nested structure where the field already exist, merge again
-          into.(fn{1}) = mergestruct(into.(fn{1}), from.(fn{1}));
-     else
-         %non structure field, or nested structure field that does not already exist, simply copy
-         into.(fn{1}) = from.(fn{1});
-     end
-    end
-rez.ops = into;
-
-ops.fproc   = fullfile(rootH, 'temp_wh.dat');
 % preprocess data to create temp_wh.dat
-rez = preprocessDataSub(ops);
+#rez = preprocessDataSub(ops);
 
-sadsds
+ops.Th = [10 4];
 
 % time-reordering as a function of drift
 rez = clusterSingleBatches(rez);
@@ -107,7 +76,7 @@ fprintf('found %d good units \n', sum(rez.good>0))
 % write to Phy
 fprintf('Saving results to Phy  \n')
 rezToPhy(rez, rootH);
-
+dshift = rez.dshift;
 save([rootH 'drift'], 'dshift');
 
 quit;
