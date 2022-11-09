@@ -51,12 +51,12 @@ rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
 %ops = rez.ops;
-
+clear ops rez
 run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = [rootS 'shifted.dat'];
 ops.fproc = [rootH 'proc.dat'];
-ops.NchanTOT = length(chanMap);
-ops.chanMap = fullfile([rootS 'chanmap.mat']);
+ops.NchanTOT = 384;
+ops.chanMap = fullfile(chanMapFile);
 %rez = rmfield(rez, {'wTEMP','wPCA','iC','dist','dshift','st0','F','F0','F0m'});
 %rez.ops = ops;
 
