@@ -40,9 +40,10 @@ disp('Finished preprocessing')
 rez                = datashift2(rez, 1);
 disp('Finished datashift')
 
+chanMap = rez.ops.chanMap;
 xcoords = rez.xcoords;
-ycoords = rez.ycoords
-asd
+ycoords = rez.ycoords;
+save([rootS 'chanmap'], 'xcoords', 'ycoords', 'chanMap');
 
 rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
@@ -50,6 +51,7 @@ addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = rez.ops.fproc;
 ops.NchanTOT = rez.ops.Nchan;
+ops.chanMap = fullfile([rootS 'chanmap.mat']);
 
 % preprocess data to create temp_wh.dat
 rez = preprocessDataSub(ops);
