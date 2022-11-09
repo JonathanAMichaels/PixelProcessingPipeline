@@ -104,4 +104,4 @@ rezToPhy(rez, rootH);
 
 save([rootH 'drift'], 'dshift');
 
-%quit;
+quit;
