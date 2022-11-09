@@ -57,7 +57,9 @@ ops.NchanTOT = rez.ops.Nchan;
 ops.chanMap = fullfile([rootS 'chanmap.mat']);
 
 % preprocess data to create temp_wh.dat
-rez = preprocessDataSub(ops);
+%rez = preprocessDataSub(ops);
+
+asd
 
 % time-reordering as a function of drift
 rez = clusterSingleBatches(rez);
