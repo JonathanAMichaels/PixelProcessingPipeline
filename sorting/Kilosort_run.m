@@ -54,7 +54,7 @@ run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = rez.ops.fproc;
 ops.fproc = [rootH 'proc.dat'];
 ops.NchanTOT = rez.ops.Nchan;
-ops.chanMap = fullfile([rootS 'chanmap']);
+ops.chanMap = fullfile([rootS 'chanmap.mat']);
 
 % preprocess data to create temp_wh.dat
 rez = preprocessDataSub(ops);
