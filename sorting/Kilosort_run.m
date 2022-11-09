@@ -50,19 +50,18 @@ save([rootS 'Wrot'], 'Wrot')
 rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
-ops = rez.ops;
+%ops = rez.ops;
 
 run([script_dir '/sorting/Kilosort_config_2.m']);
+ops.fbinary = [rootS 'shifted.dat'];
 ops.fproc = [rootS 'shifted.dat'];
-ops.NchanTOT = rez.ops.NchanTOT;
-ops.Nchan = rez.ops.Nchan;
+ops.NchanTOT = length(chanMap);
 ops.chanMap = fullfile([rootS 'chanmap.mat']);
-rez = rmfield(rez, {'wTEMP','wPCA','iC','dist','dshift','st0','F','F0','F0m'});
-rez.ops = ops;
+%rez = rmfield(rez, {'wTEMP','wPCA','iC','dist','dshift','st0','F','F0','F0m'});
+%rez.ops = ops;
 
 % preprocess data to create temp_wh.dat
-%rez = preprocessDataSub(ops);
-
+rez = preprocessDataSub(ops);
 
 % time-reordering as a function of drift
 rez = clusterSingleBatches(rez);
@@ -94,4 +93,4 @@ rezToPhy(rez, rootH);
 
 save([rootH 'drift'], 'dshift');
 
-quit;
+%quit;
