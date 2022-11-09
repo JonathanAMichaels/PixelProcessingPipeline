@@ -57,6 +57,7 @@ addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = fullfile(rootZ, fs(1).name);
 ops.fproc   = fullfile(rootH, 'proc.dat');
+ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = 385;
 
 if trange(2) == 0
