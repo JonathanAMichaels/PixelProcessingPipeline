@@ -44,7 +44,7 @@ chanMap = 1:length(rez.ops.chanMap);
 xcoords = rez.xcoords;
 ycoords = rez.ycoords;
 Wrot = rez.Wrot;
-%save([rootS 'chanmap'], 'xcoords', 'ycoords', 'chanMap');
+save([rootS 'chanmap'], 'xcoords', 'ycoords', 'chanMap');
 save([rootS 'Wrot'], 'Wrot')
 
 rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
@@ -54,6 +54,7 @@ run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = rez.ops.fproc;
 ops.fproc = [rootH 'proc.dat'];
 ops.NchanTOT = rez.ops.Nchan;
+ops.chanMap = fullfile([rootS 'chanmap']);
 
 % preprocess data to create temp_wh.dat
 rez = preprocessDataSub(ops);
