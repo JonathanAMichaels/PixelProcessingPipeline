@@ -20,7 +20,7 @@ else
     ops.trange = trange;
 end
 
-ops.trange = [0 300];
+ops.trange = [0 120];
 
 run([script_dir '/sorting/Kilosort_config_3.m']);
 ops.fproc   = fullfile(rootS, 'shifted.dat');
@@ -40,29 +40,32 @@ disp('Finished preprocessing')
 rez                = datashift2(rez, 1);
 disp('Finished datashift')
 dshift = rez.dshift;
-chanMap = 1:length(rez.ops.chanMap);
-xcoords = rez.xcoords;
-ycoords = rez.ycoords;
-Wrot = rez.Wrot;
-save([rootS 'chanmap'], 'xcoords', 'ycoords', 'chanMap');
-save([rootS 'Wrot'], 'Wrot')
+
+%chanMap = 1:length(rez.ops.chanMap);
+%xcoords = rez.xcoords;
+%ycoords = rez.ycoords;
+%Wrot = rez.Wrot;
+
+%save([rootS 'chanmap'], 'xcoords', 'ycoords', 'chanMap');
+%save([rootS 'Wrot'], 'Wrot')
 
 rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
 %ops = rez.ops;
-clear ops rez
+%clear ops rez
 run([script_dir '/sorting/Kilosort_config_2.m']);
-ops.fbinary = [rootS 'shifted.dat'];
-ops.fproc = [rootH 'proc.dat'];
-ops.NchanTOT = 384;
-ops.trange = [0 Inf];
-ops.chanMap = fullfile(chanMapFile);
+rez.ops.Th = ops.Th;
+%ops.fbinary = [rootS 'shifted.dat'];
+%ops.fproc = [rootH 'proc.dat'];
+%ops.NchanTOT = 384;
+%ops.trange = [0 Inf];
+%ops.chanMap = fullfile(chanMapFile);
 %rez = rmfield(rez, {'wTEMP','wPCA','iC','dist','dshift','st0','F','F0','F0m'});
 %rez.ops = ops;
 
 % preprocess data to create temp_wh.dat
-rez = preprocessDataSub(ops);
+%rez = preprocessDataSub(ops);
 
 % time-reordering as a function of drift
 rez = clusterSingleBatches(rez);
