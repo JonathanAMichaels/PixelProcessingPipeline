@@ -69,7 +69,7 @@ if ~isfield(params, 'forwardSp')
 end
 % Time range for cross-correlation
 if ~isfield(params, 'corrRange')
-    params.corrRange = floor((params.backSp + params.forwardSp) / 1.1);
+    params.corrRange = floor((params.backSp + params.forwardSp) / 2);
 end
 % Max number of random spikes to extract per cluster
 if ~isfield(params, 'waveCount')
@@ -107,8 +107,7 @@ if ~params.skipFilter
 
     % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
     % spike times to be close together.
-    % Take only 'good' single units as determined by kilosort, units with sufficient SNR, and units with sufficient
-    % waveform consistency
+    % Take only 'good' single units as determined by kilosort or units with sufficient SNR
     C = C((SNR > params.multiSNRThreshold & spkCount > 20) | C_ident == 1);
 end
 
@@ -221,7 +220,8 @@ end
 % Re-extract
 [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 % use first vs last quartel as consistency check
-RR = squeeze(consistency.R(1,end,:))';
+RR = mean(squeeze([consistency.R(1,2,:), consistency.R(2,3,:), consistency.R(3,4,:)]),1);
+RR(isnan(RR) | RR < 0) = 0;
 disp('waveform consistency')
 RR
 
@@ -232,7 +232,7 @@ SNR
 
 % Remove clusters that don't meet inclusion criteria
 saveUnits = find(SNR > params.SNRThreshold & spkCount > 20 & ...
-    RR > params.consistencyThreshold);
+    RR >= params.consistencyThreshold);
 keepSpikes = find(ismember(I, saveUnits));
 T = T(keepSpikes);
 I = I(keepSpikes);
@@ -379,21 +379,19 @@ else
 end
 totalT = double(max(T));
 quartels = linspace(1, totalT, 5);
-quartelPacks{1} = quartels(1:2);
-quartelPacks{2} = quartels(4:5);
-waveParcel = floor(params.waveCount/2);
+waveParcel = floor(params.waveCount/(length(quartels)-1));
 % Extract each waveform
 data = nan(params.backSp + params.forwardSp, nChan, params.waveCount, length(C), 'single');
 mdata = zeros(params.backSp + params.forwardSp, nChan, length(C), 'single');
-R = zeros(2,2,length(C),'single');
+R = zeros(length(quartels)-1,length(quartels)-1,length(C),'single');
 consistency = struct('R',[],'wave',[],'channel',[]);
 for j = 1:length(C)
     disp(['Extracting unit ' num2str(j) ' of ' num2str(length(C))])
     tempdata = nan(params.backSp + params.forwardSp, nChan, waveParcel, 2, 'single');
     waveStep = 0;
-    for q = 1:2
+    for q = 1:(length(quartels)-1)
         times = T(I == C(j));
-        times = times(times >= quartelPacks{q}(1) & times < quartelPacks{q}(2)); % trim times
+        times = times(times >= quartels(q) & times < quartels(q+1)); % trim times
         innerWaveCount = min([waveParcel length(times)]);
         useTimes = times(round(linspace(1, length(times), innerWaveCount)));
         for t = 1:length(useTimes)
