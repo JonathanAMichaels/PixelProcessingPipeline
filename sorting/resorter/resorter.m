@@ -417,7 +417,7 @@ for j = 1:length(C)
     else
         grabChannels = 8;
     end
-    tempm = squeeze(nanmean(tempdata(:,:,:,[1 end]),3));
+    tempm = squeeze(nanmean(tempdata,3));
     ucheck = permute(tempm, [2 1 3]);
     ucheck = ucheck(:,:);
     [~, ind] = sort(range(ucheck,2), 'descend');
