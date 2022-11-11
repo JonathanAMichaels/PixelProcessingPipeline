@@ -373,7 +373,7 @@ nChan = size(params.chanMap,1);
 spt = recordSize*nChan;
 % Zero out channels that are bad
 if nChan <= 32
-    badChan = find(diag(Wrot) < 5);
+    badChan = find(diag(Wrot) < 8);
 else
     badChan = [];
 end
@@ -411,11 +411,11 @@ for j = 1:length(C)
     if nChan >= 384
         grabChannels = 8;
     elseif nChan == 32
-        grabChannels = 4;
+        grabChannels = 6;
     elseif nChan == 16
-        grabChannels = 4;
+        grabChannels = 3;
     else
-        grabChannels = 8;
+        grabChannels = 4;
     end
     tempm = squeeze(nanmean(tempdata,3));
     ucheck = permute(tempm, [2 1 3]);
