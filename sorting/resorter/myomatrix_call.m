@@ -11,7 +11,6 @@ params.userSorted = false;
 params.savePlots = true;
 params.waveCount = 800;
 params.consistencyThreshold = 0;
-params.SNRThreshold = 2.0;
 
 resorter(params)
 quit;

@@ -51,7 +51,7 @@ if ~isfield(params, 'SNRThreshold')
     params.SNRThreshold = 3.0;
 end
 if ~isfield(params, 'multiSNRThreshold')
-    params.multiSNRThreshold = 3.0;
+    params.multiSNRThreshold = 4.0;
 end
 if ~isfield(params, 'consistencyThreshold')
     params.consistencyThreshold = 0.7;
@@ -107,8 +107,8 @@ if ~params.skipFilter
 
     % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
     % spike times to be close together.
-    % Take only 'good' single units as determined by kilosort or units with sufficient SNR
-    C = C((SNR > params.multiSNRThreshold & spkCount > 20) | C_ident == 1);
+    % Take only 'good' single units with sufficient SNR
+    C = C((SNR > params.multiSNRThreshold & spkCount > 20));
 end
 
 % Let's straight up trim off everything we don't need to save time
