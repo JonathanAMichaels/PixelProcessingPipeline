@@ -387,7 +387,7 @@ R = zeros(length(quartels)-1,length(quartels)-1,length(C),'single');
 consistency = struct('R',[],'wave',[],'channel',[]);
 for j = 1:length(C)
     disp(['Extracting unit ' num2str(j) ' of ' num2str(length(C))])
-    tempdata = nan(params.backSp + params.forwardSp, nChan, waveParcel, 2, 'single');
+    tempdata = nan(params.backSp + params.forwardSp, nChan, waveParcel, length(quartels)-1, 'single');
     waveStep = 0;
     for q = 1:(length(quartels)-1)
         times = T(I == C(j));
