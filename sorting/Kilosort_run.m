@@ -6,7 +6,7 @@ addpath(genpath([script_dir '/sorting/npy-matlab']))
 chanMapFile = [script_dir '/geometries/neuropixPhase3B1_kilosortChanMap.mat'];
 disp(['Using this channel map: ' chanMapFile])
 
-phyDir = 'sorted';
+phyDir = 'sortednew';
 
 rootZ = [neuropixel_folder '/'];
 rootH = [rootZ phyDir '/'];
