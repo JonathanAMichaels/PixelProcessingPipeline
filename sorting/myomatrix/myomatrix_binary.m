@@ -74,7 +74,7 @@ for q = 1:3
     elseif q == 2
         [b, a] = butter(2, [8000 14000] / (30000/2), 'bandpass');
     elseif q == 3
-        [b, a] = butter(2, [10 60] / (30000/2), 'bandpass');
+        [b, a] = butter(2, [10 50] / (30000/2), 'bandpass');
     end
     useSeconds = 30;
     tRange = size(data,1) - (30000*(120+useSeconds)) : size(data,1) - (30000*120);
@@ -103,11 +103,11 @@ for q = 1:3
     S(:,q) = std(data_filt,[],1);
 end
 print([myomatrix '/brokenchan' num2str(myomatrix_num) '.png'], '-dpng')
-
+S
 if length(dataChan) == 32
     brokenChan = find(S(:,2) > 16 | S(:,3) > 100);
 elseif length(dataChan) == 16
-    brokenChan = find(S(:,2) > 16 | S(:,3) > 20);
+    brokenChan = find(S(:,2) > 16 | S(:,3) > 25);
 end
 disp(['Broken channels are: ' num2str(brokenChan')])
 data(:,brokenChan) = randn(size(data,1), length(brokenChan))*3e-1;
