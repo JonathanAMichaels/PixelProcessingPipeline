@@ -51,7 +51,7 @@ if ~isfield(params, 'SNRThreshold')
     params.SNRThreshold = 3.0;
 end
 if ~isfield(params, 'multiSNRThreshold')
-    params.multiSNRThreshold = 4.0;
+    params.multiSNRThreshold = 3.0;
 end
 if ~isfield(params, 'consistencyThreshold')
     params.consistencyThreshold = 0.7;
@@ -104,6 +104,7 @@ if ~params.skipFilter
 
     % calc stats
     [SNR, spkCount] = calcStats(mdata, data, T, I, C);
+    SNR
 
     % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
     % spike times to be close together.
