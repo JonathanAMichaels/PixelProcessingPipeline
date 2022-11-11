@@ -69,7 +69,7 @@ if ~isfield(params, 'forwardSp')
 end
 % Time range for cross-correlation
 if ~isfield(params, 'corrRange')
-    params.corrRange = floor((params.backSp + params.forwardSp) / 2);
+    params.corrRange = floor((params.backSp + params.forwardSp) / 1.05);
 end
 % Max number of random spikes to extract per cluster
 if ~isfield(params, 'waveCount')
