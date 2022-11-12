@@ -33,11 +33,15 @@ ops.fbinary = fullfile(rootZ, fs(1).name);
 
 disp(['Using ' ops.fbinary])
 
+% preprocess data to create temp_wh.dat
+rez = preprocessDataSub(ops);
+
 rootReg = [neuropixel_folder '/NeuropixelsRegistration2/'];
 reg = dir(fullfile(rootReg, 'subtraction_*'));
-ops.dispmap = h5read(fullfile(rootReg, reg(1).name), '/dispmap');
-ops.saveFolder = rootH;
-rez                = datashift2(ops, 1);
+rez.ops.dispmap = h5read(fullfile(rootReg, reg(1).name), '/dispmap');
+rez.ops.saveFolder = rootH;
+
+rez                = datashift2(rez, 1);
 disp('Finished datashift')
 %dshift = rez.dshift;
 

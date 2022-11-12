@@ -1,12 +1,9 @@
 function rez = datashift2(ops, do_correction)
 
 
-
-    rez = [];
+ops = rez.ops;
     dispmap = ops.dispmap;
 
-rez.xc = ops.xcoords;
-rez.yc = ops.ycoords;
 
 % The min and max of the y and x ranges of the channels
 ymin = min(rez.yc);
