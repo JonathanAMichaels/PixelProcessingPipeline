@@ -52,7 +52,7 @@ disp(dmax)
 
 
 spkTh = 10; % same as the usual "template amplitude", but for the generic templates
-
+spkTh = 8; %!!!
 % Extract all the spikes across the recording that are captured by the
 % generic templates. Very few real spikes are missed in this way. 
 [st3, rez] = standalone_detector(rez, spkTh);

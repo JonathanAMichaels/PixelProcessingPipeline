@@ -23,7 +23,7 @@ end
 run([script_dir '/sorting/Kilosort_config_3.m']);
 ops.fproc   = fullfile(rootH, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
-ops.nblocks = 2;
+ops.nblocks = 1;
 
 ops.NchanTOT  = 385; % total number of channels in your recording
 
