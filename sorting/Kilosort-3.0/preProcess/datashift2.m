@@ -54,6 +54,7 @@ batchstart = 0:NT:NT*Nbatches; % batches start at these timepoints
 batchcentersamples = batchstart + floor((NT+ntb)/2);
 batchcenterseconds = round(batchcentersamples / ops.fs);
 
+batchcenterseconds(end) = batchcenterseconds(end-1); % the registration cuts off the end a bit
 batchcenterseconds
 
 dispmap = dispmap(batchcenterseconds,:);
