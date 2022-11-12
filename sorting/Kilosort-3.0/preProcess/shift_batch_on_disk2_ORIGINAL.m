@@ -2,9 +2,6 @@ function [dprev, dat_cpu, dat, shifts] = ...
     shift_batch_on_disk2(rez, ibatch, shifts, ysamp, sig, dprev)
 % register one batch of a whitened binary file
 
-origNchan = ops.Nchan;
-ops.Nchan = ops.NchanTOT;
-
 ops = rez.ops;
 Nbatch      = rez.temp.Nbatch;
 NT  	      = ops.NT;
@@ -19,19 +16,14 @@ end
 % load the batch
 fclose all;
 ntb = ops.ntbuff;
-fidR = fopen(ops.fbinary, 'r');
-fseek(fidR, offset, 'bof');
-dat = fread(fidR, [ops.Nchan NT+ntb], '*int16')';
-fclose(fidR);
+fid = fopen(ops.fproc, 'r+');
+fseek(fid, offset, 'bof');
+dat = fread(fid, [ops.Nchan NT+ntb], '*int16')';
 
-% trim back down
-ops.Nchan = origNchan;
-dat = dat(:,1:ops.Nchan);
-
-% 2D coordinates for interpolation 
+% 2D coordinates for interpolation
 xp = cat(2, rez.xc, rez.yc);
 
-% 2D kernel of the original channel positions 
+% 2D kernel of the original channel positions
 Kxx = kernel2D(xp, xp, sig);
 % 2D kernel of the new channel positions
 yp = xp;
@@ -57,9 +49,9 @@ dati = dati(1:NT, :);
 dat_cpu = gather(int16(dati));
 
 
-fidW = fopen(ops.fproc, 'r+');
-fseek(fidW, offset, 'bof');
-fwrite(fidW, dat_cpu', 'int16'); % write this batch to binary file
+% we want to write the aligned data back to the same file
+fseek(fid, offset, 'bof');
+fwrite(fid, dat_cpu', 'int16'); % write this batch to binary file
 
-fclose(fidW);
+fclose(fid);
 

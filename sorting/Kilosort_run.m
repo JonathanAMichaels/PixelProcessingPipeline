@@ -6,7 +6,7 @@ addpath(genpath([script_dir '/sorting/npy-matlab']))
 chanMapFile = [script_dir '/geometries/neuropixPhase3B1_kilosortChanMap.mat'];
 disp(['Using this channel map: ' chanMapFile])
 
-phyDir = 'sortednew';
+phyDir = 'sortednewshift';
 
 rootZ = [neuropixel_folder '/'];
 rootH = [rootZ phyDir '/'];
@@ -19,6 +19,7 @@ if trange(2) == 0
 else
     ops.trange = trange;
 end
+ops.trange = [0 180];
 
 run([script_dir '/sorting/Kilosort_config_3.m']);
 ops.fproc   = fullfile(rootH, 'proc.dat');
@@ -35,7 +36,7 @@ disp(['Using ' ops.fbinary])
 
 rez                = preprocessDataSub(ops);
 disp('Finished preprocessing')
-rez                = datashift2(rez, 0);
+rez                = datashift2(rez, 1);
 disp('Finished datashift')
 dshift = rez.dshift;
 
@@ -52,16 +53,17 @@ rmpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
 run([script_dir '/sorting/Kilosort_config_2.m']);
-ops.fbinary = fullfile(rootZ, fs(1).name);
-ops.fproc   = fullfile(rootH, 'proc.dat');
+ops.fbinary = fullfile(rootH, 'proc.dat');
+ops.fproc   = fullfile(rootH, 'proc2.dat');
 ops.chanMap = fullfile(chanMapFile);
-ops.NchanTOT = 385;
+ops.NchanTOT = 384; # 385
 
 if trange(2) == 0
     ops.trange = [0 Inf];
 else
     ops.trange = trange;
 end
+ops.trange = [0 180];
 
 %ops.fbinary = [rootS 'shifted.dat'];
 %ops.fproc = [rootH 'proc.dat'];
