@@ -2,10 +2,12 @@ function [dprev, dat_cpu, dat, shifts] = ...
     shift_batch_on_disk2(rez, ibatch, shifts, ysamp, sig, dprev)
 % register one batch of a whitened binary file
 
+ops = rez.ops;
+
+% switcheroo
 origNchan = ops.Nchan;
 ops.Nchan = ops.NchanTOT;
 
-ops = rez.ops;
 Nbatch      = rez.temp.Nbatch;
 NT  	      = ops.NT;
 
