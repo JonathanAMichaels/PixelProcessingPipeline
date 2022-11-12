@@ -60,6 +60,7 @@ dat_cpu = gather(int16(dati));
 
 
 fidW = fopen(ops.fproc, 'r+');
+offset = 2 * ops.Nchan*batchstart(ibatch); % binary file offset in bytes
 fseek(fidW, offset, 'bof');
 fwrite(fidW, dat_cpu', 'int16'); % write this batch to binary file
 
