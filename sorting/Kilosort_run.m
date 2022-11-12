@@ -33,7 +33,7 @@ ops.fbinary = fullfile(rootZ, fs(1).name);
 
 disp(['Using ' ops.fbinary])
 
-rootReg = [neuropixel_folder '/NeuropixelRegistration2/'];
+rootReg = [neuropixel_folder '/NeuropixelsRegistration2/'];
 reg = dir(fullfile(rootReg, 'subtraction_*'));
 ops.dispmap = h5read(fullfile(rootReg, reg(1).name), '/dispmap');
 ops.saveFolder = rootH;
