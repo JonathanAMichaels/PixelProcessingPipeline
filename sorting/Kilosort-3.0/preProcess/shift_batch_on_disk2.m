@@ -34,7 +34,7 @@ xp = cat(2, rez.xc, rez.yc);
 Kxx = kernel2D(xp, xp, sig);
 % 2D kernel of the new channel positions
 yp = xp;
-yp(:, 2) = yp(:, 2) - shifts; % * sig;
+yp(:, 2) = yp(:, 2) - shifts'; % * sig;
 Kyx = kernel2D(yp, xp, sig);
 
 % kernel prediction matrix
