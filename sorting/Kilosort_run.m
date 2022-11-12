@@ -19,7 +19,6 @@ if trange(2) == 0
 else
     ops.trange = trange;
 end
-ops.trange = [0 180];
 
 run([script_dir '/sorting/Kilosort_config_3.m']);
 ops.fproc   = fullfile(rootH, 'proc.dat');
@@ -63,7 +62,6 @@ if trange(2) == 0
 else
     ops.trange = trange;
 end
-ops.trange = [0 180];
 
 %ops.fbinary = [rootS 'shifted.dat'];
 %ops.fproc = [rootH 'proc.dat'];
