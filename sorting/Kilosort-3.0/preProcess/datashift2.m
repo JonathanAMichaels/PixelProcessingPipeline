@@ -59,6 +59,10 @@ batchcenterseconds
 
 dispmap = dispmap(batchcenterseconds,:);
 
+% filter out any weird temporal things
+[b,a] = butter(4,0.1);
+dispmap = filtfilt(b, a, dispmap);
+
 figure(1)
 clf
 imagesc(dispmap')
@@ -77,9 +81,8 @@ if do_correction
 else
     fprintf('time %2.2f, Skipped shifting %d batches. \n', toc, Nbatches)
 end
-% keep track of dshift 
-rez.dshift = dshift;
 
+rez.dshift = dispmap;
 
 % next, we can just run a normal spike sorter, like Kilosort1, and forget about the transformation that has happened in here 
 

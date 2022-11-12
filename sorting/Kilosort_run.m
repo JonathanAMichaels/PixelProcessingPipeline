@@ -33,7 +33,6 @@ ops.fbinary = fullfile(rootZ, fs(1).name);
 
 disp(['Using ' ops.fbinary])
 
-% preprocess data to create temp_wh.dat
 rez = preprocessDataSub(ops);
 
 rootReg = [neuropixel_folder '/NeuropixelsRegistration2/'];
@@ -43,7 +42,8 @@ rez.ops.saveFolder = rootH;
 
 rez                = datashift2(rez, 1);
 disp('Finished datashift')
-%dshift = rez.dshift;
+dshift = rez.dshift;
+save([rootH 'displacement'], 'dshift');
 
 
 %chanMap = 1:length(rez.ops.chanMap);
@@ -107,7 +107,5 @@ fprintf('found %d good units \n', sum(rez.good>0))
 % write to Phy
 fprintf('Saving results to Phy  \n')
 rezToPhy(rez, rootH);
-
-%save([rootH 'drift'], 'dshift');
 
 quit;
