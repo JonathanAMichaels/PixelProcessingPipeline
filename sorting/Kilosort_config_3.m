@@ -3,7 +3,7 @@ ops.fs = 30000;
 
 ops.doFilter = 1;
 
-ops.sig = 20;  % spatial smoothness constant for registration
+ops.sig = 10;  % spatial smoothness constant for registration
 ops.CAR = 1;
 
 % frequency for high pass filtering

@@ -1,5 +1,5 @@
 function [dprev, dat_cpu, dat, shifts] = ...
-    shift_batch_on_disk2(rez, ibatch, shifts, ysamp, sig, dprev)
+    shift_batch_on_disk2(rez, ibatch, shifts, sig, dprev)
 % register one batch of a whitened binary file
 
 ops = rez.ops;
@@ -14,10 +14,7 @@ NT  	      = ops.NT;
 batchstart = 0:NT:NT*Nbatch; % batches start at these timepoints
 offset = 2 * ops.Nchan*batchstart(ibatch); % binary file offset in bytes
 
-% upsample the shift for each channel using interpolation
-if length(ysamp)>1
-    shifts = interp1(ysamp, shifts, rez.yc, 'makima', 'extrap');
-end
+
 % load the batch
 fclose all;
 ntb = ops.ntbuff;

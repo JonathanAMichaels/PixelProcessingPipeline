@@ -33,11 +33,13 @@ ops.fbinary = fullfile(rootZ, fs(1).name);
 
 disp(['Using ' ops.fbinary])
 
-rez                = preprocessDataSub(ops);
-disp('Finished preprocessing')
-rez                = datashift2(rez, 1);
+rootReg = [neuropixel_folder '/NeuropixelRegistration2/'];
+reg = dir(fullfile(rootReg, 'subtraction_*'));
+ops.dispmap = h5read(fullfile(rootReg, reg(1).name), '/dispmap');
+ops.saveFolder = rootH;
+rez                = datashift2(ops, 1);
 disp('Finished datashift')
-dshift = rez.dshift;
+%dshift = rez.dshift;
 
 
 %chanMap = 1:length(rez.ops.chanMap);
@@ -102,6 +104,6 @@ fprintf('found %d good units \n', sum(rez.good>0))
 fprintf('Saving results to Phy  \n')
 rezToPhy(rez, rootH);
 
-save([rootH 'drift'], 'dshift');
+%save([rootH 'drift'], 'dshift');
 
 quit;
