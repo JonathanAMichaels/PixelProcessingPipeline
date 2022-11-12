@@ -56,7 +56,7 @@ run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = fullfile(rootH, 'proc.dat');
 ops.fproc   = fullfile(rootH, 'proc2.dat');
 ops.chanMap = fullfile(chanMapFile);
-ops.NchanTOT = 384; # 385
+ops.NchanTOT = 384; % 385
 
 if trange(2) == 0
     ops.trange = [0 Inf];
