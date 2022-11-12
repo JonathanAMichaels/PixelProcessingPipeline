@@ -44,8 +44,8 @@ ops.GPU                 = 1; % has to be 1, no CPU version yet, sorry
 ops.nfilt_factor        = 4; % max number of clusters per good channel (even temporary ones)
 ops.ntbuff              = 64;    % samples of symmetrical buffer for whitening and spike detection
 
-% current at 4 seconds
-ops.NT                  = 64*1024*2+ ops.ntbuff;
+% current at 2 seconds
+ops.NT                  = 64*1024+ ops.ntbuff;
  % must be multiple of 32 + ntbuff. This is the batch size (try decreasing if out of memory).
 
 ops.whiteningRange      = 32; % number of channels to use for whitening each channel
