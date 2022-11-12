@@ -54,7 +54,10 @@ if size(dati,1)==NT+ntb
 else
     dprev = [];
 end
-dati = dati(1:NT, :);
+if size(dati,1) >= NT
+    dati = dati(1:NT, :);
+end
+
 
 dat_cpu = gather(int16(dati));
 
