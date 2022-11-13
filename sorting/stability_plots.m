@@ -7,6 +7,8 @@ catch
 end
 T = readNPY('spike_times.npy');
 I = readNPY('spike_clusters.npy');
+TP = readNPY('templates.npy');
+TP_ind = readNPY('spike_templates.npy')+1;
 clusterGroup = tdfread('cluster_KSLabel.tsv');
 C = [];
 for j = 1:size(clusterGroup.cluster_id,1)
@@ -17,6 +19,8 @@ end
 keepSpikes = ismember(I, C);
 T = T(keepSpikes);
 I = I(keepSpikes);
+TP_ind = TP_ind(keepSpikes);
+
 
 f = fopen('proc.dat', 'r');
 recordSize = 2; % 2 bytes for int16
@@ -32,18 +36,16 @@ for i = 1:length(times)
 end
 sd = std(double(samples),[],1);
 
-comChan = 8;
+comChan = 16;
 tmp_amp = zeros(1,length(T)); tmp_um = zeros(1,length(T));
 for i = 1:length(T)
     if mod(i,100000) == 0
         disp(i)
     end
-    fseek(f, T(i)-2 * spt, 'bof');
-    tmp = min(double(fread(f, [nChan, 5], '*int16')),[],2)';
+    fseek(f, T(i) * spt, 'bof');
+    tmp = abs(double(fread(f, [nChan, 1], '*int16')))';
     tmp = tmp ./ sd;
-    tmp(tmp > 0) = 0;
-    tmp(tmp > -3.5) = 0;
-    tmp = abs(tmp);
+    tmp(tmp < 5) = 0;
     [m, ind] = sort(tmp, 'descend');
     norm_chan = m(1:comChan) / sum(m(1:comChan));
     tmp_um(i) = ceil(sum(ycoords(ind(1:comChan)) .* norm_chan') / 10);
@@ -53,7 +55,7 @@ fclose(f);
 delInd = find(isnan(tmp_um));
 tmp_um(delInd) = []; tmp_amp(delInd) = []; T(delInd) = []; I(delInd) = [];
 
-Ts = round(double(T)/30000)+1;
+Ts = round(double(T)/30000/5)+1;
 totalT = max(Ts);
 raster1 = zeros(totalT,max(tmp_um));
 rasteramp = zeros(totalT,max(tmp_um));
@@ -72,26 +74,4 @@ colormap('hot')
 subplot(2,1,2)
 imagesc(rasteramp')
 colormap('hot')
-
-
-figure(2)
-clf
-hold on
-cmap = lines(length(C));
-for j = 1:length(C)
-    disp(j)
-    ind = find(I == C(j));
-    theseSpikes = Ts(ind);
-    ch = tmp_chan(ind);
-    rn = randperm(length(theseSpikes));
-    if length(rn) > 100
-        rn = rn(1:100);
-    end
-    for i = 1:length(rn)
-        plot(theseSpikes(rn(i)), ch(rn(i)), '.', 'Color', cmap(j,:), 'MarkerSize', 8)
-    end
-    axis([1 max(Ts) 0.5 384.5])
-    drawnow
-end
-
 
