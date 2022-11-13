@@ -14,28 +14,40 @@ keepSpikes = ismember(I, C);
 T = T(keepSpikes);
 I = I(keepSpikes);
 
-f = fopen('proc2.dat', 'r');
+f = fopen('proc.dat', 'r');
 recordSize = 2; % 2 bytes for int16
 nChan = 384;
 spt = recordSize*nChan;
 
-backSp = 20;
-forwardSp = 60;
+% gather SD per channel
+times = randsample(max(T),50000,false);
+samples = zeros(length(times),384);
+for i = 1:length(times)
+    fseek(f, times(i) * spt, 'bof');
+    samples(i,:) = fread(f, [nChan, 1], '*int16');  
+end
+sd = std(double(samples),[],1);
+
 comChan = 8;
 tmp_amp = zeros(1,length(T)); tmp_um = zeros(1,length(T));
 for i = 1:length(T)
     if mod(i,100000) == 0
         disp(i)
     end
-    fseek(f, (T(i)-backSp) * spt, 'bof');
-    tmp = fread(f, [nChan, backSp+forwardSp], '*int16')';
-    r = double(range(tmp,1));
-    [m, ind] = sort(r, 'descend');
+    fseek(f, T(i) * spt, 'bof');
+    tmp = double(fread(f, [nChan, 1], '*int16')');
+    tmp = tmp ./ sd;
+    tmp(tmp > 0) = 0;
+    tmp(tmp > -3.5) = 0;
+    tmp = abs(tmp);
+    [m, ind] = sort(tmp, 'descend');
     norm_chan = m(1:comChan) / sum(m(1:comChan));
-    tmp_um(i) = ceil((sum(ycoords(ind(1:comChan)) .* norm_chan')+1) / 10);
+    tmp_um(i) = ceil(sum(ycoords(ind(1:comChan)) .* norm_chan') / 10);
     tmp_amp(i) = mean(m(1:comChan));
 end
 fclose(f);
+delInd = find(isnan(tmp_um));
+tmp_um(delInd) = []; tmp_amp(delInd) = []; T(delInd) = []; I(delInd) = [];
 
 Ts = round(double(T)/30000)+1;
 totalT = max(Ts);
