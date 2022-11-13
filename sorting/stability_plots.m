@@ -1,6 +1,10 @@
 clear
 
-load('/Users/jonathanamichaels/Library/CloudStorage/Dropbox/mFiles-Projects/GitHub/PixelProcessingPipeline/geometries/neuropixPhase3B1_kilosortChanMap')
+try
+    load('~/PixelProcessingPipeline/geometries/neuropixPhase3B1_kilosortChanMap');
+catch
+    load('/Users/jonathanamichaels/Library/CloudStorage/Dropbox/mFiles-Projects/GitHub/PixelProcessingPipeline/geometries/neuropixPhase3B1_kilosortChanMap')
+end
 T = readNPY('spike_times.npy');
 I = readNPY('spike_clusters.npy');
 clusterGroup = tdfread('cluster_KSLabel.tsv');
@@ -20,7 +24,7 @@ nChan = 384;
 spt = recordSize*nChan;
 
 % gather SD per channel
-times = randsample(max(T),50000,false);
+times = randsample(max(T),10000,false);
 samples = zeros(length(times),384);
 for i = 1:length(times)
     fseek(f, times(i) * spt, 'bof');
@@ -34,8 +38,8 @@ for i = 1:length(T)
     if mod(i,100000) == 0
         disp(i)
     end
-    fseek(f, T(i) * spt, 'bof');
-    tmp = double(fread(f, [nChan, 1], '*int16')');
+    fseek(f, T(i)-2 * spt, 'bof');
+    tmp = min(double(fread(f, [nChan, 5], '*int16')),[],2)';
     tmp = tmp ./ sd;
     tmp(tmp > 0) = 0;
     tmp(tmp > -3.5) = 0;
