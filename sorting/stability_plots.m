@@ -1,5 +1,7 @@
 clear
 
+k_vers = 2;
+
 try
     load('~/PixelProcessingPipeline/geometries/neuropixPhase3B1_kilosortChanMap');
 catch
@@ -28,7 +30,17 @@ for j = 1:length(C)
 end
 
 
-f = fopen('proc.dat', 'r');
+[f_b, f_a] = butter(4, 300/(30000/2), 'high');
+if k_vers == 3
+    f = fopen('proc.dat', 'r');
+    f_filt = false;
+    ntbuff = 0;
+elseif k_vers == 2
+    ff = dir('../*.bin');
+    f = fopen(['../' ff(1).name], 'r');
+    f_filt = true;
+    ntbuff = 32;
+end
 recordSize = 2; % 2 bytes for int16
 nChan = 384;
 spt = recordSize*nChan;
@@ -39,15 +51,18 @@ times = round(linspace(1, double(max(T)), 30000));
 binEdges = round(linspace(1, double(max(T)), 60));
 samples = zeros(length(times),384);
 for i = 1:length(times)
-    fseek(f, times(i) * spt, 'bof');
-    samples(i,:) = fread(f, [nChan, 1], '*int16');  
+    fseek(f, (times(i)-ntbuff) * spt, 'bof');
+    temp = double(fread(f, [nChan, (ntbuff*2)+1], '*int16'));
+    if f_filt
+        temp = filtfilt(f_b, f_a, temp')';
+    end
+    samples(i,:) = temp(:,ntbuff+1);
 end
 sd = std(double(samples),[],1);
 
 sp = zeros(length(binEdges)-1,384);
 for b = 1:length(binEdges)-1
-    ind = find(times >= binEdges(b) & times < binEdges(b+1));
-    sp(b,:) = std(samples(ind,:),[],1);
+    sp(b,:) = std(samples(times >= binEdges(b) & times < binEdges(b+1),:),[],1);
 end
 
 
@@ -57,9 +72,12 @@ for i = 1:length(T)
     if mod(i,100000) == 0
         disp(i)
     end
-    fseek(f, T(i) * spt, 'bof');
-    tmp = abs(double(fread(f, [nChan, 1], '*int16')))';
-    tmp = tmp ./ sd;
+    fseek(f, (T(i)-ntbuff) * spt, 'bof');
+    tmp = double(fread(f, [nChan, (2*ntbuff)+1], '*int16'));
+    if f_filt
+        tmp = filtfilt(f_b, f_a, tmp');
+    end
+    tmp = abs(tmp(ntbuff+1,:)) ./ sd;
     tmp(tmp < 4) = 0;
     [m, ind] = sort(tmp, 'descend');
     norm_chan = m(1:comChan) / sum(m(1:comChan));
@@ -95,7 +113,7 @@ raster_sorted = raster(:,ind);
 
 
 figure(1)
-set(gcf, 'Position', [1 1 1200 580])
+set(gcf, 'Position', [1 1 1250 580])
 clf
 subplot(1,3,1)
 imagesc(raster1')
@@ -110,5 +128,5 @@ subplot(1,3,3)
 imagesc(sp')
 ylabel('10um bins')
 
-
+print('stability_plots.png', '-dpng')
 
