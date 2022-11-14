@@ -630,7 +630,8 @@ def datashift2(ctx):
 
     ir.xc, ir.yc = probe.xc, probe.yc
 
-    disp_map = disp_map[:, ir.yc]
+    ysamp = np.array(ir.yc, dtype=np.int32)
+    disp_map = disp_map[:, ysamp]
 
 
     # The min and max of the y and x ranges of the channels
