@@ -81,7 +81,7 @@ for i = 1:length(T)
         tmp = filtfilt(f_b, f_a, tmp')';
     end
     tmp = abs(tmp(:,ntbuff+1)') ./ sd;
-    tmp(tmp < 4) = 0;
+   % tmp(tmp < 4) = 0;
     [m, ind] = sort(tmp, 'descend');
     norm_chan = m(1:comChan) / sum(m(1:comChan));
     tmp_um(i) = ceil(sum(ycoords(ind(1:comChan)) .* norm_chan') / 10);
