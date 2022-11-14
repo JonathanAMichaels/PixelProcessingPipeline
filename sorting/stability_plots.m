@@ -40,7 +40,7 @@ elseif k_vers == 2
     ff = dir('../*.bin');
     f = fopen(['../' ff(1).name], 'r');
     f_filt = true;
-    ntbuff = 32;
+    ntbuff = 16;
     nChan = 385;
 end
 recordSize = 2; % 2 bytes for int16
