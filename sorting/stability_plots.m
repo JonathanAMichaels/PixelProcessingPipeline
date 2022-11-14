@@ -1,6 +1,6 @@
 clear
 
-k_vers = 2;
+k_vers = 3;
 
 try
     load('~/PixelProcessingPipeline/geometries/neuropixPhase3B1_kilosortChanMap');
@@ -35,14 +35,15 @@ if k_vers == 3
     f = fopen('proc.dat', 'r');
     f_filt = false;
     ntbuff = 0;
+    nChan = 384;
 elseif k_vers == 2
     ff = dir('../*.bin');
     f = fopen(['../' ff(1).name], 'r');
     f_filt = true;
     ntbuff = 32;
+    nChan = 385;
 end
 recordSize = 2; % 2 bytes for int16
-nChan = 384;
 spt = recordSize*nChan;
 
 
@@ -53,6 +54,7 @@ samples = zeros(length(times),384);
 for i = 1:length(times)
     fseek(f, (times(i)-ntbuff) * spt, 'bof');
     temp = double(fread(f, [nChan, (ntbuff*2)+1], '*int16'));
+    temp = temp(1:384,:);
     if f_filt
         temp = filtfilt(f_b, f_a, temp')';
     end
@@ -74,10 +76,11 @@ for i = 1:length(T)
     end
     fseek(f, (T(i)-ntbuff) * spt, 'bof');
     tmp = double(fread(f, [nChan, (2*ntbuff)+1], '*int16'));
+    tmp = tmp(1:384,:);
     if f_filt
-        tmp = filtfilt(f_b, f_a, tmp');
+        tmp = filtfilt(f_b, f_a, tmp')';
     end
-    tmp = abs(tmp(ntbuff+1,:)) ./ sd;
+    tmp = abs(tmp(:,ntbuff+1)') ./ sd;
     tmp(tmp < 4) = 0;
     [m, ind] = sort(tmp, 'descend');
     norm_chan = m(1:comChan) / sum(m(1:comChan));
