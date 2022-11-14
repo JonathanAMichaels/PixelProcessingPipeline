@@ -63,7 +63,7 @@ def _sample2v(ap_file):
 
 
 def run_spike_sorting_ibl(bin_file, scratch_dir=None, delete=True,
-                          ks_output_dir=None, alf_path=None, log_level='INFO', params=None):
+                          ks_output_dir=None, alf_path=None, log_level='INFO', stop_after=None, params=None):
     """
     This runs the spike sorting and outputs the raw pykilosort without ALF conversion
     :param bin_file: binary file full path
@@ -89,7 +89,7 @@ def run_spike_sorting_ibl(bin_file, scratch_dir=None, delete=True,
         params = ibl_pykilosort_params(bin_file)
     try:
         _logger.info(f"Starting Pykilosort version {__version__}, output in {bin_file.parent}")
-        run(bin_file, dir_path=scratch_dir, output_dir=ks_output_dir, **params)
+        run(bin_file, dir_path=scratch_dir, output_dir=ks_output_dir, stop_after=stop_after, **params)
         post_file = glob.glob(str(scratch_dir) + '/.kilosort/*/proc.dat')
         shutil.move(post_file[0], str(ks_output_dir) + '/proc.dat')
         if delete:

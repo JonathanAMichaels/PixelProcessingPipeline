@@ -24,9 +24,10 @@ def kilosort(config):
         dispmap = f["dispmap"][:]
 
     params['nblocks'] = 200
+    params['sig_datashift'] = 1.0
     params['disp_map'] = dispmap.tolist()
     run_spike_sorting_ibl(bin_file, delete=True, scratch_dir=scratch_dir, alf_path=alf_dir,
-                          ks_output_dir=ks_output_dir, log_level='INFO', params=params)
+                          ks_output_dir=ks_output_dir, log_level='INFO', params=params, stop_after='drift_correction')
 
     # correct params.py to point to the shifted data
     with open(str(ks_output_dir) + '/params.py', 'w') as f:
