@@ -23,7 +23,7 @@ def kilosort(config):
     with h5py.File(registered_file[0], "r") as f:
         dispmap = f["dispmap"][:]
 
-    params['nblocks'] = 200
+    #params['nblocks'] = 200
     params['sig_datashift'] = 1.0
     params['disp_map'] = dispmap.tolist()
     run_spike_sorting_ibl(bin_file, delete=True, scratch_dir=scratch_dir, alf_path=alf_dir,

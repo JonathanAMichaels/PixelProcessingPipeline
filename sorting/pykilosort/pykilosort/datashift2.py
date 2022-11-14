@@ -390,7 +390,8 @@ def apply_drift_transform(dat, shifts_in, ysamp, probe, sig):
     """
 
     # upsample to get shifts for each channel
-    shifts = interpolate_1D(shifts_in, ysamp, probe.yc)
+    #shifts = interpolate_1D(shifts_in, ysamp, probe.yc)
+    shifts = shifts_in
 
     # kernel prediction matrix
     kernel_matrix = get_kernel_matrix(probe, shifts, sig)
@@ -625,9 +626,12 @@ def datashift2(ctx):
     new_disp_map = np.zeros((disp_map.shape[0], params.nblocks * 2 - 1))
     for i in range(disp_map.shape[0]):
         new_disp_map[i, :] = np.interp(batch_spacing, np.arange(disp_map.shape[1]), disp_map[i, :])
-    disp_map = new_disp_map
+    #disp_map = new_disp_map
 
     ir.xc, ir.yc = probe.xc, probe.yc
+
+    disp_map = disp_map[:, ir.yc]
+
 
     # The min and max of the y and x ranges of the channels
     ymin = min(ir.yc)
@@ -675,7 +679,7 @@ def datashift2(ctx):
 
     #dshift, yblk = get_drift(spikes, probe, Nbatch, params.nblocks, params.genericSpkTh)
 
-    yblk = batch_spacing
+    yblk = ir.yc  #batch_spacing
     dshift = -disp_map
 
     #from scipy.io import savemat
@@ -695,7 +699,7 @@ def datashift2(ctx):
         dat = ir.data_loader.load_batch(ibatch, rescale=False)
 
         # align via kriging interpolation
-        data_shifted = apply_drift_transform(dat, dshift[ibatch, :], yblk, probe, params.sig_datashift)
+        data_shifted = apply_drift_transform(dat, dshift[ibatch, :], [], probe, params.sig_datashift)
 
         # write the aligned data back to the same file
         ir.data_loader.write_batch(ibatch, data_shifted)

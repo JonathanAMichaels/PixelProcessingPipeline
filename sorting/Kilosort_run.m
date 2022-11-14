@@ -33,17 +33,17 @@ ops.fbinary = fullfile(rootZ, fs(1).name);
 
 disp(['Using ' ops.fbinary])
 
-rez = preprocessDataSub(ops);
+%rez = preprocessDataSub(ops);
 
-rootReg = [neuropixel_folder '/NeuropixelsRegistration2/'];
-reg = dir(fullfile(rootReg, 'subtraction_*'));
-rez.ops.dispmap = h5read(fullfile(rootReg, reg(1).name), '/dispmap');
-rez.ops.saveFolder = rootH;
+%rootReg = [neuropixel_folder '/NeuropixelsRegistration2/'];
+%reg = dir(fullfile(rootReg, 'subtraction_*'));
+%rez.ops.dispmap = h5read(fullfile(rootReg, reg(1).name), '/dispmap');
+%rez.ops.saveFolder = rootH;
 
-rez                = datashift2_ORIGINAL(rez, 1);
-disp('Finished datashift')
-dshift = rez.dshift;
-save([rootH 'displacement'], 'dshift');
+%rez                = datashift2_ORIGINAL(rez, 1);
+%disp('Finished datashift')
+%dshift = rez.dshift;
+%save([rootH 'displacement'], 'dshift');
 
 
 %chanMap = 1:length(rez.ops.chanMap);
