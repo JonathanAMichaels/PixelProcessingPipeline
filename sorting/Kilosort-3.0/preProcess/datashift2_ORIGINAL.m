@@ -151,7 +151,7 @@ if do_correction
     % register the data batch by batch
     dprev = gpuArray.zeros(ops.ntbuff,ops.Nchan, 'single');
     for ibatch = 1:Nbatches
-        dprev = shift_batch_on_disk2(rez, ibatch, dshift(ibatch, :), yblk, sig, dprev);
+        dprev = shift_batch_on_disk2_ORIGINAL(rez, ibatch, dshift(ibatch, :), yblk, sig, dprev);
     end
     fprintf('time %2.2f, Shifted up/down %d batches. \n', toc, Nbatches)
 else
