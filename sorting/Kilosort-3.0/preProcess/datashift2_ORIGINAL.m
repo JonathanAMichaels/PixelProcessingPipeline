@@ -140,6 +140,11 @@ dshift = imin * dd;
 % this is not really used any more, should get taken out eventually
 [~, rez.iorig] = sort(mean(dshift, 2));
 
+%% ADDED
+% filter out any weird temporal things
+[b,a] = butter(4,0.1);
+dshift = filtfilt(b, a, dshift);
+
 if do_correction
     % sigma for the Gaussian process smoothing
     sig = rez.ops.sig;

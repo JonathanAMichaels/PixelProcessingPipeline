@@ -23,7 +23,7 @@ end
 run([script_dir '/sorting/Kilosort_config_3.m']);
 ops.fproc   = fullfile(rootH, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
-ops.nblocks = 1;
+ops.nblocks = 3;
 
 ops.NchanTOT  = 385; % total number of channels in your recording
 
@@ -40,7 +40,7 @@ reg = dir(fullfile(rootReg, 'subtraction_*'));
 rez.ops.dispmap = h5read(fullfile(rootReg, reg(1).name), '/dispmap');
 rez.ops.saveFolder = rootH;
 
-rez                = datashift2(rez, 1);
+rez                = datashift2_ORIGINAL(rez, 1);
 disp('Finished datashift')
 dshift = rez.dshift;
 save([rootH 'displacement'], 'dshift');
