@@ -177,6 +177,7 @@ def run(
     else:
         ctx.intermediate.iorig = np.arange(ctx.intermediate.Nbatch)
     if stop_after == "drift_correction":
+        ir.data_loader.close()
         return ctx
     # -------------------------------------------------------------------------
     # Main tracking and template matching algorithm.
