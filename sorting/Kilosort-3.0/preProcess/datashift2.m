@@ -45,7 +45,7 @@ Nbatches      = rez.temp.Nbatch;
 % index the shift at the channel locations
 dispmap = dispmap(:, rez.yc+1);
 % flip the dispmap
-dispmap = -dispmap;
+%dispmap = -dispmap;
 
 % grab the right time
 NT = ops.NT;
