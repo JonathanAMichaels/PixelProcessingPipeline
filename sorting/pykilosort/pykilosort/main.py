@@ -153,6 +153,8 @@ def run(
     # NOTE: now we are always in Fortran order.
     if stop_after is not "drift_correction":
         assert ir.proc_path.exists()
+    else:
+        open(ir.proc_path, 'w').close()
     ir.data_loader = DataLoader(ir.proc_path, params.NT, probe.Nchan, params.scaleproc)
 
     # -------------------------------------------------------------------------
