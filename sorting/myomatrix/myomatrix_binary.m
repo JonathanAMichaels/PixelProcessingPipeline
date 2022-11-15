@@ -109,7 +109,7 @@ if length(dataChan) == 32
 elseif length(dataChan) == 16
     brokenChan = find(S(:,2) > 16 | S(:,3) > 100);
 end
-brokenChan = [1 3:16];
+brokenChan = [1 3:16]';
 disp(['Broken channels are: ' num2str(brokenChan')])
 data(:,brokenChan) = randn(size(data,1), length(brokenChan))*3e-1;
 clear data_filt
