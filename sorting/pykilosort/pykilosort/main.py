@@ -124,7 +124,7 @@ def run(
 
     # -------------------------------------------------------------------------
     # Find the whitening matrix.
-    if "whitening_matrix" not in ctx.timer.keys() and stop_after is not "drift_correction":
+    if "whitening_matrix" not in ctx.timer.keys():# and stop_after is not "drift_correction":
         # outputs a rotation matrix (Nchan by Nchan) which whitens the zero-timelag covariance
         # of the data
         with ctx.time("whitening_matrix"):
