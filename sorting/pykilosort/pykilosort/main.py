@@ -124,7 +124,7 @@ def run(
 
     # -------------------------------------------------------------------------
     # Find the whitening matrix.
-    if "whitening_matrix" not in ctx.timer.keys():
+    if false:#"whitening_matrix" not in ctx.timer.keys():
         # outputs a rotation matrix (Nchan by Nchan) which whitens the zero-timelag covariance
         # of the data
         with ctx.time("whitening_matrix"):
@@ -139,7 +139,7 @@ def run(
     # -------------------------------------------------------------------------
     # Preprocess data to create proc.dat
     ir.proc_path = ctx.path("proc", ".dat")
-    if "preprocess" not in ctx.timer.keys():
+    if false:#"preprocess" not in ctx.timer.keys():
         # Do not preprocess again if the proc.dat file already exists.
         with ctx.time("preprocess"):
             if params.preprocessing_function == 'destriping':
