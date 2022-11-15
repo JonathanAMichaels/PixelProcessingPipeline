@@ -124,7 +124,7 @@ def run(
 
     # -------------------------------------------------------------------------
     # Find the whitening matrix.
-    if "whitening_matrix" not in ctx.timer.keys():# and stop_after is not "drift_correction":
+    if "whitening_matrix" not in ctx.timer.keys() and stop_after is not "drift_correction":
         # outputs a rotation matrix (Nchan by Nchan) which whitens the zero-timelag covariance
         # of the data
         with ctx.time("whitening_matrix"):
@@ -139,10 +139,9 @@ def run(
     # -------------------------------------------------------------------------
     # Preprocess data to create proc.dat
     ir.proc_path = ctx.path("proc", ".dat")
-    if "preprocess" not in ctx.timer.keys():# and stop_after is not "drift_correction":
+    if "preprocess" not in ctx.timer.keys() and stop_after is not "drift_correction":
         # Do not preprocess again if the proc.dat file already exists.
         with ctx.time("preprocess"):
-            print(params.preprocessing_function)
             if params.preprocessing_function == 'destriping':
                 destriping(ctx)
             else:
@@ -152,7 +151,8 @@ def run(
 
     # Open the proc file.
     # NOTE: now we are always in Fortran order.
-    assert ir.proc_path.exists()
+    if stop_after is not "drift_correction":
+        assert ir.proc_path.exists()
     ir.data_loader = DataLoader(ir.proc_path, params.NT, probe.Nchan, params.scaleproc)
 
     # -------------------------------------------------------------------------
