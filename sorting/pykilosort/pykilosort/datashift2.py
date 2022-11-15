@@ -613,19 +613,12 @@ def datashift2(ctx):
     Nbatch = ir.Nbatch
     disp_map = np.transpose(np.array(params.disp_map))
 
+    batch_centers = ((np.arange(Nbatch) * params.NT) + params.NT/2) / params.fs
     # re-interpolate dispmap to match the number of batches
-    batch_spacing = np.linspace(start=0, stop=disp_map.shape[0] - 1, num=Nbatch)
     new_disp_map = np.zeros((Nbatch, disp_map.shape[1]))
     for i in range(disp_map.shape[1]):
-        new_disp_map[:, i] = np.interp(batch_spacing, np.arange(disp_map.shape[0]), disp_map[:, i])
+        new_disp_map[:, i] = np.interp(batch_centers, np.arange(disp_map.shape[0]), disp_map[:, i])
     disp_map = new_disp_map
-
-    # re-interpolate dispmap to match nblock * 2 -1
-    #batch_spacing = np.linspace(start=0, stop=disp_map.shape[1] - 1, num=params.nblocks * 2 - 1)
-    #new_disp_map = np.zeros((disp_map.shape[0], params.nblocks * 2 - 1))
-    #for i in range(disp_map.shape[0]):
-    #    new_disp_map[i, :] = np.interp(batch_spacing, np.arange(disp_map.shape[1]), disp_map[i, :])
-    #disp_map = new_disp_map
 
     ir.xc, ir.yc = probe.xc, probe.yc
 
@@ -675,7 +668,7 @@ def datashift2(ctx):
 
     #dshift, yblk = get_drift(spikes, probe, Nbatch, params.nblocks, params.genericSpkTh)
 
-    yblk = np.arange(disp_map.shape[1])
+    yblk = np.arange(disp_map.shape[1]) # disp_map is already in um
     dshift = -disp_map
 
     #from scipy.io import savemat

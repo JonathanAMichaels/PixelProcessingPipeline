@@ -29,7 +29,6 @@ for j = 1:length(C)
     cluster_um(j) = ycoords(temp);
 end
 
-
 [f_b, f_a] = butter(4, 300/(30000/2), 'high');
 if k_vers == 3
     f = fopen('proc.dat', 'r');
@@ -42,7 +41,13 @@ elseif k_vers == 2
     f_filt = true;
     ntbuff = 16;
     nChan = 385;
+elseif k_vers == 2.25
+    f = fopen('proc.dat', 'r');
+    f_filt = true;
+    ntbuff = 16;
+    nChan = 384;
 end
+
 recordSize = 2; % 2 bytes for int16
 spt = recordSize*nChan;
 
