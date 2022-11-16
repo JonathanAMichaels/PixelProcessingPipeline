@@ -390,10 +390,10 @@ def apply_drift_transform(dat, shifts_in, ysamp, probe, sig):
     :param sig: Standard deviation for Gaussian in kriging interpolation
     :return: Shifted data batch via a kriging transformation
     """
+    # upsample to get shifts for each channel
+    shifts = interpolate_1D(shifts_in, ysamp, probe.yc)
 
     if False:
-        # upsample to get shifts for each channel
-        shifts = interpolate_1D(shifts_in, ysamp, probe.yc)
 
         # kernel prediction matrix
         kernel_matrix = get_kernel_matrix(probe, shifts, sig)
@@ -402,9 +402,10 @@ def apply_drift_transform(dat, shifts_in, ysamp, probe, sig):
         data_shifted = shift_data(dat, kernel_matrix)
     else:
         print(dat.shape)
-        print(ysamp.shape)
-        ff = interp1d(ysamp, dat, kind='linear', axis=1, fill_value=0)
-        data_shifted = ff(ysamp + shifts_in)
+        print(probe.yc.shape)
+        print(shifts.shape)
+        ff = interp1d(probe.yc, dat, kind='linear', axis=0, fill_value=0)
+        data_shifted = ff(probe.yc + shifts)
 
 
     return data_shifted
