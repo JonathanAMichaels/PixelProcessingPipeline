@@ -401,9 +401,6 @@ def apply_drift_transform(dat, shifts_in, ysamp, probe, sig):
         # apply shift transformation to the data
         data_shifted = shift_data(dat, kernel_matrix)
     else:
-        print(dat.shape)
-        print(probe.yc)
-        print(shifts)
         data_shifted = dat
         for i in range(dat.shape[0]):
             data_shifted[i, :] = np.interp(probe.yc + shifts, probe.yc, dat[i,:])
