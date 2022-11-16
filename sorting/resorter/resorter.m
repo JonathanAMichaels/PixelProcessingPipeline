@@ -62,10 +62,10 @@ if ~isfield(params, 'refractoryLim')
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
-    params.backSp = 121;
+    params.backSp = 90;
 end
 if ~isfield(params, 'forwardSp')
-    params.forwardSp = 121;
+    params.forwardSp = 90;
 end
 % Time range for cross-correlation
 if ~isfield(params, 'corrRange')
