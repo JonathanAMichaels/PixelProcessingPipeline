@@ -160,7 +160,6 @@ if neuro_sorting:
         #os.system('module load matlab/2021b')
         matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
 
-
     for pixel in range(config['num_neuropixels']):
         config_kilosort['neuropixel_folder'] = neuro_folders[pixel]
         tmp = glob.glob(neuro_folders[pixel] + '/*_t*.imec' + str(pixel) + '.ap.bin')
@@ -172,7 +171,7 @@ if neuro_sorting:
             extract_sync(config_kilosort)
 
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
-        kilosort(config_kilosort)
+        #kilosort(config_kilosort)
 
         print(config_kilosort)
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
