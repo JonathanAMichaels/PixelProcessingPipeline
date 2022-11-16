@@ -6,7 +6,7 @@ addpath(genpath([script_dir '/sorting/npy-matlab']))
 chanMapFile = [script_dir '/geometries/neuropixPhase3B1_kilosortChanMap.mat'];
 disp(['Using this channel map: ' chanMapFile])
 
-phyDir = 'sortednewshift';
+phyDir = 'sortednewshiftinterp';
 
 rootZ = [neuropixel_folder '/'];
 rootH = [rootZ phyDir '/'];
@@ -107,5 +107,7 @@ fprintf('found %d good units \n', sum(rez.good>0))
 % write to Phy
 fprintf('Saving results to Phy  \n')
 rezToPhy(rez, rootH);
+
+delete ops.fproc
 
 quit;

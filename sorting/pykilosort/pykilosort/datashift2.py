@@ -13,6 +13,8 @@ from .postprocess import my_conv2_cpu
 from .learn import extractTemplatesfromSnippets
 from .utils import get_cuda, Bunch
 
+from scipy.interpolate import interp1d
+
 logger = logging.getLogger(__name__)
 
 
@@ -389,14 +391,19 @@ def apply_drift_transform(dat, shifts_in, ysamp, probe, sig):
     :return: Shifted data batch via a kriging transformation
     """
 
-    # upsample to get shifts for each channel
-    shifts = interpolate_1D(shifts_in, ysamp, probe.yc)
+    if False:
+        # upsample to get shifts for each channel
+        shifts = interpolate_1D(shifts_in, ysamp, probe.yc)
 
-    # kernel prediction matrix
-    kernel_matrix = get_kernel_matrix(probe, shifts, sig)
+        # kernel prediction matrix
+        kernel_matrix = get_kernel_matrix(probe, shifts, sig)
 
-    # apply shift transformation to the data
-    data_shifted = shift_data(dat, kernel_matrix)
+        # apply shift transformation to the data
+        data_shifted = shift_data(dat, kernel_matrix)
+    else:
+        ff = interp1d(ysamp, dat, kind='linear', axis=0, fill_value=0)
+        data_shifted = ff(ysamp + shifts_in)
+
 
     return data_shifted
 
