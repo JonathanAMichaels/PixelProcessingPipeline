@@ -171,7 +171,7 @@ if neuro_sorting:
             extract_sync(config_kilosort)
 
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
-        #kilosort(config_kilosort)
+        kilosort(config_kilosort)
 
         print(config_kilosort)
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
