@@ -393,18 +393,15 @@ def apply_drift_transform(dat, shifts_in, ysamp, probe, sig):
     # upsample to get shifts for each channel
     shifts = interpolate_1D(shifts_in, ysamp, probe.yc)
 
-    if False:
+    # kernel prediction matrix
+    kernel_matrix = get_kernel_matrix(probe, shifts, sig)
 
-        # kernel prediction matrix
-        kernel_matrix = get_kernel_matrix(probe, shifts, sig)
+    # apply shift transformation to the data
+    data_shifted = shift_data(dat, kernel_matrix)
 
-        # apply shift transformation to the data
-        data_shifted = shift_data(dat, kernel_matrix)
-    else:
-        data_shifted = dat
-        for i in range(dat.shape[0]):
-            data_shifted[i, :] = np.interp(probe.yc - shifts, probe.yc, dat[i,:])
-
+    #data_shifted = dat
+    #for i in range(dat.shape[0]):
+    #    data_shifted[i, :] = np.interp(probe.yc - shifts, probe.yc, dat[i,:])
 
     return data_shifted
 

@@ -2,12 +2,10 @@ import os
 import sys
 import glob
 import h5py
-import numpy as np
 
 script_folder = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(script_folder)
 
-import shutil
 from pathlib import Path
 from pykilosort.ibl import run_spike_sorting_ibl, ibl_pykilosort_params
 
@@ -24,7 +22,7 @@ def kilosort(config):
         dispmap = f["dispmap"][:]
 
     params['disp_map'] = dispmap.tolist()
-    params['sig_datashift'] = 60.0
+    params['sig_datashift'] = 50.0
     run_spike_sorting_ibl(bin_file, delete=True, scratch_dir=scratch_dir, alf_path=None,
                           ks_output_dir=ks_output_dir, log_level='INFO', params=params, stop_after='drift_correction')
 
