@@ -413,11 +413,11 @@ for j = 1:length(C)
     if nChan >= 384
         grabChannels = 8;
     elseif nChan == 32
-        grabChannels = 6;
+        grabChannels = 10;
     elseif nChan == 16
-        grabChannels = 3;
+        grabChannels = 5;
     else
-        grabChannels = 4;
+        grabChannels = 5;
     end
     tempm = squeeze(nanmean(tempdata,3));
     ucheck = permute(tempm, [2 1 3]);
