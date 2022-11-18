@@ -62,10 +62,10 @@ if ~isfield(params, 'refractoryLim')
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
-    params.backSp = 90;
+    params.backSp = 120;
 end
 if ~isfield(params, 'forwardSp')
-    params.forwardSp = 90;
+    params.forwardSp = 120;
 end
 % Time range for cross-correlation
 if ~isfield(params, 'corrRange')
@@ -83,7 +83,7 @@ end
 disp('Reading kilosort output')
 T = readNPY([params.kiloDir '/spike_times.npy']);
 I = readNPY([params.kiloDir '/spike_clusters.npy']);
-Wrot = readNPY([params.kiloDir '/whitening_mat.npy']);
+Wrot = readNPY([params.kiloDir '/whitening_mat_inv.npy']);
 
 if params.userSorted
     clusterGroup = tdfread([params.kiloDir '/cluster_group.tsv']);
@@ -100,7 +100,7 @@ end
 
 if ~params.skipFilter
     % Extract individual waveforms from kilosort binary
-    [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
+    [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
     % calc stats
     [SNR, spkCount] = calcStats(mdata, data, T, I, C);
@@ -125,7 +125,7 @@ disp(['Number of spikes to work with: ' num2str(length(I))])
 keepGoing = 1;
 while keepGoing
     % Extract individual waveforms from kilosort binary
-    [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
+    [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
     % calculate cross-correlation
     [bigR, lags] = calcCrossCorr(params, mdata, consistency);
@@ -374,7 +374,7 @@ nChan = size(params.chanMap,1);
 spt = recordSize*nChan;
 % Zero out channels that are bad
 if nChan <= 32
-    badChan = find(diag(pinv(Wrot)) < 8);
+    badChan = find(diag(Wrot) < 8);
 else
     badChan = [];
 end
@@ -399,7 +399,7 @@ for j = 1:length(C)
             fseek(f, (useTimes(t)-params.backSp) * spt, 'bof');
             tempdata(:,:,t,q) = fread(f, [nChan, params.backSp+params.forwardSp], '*int16')';
             if unwhiten
-                tempdata(:,:,t,q) = tempdata(:,:,t,q) / Wrot; % unwhiten and rescale data to uV
+                tempdata(:,:,t,q) = tempdata(:,:,t,q) * Wrot / 200; % unwhiten and rescale data to uV
             end
             tempdata(:,badChan,t,q) = 0;
         end
