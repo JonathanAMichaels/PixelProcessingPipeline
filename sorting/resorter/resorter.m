@@ -83,7 +83,7 @@ end
 disp('Reading kilosort output')
 T = readNPY([params.kiloDir '/spike_times.npy']);
 I = readNPY([params.kiloDir '/spike_clusters.npy']);
-Wrot = readNPY([params.kiloDir '/whitening_mat_inv.npy']);
+Wrot = readNPY([params.kiloDir '/whitening_mat.npy']);
 
 if params.userSorted
     clusterGroup = tdfread([params.kiloDir '/cluster_group.tsv']);
