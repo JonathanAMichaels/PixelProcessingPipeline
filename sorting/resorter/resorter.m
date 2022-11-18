@@ -378,6 +378,7 @@ if nChan <= 32
 else
     badChan = [];
 end
+Wrot_orig = pinv(Wrot) * 200; % recover the original whitening matrix
 totalT = double(max(T));
 quartels = linspace(1, totalT, 5);
 waveParcel = floor(params.waveCount/(length(quartels)-1));
@@ -399,7 +400,7 @@ for j = 1:length(C)
             fseek(f, (useTimes(t)-params.backSp) * spt, 'bof');
             tempdata(:,:,t,q) = fread(f, [nChan, params.backSp+params.forwardSp], '*int16')';
             if unwhiten
-                tempdata(:,:,t,q) = tempdata(:,:,t,q) * Wrot / 200; % unwhiten and rescale data to uV
+                tempdata(:,:,t,q) = tempdata(:,:,t,q) / Wrot_orig; % unwhiten and rescale data to uV
             end
             tempdata(:,badChan,t,q) = 0;
         end
