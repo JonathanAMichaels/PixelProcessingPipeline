@@ -48,10 +48,10 @@ if ~isfield(params, 'crit')
 end
 % SNR threshold for keeping clusters at the end
 if ~isfield(params, 'SNRThreshold')
-    params.SNRThreshold = 3.0;
+    params.SNRThreshold = 4.0;
 end
 if ~isfield(params, 'multiSNRThreshold')
-    params.multiSNRThreshold = 3.0;
+    params.multiSNRThreshold = 4.0;
 end
 if ~isfield(params, 'consistencyThreshold')
     params.consistencyThreshold = 0.7;
@@ -211,7 +211,7 @@ for j = 1:length(C)
         if sum(dt <= sampThresh) == 0
             keepRemoving = false;
         else
-            delInd(end+1) = find(dt <= sampThresh,1)  + 1 + length(delInd);
+            delInd(end+1) = find(dt <= sampThresh, 1)  + 1 + length(delInd);
         end
     end
     I(ind(delInd)) = [];
@@ -378,7 +378,7 @@ if nChan <= 32
 else
     badChan = [];
 end
-Wrot_orig = pinv(Wrot) * 200; % recover the original whitening matrix
+Wrot_orig = pinv(Wrot) * 200; % recover the original whitening matrix (specific to pykilosort 2.5)
 totalT = double(max(T));
 quartels = linspace(1, totalT, 5);
 waveParcel = floor(params.waveCount/(length(quartels)-1));
