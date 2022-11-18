@@ -48,7 +48,7 @@ if ~isfield(params, 'crit')
 end
 % SNR threshold for keeping clusters at the end
 if ~isfield(params, 'SNRThreshold')
-    params.SNRThreshold = 4.0;
+    params.SNRThreshold = 3.0;
 end
 if ~isfield(params, 'multiSNRThreshold')
     params.multiSNRThreshold = 4.0;
@@ -62,10 +62,10 @@ if ~isfield(params, 'refractoryLim')
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
-    params.backSp = 120;
+    params.backSp = 140;
 end
 if ~isfield(params, 'forwardSp')
-    params.forwardSp = 120;
+    params.forwardSp = 140;
 end
 % Time range for cross-correlation
 if ~isfield(params, 'corrRange')
@@ -413,11 +413,11 @@ for j = 1:length(C)
     if nChan >= 384
         grabChannels = 8;
     elseif nChan == 32
-        grabChannels = 10;
+        grabChannels = 6;
     elseif nChan == 16
-        grabChannels = 5;
+        grabChannels = 3;
     else
-        grabChannels = 5;
+        grabChannels = 4;
     end
     tempm = squeeze(nanmean(tempdata,3));
     ucheck = permute(tempm, [2 1 3]);
