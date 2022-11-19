@@ -374,8 +374,8 @@ nChan = size(params.chanMap,1);
 spt = recordSize*nChan;
 % Zero out channels that are bad
 if nChan <= 32
-    diag(Wrot)
-    badChan = find(diag(Wrot) < 8);
+    %diag(Wrot)
+    badChan = find(diag(Wrot) < 4);
 else
     badChan = [];
 end
