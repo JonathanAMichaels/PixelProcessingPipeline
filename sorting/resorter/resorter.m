@@ -438,10 +438,12 @@ function [r, lags] = calcCrossCorr(params, mdata, consistency)
     disp('Calculating waveform cross-correlations')
     mdata = single(mdata);
     % Let's focus on the top channels only
-    for j = 1:size(mdata,3)
-        allChan = 1:size(mdata,2);
-        allChan(consistency.channel(:,j)) = [];
-        mdata(:,allChan,j) = 0;
+    if size(mdata,2) > 32
+        for j = 1:size(mdata,3)
+            allChan = 1:size(mdata,2);
+            allChan(consistency.channel(:,j)) = [];
+            mdata(:,allChan,j) = 0;
+        end
     end
     % concatenate channels together while keeping a buffer between them
     catdata = [];
