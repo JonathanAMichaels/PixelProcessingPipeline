@@ -102,6 +102,13 @@ if ~params.skipFilter
     % Extract individual waveforms from kilosort binary
     [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
+    % re-center all spike times
+    temp = permute(mdata, [3 1 2]);
+    [~, minTime] = min(min(temp,[],3),[],2);
+    for j = 1:length(C)
+        T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp;
+    end
+
     % calc stats
     [SNR, spkCount] = calcStats(mdata, data, T, I, C);
     SNR
@@ -127,9 +134,20 @@ while keepGoing
     % Extract individual waveforms from kilosort binary
     [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
+    % re-center all spike times
+    temp = permute(mdata, [3 1 2]);
+    [~, minTime] = min(min(temp,[],3),[],2);
+    new_mdata = zeros(size(mdata,1)*3, size(mdata,2), size(mdata,3));
+    for j = 1:length(C)
+        T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp;
+        % correct mdata centering
+        new_mdata((size(mdata,1)+1:size(mdata,1)*2) - (minTime(j) - params.backSp),:,j) = mdata(:,:,j);
+    end
+    mdata = new_mdata((size(mdata,1)+1:size(mdata,1)*2),:,:);
+
     % calculate cross-correlation
-    [bigR, lags] = calcCrossCorr(params, mdata, consistency);
-    
+    [bigR, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C);
+
     disp('Combining units and re-assigning spikes')
     % Find lags with maximum correlation
     [m, mL] = max(bigR,[],1);
@@ -137,10 +155,8 @@ while keepGoing
     m(isnan(m)) = 0;
     mL = lags(mL);
     
-    % Remove edges below correlation threshold
-    J = m;
-    J(J < params.crit) = 0;
-    J(J > 0) = 1;
+    % Let's choose what to merge
+    J = m > 0.8 | (m > 0.7 & rCross > 0.7);
     
     % Create graph of connected clusters
     J = graph(J);
@@ -190,32 +206,20 @@ while keepGoing
     T = newT;
     I = newI;
     C = unique(newC);
-    
+
+    % remove duplicates
+    [T, I] = removeDuplicates(params, T, I, C);
+
     % When there are no more connected clusters we can stop
     keepGoing = length(bins) ~= length(unique(bins));
 end
 disp('Finished merging clusters')
 
-% Let's remove spikes that were multi-detected
-sampThresh = params.refractoryLim * (params.sr/1000);
-disp(['Removing duplicate counted spikes within ' num2str(sampThresh/(params.sr/1000)) 'ms range'])
+% re-center all spike times
+temp = permute(mdata, [3 1 2]);
+[~, minTime] = min(min(temp,[],3),[],2);
 for j = 1:length(C)
-    keepRemoving = true;
-    delInd = [];
-    ind = find(I == C(j));
-    times = T(ind);
-    while keepRemoving
-        theseTimes = times;
-        theseTimes(delInd) = [];
-        dt = diff(theseTimes);
-        if sum(dt <= sampThresh) == 0
-            keepRemoving = false;
-        else
-            delInd(end+1) = find(dt <= sampThresh, 1)  + 1 + length(delInd);
-        end
-    end
-    I(ind(delInd)) = [];
-    T(ind(delInd)) = [];
+    T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp;
 end
 
 % Re-extract
@@ -434,7 +438,7 @@ fclose(f);
 consistency.R = R;
 end
 
-function [r, lags] = calcCrossCorr(params, mdata, consistency)
+function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
     disp('Calculating waveform cross-correlations')
     mdata = single(mdata);
     % Let's focus on the top channels only
@@ -466,5 +470,56 @@ function [r, lags] = calcCrossCorr(params, mdata, consistency)
     r = reshape(r, [size(r,1) size(mdata,3) size(mdata,3)]);
     for z = 1:size(r,1)
         r(z, logical(eye(size(r,2), size(r,3)))) = 0;
+    end
+
+
+    % Calculate zero-lag auto and cross-correlograms in spike timing (using a 1ms bin)
+    M = ceil(double(max(T)/30));
+    S = zeros(M,length(C),'logical');
+    for j = 1:length(C)
+        spk = round(double(T(I == C(j)))/30);
+        S(spk,j) = 1;
+    end
+    rCross = zeros(size(S,2), size(S,2));
+    for i = 1:size(S,2)
+        for j = 1:size(S,2)
+            rCross(i,j) = corr(S(:,i), S(:,j));
+        end
+    end
+end
+
+
+function [T, I] = removeDuplicates(params, T, I, C)
+    % Let's remove spikes that were multi-detected
+    sampThresh = params.refractoryLim * (params.sr/1000);
+    disp(['Removing duplicate counted spikes within ' num2str(sampThresh/(params.sr/1000)) 'ms range'])
+    for j = 1:length(C)        
+        ind = find(I == C(j));
+        times = T(ind);
+
+        % This is the most efficient way to eliminate duplicate spikes.
+        % You'll drop a few more than necessary, but it's generally worth it for the efficiency
+        dt1 = diff(times);
+        dt2 = flipud(diff(flipud(times)));
+        delInd = find(dt1 <= sampThresh & dt2 <= sampThresh) + 1;
+        I(ind(delInd)) = [];
+        T(ind(delInd)) = [];
+
+        ind = find(I == C(j));
+        times = T(ind);
+        keepRemoving = true;
+        delInd = [];
+        while keepRemoving
+            theseTimes = times;
+            theseTimes(delInd) = [];
+            dt = diff(theseTimes);
+            if sum(dt <= sampThresh) == 0
+                keepRemoving = false;
+            else
+                delInd(end+1) = find(dt <= sampThresh, 1)  + 1 + length(delInd);
+            end
+        end
+        I(ind(delInd)) = [];
+        T(ind(delInd)) = [];
     end
 end
