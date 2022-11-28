@@ -13,5 +13,11 @@ params.waveCount = 800;
 params.consistencyThreshold = 0;
 params.crit = 0.8;
 params.multiSNRThreshold = 4.0;
-resorter(params)
+% make sure a sorting exists
+if isfile([myomatrix_folder '/spike_times.npy'])
+    resorter(params)
+else
+    disp('No spike sorting to post-process')
+end
+
 quit;
