@@ -1,5 +1,6 @@
 load('/tmp/config.mat')
 
+restoredefaultpath
 addpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/npy-matlab']))
 
