@@ -156,7 +156,7 @@ while keepGoing
     mL = lags(mL);
     
     % Let's choose what to merge
-    J = m > 0.8 | (m > 0.3 & rCross > 0.3);
+    J = m > 0.8 | (m > 0.4 & rCross > 0.2);
     
     % Create graph of connected clusters
     J = graph(J);
@@ -473,11 +473,11 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
     end
 
 
-    % Calculate zero-lag auto and cross-correlograms in spike timing (using a 1ms bin)
-    M = ceil(double(max(T)/30));
+    % Calculate zero-lag auto and cross-correlograms in spike timing (using a 5ms bin)
+    M = ceil(double(max(T)/30/5));
     S = zeros(M,length(C),'logical');
     for j = 1:length(C)
-        spk = round(double(T(I == C(j)))/30);
+        spk = round(double(T(I == C(j)))/30/5);
         S(spk,j) = 1;
     end
     rCross = zeros(size(S,2), size(S,2));
