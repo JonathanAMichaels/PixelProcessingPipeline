@@ -10,7 +10,7 @@ params.binaryFile = [myomatrix_folder '/proc.dat'];
 params.userSorted = false;
 params.savePlots = true;
 params.waveCount = 800;
-params.consistencyThreshold = 0;
+params.consistencyThreshold = 0.6;
 params.crit = 0.8;
 params.multiSNRThreshold = 3.8;
 % make sure a sorting exists
