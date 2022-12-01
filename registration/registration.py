@@ -43,7 +43,7 @@ def registration(config):
         sr = spikeglx.Reader(binary)
         print(sr.nc, sr.nsync, sr.rl)
         h = sr.geometry
-        if not standardized_file.exists():
+        if not standardized_file.exists() and not config['registration_final']:
             print("Destriping", binary)
             batch_size_secs = 1
             batch_intervals_secs = 50
@@ -95,7 +95,7 @@ def registration(config):
                   ' --geom=' + config['script_dir'] +
                   '/registration/spikes_localization_registration/channels_maps/np1_channel_map.npy ' +
                   '--n_windows=4 ' +
-                  '--disp=1000 --overwrite')  # 5, 1500 / 3, 900
+                  '--disp=1000 --overwrite --registration_final=' + str(config['registration_final']))  # 5, 1500 / 3, 900
 
         registered_file = glob.glob(registration_directory + 'subtraction_*.h5')
         with h5py.File(registered_file[0], "r") as f:

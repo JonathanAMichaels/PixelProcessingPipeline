@@ -24,6 +24,8 @@ g = ap.add_argument_group("Data input/output")
 g.add_argument("standardized_bin")
 g.add_argument("out_folder")
 g.add_argument("--overwrite", action="store_true")
+g.add_argument("--registration_final", default=False,
+               type=lambda x: x == 'True')
 
 g = ap.add_argument_group("Pipeline configuration")
 g.add_argument("--geom", default=None, type=str)
@@ -114,30 +116,31 @@ if args.nogpu:
 
 print(args)
 
-sub_h5 = subtract.subtraction(
-    args.standardized_bin,
-    args.out_folder,
-    neighborhood_kind=args.neighborhood_kind,
-    extract_box_radius=args.extract_box_radius,
-    enforce_decrease_kind=args.enforce_decrease_kind,
-    geom=geom,
-    thresholds=args.thresholds,
-    nn_detect=args.nndetect,
-    denoise_detect=args.dndetect,
-    n_sec_chunk=args.n_sec_chunk,
-    tpca_rank=args.tpca_rank,
-    n_jobs=args.n_jobs,
-    t_start=args.t_start,
-    t_end=args.t_end,
-    do_clean=not args.noclean,
-    n_sec_pca=args.n_sec_pca,
-    do_localize=not args.nolocalize,
-    save_residual=not args.noresidual,
-    loc_workers=args.n_loc_workers,
-    localize_radius=args.localize_radius,
-    save_waveforms=not args.nowaveforms,
-    overwrite=False,
-)
+if not args.registration_final:
+    sub_h5 = subtract.subtraction(
+        args.standardized_bin,
+        args.out_folder,
+        neighborhood_kind=args.neighborhood_kind,
+        extract_box_radius=args.extract_box_radius,
+        enforce_decrease_kind=args.enforce_decrease_kind,
+        geom=geom,
+        thresholds=args.thresholds,
+        nn_detect=args.nndetect,
+        denoise_detect=args.dndetect,
+        n_sec_chunk=args.n_sec_chunk,
+        tpca_rank=args.tpca_rank,
+        n_jobs=args.n_jobs,
+        t_start=args.t_start,
+        t_end=args.t_end,
+        do_clean=not args.noclean,
+        n_sec_pca=args.n_sec_pca,
+        do_localize=not args.nolocalize,
+        save_residual=not args.noresidual,
+        loc_workers=args.n_loc_workers,
+        localize_radius=args.localize_radius,
+        save_waveforms=not args.nowaveforms,
+        overwrite=False,
+    )
 
 
 # -- registration

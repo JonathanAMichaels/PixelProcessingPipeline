@@ -27,6 +27,7 @@ else:
     raise SystemExit(f"Usage: {sys.argv[0]} -f argument must be present")
 
 registration = False
+registration_final = False
 myo_sorting = False
 myo_post = False
 neuro_sorting = False
@@ -36,6 +37,8 @@ cluster = False
 in_cluster = False
 if "-registration" in opts:
     registration = True
+if "-registration_final" in opts:
+    registration_final = True
 if "-myo_sorting" in opts:
     myo_sorting = True
 if "-myo_post" in opts:
@@ -134,12 +137,13 @@ if in_cluster:
     config['in_cluster'] = True
 else:
     config['in_cluster'] = False
+config['registration_final'] = registration_final
 
 # Save config file with up-to-date information
 yaml.dump(config, open(config_file, 'w'), Dumper=yaml.RoundTripDumper)
 
 # Proceed with registration
-if registration:
+if registration or registration_final:
     registration_function(config)
 
 # Prepare common kilosort config
