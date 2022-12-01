@@ -33,69 +33,70 @@ def registration(config):
             raise SystemExit('Invalid Neuropixel data: ' + str(file))
         binary = Path(file[0])
 
-        standardized_directory = working_directory + 'standardized/'
-        if not os.path.exists(standardized_directory):
-            os.makedirs(standardized_directory)
-        standardized_directory = Path(standardized_directory)
-        standardized_file = standardized_directory / f"{binary.stem}.normalized.bin"
+        if False:
+            standardized_directory = working_directory + 'standardized/'
+            if not os.path.exists(standardized_directory):
+                os.makedirs(standardized_directory)
+            standardized_directory = Path(standardized_directory)
+            standardized_file = standardized_directory / f"{binary.stem}.normalized.bin"
 
-        # run destriping
-        sr = spikeglx.Reader(binary)
-        print(sr.nc, sr.nsync, sr.rl)
-        h = sr.geometry
-        if False:#not standardized_file.exists():
-            print("Destriping", binary)
-            batch_size_secs = 1
-            batch_intervals_secs = 50
-            # scans the file at constant interval, with a demi batch starting offset
-            nbatches = int(np.ceil((sr.rl - batch_size_secs) / batch_intervals_secs - 0.5))
-            print(nbatches)
-            wrots = np.zeros((nbatches, sr.nc - sr.nsync, sr.nc - sr.nsync))
-            for ibatch in trange(nbatches, desc="destripe batches"):
-                ifirst = int(
-                    (ibatch + 0.5) * batch_intervals_secs * sr.fs
-                    + batch_intervals_secs
+            # run destriping
+            sr = spikeglx.Reader(binary)
+            print(sr.nc, sr.nsync, sr.rl)
+            h = sr.geometry
+            if not standardized_file.exists():
+                print("Destriping", binary)
+                batch_size_secs = 1
+                batch_intervals_secs = 50
+                # scans the file at constant interval, with a demi batch starting offset
+                nbatches = int(np.ceil((sr.rl - batch_size_secs) / batch_intervals_secs - 0.5))
+                print(nbatches)
+                wrots = np.zeros((nbatches, sr.nc - sr.nsync, sr.nc - sr.nsync))
+                for ibatch in trange(nbatches, desc="destripe batches"):
+                    ifirst = int(
+                        (ibatch + 0.5) * batch_intervals_secs * sr.fs
+                        + batch_intervals_secs
+                    )
+                    ilast = ifirst + int(batch_size_secs * sr.fs)
+                    sample = voltage.destripe(
+                        sr[ifirst:ilast, : -sr.nsync].T, fs=sr.fs, neuropixel_version=1
+                    )
+                    np.fill_diagonal(
+                        wrots[ibatch, :, :],
+                        1 / utils.rms(sample) * sr.sample2volts[: -sr.nsync],
+                    )
+
+                wrot = np.median(wrots, axis=0)
+                voltage.decompress_destripe_cbin(
+                    sr.file_bin,
+                    h=h,
+                    wrot=wrot,
+                    output_file=standardized_file,
+                    dtype=np.float32,
+                    nc_out=sr.nc - sr.nsync,
                 )
-                ilast = ifirst + int(batch_size_secs * sr.fs)
-                sample = voltage.destripe(
-                    sr[ifirst:ilast, : -sr.nsync].T, fs=sr.fs, neuropixel_version=1
+
+                # also copy the companion meta-data file
+                shutil.copy(
+                    sr.file_meta_data,
+                    standardized_file.parent.joinpath(
+                        f"{sr.file_meta_data.stem}.normalized.meta"
+                    ),
                 )
-                np.fill_diagonal(
-                    wrots[ibatch, :, :],
-                    1 / utils.rms(sample) * sr.sample2volts[: -sr.nsync],
-                )
 
-            wrot = np.median(wrots, axis=0)
-            voltage.decompress_destripe_cbin(
-                sr.file_bin,
-                h=h,
-                wrot=wrot,
-                output_file=standardized_file,
-                dtype=np.float32,
-                nc_out=sr.nc - sr.nsync,
-            )
+            if config['in_cluster']:
+                n_jobs = 4
+            else:
+                n_jobs = 1
 
-            # also copy the companion meta-data file
-            shutil.copy(
-                sr.file_meta_data,
-                standardized_file.parent.joinpath(
-                    f"{sr.file_meta_data.stem}.normalized.meta"
-                ),
-            )
-
-        if config['in_cluster']:
-            n_jobs = 4
-        else:
-            n_jobs = 1
-
-        os.system('python ' + config['script_dir'] +
-                  '/registration/spikes_localization_registration/scripts/subtract.py '
-                  + str(standardized_file) + ' ' + registration_directory +
-                  ' --noresidual --nowaveforms --dndetect --thresholds=12,10,8 --n_jobs=' + str(n_jobs) +  # 12,10,8,6
-                  ' --geom=' + config['script_dir'] +
-                  '/registration/spikes_localization_registration/channels_maps/np1_channel_map.npy ' +
-                  '--n_windows=4 ' +
-                  '--disp=1000 --overwrite')  # 5, 1500 / 3, 900
+            os.system('python ' + config['script_dir'] +
+                      '/registration/spikes_localization_registration/scripts/subtract.py '
+                      + str(standardized_file) + ' ' + registration_directory +
+                      ' --noresidual --nowaveforms --dndetect --thresholds=12,10,8 --n_jobs=' + str(n_jobs) +  # 12,10,8,6
+                      ' --geom=' + config['script_dir'] +
+                      '/registration/spikes_localization_registration/channels_maps/np1_channel_map.npy ' +
+                      '--n_windows=4 ' +
+                      '--disp=1000 --overwrite')  # 5, 1500 / 3, 900
 
         registered_file = glob.glob(registration_directory + 'subtraction_*.h5')
         with h5py.File(registered_file[0], "r") as f:
