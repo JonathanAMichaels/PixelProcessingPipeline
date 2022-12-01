@@ -144,6 +144,7 @@ if not args.registration_final:
     )
 else:
     sub_h5 = glob.glob(args.out_folder + 'subtraction_*.h5')
+    sub_h5 = sub_h5[0]
 
 # -- registration
 
