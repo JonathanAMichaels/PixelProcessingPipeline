@@ -8,6 +8,7 @@ and displacement map to the output HDF5 file from subtraction.
 
 See the documentation of `subtract.subtraction` for lots of detail.
 """
+import glob
 import os
 import argparse
 import h5py
@@ -141,7 +142,8 @@ if not args.registration_final:
         save_waveforms=not args.nowaveforms,
         overwrite=False,
     )
-
+else:
+    sub_h5 = glob.glob(args.out_folder + 'subtraction_*.h5')
 
 # -- registration
 
