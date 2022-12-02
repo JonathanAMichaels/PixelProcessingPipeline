@@ -151,19 +151,20 @@ config_kilosort = yaml.safe_load(open(config_file, 'r'))
 config_kilosort['myomatrix_number'] = 1
 config_kilosort['channel_list'] = 1
 
+if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
+    matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
+elif os.path.isfile('/srv/software/matlab/R2021b/bin/matlab'):
+    matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
+else:
+    matlab_path = glob.glob('/usr/local/MATLAB/R*')
+    matlab_root = matlab_path[0] + '/bin/matlab'
+
 # Proceed with neural spike sorting
 if neuro_sorting:
     config_kilosort = {'script_dir': config['script_dir'], 'trange': np.array(config['Session']['trange'])}
     config_kilosort['type'] = 1
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
-
     path_to_add = script_folder + '/sorting/'
-    if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
-        matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
-    else:
-        #os.system('module load matlab/2021b')
-        matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
-
     for pixel in range(config['num_neuropixels']):
         config_kilosort['neuropixel_folder'] = neuro_folders[pixel]
         tmp = glob.glob(neuro_folders[pixel] + '/*_t*.imec' + str(pixel) + '.ap.bin')
@@ -187,10 +188,6 @@ if neuro_post:
     config_kilosort = {'script_dir': config['script_dir']}
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
     path_to_add = script_folder + '/sorting/'
-    if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
-        matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
-    else:
-        matlab_root = '/local/software/matlab/R2020b/bin/matlab'
     for pixel in range(config['num_neuropixels']):
         config_kilosort['neuropixel_folder'] = neuro_folders[pixel] + '/sorted'
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
@@ -203,10 +200,6 @@ if myo_sorting:
                        'trange': np.array(config['Session']['trange']),
                        'sync_chan': int(config['Session']['myo_analog_chan'])}
     path_to_add = script_folder + '/sorting/'
-    if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
-        matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
-    else:
-        matlab_root = '/local/software/matlab/R2020b/bin/matlab'
     for myomatrix in range(len(config['Session']['myo_chan_list'])):
         f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
         config_kilosort['myomatrix_data'] = f[0]
@@ -227,10 +220,6 @@ if myo_sorting:
 if myo_post:
     config_kilosort = {'script_dir': config['script_dir'], 'myomatrix': config['myomatrix']}
     path_to_add = script_folder + '/sorting/'
-    if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
-        matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
-    else:
-        matlab_root = '/local/software/matlab/R2020b/bin/matlab'
     for myomatrix in range(len(config['Session']['myo_chan_list'])):
         f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
 
