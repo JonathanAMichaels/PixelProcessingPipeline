@@ -85,6 +85,9 @@ T = readNPY([params.kiloDir '/spike_times.npy']);
 I = readNPY([params.kiloDir '/spike_clusters.npy']);
 Wrot = readNPY([params.kiloDir '/whitening_mat_inv.npy']);
 
+%TMP = readNPY([params.kiloDir '/templates.npy']);
+%TMP_ind = readNPY([params.kiloDir '/templates_ind.npy']);
+
 if params.userSorted
     clusterGroup = tdfread([params.kiloDir '/cluster_group.tsv']);
 else
@@ -226,6 +229,9 @@ end
 [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 % use first vs last quartel as consistency check
 RR = mean(squeeze([consistency.R(1,2,:), consistency.R(2,3,:), consistency.R(3,4,:)]),1);
+if size(consistency.R,3) == 1
+    RR = mean(RR)
+end
 RR(isnan(RR) | RR < 0) = 0;
 disp('waveform consistency')
 RR
