@@ -48,6 +48,7 @@ def run(
     # Get params.
     params = KilosortParams(**params or {})
     assert params
+    print(params)
 
     raw_data = RawDataLoader(dat_path, **params.ephys_reader_args)
 
