@@ -211,7 +211,7 @@ class KilosortParams(BaseModel):
     scaleproc: int = Field(200, description="int16 scaling of whitened data")
     nPCs: int = Field(3, description="how many PCs to project the spikes into")
 
-    nt0: int = 61
+    nt0: int = 81
     nup: int = 10
     sig: int = 1
     gain: int = 1
