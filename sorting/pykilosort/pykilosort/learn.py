@@ -227,6 +227,7 @@ def mexGetSpikes2(Params, drez, wTEMP, iC):
 
     maxFR = constants.maxFR
     Nthreads = constants.Nthreads
+    Nthreads = 128
     print(Nthreads)
 
     # tpB = (8, 2 * nt0 - 1)
