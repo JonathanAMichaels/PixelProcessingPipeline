@@ -1,4 +1,4 @@
-const int  Nthreads = 512, maxFR = 5000, NrankMax = 6;
+const int  Nthreads = 1024, maxFR = 5000, NrankMax = 6;
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void  sumChannels(const double *Params, const float *data,
 	float *datasum, int *kkmax, const int *iC){
