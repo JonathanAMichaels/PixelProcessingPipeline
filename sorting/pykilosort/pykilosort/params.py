@@ -231,7 +231,7 @@ class KilosortParams(BaseModel):
     # Computed properties
     @property
     def NT(self) -> int:
-        return 64 * 1024 + self.ntbuff
+        return 128 * 1024 + self.ntbuff #  64 * 1024 + self.ntbuff
 
     @property
     def NTbuff(self) -> int:
