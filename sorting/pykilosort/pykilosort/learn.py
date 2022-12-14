@@ -227,13 +227,11 @@ def mexGetSpikes2(Params, drez, wTEMP, iC):
 
     maxFR = constants.maxFR
     Nthreads = constants.Nthreads
-    Nthreads = 2048
     print(Nthreads)
 
     # tpB = (8, 2 * nt0 - 1)
     # tpF = (16, Nnearest)
     tpS = (nt0, 16)
-    print(tpS)
 
     d_Params = cp.asarray(Params, dtype=np.float64, order="F")
     d_data = cp.asarray(drez, dtype=np.float32, order="F")
@@ -304,6 +302,12 @@ def mexGetSpikes2(Params, drez, wTEMP, iC):
 
     # update dWU here by adding back to subbed spikes
     extract_snips = cp.RawKernel(code, "extract_snips")
+    print(d_Params)
+    print(d_st1)
+    print(d_id1)
+    print(d_counter)
+    print(d_data)
+    print(d_WU)
     extract_snips((Nchan,), tpS, (d_Params, d_st1, d_id1, d_counter, d_data, d_WU))
 
     # QUESTION: why a copy here??
