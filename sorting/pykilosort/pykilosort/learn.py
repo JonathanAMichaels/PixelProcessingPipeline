@@ -301,9 +301,6 @@ def mexGetSpikes2(Params, drez, wTEMP, iC):
 
     # update dWU here by adding back to subbed spikes
     extract_snips = cp.RawKernel(code, "extract_snips")
-    print(NT)
-    print(d_data.shape)
-    print(d_WU.shape)
     extract_snips((Nchan,), tpS, (d_Params, d_st1, d_id1, d_counter, d_data, d_WU))
 
     # QUESTION: why a copy here??
