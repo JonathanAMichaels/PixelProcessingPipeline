@@ -185,8 +185,8 @@ if neuro_sorting:
                   path_to_add + '\'); Kilosort_run"')
 
         print('Starting alf post-processing of ' + config_kilosort['neuropixel'])
-        alf_dir = Path(config['neuropixel_folder'] + '/sorted/alf')
-        ks_dir = Path(config['neuropixel_folder'] + '/sorted')
+        alf_dir = Path(config_kilosort['neuropixel_folder'] + '/sorted/alf')
+        ks_dir = Path(config_kilosort['neuropixel_folder'] + '/sorted')
         ks2_to_alf(ks_dir, Path(config_kilosort['neuropixel']), alf_dir)
 
 # Proceed with neuro post-processing
