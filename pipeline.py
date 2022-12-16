@@ -7,6 +7,7 @@ from pathlib import Path
 import datetime
 import numpy as np
 import shutil
+from ibllib.ephys.spikes import ks2_to_alf
 from pipeline_utils import find, create_config, extract_sync, extract_LFP
 from registration.registration import registration as registration_function
 from sorting.pykilosort.run_myo_pykilosort import myo_sort as myo_function
@@ -175,13 +176,18 @@ if neuro_sorting:
             print('Extracting sync signal from ' + config_kilosort['neuropixel'] + ' and saving')
             extract_sync(config_kilosort)
 
-        print('Starting spike sorting of ' + config_kilosort['neuropixel'])
+        print('Starting drift correction of ' + config_kilosort['neuropixel'])
         kilosort(config_kilosort)
 
-        print(config_kilosort)
+        print('Starting spike sorting of ' + config_kilosort['neuropixel'])
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
                   path_to_add + '\'); Kilosort_run"')
+
+        print('Starting alf post-processing of ' + config_kilosort['neuropixel'])
+        alf_dir = Path(config['neuropixel_folder'] + '/sorted/alf')
+        ks_dir = Path(config['neuropixel_folder'] + '/sorted')
+        ks2_to_alf(ks_dir, Path(config_kilosort['neuropixel']), alf_dir)
 
 # Proceed with neuro post-processing
 if neuro_post:

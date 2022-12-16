@@ -13,7 +13,6 @@ def kilosort(config):
     bin_file = Path(config['neuropixel'])
     ks_output_dir = Path(config['neuropixel_folder'] + '/sorted')
     scratch_dir = ks_output_dir
-    alf_dir = Path(config['neuropixel_folder'] + '/sorted/alf')
     ks_output_dir.mkdir(parents=True, exist_ok=True)
     params = ibl_pykilosort_params([bin_file])
 
