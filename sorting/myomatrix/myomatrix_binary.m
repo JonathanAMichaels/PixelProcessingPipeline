@@ -74,17 +74,13 @@ for q = 1:3
     elseif q == 2
         [b, a] = butter(2, [8000 14000] / (30000/2), 'bandpass');
     elseif q == 3
-        [b, a] = butter(2, [10 50] / (30000/2), 'bandpass');
+        [b, a] = butter(2, [1 60] / (30000/2), 'bandpass');
     end
-    useSeconds = 30;
-    tRange = size(data,1) - (30000*(120+useSeconds)) : size(data,1) - (30000*120);
-    if isempty(tRange)
-        tRange = -1;
+    useSeconds = 180;
+    if size(data,1) < useSeconds*30000
+        useSeconds = floor(size(data,1)/30000)
     end
-    while (tRange(1) < 1)
-        useSeconds = useSeconds - 1;
-        tRange = size(data,1) - (30000*useSeconds) : size(data,1);
-    end
+    tRange = size(data,1) - (30000*useSeconds) : size(data,1);
 
     data_filt = zeros(length(tRange),size(data,2),'single');
     for i = 1:size(data,2)
@@ -103,7 +99,7 @@ for q = 1:3
     S(:,q) = std(data_filt,[],1);
 end
 print([myomatrix '/brokenchan' num2str(myomatrix_num) '.png'], '-dpng')
-
+sdsdsdsd
 if length(dataChan) == 32
     brokenChan = find(S(:,2) > 16 | S(:,3) > 100);
 elseif length(dataChan) == 16
