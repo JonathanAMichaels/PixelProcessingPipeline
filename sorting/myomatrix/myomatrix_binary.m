@@ -74,7 +74,7 @@ for q = 1:3
     elseif q == 2
         [b, a] = butter(2, [8000 14000] / (30000/2), 'bandpass');
     elseif q == 3
-        [b, a] = butter(2, [1 60] / (30000/2), 'bandpass');
+        [b, a] = butter(2, [5 70] / (30000/2), 'bandpass');
     end
     useSeconds = 180;
     if size(data,1) < useSeconds*30000
