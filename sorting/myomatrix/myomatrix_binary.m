@@ -76,11 +76,12 @@ for q = 1:3
     elseif q == 3
         [b, a] = butter(2, [5 70] / (30000/2), 'bandpass');
     end
-    useSeconds = 180;
-    if size(data,1) < useSeconds*30000
-        useSeconds = floor(size(data,1)/30000)
+    useSeconds = 300;
+    if size(data,1) < useSeconds*2*30000
+        useSeconds = floor(size(data,1)/30000/2)-1;
     end
-    tRange = size(data,1) - (30000*useSeconds) : size(data,1);
+    tRange = size(data,1) - round(size(data,1)/2) - round(30000*useSeconds/2) : size(data,1) ...
+             - round(size(data,1)/2) + round(30000*useSeconds/2);
 
     data_filt = zeros(length(tRange),size(data,2),'single');
     for i = 1:size(data,2)
