@@ -100,11 +100,11 @@ for q = 1:3
     S(:,q) = std(data_filt,[],1);
 end
 print([myomatrix '/brokenchan' num2str(myomatrix_num) '.png'], '-dpng')
-sdsdsdsd
+
 if length(dataChan) == 32
-    brokenChan = find(S(:,2) > 16 | S(:,3) > 100);
+    brokenChan = find(S(:,2) > 16 | S(:,3) > 400);
 elseif length(dataChan) == 16
-    brokenChan = find(S(:,2) > 16 | S(:,3) > 100);
+    brokenChan = find(S(:,2) > 16 | S(:,3) > 400);
 end
 disp(['Broken channels are: ' num2str(brokenChan')])
 data(:,brokenChan) = randn(size(data,1), length(brokenChan))*3e-1;
@@ -126,6 +126,7 @@ save([myomatrix '/bulkEMG' num2str(myomatrix_num)], 'bEMG', 'notBroken', 'dataCh
 clear bEMG
 disp('Saved generated bulk EMG')
 fileID = fopen([myomatrix '/data' num2str(myomatrix_num) '.bin'], 'w');
+data = data(1:30000000,:);
 fwrite(fileID, int16(data'), 'int16');
 fclose(fileID);
 clear data
