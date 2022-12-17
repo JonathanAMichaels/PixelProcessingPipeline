@@ -107,7 +107,7 @@ elseif length(dataChan) == 16
     brokenChan = find(S(:,2) > 16 | S(:,3) > 400);
 end
 disp(['Broken channels are: ' num2str(brokenChan')])
-%data(:,brokenChan) = randn(size(data,1), length(brokenChan))*3e-1;
+data(:,brokenChan) = randn(size(data,1), length(brokenChan));%*3e-1;
 clear data_filt
 
 % Generate "Bulk EMG" dataset
@@ -126,7 +126,6 @@ save([myomatrix '/bulkEMG' num2str(myomatrix_num)], 'bEMG', 'notBroken', 'dataCh
 clear bEMG
 disp('Saved generated bulk EMG')
 fileID = fopen([myomatrix '/data' num2str(myomatrix_num) '.bin'], 'w');
-data = data(1:30000000,:);
 fwrite(fileID, int16(data'), 'int16');
 fclose(fileID);
 clear data
