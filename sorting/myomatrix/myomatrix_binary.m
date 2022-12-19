@@ -17,7 +17,8 @@ else
 end
 disp(['Using this channel map: ' chanMapFile])
 
-dataChan = chanList;
+dataChan = chanList
+mkdir([myomatrix '/sorted' num2str(myomatrix_num)])
 
 % Check if we're dealing with .dat or .continuous
 oebin = dir([myomatrix_data '/structure.oebin']);
@@ -100,7 +101,7 @@ for q = 1:2
     end
     axis([1 size(data_filt,1) 0 (size(data,2)+1)*1600])
 end
-print([myomatrix '/brokenchan' num2str(myomatrix_num) '.png'], '-dpng')
+print([myomatrix '/sorted' num2str(myomatrix_num) 'brokenChan.png'], '-dpng')
 S
 if length(chanList) == 16
     brokenChan = find(S(:,2) > 30);
@@ -124,10 +125,10 @@ if length(dataChan) == 32
 else
     bEMG = int16(mean(data(:,notBroken),2));
 end
-save([myomatrix '/bulkEMG' num2str(myomatrix_num)], 'bEMG', 'notBroken', 'dataChan')
+save([myomatrix '/sorted' num2str(myomatrix_num) '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
 clear bEMG
 disp('Saved generated bulk EMG')
-fileID = fopen([myomatrix '/data' num2str(myomatrix_num) '.bin'], 'w');
+fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
 fwrite(fileID, int16(data'), 'int16');
 fclose(fileID);
 clear data
