@@ -100,7 +100,7 @@ for q = 1:3
     S(:,q) = std(data_filt,[],1);
 end
 print([myomatrix '/brokenchan' num2str(myomatrix_num) '.png'], '-dpng')
-
+sdsds
 if length(dataChan) == 32
     brokenChan = find(S(:,2) > 16 | S(:,3) > 400);
 elseif length(dataChan) == 16
