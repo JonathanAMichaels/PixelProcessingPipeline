@@ -90,6 +90,11 @@ for q = 1:2
     end
     S(:,q) = std(data_filt,[],1);
     subplot(1,2,q)
+    if q == 1
+        title('Filtered Signal Snippet (300-7500Hz)')
+    else
+        title('Filtered Noise Snippet (5-70Hz)')
+    end
     hold on
     for i = 1:size(data,2)
         if (bipolar && S(i,2) > bipolarThresh) || (~bipolar && S(i,2) > unipolarThresh)
@@ -99,6 +104,7 @@ for q = 1:2
         end
         plot(data_filt(:,i) + i*1600, 'Color', cmap)
     end
+    set(gca, 'YTick', (1:size(data,2))*1600, 'YTickLabels', 1:size(data,2))
     axis([1 size(data_filt,1) 0 (size(data,2)+1)*1600])
 end
 print([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.png'], '-dpng')
