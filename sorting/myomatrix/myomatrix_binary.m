@@ -101,7 +101,7 @@ for q = 1:2
     end
     axis([1 size(data_filt,1) 0 (size(data,2)+1)*1600])
 end
-print([myomatrix '/sorted' num2str(myomatrix_num) 'brokenChan.png'], '-dpng')
+print([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.png'], '-dpng')
 S
 if length(chanList) == 16
     brokenChan = find(S(:,2) > 30);
