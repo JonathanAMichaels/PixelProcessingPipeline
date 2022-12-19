@@ -84,6 +84,7 @@ disp('Reading kilosort output')
 T = readNPY([params.kiloDir '/spike_times.npy']);
 I = readNPY([params.kiloDir '/spike_clusters.npy']);
 Wrot = readNPY([params.kiloDir '/whitening_mat_inv.npy']);
+params.brokenChan = load(params.kiloDir '/brokenChan');
 
 %TMP = readNPY([params.kiloDir '/templates.npy']);
 %TMP_ind = readNPY([params.kiloDir '/templates_ind.npy']);
@@ -382,13 +383,7 @@ f = fopen(params.binaryFile, 'r');
 recordSize = 2; % 2 bytes for int16
 nChan = size(params.chanMap,1);
 spt = recordSize*nChan;
-% Zero out channels that are bad
-if nChan <= 32
-    %diag(Wrot)
-    badChan = find(diag(Wrot) < 4);
-else
-    badChan = [];
-end
+badChan = params.brokenChan; % Zero out channels that are bad
 Wrot_orig = pinv(Wrot) * 200; % recover the original whitening matrix (specific to pykilosort 2.5)
 totalT = double(max(T));
 quartels = linspace(1, totalT, 5);

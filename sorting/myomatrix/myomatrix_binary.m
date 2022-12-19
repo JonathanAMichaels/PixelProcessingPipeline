@@ -68,12 +68,10 @@ disp(['Total recording time: ' num2str(size(data,1)/30000/60) ' minutes'])
 
 clf
 S = zeros(size(data,2), 3);
-for q = 1:3
+for q = 1:2
     if q == 1
         [b, a] = butter(2, [300 7500] / (30000/2), 'bandpass');
     elseif q == 2
-        [b, a] = butter(2, [8000 14000] / (30000/2), 'bandpass');
-    elseif q == 3
         [b, a] = butter(2, [5 70] / (30000/2), 'bandpass');
     end
     useSeconds = 300;
@@ -82,12 +80,11 @@ for q = 1:3
     end
     tRange = size(data,1) - round(size(data,1)/2) - round(30000*useSeconds/2) : size(data,1) ...
              - round(size(data,1)/2) + round(30000*useSeconds/2);
-
     data_filt = zeros(length(tRange),size(data,2),'single');
     for i = 1:size(data,2)
         data_filt(:,i) = single(filtfilt(b, a, double(data(tRange,i))));
     end
-    subplot(1,3,q)
+    subplot(1,2,q)
     hold on
     for i = 1:size(data,2)
         plot(data_filt(:,i) + i*1600)
@@ -96,13 +93,14 @@ for q = 1:3
     S(:,q) = std(data_filt,[],1);
 end
 print([myomatrix '/brokenchan' num2str(myomatrix_num) '.png'], '-dpng')
-sdsds
-if length(dataChan) == 32
-    brokenChan = find(S(:,2) > 16 | S(:,3) > 400);
-elseif length(dataChan) == 16
-    brokenChan = find(S(:,2) > 16 | S(:,3) > 400);
+S
+if length(chanList) == 16
+    brokenChan = find(S(:,2) > 30);
+else
+    brokenChan = find(S(:,2) > 120);
 end
 disp(['Broken channels are: ' num2str(brokenChan')])
+save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
 data(:,brokenChan) = randn(size(data,1), length(brokenChan));%*3e-1;
 clear data_filt
 
