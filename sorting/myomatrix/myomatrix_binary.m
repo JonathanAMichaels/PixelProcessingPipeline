@@ -67,7 +67,10 @@ disp('Saved sync data')
 disp(['Total recording time: ' num2str(size(data,1)/30000/60) ' minutes'])
 
 clf
-S = zeros(size(data,2), 3);
+S = zeros(size(data,2), 2);
+bipolarThresh = 30;
+unipolarThresh = 120;
+bipolar = length(chanList) == 16;
 for q = 1:2
     if q == 1
         [b, a] = butter(2, [300 7500] / (30000/2), 'bandpass');
@@ -84,13 +87,18 @@ for q = 1:2
     for i = 1:size(data,2)
         data_filt(:,i) = single(filtfilt(b, a, double(data(tRange,i))));
     end
+    S(:,q) = std(data_filt,[],1);
     subplot(1,2,q)
     hold on
     for i = 1:size(data,2)
-        plot(data_filt(:,i) + i*1600)
+        if (bipolar && S(:,2) > bipolarThresh) || (~bipolar && S(:,2) > unipolarThresh)
+            cmap = [1 0.2 0.2];
+        else
+            cmap = [0 0 0]
+        end
+        plot(data_filt(:,i) + i*1600, 'Color', cmap)
     end
     axis([1 size(data_filt,1) 0 (size(data,2)+1)*1600])
-    S(:,q) = std(data_filt,[],1);
 end
 print([myomatrix '/brokenchan' num2str(myomatrix_num) '.png'], '-dpng')
 S
