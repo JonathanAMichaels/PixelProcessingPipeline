@@ -90,13 +90,9 @@ for q = 1:3
     subplot(1,3,q)
     hold on
     for i = 1:size(data,2)
-        if size(data_filt,1) < 120000
-            plot_range = 1:size(data_filt,1);
-        else
-            plot_range = 1:120000;
-        end
-        plot(data_filt(plot_range,i) + i*1500)
+        plot(data_filt(:,i) + i*1600)
     end
+    axis([1 size(data_filt,1) 0 (size(data,2)+1)*1600])
     S(:,q) = std(data_filt,[],1);
 end
 print([myomatrix '/brokenchan' num2str(myomatrix_num) '.png'], '-dpng')
