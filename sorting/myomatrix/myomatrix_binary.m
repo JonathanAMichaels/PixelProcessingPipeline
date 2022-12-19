@@ -91,7 +91,7 @@ for q = 1:2
     subplot(1,2,q)
     hold on
     for i = 1:size(data,2)
-        if (bipolar && S(:,2) > bipolarThresh) || (~bipolar && S(:,2) > unipolarThresh)
+        if (bipolar && S(i,2) > bipolarThresh) || (~bipolar && S(i,2) > unipolarThresh)
             cmap = [1 0.2 0.2];
         else
             cmap = [0 0 0]
