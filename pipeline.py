@@ -216,10 +216,10 @@ if myo_sorting:
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
 
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
+        shutil.rmtree(config_kilosort['myomatrix_folder'], ignore_errors=True)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
                   path_to_add + '\')); myomatrix_binary"')
 
-        shutil.rmtree(config_kilosort['myomatrix_folder'], ignore_errors=True)
         myo_function(config_kilosort)
 
 # Proceed with myo post-processing

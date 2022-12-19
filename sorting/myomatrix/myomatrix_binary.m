@@ -17,8 +17,8 @@ else
 end
 disp(['Using this channel map: ' chanMapFile])
 
-dataChan = chanList
-mkdir([myomatrix '/sorted' num2str(myomatrix_num)])
+dataChan = chanList;
+mkdir([myomatrix '/sorted' num2str(myomatrix_num) '/']);
 
 % Check if we're dealing with .dat or .continuous
 oebin = dir([myomatrix_data '/structure.oebin']);
@@ -95,7 +95,7 @@ for q = 1:2
         if (bipolar && S(i,2) > bipolarThresh) || (~bipolar && S(i,2) > unipolarThresh)
             cmap = [1 0.2 0.2];
         else
-            cmap = [0 0 0]
+            cmap = [0 0 0];
         end
         plot(data_filt(:,i) + i*1600, 'Color', cmap)
     end

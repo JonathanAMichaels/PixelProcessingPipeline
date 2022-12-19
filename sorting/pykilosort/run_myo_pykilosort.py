@@ -1,18 +1,11 @@
 import os
 import sys
-
 script_folder = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(script_folder)
-
 import glob
 from pathlib import Path
-import numpy as np
-import scipy.io
 import shutil
 from pykilosort import run, add_default_handler, myomatrix_bipolar_probe, myomatrix_unipolar_probe
-
-#channelRemap = [23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8,
-#                24, 25, 26, 27, 28, 29, 30, 31, 0, 1, 2, 3, 4, 5, 6, 7]
 
 def myo_sort(config):
     directory = config['myomatrix']
