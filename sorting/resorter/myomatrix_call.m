@@ -9,7 +9,7 @@ params.kiloDir = myomatrix_folder;
 params.binaryFile = [myomatrix_folder '/proc.dat'];
 params.userSorted = false;
 params.savePlots = true;
-params.waveCount = 800;
+params.waveCount = 2000;
 params.consistencyThreshold = 0.6;
 params.crit = 0.8;
 % make sure a sorting exists
