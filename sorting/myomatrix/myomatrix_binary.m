@@ -110,7 +110,7 @@ end
 print([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.png'], '-dpng')
 S
 if length(chanList) == 16
-    brokenChan = find(S(:,2) > 30);
+    brokenChan = find(S(:,2) > 300);
 else
     brokenChan = find(S(:,2) > 120);
 end
