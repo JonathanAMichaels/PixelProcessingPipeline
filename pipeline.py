@@ -235,6 +235,7 @@ if myo_post:
 
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
 
+        shutil.rmtree(config_kilosort['myomatrix_folder'] + '/Plots', ignore_errors=True)
         print('Starting resorting of ' + config_kilosort['myomatrix_folder'])
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
