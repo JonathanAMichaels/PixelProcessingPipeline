@@ -69,7 +69,7 @@ disp(['Total recording time: ' num2str(size(data,1)/30000/60) ' minutes'])
 
 clf
 S = zeros(size(data,2), 2);
-bipolarThresh = 30;
+bipolarThresh = 90;
 unipolarThresh = 120;
 bipolar = length(chanList) == 16;
 for q = 1:2
@@ -110,9 +110,9 @@ end
 print([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.png'], '-dpng')
 S
 if length(chanList) == 16
-    brokenChan = find(S(:,2) > 60);
+    brokenChan = find(S(:,2) > bipolarThresh);
 else
-    brokenChan = find(S(:,2) > 120);
+    brokenChan = find(S(:,2) > unipolarThresh);
 end
 disp(['Broken channels are: ' num2str(brokenChan')])
 save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
