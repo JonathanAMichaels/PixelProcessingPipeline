@@ -45,6 +45,11 @@ while ibatch<=Nbatch
 
     ibatch = ibatch + ops.nSkipCov; % skip this many batches
 end
+
+Nbatch
+ops.nSkipCov
+CC
+
 CC = CC / ceil((Nbatch-1)/ops.nSkipCov); % normalize by number of batches
 
 fclose(fid);
