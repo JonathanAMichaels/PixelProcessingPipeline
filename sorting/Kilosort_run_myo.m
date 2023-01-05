@@ -5,9 +5,9 @@ try
 end
 
 if num_chans == 16
-    chanMapFile = [script_dir '/geometries/bipolar_test_kilosortChanMap'];
+    chanMapFile = [script_dir '/geometries/bipolar_test_kilosortChanMap.mat'];
 elseif num_chans == 32
-    chanMapFile = [script_dir '/geometries/monopolar_test_kilosortChanMap'];
+    chanMapFile = [script_dir '/geometries/monopolar_test_kilosortChanMap.mat'];
 end
 disp(['Using this channel map: ' chanMapFile])
 
@@ -18,7 +18,9 @@ run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = fullfile(myomatrix_folder, 'data.bin');
 ops.fproc   = fullfile(myomatrix_folder, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
-ops.NchanTOT = 384; % 385
+ops.NchanTOT = num_chans;
+
+ops.nt0 = 61;
 
 if trange(2) == 0
     ops.trange = [0 Inf];
