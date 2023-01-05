@@ -20,7 +20,7 @@ ops.fproc   = fullfile(myomatrix_folder, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
-ops.nt0 = 61;
+ops.nt0 = 70;
 
 if trange(2) == 0
     ops.trange = [0 Inf];
@@ -57,7 +57,7 @@ fprintf('found %d good units \n', sum(rez.good>0))
 
 % write to Phy
 fprintf('Saving results to Phy  \n')
-rezToPhy(rez, rootH);
+rezToPhy(rez, myomatrix_folder);
 
 delete(ops.fproc)
 
