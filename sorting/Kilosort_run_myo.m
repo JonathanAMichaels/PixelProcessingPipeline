@@ -21,7 +21,8 @@ ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
 ops.nt0 = 61;
-ops.Th = [2 2]
+%ops.Th = [2 2]
+ops.spkTh = -3
 
 if trange(2) == 0
     ops.trange = [0 Inf];
