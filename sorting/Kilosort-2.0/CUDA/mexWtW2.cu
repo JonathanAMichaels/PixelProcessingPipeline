@@ -22,7 +22,8 @@ const int nblock = 32;
 
 __global__ void	crossFilter(const double *Params, const float *W1, const float *W2,
         const float *UtU, float *WtW){    
-  __shared__ float shW1[nblock*261], shW2[nblock*261];
+  //__shared__ float shW1[nblock*261], shW2[nblock*261];
+  extern __shared__ float shW1[], shW2[];
 
   float x;
   int nt0, tidx, tidy , bidx, bidy, i, Nfilt, t, tid1, tid2;
@@ -81,6 +82,10 @@ __global__ void	crossFilter(const double *Params, const float *W1, const float *
 void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
+
+  int maxbytes = 166912; // 163 KiB
+  cudaFuncSetAttribute(crossFilter, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+
     /* Declare input variables*/
   double *Params, *d_Params;
   unsigned int nt0, Nfilt;
