@@ -20,7 +20,8 @@ ops.fproc   = fullfile(myomatrix_folder, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
-ops.nt0 = 70;
+ops.nt0 = 61;
+ops.Th = [2 2]
 
 if trange(2) == 0
     ops.trange = [0 Inf];
