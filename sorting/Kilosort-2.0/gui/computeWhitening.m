@@ -2,7 +2,7 @@
 
 function [ops, Wrot] = computeWhitening(ops)
 
-ops.nt0 	= getOr(ops, {'nt0'}, 61);
+ops.nt0 	= getOr(ops, {'nt0'}, 261);
 
 [chanMap, xc, yc, kcoords, NchanTOTdefault] = loadChanMap(ops.chanMap);
 ops.Nchan = numel(chanMap);

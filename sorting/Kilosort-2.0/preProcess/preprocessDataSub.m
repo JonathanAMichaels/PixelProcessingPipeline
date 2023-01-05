@@ -9,8 +9,8 @@ function rez = preprocessDataSub(ops)
 % 5) scaling to int16 values
 
 tic;
-ops.nt0 	  = getOr(ops, {'nt0'}, 61); % number of time samples for the templates (has to be <=81 due to GPU shared memory)
-ops.nt0min  = getOr(ops, 'nt0min', ceil(20 * ops.nt0/61)); % time sample where the negative peak should be aligned
+ops.nt0 	  = getOr(ops, {'nt0'}, 261); % number of time samples for the templates (has to be <=81 due to GPU shared memory)
+ops.nt0min  = getOr(ops, 'nt0min', ceil(20 * ops.nt0/261)); % time sample where the negative peak should be aligned
 
 NT       = ops.NT ; % number of timepoints per batch
 NchanTOT = ops.NchanTOT; % total number of channels in the raw binary file, including dead, auxiliary etc

@@ -144,8 +144,8 @@ function [rez, ops] = preprocessDataForNoise(ops)
 %write out the data as rows = time -- just a convenience so it 
 %it can be read in using the same code
 
-ops.nt0 	= getOr(ops, {'nt0'}, 61);
-ops.nt0min  = getOr(ops, 'nt0min', ceil(20 * ops.nt0/61));
+ops.nt0 	= getOr(ops, {'nt0'}, 261);
+ops.nt0min  = getOr(ops, 'nt0min', ceil(20 * ops.nt0/261));
 
 NT       = ops.NT ;
 NchanTOT = ops.NchanTOT;
