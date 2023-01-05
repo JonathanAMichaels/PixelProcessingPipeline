@@ -285,8 +285,8 @@ void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
     int maxbytes = 166912; // 163 KiB
-    cudaFuncSetAttribute(getW, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
-    cudaFuncSetAttribute(reNormalize, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+  //  cudaFuncSetAttribute(getW, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+  //  cudaFuncSetAttribute(reNormalize, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
 
   /* Initialize the MathWorks GPU API. */
   mxInitGPU();
