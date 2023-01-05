@@ -220,7 +220,12 @@ if myo_sorting:
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
                   path_to_add + '\')); myomatrix_binary"')
 
-        myo_function(config_kilosort)
+        #myo_function(config_kilosort)
+
+        print('Starting spike sorting of ' + config_kilosort['myomatrix_folder'])
+        scipy.io.savemat('/tmp/config.mat', config_kilosort)
+        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
+                  path_to_add + '\'); Kilosort_run_myo"')
 
 # Proceed with myo post-processing
 if myo_post:

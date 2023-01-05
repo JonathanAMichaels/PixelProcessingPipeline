@@ -112,6 +112,6 @@ fprintf('found %d good units \n', sum(rez.good>0))
 fprintf('Saving results to Phy  \n')
 rezToPhy(rez, rootH);
 
-delete(ops.fproc)
+%delete(ops.fproc)
 
 quit;
