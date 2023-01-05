@@ -18,7 +18,7 @@ run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = fullfile(myomatrix_folder, 'data.bin');
 ops.fproc   = fullfile(myomatrix_folder, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
-ops.NchanTOT = num_chans;
+ops.NchanTOT = double(num_chans);
 
 ops.nt0 = 61;
 
