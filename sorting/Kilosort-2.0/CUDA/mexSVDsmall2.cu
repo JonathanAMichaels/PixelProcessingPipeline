@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024,  NrankMax = 3, nt0max = 80, NchanMax = 16;
+const int  Nthreads = 1024,  NrankMax = 3, nt0max = 80, NchanMax = 32;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void blankdWU(const double *Params, const double *dWU,  
@@ -164,8 +164,10 @@ __global__ void reNormalize(const double *Params, const double *A, const double 
     int Nfilt, nt0, tid, bid, Nchan,k, Nrank, imax, t, ishift, tmax;
     double x, xmax, xshift, sgnmax;
     
-    extern __shared__ double sW[NrankMax*nt0max], sU[NchanMax*NrankMax], sS[NrankMax+1],
-            sWup[nt0max*10];
+    //extern __shared__ double sW[NrankMax*nt0max], sU[NchanMax*NrankMax], sS[NrankMax+1],
+    //        sWup[nt0max*10];
+    extern __shared__ double sW[], sU[], sS[],
+            sWup[];
     
     nt0       = (int) Params[4];
     Nchan     = (int) Params[9];
