@@ -141,6 +141,7 @@ for ibatch = 1:niter
     % such as when we subtract off a template
     [UtU, maskU] = getMeUtU(iW, iC, mask, Nnearest, Nchan); % this needs to change (but I don't know why!)
 
+    maskU
 
     % main CUDA function in the whole codebase. does the iterative template matching
     % based on the current templates, gets features for these templates if requested (featW, featPC),
@@ -150,6 +151,8 @@ for ibatch = 1:niter
     [st0, id0, x0, featW, dWU0, drez, nsp0, featPC, vexp, errmsg] = ...
         mexMPnu8(Params, dataRAW, single(U), single(W), single(mu), iC-1, iW-1, UtU, iList-1, ...
         wPCA);
+
+    nsp0
     
     % errmsg returns 1 if caller requested "stableMode" but mexMPnu8 was
     % compiled without the sorter enabled (i.e. STABLEMODE_ENABLE = false
