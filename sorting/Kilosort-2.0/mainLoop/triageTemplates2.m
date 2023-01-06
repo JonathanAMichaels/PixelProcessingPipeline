@@ -10,7 +10,12 @@ function [W, U, dWU, mu, nsp, ndrop] = ...
 m0 = ops.minFR * ops.NT/ops.fs;
 idrop = nsp<m0; % drop any templates with firing rate below this
 
-W(:,idrop,:) = []; % remove those templates everywhere
+try
+    W(:,idrop,:) = []; % remove those templates everywhere
+catch
+    W(:,idrop,:) = []; % remove those templates everywhere
+end
+
 U(:,idrop,:) = [];
 dWU(:,:, idrop) = [];
 mu(idrop) = [];
