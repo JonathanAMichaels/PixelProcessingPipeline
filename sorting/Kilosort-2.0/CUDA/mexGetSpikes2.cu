@@ -72,6 +72,7 @@ __global__ void	Conv1D(const double *Params, const float *data, const float *W, 
     Nrank     = (int) Params[14];
     nt0       = (int) Params[4];
     Nchan     = (int) Params[9];
+    printf("%d \n", nt0);
     
     if(tid<nt0*Nrank)
         sW[tid]= W[tid];
@@ -145,6 +146,7 @@ __global__ void	cleanup_spikes(const double *Params, const float *err,
   tid0 		= bid * blockDim.x ;
   Th 		= (float) Params[2];
   //Th = 14.0f;
+  printf("%d \n", lockout);
   
   while(tid0<NT-Nthreads-lockout+1){
       if (tid<2*lockout)

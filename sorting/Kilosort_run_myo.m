@@ -21,7 +21,7 @@ ops.fproc   = fullfile(myomatrix_folder, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
-ops.nt0 = 71;
+ops.nt0 = 64;
 %ops.Th = [2 2]
 %ops.spkTh = -3;
 ops.minFR = 0.01;
