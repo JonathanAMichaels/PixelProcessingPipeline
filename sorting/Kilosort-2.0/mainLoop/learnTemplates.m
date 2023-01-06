@@ -134,10 +134,6 @@ for ibatch = 1:niter
     % this uses a "warm start" by remembering the W from the previous iteration
     [W, U, mu] = mexSVDsmall2(Params, dWU, W, iC-1, iW-1, Ka, Kb);
 
-    W
-    U
-    mu
-
 
     % UtU is the gram matrix of the spatial components of the low-rank SVDs
     % it tells us which pairs of templates are likely to "interfere" with each other
