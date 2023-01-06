@@ -31,8 +31,10 @@ r0 = 2*(sd(:) + sd(:)') ./ abs(mu(:) - mu(:)');
 % determine which template has more spikes (that one survives)
 rdir = (nsp(:) - nsp(:)')<0;
 % for each pair of template, score their similarity by their template correlation, and amplitude separation
-ipair = (cc>0.9 & gather(r0)>1 & rdir);
+ipair = (cc>0.9 & r0>1 & rdir);
 % for each template, find its most similar other template
+ipair = gather(ipair);
+size(ipair)
 amax = max(ipair, [], 2);
 % if this score is 1, then all the criteria have bene met for dropping this template
 idrop= amax>0;

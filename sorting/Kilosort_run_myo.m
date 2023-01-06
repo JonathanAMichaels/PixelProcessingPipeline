@@ -3,6 +3,7 @@ load('/tmp/config.mat')
 try
     restoredefaultpath
 end
+dbstop if error
 
 if num_chans == 16
     chanMapFile = [script_dir '/geometries/bipolar_test_kilosortChanMap.mat'];
