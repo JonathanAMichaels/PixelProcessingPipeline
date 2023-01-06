@@ -25,7 +25,7 @@ __global__ void	crossFilter(const double *Params, const float *W1, const float *
   //__shared__ float shW1[nblock*81], shW2[nblock*81];
   extern __shared__ float array[];
   float* shW1 = (float*)&array;
-  float* shW2 = (float*)&shW1[nblock*161];
+  float* shW2 = (float*)&shW1[nblock*131];
 
   float x;
   int nt0, tidx, tidy , bidx, bidy, i, Nfilt, t, tid1, tid2;
@@ -124,7 +124,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   dim3 grid(1 + (Nfilt/nblock), 1 + (Nfilt/nblock));
   dim3 block(nblock, nblock);
 
-  crossFilter<<<grid, block, sizeof(float)*(nblock*161 + nblock*161)>>>(d_Params, d_W1, d_W2, d_UtU, d_WtW);
+  crossFilter<<<grid, block, sizeof(float)*(nblock*131 + nblock*131)>>>(d_Params, d_W1, d_W2, d_UtU, d_WtW);
 
   plhs[0] 	= mxGPUCreateMxArrayOnGPU(WtW);
 

@@ -112,17 +112,12 @@ for ibatch = 1:niter
         dWU = mexGetSpikes2(Params, dataRAW, wTEMP, iC-1); % CUDA function to get spatiotemporal clips from spike detections
         dWU = double(dWU);
         dWU = reshape(wPCAd * (wPCAd' * dWU(:,:)), size(dWU)); % project these into the wPCA waveforms
-        try
-            W = W0(:,ones(1,size(dWU,3)),:); % initialize the low-rank decomposition with standard waves
-            Nfilt = size(W,2); % update the number of filters/templates
-            nsp(1:Nfilt) = m0; % initialize the number of spikes for new templates with the minimum allowed value, so it doesn't get thrown back out right away
-            Params(2) = Nfilt; % update in the CUDA parameters
-        catch
-            W = W0(:,ones(1,size(dWU,3)),:); % initialize the low-rank decomposition with standard waves
-            Nfilt = size(W,2); % update the number of filters/templates
-            nsp(1:Nfilt) = m0; % initialize the number of spikes for new templates with the minimum allowed value, so it doesn't get thrown back out right away
-            Params(2) = Nfilt; % update in the CUDA parameters
-        end
+
+        W = W0(:,ones(1,size(dWU,3)),:); % initialize the low-rank decomposition with standard waves
+        Nfilt = size(W,2); % update the number of filters/templates
+        nsp(1:Nfilt) = m0; % initialize the number of spikes for new templates with the minimum allowed value, so it doesn't get thrown back out right away
+        Params(2) = Nfilt; % update in the CUDA parameters
+
 
     end
 
