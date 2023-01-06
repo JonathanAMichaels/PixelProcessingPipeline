@@ -22,7 +22,9 @@ ops.NchanTOT = double(num_chans);
 
 ops.nt0 = 61;
 %ops.Th = [2 2]
-ops.spkTh = -3
+ops.spkTh = -3;
+ops.Nfilt = 64;
+ops.NT = 512*1024+ ops.ntbuff;
 
 if trange(2) == 0
     ops.trange = [0 Inf];
