@@ -24,6 +24,7 @@ ndrop(1) = .9 * ndrop(1) + .1*gather(sum(idrop)); % keep track of how many templ
 
 % compute pairwise correlations between templates
 cc = getMeWtW2(W, U);
+cc = gather(cc);
 cc = cc -diag(diag(cc)); % exclude the diagonal
 
 sd = sqrt(10); % this is hard-coded here
