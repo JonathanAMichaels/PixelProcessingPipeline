@@ -356,13 +356,13 @@ void mexFunction(int nlhs, mxArray *plhs[],
   getwtw<<<Nfilt, tpS>>>(d_Params, d_dWUb, d_wtw);
   
   // get W by power svd iterations
-  getW<<<Nfilt, nt0>>>(d_Params, d_wtw, d_W, sizeof(double)*(nt0max*NrankMax + nt0max*nt0max + 1);
+  getW<<<Nfilt, nt0>>>(d_Params, d_wtw, d_W, sizeof(double)*(nt0max*NrankMax + nt0max*nt0max + 1));
   
   // compute U by W' * dWU
-  getU<<<Nfilt, tpK>>>(d_Params, d_dWUb, d_W, d_U, sizeof(double)*(NrankMax*nt0max + NchanMax*NrankMax + NrankMax + 1 + nt0max*10));
+  getU<<<Nfilt, tpK>>>(d_Params, d_dWUb, d_W, d_U);
   
   // normalize U, get S, get mu, renormalize W
-  reNormalize<<<Nfilt, nt0>>>(d_Params, d_A, d_B, d_W, d_U, d_mu);
+  reNormalize<<<Nfilt, nt0>>>(d_Params, d_A, d_B, d_W, d_U, d_mu, sizeof(double)*(NrankMax*nt0max + NchanMax*NrankMax + NrankMax + 1 + nt0max*10));
 
   plhs[0] 	= mxGPUCreateMxArrayOnGPU(W);
   plhs[1] 	= mxGPUCreateMxArrayOnGPU(U);
