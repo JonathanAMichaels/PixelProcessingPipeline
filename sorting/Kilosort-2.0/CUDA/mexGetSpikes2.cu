@@ -72,7 +72,6 @@ __global__ void	Conv1D(const double *Params, const float *data, const float *W, 
     Nrank     = (int) Params[14];
     nt0       = (int) Params[4];
     Nchan     = (int) Params[9];
-    printf("%d \n", nt0);
     
     if(tid<nt0*Nrank)
         sW[tid]= W[tid];
