@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024, maxFR = 5000, NrankMax = 6;
+const int  Nthreads = 1024, maxFR = 5000, NrankMax = 6; nt0max = 81;
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void  sumChannels(const double *Params, const float *data, 
 	float *datasum, int *kkmax, const int *iC){
@@ -58,7 +58,11 @@ __global__ void  sumChannels(const double *Params, const float *data,
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	Conv1D(const double *Params, const float *data, const float *W, float *conv_sig){
-    volatile __shared__ float  sW[81*NrankMax], sdata[(Nthreads+81)];
+    //volatile __shared__ float  sW[81*NrankMax], sdata[(Nthreads+81)];
+    extern __shared__ float array[];
+    float sW = (float*)&array;
+    float sdata = (float*)&sW[nt0max*NrankMax];
+
     float y;
     int tid, tid0, bid, i, nid, Nrank, NT, nt0,  Nchan;
 
@@ -127,7 +131,9 @@ __global__ void	cleanup_spikes(const double *Params, const float *err,
 	const int *ftype, float *x, int *st, int *id, int *counter){
     
   int lockout, indx, tid, bid, NT, tid0,  j, t0;
-  volatile __shared__ float sdata[Nthreads+2*81+1];
+  //volatile __shared__ float sdata[Nthreads+2*81+1];
+  extern __shared__ float sdata[];
+
   bool flag=0;
   float err0, Th;
   
@@ -178,7 +184,11 @@ __global__ void	cleanup_heights(const double *Params, const float *x,
         const int *st, const int *id, int *st1, int *id1, int *counter){
     
   int indx, tid, bid, t, d, Nmax;
-  volatile __shared__ float s_id[maxFR], s_x[maxFR];
+  //volatile __shared__ float s_id[maxFR], s_x[maxFR];
+  extern __shared__ float array[];
+  float s_id = (float*)&array;
+  float s_x = (float*)&s_id[maxFR];
+
   bool flag=0;
   float xmax;
   
@@ -280,6 +290,11 @@ __global__ void extract_snips2(const double *Params, const float *err, const int
 void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
+  int maxbytes = 166912; // 163 KiB
+  cudaFuncSetAttribute(cleanup_heights, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+  cudaFuncSetAttribute(cleanup_spikes, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+  cudaFuncSetAttribute(Conv1D, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+
   /* Initialize the MathWorks GPU API. */
   mxInitGPU();
 
