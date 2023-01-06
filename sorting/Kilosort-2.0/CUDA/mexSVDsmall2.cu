@@ -75,7 +75,7 @@ __global__ void getU(const double *Params, const double *dWU, double *W, double 
   
   nt0       = (int) Params[4];
   Nchan     = (int) Params[9];
-  Nfilt    	=   (int) Params[1];
+  Nfilt    	= (int) Params[1];
   tidx 		= threadIdx.x;
   tidy 		= threadIdx.y;
   bid 		= blockIdx.x;
