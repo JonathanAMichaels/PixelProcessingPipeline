@@ -17,11 +17,11 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024, maxFR = 100000, NrankMax = 3, nt0max=131, NchanMax = 17;
+const int  Nthreads = 1024, maxFR = 100000, NrankMax = 3, nt0max=81, NchanMax = 17;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	Conv1D(const double *Params, const float *data, const float *W, float *conv_sig){    
-  volatile __shared__ float  sW[131*NrankMax], sdata[Nthreads+131];
+  volatile __shared__ float  sW[81*NrankMax], sdata[Nthreads+81];
   float x, y;
   int tid, tid0, bid, i, nid, Nrank, NT, nt0;
 
@@ -167,7 +167,7 @@ __global__ void  maxChannels(const double *Params, const float *dataraw, const f
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	max1D(const double *Params, const float *data, float *conv_sig){
     
-    volatile __shared__ float  sdata[Nthreads+131];
+    volatile __shared__ float  sdata[Nthreads+81];
     float y, spkTh;
     int tid, tid0, bid, i, NT, nt0;
     
