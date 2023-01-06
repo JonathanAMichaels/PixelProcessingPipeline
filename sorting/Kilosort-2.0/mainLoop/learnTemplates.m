@@ -134,12 +134,6 @@ for ibatch = 1:niter
     % this uses a "warm start" by remembering the W from the previous iteration
     [W, U, mu] = mexSVDsmall2(Params, dWU, W, iC-1, iW-1, Ka, Kb);
 
-    iC
-    Nnearest
-    Nchan
-    iW
-    mask
-
     % UtU is the gram matrix of the spatial components of the low-rank SVDs
     % it tells us which pairs of templates are likely to "interfere" with each other
     % such as when we subtract off a template
@@ -205,7 +199,8 @@ for ibatch = 1:niter
             dWU0 = double(dWU0);
             dWU0 = reshape(wPCAd * (wPCAd' * dWU0(:,:)), size(dWU0)); % apply PCA for smoothing purposes
             dWU = cat(3, dWU, dWU0);
-            
+
+            dWU0 = gather(dWU0);
             W(:,Nfilt + [1:size(dWU0,3)],:) = W0(:,ones(1,size(dWU0,3)),:); % initialize temporal components of waveforms
             
             nsp(Nfilt + [1:size(dWU0,3)]) = ops.minFR * NT/ops.fs; % initialize the number of spikes with the minimum allowed
