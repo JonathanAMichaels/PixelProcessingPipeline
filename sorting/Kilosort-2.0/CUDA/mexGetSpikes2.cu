@@ -366,7 +366,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   counter = (unsigned int*) calloc(1,sizeof(unsigned int));
   
   // filter the data with the temporal templates
-  Conv1D<<<Nchan, Nthreads>>>(d_Params, d_data, d_W, d_dfilt);
+  Conv1D<<<Nchan, Nthreads, sizeof(float)*(nt0max*NrankMax + Nthreads+nt0max)>>>(d_Params, d_data, d_W, d_dfilt);
   
   // sum each template across channels, square, take max
   sumChannels<<<NT/Nthreads,Nthreads>>>(d_Params, d_dfilt, d_dout, d_kkmax, d_iC);
@@ -375,11 +375,11 @@ void mexFunction(int nlhs, mxArray *plhs[],
   bestFilter<<<NT/Nthreads,Nthreads>>>(d_Params, d_dout, d_err, d_ftype, d_kkmax, d_kk);
  
   // ignore peaks that are smaller than another nearby peak
-  cleanup_spikes<<<NT/Nthreads,Nthreads>>>(d_Params,
+  cleanup_spikes<<<NT/Nthreads, Nthreads, sizeof(float)*(Nthreads+2*nt0max+1)>>>(d_Params,
           d_err, d_ftype, d_x, d_st, d_id, d_counter); // NT/Nthreads 
    
   // ignore peaks that are smaller than another nearby peak
-  cleanup_heights<<<1 + maxFR/32 , 32>>>(d_Params, d_x, d_st, d_id, d_st1, d_id1, d_counter); // 1 + maxFR/32
+  cleanup_heights<<<1 + maxFR/32 , 32, sizeof(float)*(maxFR + maxFR)>>>(d_Params, d_x, d_st, d_id, d_st1, d_id1, d_counter); // 1 + maxFR/32
    
   // add new spikes to 2nd counter
   cudaMemcpy(counter,     d_counter+1, sizeof(int), cudaMemcpyDeviceToHost);
