@@ -26,7 +26,7 @@ __global__ void	crossFilter(const double *Params, const float *W1, const float *
   //extern __shared__ float shW1[], shW2[];
   extern __shared__ float array[];
   float* shW1 = (float*)&array;
-  float* shW2 = (float*)&shW1[nblock*261]
+  float* shW2 = (float*)&shW1[nblock*261];
 
   float x;
   int nt0, tidx, tidy , bidx, bidy, i, Nfilt, t, tid1, tid2;
