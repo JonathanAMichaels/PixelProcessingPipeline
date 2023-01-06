@@ -25,9 +25,9 @@ ops.nt0 = 61;
 %ops.Th = [2 2]
 %ops.spkTh = -3;
 ops.minFR = 0.01;
-ops.NT = 1028*1024+ ops.ntbuff;
-ops.nskip           = 5;  % how many batches to skip for determining spike PCs
-ops.nSkipCov            = 5; % compute whitening matrix from every N-th batch
+ops.NT = 8*1028*1024+ ops.ntbuff;
+ops.nskip           = 1;  % how many batches to skip for determining spike PCs
+ops.nSkipCov            = 1; % compute whitening matrix from every N-th batch
 ops.reorder = 0;
 
 if trange(2) == 0
