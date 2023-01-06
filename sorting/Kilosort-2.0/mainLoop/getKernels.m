@@ -6,7 +6,7 @@ function [Ka, Kb] = getKernels(ops, nup, sig)
 % also needs sig, the interpolation smoothness (default = 1)
 
 nt0min = getOr(ops, 'nt0min', 20);
-nt0    = getOr(ops, 'nt0',    261);
+nt0    = getOr(ops, 'nt0',    81);
 
 xs = 1:nt0;
 ys = linspace(.5, nt0+.5, nt0*nup+1);
