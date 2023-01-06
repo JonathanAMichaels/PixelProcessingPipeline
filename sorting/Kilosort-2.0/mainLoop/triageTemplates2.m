@@ -10,11 +10,7 @@ function [W, U, dWU, mu, nsp, ndrop] = ...
 m0 = ops.minFR * ops.NT/ops.fs;
 idrop = nsp<m0; % drop any templates with firing rate below this
 
-try
-    W(:,idrop,:) = []; % remove those templates everywhere
-catch
-    W(:,idrop,:) = []; % remove those templates everywhere
-end
+W(:,idrop,:) = []; % remove those templates everywhere
 U(:,idrop,:) = [];
 dWU(:,:, idrop) = [];
 mu(idrop) = [];
@@ -23,7 +19,6 @@ ndrop(1) = .9 * ndrop(1) + .1*gather(sum(idrop)); % keep track of how many templ
 
 % compute pairwise correlations between templates
 cc = getMeWtW2(W, U);
-cc = gather(cc);
 cc = cc -diag(diag(cc)); % exclude the diagonal
 
 sd = sqrt(10); % this is hard-coded here
