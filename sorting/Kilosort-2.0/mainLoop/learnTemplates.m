@@ -193,14 +193,14 @@ for ibatch = 1:niter
         
         % this adds new templates if they are detected in the residual
         [dWU0,cmap] = mexGetSpikes2(Params, drez, wTEMP, iC-1);
-        
+        dWU0 = gather(dWU0);
+
         if size(dWU0,3)>0
             % new templates need to be integrated into the same format as all templates
             dWU0 = double(dWU0);
             dWU0 = reshape(wPCAd * (wPCAd' * dWU0(:,:)), size(dWU0)); % apply PCA for smoothing purposes
             dWU = cat(3, dWU, dWU0);
 
-            dWU0 = gather(dWU0);
             W(:,Nfilt + [1:size(dWU0,3)],:) = W0(:,ones(1,size(dWU0,3)),:); % initialize temporal components of waveforms
             
             nsp(Nfilt + [1:size(dWU0,3)]) = ops.minFR * NT/ops.fs; % initialize the number of spikes with the minimum allowed
