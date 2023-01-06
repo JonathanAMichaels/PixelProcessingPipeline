@@ -23,7 +23,6 @@ const int nblock = 32;
 __global__ void	crossFilter(const double *Params, const float *W1, const float *W2,
         const float *UtU, float *WtW){    
   //__shared__ float shW1[nblock*81], shW2[nblock*81];
-  //extern __shared__ float shW1[], shW2[];
   extern __shared__ float array[];
   float* shW1 = (float*)&array;
   float* shW2 = (float*)&shW1[nblock*81];
