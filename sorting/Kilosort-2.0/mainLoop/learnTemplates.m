@@ -129,6 +129,7 @@ for ibatch = 1:niter
     dWU = dWU(:,:,isort);
     nsp = nsp(isort);
     
+    errorhere
 
     % decompose dWU by svd of time and space (via covariance matrix of 61 by 61 samples)
     % this uses a "warm start" by remembering the W from the previous iteration
