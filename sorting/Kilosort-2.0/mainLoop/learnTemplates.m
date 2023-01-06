@@ -188,7 +188,7 @@ for ibatch = 1:niter
             [W, U, dWU, mu, nsp, ndrop] = ...
                 triageTemplates2(ops, iW, C2C, W, U, dWU, mu, nsp, ndrop);
         end
-        Nfilt = size(W,2); % update the number of filters
+        Nfilt = gather(size(W,2)); % update the number of filters
         Params(2) = Nfilt;
         
         % this adds new templates if they are detected in the residual
