@@ -99,7 +99,7 @@ __global__ void getW(const double *Params, double *wtw, double *W){
   extern __shared__ double array[];
 
   double* sW = (double*)array;
-  double* swtw = (double*)&sW[nt0max+NrankMax];
+  double* swtw = (double*)&sW[nt0max*NrankMax];
   double* xN = (double*)&swtw[nt0max*nt0max];
   
   nt0       = (int) Params[4];
@@ -170,8 +170,12 @@ __global__ void reNormalize(const double *Params, const double *A, const double 
     
     //extern __shared__ double sW[NrankMax*nt0max], sU[NchanMax*NrankMax], sS[NrankMax+1],
     //        sWup[nt0max*10];
-    extern __shared__ double sW[], sU[], sS[],
-            sWup[];
+    extern __shared__ double array[];
+
+    double* sW = (double*)array;
+    double* sU = (double*)&sW[NrankMax*nt0max];
+    double* sS = (double*)&sU[NchanMax*NrankMax];
+    double* sWup = (double*)&sS[NrankMax+1];
     
     nt0       = (int) Params[4];
     Nchan     = (int) Params[9];
