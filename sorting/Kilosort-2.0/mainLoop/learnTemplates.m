@@ -108,7 +108,7 @@ for ibatch = 1:niter
     if ibatch==1
        % only on the first batch, we first get a new set of spikes from the residuals,
        % which in this case is the unmodified data because we start with no templates
-        [dWU, cmap] = mexGetSpikes2(Params, dataRAW, wTEMP, iC-1); % CUDA function to get spatiotemporal clips from spike detections
+        dWU = mexGetSpikes2(Params, dataRAW, wTEMP, iC-1); % CUDA function to get spatiotemporal clips from spike detections
         dWU = double(dWU);
         dWU = reshape(wPCAd * (wPCAd' * dWU(:,:)), size(dWU)); % project these into the wPCA waveforms
 
@@ -195,7 +195,7 @@ for ibatch = 1:niter
         Params(2) = Nfilt;
         
         % this adds new templates if they are detected in the residual
-        [dWU0,cmap] = mexGetSpikes2(Params, drez, wTEMP, iC-1);
+        dWU0 = mexGetSpikes2(Params, drez, wTEMP, iC-1);
 
         if size(dWU0,3)>0
             % new templates need to be integrated into the same format as all templates

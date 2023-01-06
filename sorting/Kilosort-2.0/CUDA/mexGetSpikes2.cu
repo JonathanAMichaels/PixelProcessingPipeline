@@ -388,9 +388,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
       cudaMemcpy(d_WU1, d_WU, nt0*Nchan*counter[0]*sizeof(float), cudaMemcpyDeviceToDevice);  
   
   // dWU stays a GPU array
-  plhs[0] 	= mxGPUCreateMxArrayOnGPU(WU1);  
-  plhs[1] 	= mxGPUCreateMxArrayOnGPU(dout); 
-
+  plhs[0] 	= mxGPUCreateMxArrayOnGPU(WU1);
   
   cudaFree(d_ftype);
   cudaFree(d_kkmax);
@@ -409,6 +407,6 @@ void mexFunction(int nlhs, mxArray *plhs[],
   mxGPUDestroyGPUArray(W);  
   mxGPUDestroyGPUArray(iC);
   mxGPUDestroyGPUArray(data);
-  mxGPUDestroyGPUArray(WU1);  
+  mxGPUDestroyGPUArray(WU1);
   mxGPUDestroyGPUArray(dout);
 }
