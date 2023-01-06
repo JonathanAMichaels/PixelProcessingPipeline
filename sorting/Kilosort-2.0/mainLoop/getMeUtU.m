@@ -7,6 +7,9 @@ function [UtU, maskU, iList] = getMeUtU(iU, iC, mask, Nnearest, Nchan)
 
 Nfilt = numel(iU);
 
+iU
+Nfilt
+
 U = gpuArray.zeros(Nchan, Nfilt, 'single'); % create a sparse matrix with ones if a channel K belongs to a template
 
 ix = iC(:, iU) + int32([0:Nchan:(Nchan*Nfilt-1)]); % use the template primary channel to obtain its neighboring channels from iC

@@ -67,7 +67,6 @@ for ibatch = 1:nBatches
     end
 
     disp(Nfilt)
-    disp(size(uproj,2))
     if size(uproj,2)>Nfilt
        % if a batch has at least as many spikes as templates we request, then cluster it
        % uproj contains all spikes, W will hold the starting points for
