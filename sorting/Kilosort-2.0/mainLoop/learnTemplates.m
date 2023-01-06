@@ -137,6 +137,8 @@ for ibatch = 1:niter
     W
     U
     mu
+    iW
+    iC
 
 
     % UtU is the gram matrix of the spatial components of the low-rank SVDs
