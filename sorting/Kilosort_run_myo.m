@@ -24,9 +24,10 @@ ops.NchanTOT = double(num_chans);
 ops.nt0 = 61;
 %ops.Th = [2 2]
 %ops.spkTh = -3;
-ops.Nfilt = 128;
 ops.minFR = 0.01;
-ops.NT = 256*1024+ ops.ntbuff;
+ops.NT = 1028*1024+ ops.ntbuff;
+ops.nskip           = 5;  % how many batches to skip for determining spike PCs
+ops.nSkipCov            = 5; % compute whitening matrix from every N-th batch
 
 if trange(2) == 0
     ops.trange = [0 Inf];
