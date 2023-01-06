@@ -24,7 +24,7 @@ ops.nt0 = 61;
 %ops.Th = [2 2]
 %ops.spkTh = -3;
 ops.Nfilt = 128;
-ops.minFR = 0.001;
+ops.minFR = 0.01;
 ops.NT = 512*1024+ ops.ntbuff;
 
 if trange(2) == 0
