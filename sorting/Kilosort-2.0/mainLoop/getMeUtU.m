@@ -17,6 +17,7 @@ U(ix) = 1; % use this as an awkward index into U
 
 UtU = (U'*U) > 0; % if this is 0, the templates had not pair of channels in common
 
+mask = gather(mask);
 maskU = mask(:, iU); % we also return the masks for each template, picked from the corresponding mask of their primary channel
 
 if nargin>3 && nargout>2
