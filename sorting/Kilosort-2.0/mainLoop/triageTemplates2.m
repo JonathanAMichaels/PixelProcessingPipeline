@@ -10,8 +10,6 @@ function [W, U, dWU, mu, nsp, ndrop] = ...
 m0 = ops.minFR * ops.NT/ops.fs;
 idrop = nsp<m0; % drop any templates with firing rate below this
 
-idrop = gather(idrop);
-
 try
     W(:,idrop,:) = []; % remove those templates everywhere
 catch
@@ -37,8 +35,6 @@ rdir = (nsp(:) - nsp(:)')<0;
 % for each pair of template, score their similarity by their template correlation, and amplitude separation
 ipair = (cc>0.9 & r0>1 & rdir);
 % for each template, find its most similar other template
-ipair = gather(ipair);
-size(ipair)
 amax = max(ipair, [], 2);
 % if this score is 1, then all the criteria have bene met for dropping this template
 idrop= amax>0;
