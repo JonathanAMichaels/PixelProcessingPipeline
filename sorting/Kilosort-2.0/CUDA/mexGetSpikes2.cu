@@ -146,7 +146,6 @@ __global__ void	cleanup_spikes(const double *Params, const float *err,
   tid0 		= bid * blockDim.x ;
   Th 		= (float) Params[2];
   //Th = 14.0f;
-  printf("%d \n", lockout);
   
   while(tid0<NT-Nthreads-lockout+1){
       if (tid<2*lockout)
