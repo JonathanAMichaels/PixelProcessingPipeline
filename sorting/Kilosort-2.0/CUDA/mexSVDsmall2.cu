@@ -352,7 +352,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   getwtw<<<Nfilt, tpS>>>(d_Params, d_dWUb, d_wtw);
   
   // get W by power svd iterations
-  getW<<<Nfilt, nt0>>>(d_Params, d_wtw, d_W, sizeof(double)*(nt0max*NrankMax), sizeof(double)*(nt0Max*nt0Max), sizeof(double));
+  getW<<<Nfilt, nt0>>>(d_Params, d_wtw, d_W, sizeof(double)*(nt0max*NrankMax), sizeof(double)*(nt0max*nt0max), sizeof(double));
   
   // compute U by W' * dWU
   getU<<<Nfilt, tpK>>>(d_Params, d_dWUb, d_W, d_U, sizeof(double)*(NrankMax*nt0max), sizeof(double)*(NchanMax*NrankMax), sizeof(double)*(NrankMax+1), sizeof(double)*(nt0max*10));
