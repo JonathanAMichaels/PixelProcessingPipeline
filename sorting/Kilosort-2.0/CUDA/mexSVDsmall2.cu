@@ -96,11 +96,11 @@ __global__ void getW(const double *Params, double *wtw, double *W){
   int Nfilt, nt0, tid, bid, i, t, Nrank,k, tmax;
   double x, x0, xmax; 
   //volatile __shared__ double sW[nt0max*NrankMax], swtw[nt0max*nt0max], xN[1];
-  extern __shared__ double array[];
+  extern __shared__ float array[];
 
-  double* sW = (double*)array;
-  double* swtw = (double*)&sW[nt0max*NrankMax];
-  double* xN = (double*)&swtw[nt0max*nt0max];
+  float* sW = (float*)array;
+  float* swtw = (float*)&sW[nt0max*NrankMax];
+  float* xN = (float*)&swtw[nt0max*nt0max];
   
   nt0       = (int) Params[4];
    Nrank       = (int) Params[6];
