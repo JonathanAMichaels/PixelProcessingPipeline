@@ -929,7 +929,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
 
   
   //dim3 tpB(8, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 16), tpW(Nnearest, Nrank), tpPC(NchanU, Nrank);
-  dim3 tpB(2, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 4), tpW(Nnearest, Nrank), tpPC(NchanU, Nrank);
+  dim3 tpB(1, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 2), tpW(Nnearest, Nrank), tpPC(NchanU, Nrank);
   
   // filter the data with the spatial templates
   spaceFilter<<<Nfilt, Nthreads>>>(d_Params, d_draw, d_U, d_iC, d_iW, d_data);
