@@ -215,10 +215,10 @@ if myo_sorting:
         config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
 
-        #scipy.io.savemat('/tmp/config.mat', config_kilosort)
-        #shutil.rmtree(config_kilosort['myomatrix_folder'], ignore_errors=True)
-        #os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
-        #          path_to_add + '\')); myomatrix_binary"')
+        scipy.io.savemat('/tmp/config.mat', config_kilosort)
+        shutil.rmtree(config_kilosort['myomatrix_folder'], ignore_errors=True)
+        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
+                  path_to_add + '\')); myomatrix_binary"')
 
         #myo_function(config_kilosort)
 
