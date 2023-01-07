@@ -21,7 +21,7 @@ ops.fproc   = fullfile(myomatrix_folder, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
-ops.nt0 = 261;
+ops.nt0 = 201;
 ops.minFR = 0.01;
 ops.NT = 16*64*1024 + ops.ntbuff;
 ops.nskip           = 2;  % how many batches to skip for determining spike PCs
