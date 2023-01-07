@@ -170,12 +170,12 @@ __global__ void reNormalize(const double *Params, const double *A, const double 
     
     //extern __shared__ double sW[NrankMax*nt0max], sU[NchanMax*NrankMax], sS[NrankMax+1],
     //        sWup[nt0max*10];
-    extern __shared__ double array2[];
+    extern __shared__ float array[];
 
-    double* sW = (double*)array2;
-    double* sU = (double*)&sW[NrankMax*nt0max];
-    double* sS = (double*)&sU[NchanMax*NrankMax];
-    double* sWup = (double*)&sS[NrankMax+1];
+    float* sW = (float*)array;
+    float* sU = (float*)&sW[NrankMax*nt0max];
+    float* sS = (float*)&sU[NchanMax*NrankMax];
+    float* sWup = (float*)&sS[NrankMax+1];
     
     nt0       = (int) Params[4];
     Nchan     = (int) Params[9];
