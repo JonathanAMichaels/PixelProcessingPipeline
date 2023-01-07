@@ -11,7 +11,7 @@ def myo_sort(config):
     directory = config['myomatrix']
     chans = range(0, config['num_chans'])
     bin_file = directory + '/sorted' + str(config['myomatrix_num']) + '/data.bin'
-    params = {'perform_drift_registration': False, 'n_channels': len(chans), 'minfr_goodchannels': 0.} # not0: doesn't seem to work for nt0 > 64
+    params = {'perform_drift_registration': False, 'n_channels': len(chans), 'minfr_goodchannels': 0.}
     data_path = Path(bin_file)
     dir_path = Path(config['myomatrix_folder'])  # by default uses the same folder as the dataset
     output_dir = dir_path
@@ -23,7 +23,7 @@ def myo_sort(config):
     else:
         error('No probe configuration available')
     run(data_path, dir_path=dir_path, output_dir=output_dir,
-        probe=probe, low_memory=True, **params)
+        probe=probe, low_memory=True, stop_after="preprocess", **params)
     post_file = glob.glob(str(dir_path) + '/.kilosort/*/proc.dat')
     try:
         shutil.move(post_file[0], str(dir_path) + '/proc.dat')

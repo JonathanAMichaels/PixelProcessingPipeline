@@ -290,6 +290,7 @@ __global__ void extract_snips2(const double *Params, const float *err, const int
 void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
+
   int maxbytes = 166912; // 163 KiB
   cudaFuncSetAttribute(cleanup_heights, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
   cudaFuncSetAttribute(cleanup_spikes, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
