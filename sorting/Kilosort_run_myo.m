@@ -21,12 +21,9 @@ ops.fproc   = fullfile(myomatrix_folder, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
-ops.nt0 = 141;
-ops.ntbuff = 64;
-%ops.Th = [2 2]
-%ops.spkTh = -3;
+ops.nt0 = 181;
 ops.minFR = 0.01;
-ops.NT = 32*64*1024 + ops.ntbuff;
+ops.NT = 16*64*1024 + ops.ntbuff;
 ops.nskip           = 2;  % how many batches to skip for determining spike PCs
 ops.nSkipCov            = 2; % compute whitening matrix from every N-th batch
 ops.reorder = 1;
