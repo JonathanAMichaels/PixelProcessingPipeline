@@ -104,7 +104,6 @@ for ibatch = 1:niter
     dat = fread(fid, [NT ops.Nchan], '*int16');
     dataRAW = single(gpuArray(dat))/ ops.scaleproc;
 
-
     if ibatch==1
        % only on the first batch, we first get a new set of spikes from the residuals,
        % which in this case is the unmodified data because we start with no templates
@@ -117,8 +116,6 @@ for ibatch = 1:niter
         Nfilt = size(W,2); % update the number of filters/templates
         nsp(1:Nfilt) = m0; % initialize the number of spikes for new templates with the minimum allowed value, so it doesn't get thrown back out right away
         Params(2) = Nfilt; % update in the CUDA parameters
-
-
     end
 
     
@@ -135,11 +132,6 @@ for ibatch = 1:niter
     % decompose dWU by svd of time and space (via covariance matrix of 61 by 61 samples)
     % this uses a "warm start" by remembering the W from the previous iteration
     [W, U, mu] = mexSVDsmall2(Params, dWU, W, iC-1, iW-1, Ka, Kb);
-
-    ibatch
-    size(W)
-    U
-
 
     % UtU is the gram matrix of the spatial components of the low-rank SVDs
     % it tells us which pairs of templates are likely to "interfere" with each other

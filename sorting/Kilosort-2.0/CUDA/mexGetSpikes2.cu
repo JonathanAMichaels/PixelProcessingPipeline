@@ -310,8 +310,9 @@ void mexFunction(int nlhs, mxArray *plhs[],
   Nnearest  = (unsigned int) Params[5];
   Nrank     = (unsigned int) Params[14];
   
-  dim3 tpB(8, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 8);
-        
+  //dim3 tpB(8, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 8); // tpS was (nt0, 16), which can call too many threads if nt0 > 64
+  dim3 tpS(nt0, 4); // !!
+
   cudaMalloc(&d_Params,      sizeof(double)*mxGetNumberOfElements(prhs[0]));
   cudaMemcpy(d_Params,Params,sizeof(double)*mxGetNumberOfElements(prhs[0]),cudaMemcpyHostToDevice);
 
