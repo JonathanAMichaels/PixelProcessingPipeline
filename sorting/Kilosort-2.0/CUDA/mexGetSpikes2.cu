@@ -397,7 +397,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   
   // update dWU here by adding back to subbed spikes
   //extract_snips2<<<Nchan,tpS>>>(  d_Params, d_err, d_st1, d_id1, d_counter, d_kk, d_iC, d_W, d_WU);
-  extract_snips<<<Nchan,tpS>>>(  d_Params, d_st1, d_id1, d_counter, d_data, d_WU);
+  //extract_snips<<<Nchan,tpS>>>(  d_Params, d_st1, d_id1, d_counter, d_data, d_WU);
 
   if (counter[0]>0)
       cudaMemcpy(d_WU1, d_WU, nt0*Nchan*counter[0]*sizeof(float), cudaMemcpyDeviceToDevice);  
