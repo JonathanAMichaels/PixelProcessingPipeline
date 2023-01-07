@@ -21,7 +21,7 @@ ops.fproc   = fullfile(myomatrix_folder, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
-ops.nt0 = 141;
+ops.nt0 = 181;
 ops.minFR = 0.01;
 ops.NT = 16*64*1024 + ops.ntbuff;
 ops.nskip           = 2;  % how many batches to skip for determining spike PCs
@@ -47,7 +47,7 @@ rez = learnAndSolve8b(rez);
 
 % OPTIONAL: remove double-counted spikes - solves issue in which individual spikes are assigned to multiple templates.
 % See issue 29: https://github.com/MouseLand/Kilosort2/issues/29
-rez = remove_ks2_duplicate_spikes(rez);
+%rez = remove_ks2_duplicate_spikes(rez);
 
 % final merges
 rez = find_merges(rez, 1);
