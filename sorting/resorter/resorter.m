@@ -121,7 +121,7 @@ if ~params.skipFilter
     % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
     % spike times to be close together.
     % Take only 'good' single units with sufficient SNR
-    C = C((C_ident | SNR > params.multiSNRThreshold) & spkCount > 20);
+    C = C((C_ident | SNR > params.multiSNRThreshold) & spkCount > 50);
 end
 
 % Let's straight up trim off everything we don't need to save time
@@ -161,7 +161,7 @@ while keepGoing
     mL = lags(mL);
     
     % Let's choose what to merge
-    J = m > params.crit | (m > 0.7 & rCross > 0.3);
+    J = m > params.crit | (m > 0.6 & rCross > 0.3);
     
     % Create graph of connected clusters
     J = graph(J);
@@ -355,7 +355,7 @@ end
 
 disp(['Number of clusters: ' num2str(length(C))])
 disp(['Number of spikes: ' num2str(length(I))])
-save([params.kiloDir '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'consistency', 'data');
+save([params.kiloDir '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'consistency');
 end
 
 
