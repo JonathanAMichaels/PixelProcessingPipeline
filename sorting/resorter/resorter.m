@@ -79,6 +79,8 @@ if ~isfield(params, 'skipFilter')
     params.skipFilter = false;
 end
 
+dbstop if error
+
 % Read data from kilosort output
 disp('Reading kilosort output')
 T = readNPY([params.kiloDir '/spike_times.npy']);
