@@ -11,9 +11,9 @@ params.userSorted = false;
 params.savePlots = true;
 params.waveCount = 2000;
 %params.consistencyThreshold = 0.75;
-params.consistencyThreshold = 0.5;
+params.consistencyThreshold = 0;
 %params.crit = 0.8;
-params.crit = 0.8;
+params.crit = Inf;
 % make sure a sorting exists
 if isfile([myomatrix_folder '/spike_times.npy'])
     resorter(params)

@@ -121,7 +121,7 @@ if ~params.skipFilter
     % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
     % spike times to be close together.
     % Take only 'good' single units with sufficient SNR
-    C = C((C_ident | SNR > params.multiSNRThreshold) & spkCount > 50);
+    C = C(C_ident);% | (SNR > params.multiSNRThreshold & spkCount > 50));
 end
 
 % Let's straight up trim off everything we don't need to save time
@@ -163,7 +163,7 @@ while keepGoing
     mL = lags(mL);
     
     % Let's choose what to merge
-    J = m > params.crit | (m > 0.6 & rCross > 0.3);
+    J = m > params.crit;% | (m > 0.6 & rCross > 0.3);
     
     % Create graph of connected clusters
     J = graph(J);
@@ -215,7 +215,7 @@ while keepGoing
     C = unique(newC);
 
     % remove duplicates
-    [T, I] = removeDuplicates(params, T, I, C);
+    %[T, I] = removeDuplicates(params, T, I, C);
 
     % When there are no more connected clusters we can stop
     keepGoing = length(bins) ~= length(unique(bins));
@@ -234,10 +234,7 @@ end
 % Re-extract
 [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 % use first vs last quartel as consistency check
-RR = mean(squeeze([consistency.R(1,2,:), consistency.R(2,3,:), consistency.R(3,4,:)]),1);
-if size(consistency.R,3) == 1
-    RR = mean(RR)
-end
+RR = consistency.R;
 RR(isnan(RR) | RR < 0) = 0;
 disp('waveform consistency')
 RR
@@ -258,7 +255,7 @@ mdata = mdata(:,:,saveUnits);
 data = data(:,:,:,saveUnits);
 SNR = SNR(saveUnits);
 spkCount = spkCount(saveUnits);
-consistency.R = consistency.R(:,:,saveUnits);
+consistency.R = consistency.R(saveUnits);
 consistency.wave = consistency.wave(:,:,:,saveUnits);
 consistency.channel = consistency.channel(:,saveUnits);
 
@@ -391,20 +388,20 @@ spt = recordSize*nChan;
 badChan = params.brokenChan; % Zero out channels that are bad
 Wrot_orig = pinv(Wrot) * 200; % recover the original whitening matrix (specific to pykilosort 2.5)
 totalT = double(max(T));
-quartels = linspace(1, totalT, 5);
-waveParcel = floor(params.waveCount/(length(quartels)-1));
+sections = linspace(1, totalT, 3); % split into 2 equal parts
+waveParcel = floor(params.waveCount/(length(sections)-1));
 % Extract each waveform
 data = nan(params.backSp + params.forwardSp, nChan, params.waveCount, length(C), 'single');
 mdata = zeros(params.backSp + params.forwardSp, nChan, length(C), 'single');
-R = zeros(length(quartels)-1,length(quartels)-1,length(C),'single');
+R = zeros(1,length(C),'single');
 consistency = struct('R',[],'wave',[],'channel',[]);
 for j = 1:length(C)
     disp(['Extracting unit ' num2str(j) ' of ' num2str(length(C))])
-    tempdata = nan(params.backSp + params.forwardSp, nChan, waveParcel, length(quartels)-1, 'single');
+    tempdata = nan(params.backSp + params.forwardSp, nChan, waveParcel, length(sections)-1, 'single');
     waveStep = 0;
-    for q = 1:(length(quartels)-1)
+    for q = 1:(length(sections)-1)
         times = T(I == C(j));
-        times = times(times >= quartels(q) & times < quartels(q+1)); % trim times
+        times = times(times >= sections(q) & times < sections(q+1)); % trim times
         innerWaveCount = min([waveParcel length(times)]);
         useTimes = times(round(linspace(1, length(times), innerWaveCount)));
         for t = 1:length(useTimes)
@@ -438,7 +435,8 @@ for j = 1:length(C)
     consistency.channel(:,j) = ind(1:grabChannels);
     tempm = permute(tempm(:,ind(1:grabChannels),:), [3 1 2]);
     tempm = tempm(:,:)';
-    R(:,:,j) = corr(tempm);
+    tempCorr = corr(tempm);
+    R(j) = tempCorr(1,2);
 end
 fclose(f);
 consistency.R = R;
