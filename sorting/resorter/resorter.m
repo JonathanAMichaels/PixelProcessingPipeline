@@ -123,9 +123,8 @@ if ~params.skipFilter
     % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
     % spike times to be close together.
     % Take only 'good' single units with sufficient SNR
-    C = C(C_ident);% | (SNR > params.multiSNRThreshold & spkCount > 50));
+    C = C(C_ident == 1 | (SNR > params.multiSNRThreshold & spkCount > 50));
 end
-C = C(C_ident == 1);
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
