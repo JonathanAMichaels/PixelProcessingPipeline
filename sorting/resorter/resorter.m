@@ -123,6 +123,7 @@ if ~params.skipFilter
     % Take only 'good' single units with sufficient SNR
     C = C(C_ident);% | (SNR > params.multiSNRThreshold & spkCount > 50));
 end
+C = C(C_ident == 1);
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));

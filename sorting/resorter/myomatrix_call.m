@@ -10,6 +10,7 @@ params.binaryFile = [myomatrix_folder '/proc.dat'];
 params.userSorted = false;
 params.savePlots = true;
 params.waveCount = 2000;
+params.skipFilter = True;
 %params.consistencyThreshold = 0.75;
 params.consistencyThreshold = 0;
 %params.crit = 0.8;
