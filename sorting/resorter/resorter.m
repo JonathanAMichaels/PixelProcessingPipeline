@@ -140,6 +140,7 @@ while keepGoing
     [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
     % re-center all spike times
+    if false
     temp = permute(mdata, [3 1 2]);
     [~, minTime] = min(min(temp,[],3),[],2);
     new_mdata = zeros(size(mdata,1)*3, size(mdata,2), size(mdata,3));
@@ -149,6 +150,7 @@ while keepGoing
         new_mdata((size(mdata,1)+1:size(mdata,1)*2) - (minTime(j) - params.backSp),:,j) = mdata(:,:,j);
     end
     mdata = new_mdata((size(mdata,1)+1:size(mdata,1)*2),:,:);
+    end
 
     % calculate cross-correlation
     [bigR, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C);
@@ -208,7 +210,7 @@ while keepGoing
             newT(i) = T(i) + newLags(ind);
         end
     end
-    T = newT;
+    %T = newT;
     I = newI;
     C = unique(newC);
 
@@ -220,11 +222,13 @@ while keepGoing
 end
 disp('Finished merging clusters')
 
+if false
 % re-center all spike times
 temp = permute(mdata, [3 1 2]);
 [~, minTime] = min(min(temp,[],3),[],2);
 for j = 1:length(C)
     T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp;
+end
 end
 
 % Re-extract
