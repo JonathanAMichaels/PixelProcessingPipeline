@@ -10,11 +10,9 @@ params.binaryFile = [myomatrix_folder '/proc.dat'];
 params.userSorted = false;
 params.savePlots = true;
 params.waveCount = 2000;
-params.skipFilter = true;
 %params.consistencyThreshold = 0.75;
 params.consistencyThreshold = 0;
-%params.crit = 0.8;
-params.crit = Inf;
+params.crit = 0.8;
 % make sure a sorting exists
 if isfile([myomatrix_folder '/spike_times.npy'])
     resorter(params)
