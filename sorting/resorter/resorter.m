@@ -109,11 +109,13 @@ if ~params.skipFilter
     % Extract individual waveforms from kilosort binary
     [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
+    if false
     % re-center all spike times
     temp = permute(mdata, [3 1 2]);
     [~, minTime] = min(min(temp,[],3),[],2);
     for j = 1:length(C)
         T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp;
+    end
     end
 
     % calc stats
@@ -165,7 +167,7 @@ while keepGoing
     mL = lags(mL);
     
     % Let's choose what to merge
-    J = m > params.crit;% | (m > 0.6 & rCross > 0.3);
+    J = m > params.crit | (m > 0.6 & rCross > 0.3);
     
     % Create graph of connected clusters
     J = graph(J);
