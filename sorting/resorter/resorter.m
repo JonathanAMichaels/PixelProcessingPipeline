@@ -58,7 +58,7 @@ if ~isfield(params, 'consistencyThreshold')
 end
 % Spikes below this refractory time limit will be considered duplicates
 if ~isfield(params, 'refractoryLim')
-    params.refractoryLim = 4;
+    params.refractoryLim = 3;
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
@@ -144,17 +144,15 @@ while keepGoing
     [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
     % re-center all spike times
-    if false
     temp = permute(mdata, [3 1 2]);
     [~, minTime] = min(min(temp,[],3),[],2);
     new_mdata = zeros(size(mdata,1)*3, size(mdata,2), size(mdata,3));
     for j = 1:length(C)
-        T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp;
+        T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp - 1;
         % correct mdata centering
-        new_mdata((size(mdata,1)+1:size(mdata,1)*2) - (minTime(j) - params.backSp),:,j) = mdata(:,:,j);
+        new_mdata((size(mdata,1)+1:size(mdata,1)*2) - (minTime(j) - params.backSp - 1),:,j) = mdata(:,:,j);
     end
     mdata = new_mdata((size(mdata,1)+1:size(mdata,1)*2),:,:);
-    end
 
     % calculate cross-correlation
     [bigR, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C);
@@ -219,20 +217,18 @@ while keepGoing
     C = unique(newC);
 
     % remove duplicates
-    %[T, I] = removeDuplicates(params, T, I, C);
+    [T, I] = removeDuplicates(params, T, I, C);
 
     % When there are no more connected clusters we can stop
     keepGoing = length(bins) ~= length(unique(bins));
 end
 disp('Finished merging clusters')
 
-if false
 % re-center all spike times
 temp = permute(mdata, [3 1 2]);
 [~, minTime] = min(min(temp,[],3),[],2);
 for j = 1:length(C)
-    T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp;
-end
+    T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp - 1;
 end
 
 % Re-extract
