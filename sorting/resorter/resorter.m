@@ -127,6 +127,7 @@ if ~params.skipFilter
     % Take only 'good' single units with sufficient SNR
     C = C(C_ident == 1 | (SNR > params.multiSNRThreshold & spkCount > 50));
 end
+C = C(C_ident == 1);
 
 % Let's straight up trim off everything we don't need to save time
 keepSpikes = find(ismember(I,C));
@@ -143,6 +144,7 @@ while keepGoing
     % Extract individual waveforms from kilosort binary
     [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
+    if false
     % re-center all spike times
     temp = permute(mdata, [3 1 2]);
     [~, minTime] = min(min(temp,[],3),[],2);
@@ -153,6 +155,7 @@ while keepGoing
         new_mdata((size(mdata,1)+1:size(mdata,1)*2) - (minTime(j) - params.backSp - 1),:,j) = mdata(:,:,j);
     end
     mdata = new_mdata((size(mdata,1)+1:size(mdata,1)*2),:,:);
+    end
 
     % calculate cross-correlation
     [bigR, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C);
@@ -165,7 +168,7 @@ while keepGoing
     mL = lags(mL);
     
     % Let's choose what to merge
-    J = m > params.crit | (m > 0.6 & rCross > 0.3);
+    J = m > params.crit;% | (m > 0.6 & rCross > 0.3);
     
     % Create graph of connected clusters
     J = graph(J);
@@ -224,11 +227,13 @@ while keepGoing
 end
 disp('Finished merging clusters')
 
+if false
 % re-center all spike times
 temp = permute(mdata, [3 1 2]);
 [~, minTime] = min(min(temp,[],3),[],2);
 for j = 1:length(C)
     T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp - 1;
+end
 end
 
 % Re-extract
