@@ -48,7 +48,7 @@ if ~isfield(params, 'crit')
 end
 % SNR threshold for keeping clusters at the end
 if ~isfield(params, 'SNRThreshold')
-    params.SNRThreshold = 3.2;
+    params.SNRThreshold = 0;
 end
 if ~isfield(params, 'multiSNRThreshold')
     params.multiSNRThreshold = 3.2; % 3.8
