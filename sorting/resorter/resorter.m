@@ -48,17 +48,17 @@ if ~isfield(params, 'crit')
 end
 % SNR threshold for keeping clusters at the end
 if ~isfield(params, 'SNRThreshold')
-    params.SNRThreshold = 0; % 3.2
+    params.SNRThreshold = 3.0; % 3.2
 end
 if ~isfield(params, 'multiSNRThreshold')
-    params.multiSNRThreshold = 0; % 3.8
+    params.multiSNRThreshold = 3.5; % 3.8
 end
 if ~isfield(params, 'consistencyThreshold')
-    params.consistencyThreshold = 0.7;
+    params.consistencyThreshold = 0.75;
 end
 % Spikes below this refractory time limit will be considered duplicates
 if ~isfield(params, 'refractoryLim')
-    params.refractoryLim = 3;
+    params.refractoryLim = 4;
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
@@ -251,7 +251,6 @@ SNR
 % Remove clusters that don't meet inclusion criteria
 saveUnits = find(SNR > params.SNRThreshold & spkCount > 50 & ...
     RR >= params.consistencyThreshold);
-saveUnits = 1:length(SNR);
 keepSpikes = find(ismember(I, saveUnits));
 T = T(keepSpikes);
 I = I(keepSpikes);
