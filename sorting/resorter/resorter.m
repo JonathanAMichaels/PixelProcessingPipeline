@@ -51,7 +51,7 @@ if ~isfield(params, 'SNRThreshold')
     params.SNRThreshold = 3.2;
 end
 if ~isfield(params, 'multiSNRThreshold')
-    params.multiSNRThreshold = 3.8; % 3.8
+    params.multiSNRThreshold = 3.2; % 3.8
 end
 if ~isfield(params, 'consistencyThreshold')
     params.consistencyThreshold = 0.7;
