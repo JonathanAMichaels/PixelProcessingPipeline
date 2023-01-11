@@ -251,6 +251,7 @@ SNR
 % Remove clusters that don't meet inclusion criteria
 saveUnits = find(SNR > params.SNRThreshold & spkCount > 50 & ...
     RR >= params.consistencyThreshold);
+saveUnits = 1:length(SNR);
 keepSpikes = find(ismember(I, saveUnits));
 T = T(keepSpikes);
 I = I(keepSpikes);
