@@ -48,10 +48,10 @@ if ~isfield(params, 'crit')
 end
 % SNR threshold for keeping clusters at the end
 if ~isfield(params, 'SNRThreshold')
-    params.SNRThreshold = 0;
+    params.SNRThreshold = 0; % 3.2
 end
 if ~isfield(params, 'multiSNRThreshold')
-    params.multiSNRThreshold = 3.2; % 3.8
+    params.multiSNRThreshold = 0; % 3.8
 end
 if ~isfield(params, 'consistencyThreshold')
     params.consistencyThreshold = 0.7;
@@ -424,13 +424,13 @@ for j = 1:length(C)
     
     % consistency check
     if nChan >= 384
-        grabChannels = 8;
+        grabChannels = 16;
     elseif nChan == 32
-        grabChannels = 6;
+        grabChannels = 32;
     elseif nChan == 16
-        grabChannels = 3;
+        grabChannels = 16;
     else
-        grabChannels = 4;
+        grabChannels = 8;
     end
     tempm = squeeze(nanmean(tempdata,3));
     ucheck = permute(tempm, [2 1 3]);
