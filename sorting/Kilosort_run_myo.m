@@ -28,7 +28,7 @@ ops.nSkipCov            = 2; % compute whitening matrix from every N-th batch
 ops.reorder = 1;
 ops.sigmaMask = 1e10; % we don't want a distance-dependant decay
 ops.Th = [9 4];
-ops.minfr_goodchannels = 0.05;
+ops.minfr_goodchannels = 0.2;
 
 if trange(2) == 0
     ops.trange = [0 Inf];
