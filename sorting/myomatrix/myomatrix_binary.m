@@ -92,7 +92,7 @@ for q = 1:2
     if q == 2
         S(:,q) = std(data_filt,[],1);
     else
-        data_norm = data_filt ./ repmat(S(:,q)', [size(data_filt,1) 1]);
+        data_norm = data_filt ./ repmat(std(data_filt,[],1), [size(data_filt,1) 1]);
         spk = sum(data_norm < -8, 1);
         S(:,q) = spk / size(data_norm,1) * 30000;
     end
@@ -122,7 +122,7 @@ for q = 1:2
 end
 print([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.png'], '-dpng')
 S
-asds
+
 if length(chanList) == 16
     brokenChan = find(S(:,2) > bipolarThresh | S(:,1) < 1);
 else
@@ -130,24 +130,26 @@ else
 end
 disp(['Broken/inactive channels are: ' num2str(brokenChan')])
 save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
-clear data_filt
+clear data_filt data_norm
 data(:,brokenChan) = zeros(size(data,1), length(brokenChan));
 
-% Generate "Bulk EMG" dataset
-notBroken = 1:size(data,2);
-notBroken(brokenChan) = [];
-if length(dataChan) == 32
-    bottomHalf = [9:16 25:32];
-    topHalf = [1:8 17:24];
-    bottomHalf(ismember(bottomHalf, brokenChan)) = [];
-    topHalf(ismember(topHalf, brokenChan)) = [];
-    bEMG = int16(mean(data(:,bottomHalf),2)) - int16(mean(data(:,topHalf),2));
-else
-    bEMG = int16(mean(data(:,notBroken),2));
+if false
+    % Generate "Bulk EMG" dataset
+    notBroken = 1:size(data,2);
+    notBroken(brokenChan) = [];
+    if length(dataChan) == 32
+        bottomHalf = [9:16 25:32];
+        topHalf = [1:8 17:24];
+        bottomHalf(ismember(bottomHalf, brokenChan)) = [];
+        topHalf(ismember(topHalf, brokenChan)) = [];
+        bEMG = int16(mean(data(:,bottomHalf),2)) - int16(mean(data(:,topHalf),2));
+    else
+        bEMG = int16(mean(data(:,notBroken),2));
+    end
+    save([myomatrix '/sorted' num2str(myomatrix_num) '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
+    clear bEMG
+    disp('Saved generated bulk EMG')
 end
-save([myomatrix '/sorted' num2str(myomatrix_num) '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
-clear bEMG
-disp('Saved generated bulk EMG')
 fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
 fwrite(fileID, int16(data'), 'int16');
 fclose(fileID);
