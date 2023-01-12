@@ -74,11 +74,11 @@ unipolarThresh = 120;
 bipolar = length(chanList) == 16;
 for q = 1:2
     if q == 1
-        [b, a] = butter(2, [300 7500] / (30000/2), 'bandpass');
+        [b, a] = butter(3, [300 7500] / (30000/2), 'bandpass');
     elseif q == 2
-        [b, a] = butter(2, [5 70] / (30000/2), 'bandpass');
+        [b, a] = butter(3, [5 70] / (30000/2), 'bandpass');
     end
-    useSeconds = 300;
+    useSeconds = 600;
     if size(data,1) < useSeconds*2*30000
         useSeconds = floor(size(data,1)/30000/2)-1;
     end
@@ -89,6 +89,7 @@ for q = 1:2
         data_filt(:,i) = single(filtfilt(b, a, double(data(tRange,i))));
     end
     S(:,q) = std(data_filt,[],1);
+
     subplot(1,2,q)
     if q == 1
         title('Filtered Signal Snippet (300-7500Hz)')
