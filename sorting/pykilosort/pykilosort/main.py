@@ -113,7 +113,7 @@ def run(
         import scipy.io
         dd = scipy.io.loadmat(str(dir_path) + '/brokenChan.mat')
         brokenChan = dd['brokenChan']
-        igood = np.zeros(probe.Nchan)+1
+        igood = np.zeros(len(probe.chanMap))+1
         igood[brokenChan] = 0
         ir.igood = igood.astype('bool')
         print(ir.good)
