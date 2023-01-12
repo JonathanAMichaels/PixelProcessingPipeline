@@ -425,9 +425,9 @@ for j = 1:length(C)
     if nChan >= 384
         grabChannels = 16;
     elseif nChan == 32
-        grabChannels = 32;
-    elseif nChan == 16
         grabChannels = 16;
+    elseif nChan == 16
+        grabChannels = 8;
     else
         grabChannels = 8;
     end
