@@ -113,11 +113,10 @@ def run(
         import scipy.io
         dd = scipy.io.loadmat(str(dir_path) + '/brokenChan.mat')
         brokenChan = dd['brokenChan']
-        print(brokenChan)
-        igood = np.zeros(len(probe.chanMap))+1
+        igood = np.zeros(probe.Nchan)+1
         igood[brokenChan] = 0
         ir.igood = igood.astype('bool')
-
+        print(ir.good)
         probe.chanMap = probe.chanMap[ir.igood]
         probe.xc = probe.xc[ir.igood]  # removes coordinates of bad channels
         probe.yc = probe.yc[ir.igood]
