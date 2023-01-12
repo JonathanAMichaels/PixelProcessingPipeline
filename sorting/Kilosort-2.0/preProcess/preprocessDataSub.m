@@ -68,8 +68,8 @@ rez.ops.chanMap = chanMap;
 fprintf('Time %3.0fs. Computing whitening matrix.. \n', toc);
 
 % this requires removing bad channels first
-Wrot = get_whitening_matrix(rez); % outputs a rotation matrix (Nchan by Nchan) which whitens the zero-timelag covariance of the data
-%Wrot = gpuArray.eye(ops.Nchan, 'single');
+#Wrot = get_whitening_matrix(rez); % outputs a rotation matrix (Nchan by Nchan) which whitens the zero-timelag covariance of the data
+Wrot = ops.scaleproc * gpuArray.eye(ops.Nchan, 'single');
 
 fprintf('Time %3.0fs. Loading raw data and applying filters... \n', toc);
 
