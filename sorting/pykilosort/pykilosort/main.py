@@ -116,7 +116,7 @@ def run(
         igood = np.zeros(len(probe.chanMap))+1
         igood[brokenChan] = 0
         ir.igood = igood.astype('bool')
-        print(ir.good)
+        print(ir.igood)
         probe.chanMap = probe.chanMap[ir.igood]
         probe.xc = probe.xc[ir.igood]  # removes coordinates of bad channels
         probe.yc = probe.yc[ir.igood]
