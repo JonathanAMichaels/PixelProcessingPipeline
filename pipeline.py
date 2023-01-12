@@ -225,7 +225,7 @@ if myo_sorting:
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
                   path_to_add + '\'); Kilosort_run_myo"')
 
-        myo_function(config_kilosort)
+        #myo_function(config_kilosort)
 
 # Proceed with myo post-processing
 if myo_post:
