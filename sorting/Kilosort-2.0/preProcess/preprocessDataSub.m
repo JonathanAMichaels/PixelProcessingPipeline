@@ -32,7 +32,7 @@ if getOr(ops, 'minfr_goodchannels', .1)>0 % discard channels that have very few 
     % determine bad channels
     fprintf('Time %3.0fs. Determining good channels.. \n', toc);
     if isfile(ops.brokenChan)
-        brokenChan = load(ops.brokenChan);
+        load(ops.brokenChan)
         igood = 1:NchanTOT;
         igood(brokenChan) = [];
     else
