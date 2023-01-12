@@ -12,7 +12,7 @@ def myo_sort(config):
     chans = range(0, config['num_chans'])
     bin_file = directory + '/sorted' + str(config['myomatrix_num']) + '/data.bin'
     params = {'perform_drift_registration': False, 'n_channels': len(chans),
-              'minfr_goodchannels': 0., 'do_whitening': False}
+              'minfr_goodchannels': 0.}
     data_path = Path(bin_file)
     dir_path = Path(config['myomatrix_folder'])  # by default uses the same folder as the dataset
     output_dir = dir_path

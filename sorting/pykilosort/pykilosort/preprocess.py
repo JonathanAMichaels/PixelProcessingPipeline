@@ -220,21 +220,22 @@ def get_whitening_matrix(raw_data=None, probe=None, params=None, nSkipCov=None):
         CCall[icc, :, :] = cp.dot(datr.T, datr) / datr.shape[0]
     CC = cp.median(CCall, axis=0)
 
-    if params.do_whitening:
-        if whiteningRange < np.inf:
-            #  if there are too many channels, a finite whiteningRange is more robust to noise
-            # in the estimation of the covariance
-            whiteningRange = min(whiteningRange, Nchan)
-            # this function performs the same matrix inversions as below, just on subsets of
-            # channels around each channel
-            Wrot = whiteningLocal(CC, yc, xc, whiteningRange)
-        else:
-            Wrot = whiteningFromCovariance(CC)
-    else:
-        # Do single channel z-scoring instead of whitening
-        # Wrot = cp.diag(cp.diag(CC) ** (-0.5))
+    if Nchan <= 32:
         Wrot = cp.diag(cp.ones(Nchan))  # don't do anything
-        print('YO')
+    else:
+        if params.do_whitening:
+            if whiteningRange < np.inf:
+                #  if there are too many channels, a finite whiteningRange is more robust to noise
+                # in the estimation of the covariance
+                whiteningRange = min(whiteningRange, Nchan)
+                # this function performs the same matrix inversions as below, just on subsets of
+                # channels around each channel
+                Wrot = whiteningLocal(CC, yc, xc, whiteningRange)
+            else:
+                Wrot = whiteningFromCovariance(CC)
+        else:
+            # Do single channel z-scoring instead of whitening
+            Wrot = cp.diag(cp.diag(CC) ** (-0.5))
 
     Wrot = Wrot * scaleproc
     condition_number = np.linalg.cond(cp.asnumpy(Wrot))
