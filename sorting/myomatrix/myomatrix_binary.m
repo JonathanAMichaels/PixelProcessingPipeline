@@ -131,7 +131,7 @@ end
 disp(['Broken/inactive channels are: ' num2str(brokenChan')])
 save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
 clear data_filt data_norm
-data(:,brokenChan) = zeros(size(data,1), length(brokenChan));
+data(:,brokenChan) = 0;
 
 if false
     % Generate "Bulk EMG" dataset

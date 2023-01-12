@@ -18,6 +18,7 @@ addpath(genpath([script_dir '/sorting/npy-matlab']))
 run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = fullfile(myomatrix_folder, 'data.bin');
 ops.fproc   = fullfile(myomatrix_folder, 'proc.dat');
+ops.brokenChan = fullfile(myomatrix_folder, 'brokenChan.mat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 

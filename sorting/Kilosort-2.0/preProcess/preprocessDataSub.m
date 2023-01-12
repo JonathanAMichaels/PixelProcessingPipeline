@@ -31,7 +31,13 @@ ops.NchanTOT = getOr(ops, 'NchanTOT', NchanTOTdefault); % if NchanTOT was left e
 if getOr(ops, 'minfr_goodchannels', .1)>0 % discard channels that have very few spikes
     % determine bad channels
     fprintf('Time %3.0fs. Determining good channels.. \n', toc);
-    igood = get_good_channels(ops, chanMap);
+    if isfile(ops.brokenChan)
+        brokenChan = load(ops.brokenChan);
+        igood = 1:NchanTOT;
+        igood(brokenChan) = [];
+    else
+        igood = get_good_channels(ops, chanMap);
+    end
 
     chanMap = chanMap(igood); %it's enough to remove bad channels from the channel map, which treats them as if they are dead
 
