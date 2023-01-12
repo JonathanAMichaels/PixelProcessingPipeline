@@ -111,7 +111,7 @@ def run(
         ir.igood = ir.igood.ravel().astype("bool")
 
         import scipy.io
-        brokenChan = scipy.io.loadmat(str(dir_path) + 'brokenChan.mat')
+        brokenChan = scipy.io.loadmat(str(dir_path) + '/brokenChan.mat')
         igood = np.zeros(len(probe.chanMap))+1
         igood[brokenChan] = 0
         ir.igood = igood.astype('bool')
