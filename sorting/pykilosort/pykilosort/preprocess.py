@@ -232,7 +232,9 @@ def get_whitening_matrix(raw_data=None, probe=None, params=None, nSkipCov=None):
             Wrot = whiteningFromCovariance(CC)
     else:
         # Do single channel z-scoring instead of whitening
-        Wrot = cp.diag(cp.diag(CC) ** (-0.5))
+        # Wrot = cp.diag(cp.diag(CC) ** (-0.5))
+        Wrot = cp.diag(cp.ones(Nchan))  # don't do anything
+        print('YO')
 
     Wrot = Wrot * scaleproc
     condition_number = np.linalg.cond(cp.asnumpy(Wrot))
