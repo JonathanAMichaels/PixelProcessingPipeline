@@ -109,6 +109,12 @@ def run(
         # it's enough to remove bad channels from the channel map, which treats them
         # as if they are dead
         ir.igood = ir.igood.ravel().astype("bool")
+
+        brokenChan = scipy.io.loadmat(str(dir_path) + 'brokenChan.mat')
+        igood = np.zeros(len(probe.chanMap))+1
+        igood[brokenChan] = 0
+        ir.igood = igood.astype('bool')
+
         probe.chanMap = probe.chanMap[ir.igood]
         probe.xc = probe.xc[ir.igood]  # removes coordinates of bad channels
         probe.yc = probe.yc[ir.igood]
