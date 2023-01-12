@@ -72,6 +72,7 @@ S = zeros(size(data,2), 2);
 bipolarThresh = 90;
 unipolarThresh = 120;
 bipolar = length(chanList) == 16;
+spk = zeros(1,length(chanList));
 for q = 1:2
     if q == 1
         [b, a] = butter(3, [300 7500] / (30000/2), 'bandpass');
@@ -89,6 +90,12 @@ for q = 1:2
         data_filt(:,i) = single(filtfilt(b, a, double(data(tRange,i))));
     end
     S(:,q) = std(data_filt,[],1);
+
+    data_norm = data_filt ./ repmat(S(:,q)', [size(data_filt,1) 1]);
+    for j = 1:size(data_norm,2)
+        spk(j) = sum(data_norm < -8, [], 1);
+    end
+    spk
 
     subplot(1,2,q)
     if q == 1
