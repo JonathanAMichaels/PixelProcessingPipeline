@@ -23,12 +23,12 @@ ops.NchanTOT = double(num_chans);
 
 ops.nt0 = 201;
 ops.NT = 16*64*1024 + ops.ntbuff;
-ops.nskip           = 2;  % how many batches to skip for determining spike PCs
-ops.nSkipCov            = 2; % compute whitening matrix from every N-th batch
+ops.nskip           = 5;  % how many batches to skip for determining spike PCs
+ops.nSkipCov            = 5; % compute whitening matrix from every N-th batch
 ops.reorder = 1;
 ops.sigmaMask = 1e10; % we don't want a distance-dependant decay
-ops.Th = [9 4];
-ops.minfr_goodchannels = 0.2;
+ops.Th = [10 4];
+ope.whiteningRange = 8;
 
 if trange(2) == 0
     ops.trange = [0 Inf];
