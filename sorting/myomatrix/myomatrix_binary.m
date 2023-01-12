@@ -74,9 +74,9 @@ unipolarThresh = 120;
 bipolar = length(chanList) == 16;
 for q = 1:2
     if q == 1
-        [b, a] = butter(3, [300 7500] / (30000/2), 'bandpass');
+        [b, a] = butter(2, [300 7500] / (30000/2), 'bandpass');
     elseif q == 2
-        [b, a] = butter(3, [5 70] / (30000/2), 'bandpass');
+        [b, a] = butter(2, [5 70] / (30000/2), 'bandpass');
     end
     useSeconds = 600;
     if size(data,1) < useSeconds*2*30000
@@ -122,6 +122,7 @@ for q = 1:2
 end
 print([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.png'], '-dpng')
 S
+asds
 if length(chanList) == 16
     brokenChan = find(S(:,2) > bipolarThresh | S(:,1) < 1);
 else
@@ -130,15 +131,6 @@ end
 disp(['Broken/inactive channels are: ' num2str(brokenChan')])
 save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
 clear data_filt
-
-data(:,brokenChan) = zeros(size(data,1), length(brokenChan));
-
-% Filter entire recording
-[b, a] = butter(3, [300 7500] / (30000/2), 'bandpass');
-data = data - mean(data,1);
-data = data - median(data,2);
-data = filtfilt(b, a, data);
-
 data(:,brokenChan) = zeros(size(data,1), length(brokenChan));
 
 % Generate "Bulk EMG" dataset
