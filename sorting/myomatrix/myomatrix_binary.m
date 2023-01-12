@@ -72,7 +72,6 @@ S = zeros(size(data,2), 2);
 bipolarThresh = 90;
 unipolarThresh = 120;
 bipolar = length(chanList) == 16;
-spk = zeros(1,length(chanList));
 for q = 1:2
     if q == 1
         [b, a] = butter(3, [300 7500] / (30000/2), 'bandpass');
@@ -89,13 +88,14 @@ for q = 1:2
     for i = 1:size(data,2)
         data_filt(:,i) = single(filtfilt(b, a, double(data(tRange,i))));
     end
-    S(:,q) = std(data_filt,[],1);
 
-    data_norm = data_filt ./ repmat(S(:,q)', [size(data_filt,1) 1]);
-    for j = 1:size(data_norm,2)
-        spk(j) = sum(data_norm < -8, [], 1);
+    if q == 2
+        S(:,q) = std(data_filt,[],1);
+    else
+        data_norm = data_filt ./ repmat(S(:,q)', [size(data_filt,1) 1]);
+        spk = sum(data_norm < -8, 1);
+        S(:,q) = spk / size(data_norm,1) * 30000;
     end
-    spk
 
     subplot(1,2,q)
     if q == 1
@@ -105,10 +105,15 @@ for q = 1:2
     end
     hold on
     for i = 1:size(data,2)
-        if (bipolar && S(i,2) > bipolarThresh) || (~bipolar && S(i,2) > unipolarThresh)
-            cmap = [1 0.2 0.2];
+        cmap = [0 0 0];
+        if q == 1
+            if S(i,1) < 1
+                 cmap = [1 0.2 0.2];
+            end
         else
-            cmap = [0 0 0];
+            if (bipolar && S(i,2) > bipolarThresh) || (~bipolar && S(i,2) > unipolarThresh)
+                cmap = [1 0.2 0.2];
+            end
         end
         plot(data_filt(:,i) + i*1600, 'Color', cmap)
     end
@@ -118,14 +123,23 @@ end
 print([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.png'], '-dpng')
 S
 if length(chanList) == 16
-    brokenChan = find(S(:,2) > bipolarThresh);
+    brokenChan = find(S(:,2) > bipolarThresh | S(:,1) < 1);
 else
-    brokenChan = find(S(:,2) > unipolarThresh);
+    brokenChan = find(S(:,2) > unipolarThresh | S(:,1) < 1);
 end
-disp(['Broken channels are: ' num2str(brokenChan')])
+disp(['Broken/inactive channels are: ' num2str(brokenChan')])
 save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
-data(:,brokenChan) = randn(size(data,1), length(brokenChan));%*3e-1;
 clear data_filt
+
+data(:,brokenChan) = zeros(size(data,1), length(brokenChan));
+
+% Filter entire recording
+[b, a] = butter(3, [300 7500] / (30000/2), 'bandpass');
+data = data - mean(data,1);
+data = data - median(data,2);
+data = filtfilt(b, a, data);
+
+data(:,brokenChan) = zeros(size(data,1), length(brokenChan));
 
 % Generate "Bulk EMG" dataset
 notBroken = 1:size(data,2);
