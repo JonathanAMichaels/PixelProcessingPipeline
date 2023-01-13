@@ -133,8 +133,7 @@ save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan
 clear data_filt data_norm
 data(:,brokenChan) = 0;
 
-data = data - mean(data,1);
-data = data - median(data,2);
+mean_data = mean(data,1);
 [b, a] = butter(4, [350 7500]/ (30000/2), 'bandpass');
 intervals = 1 : 30000*60 : size(data,1);
 buffer = 256;
@@ -147,7 +146,9 @@ for t = 1:length(intervals)-1
         postBuff = 0;
     end
     tRange = intervals(t)-preBuff : intervals(t+1)+postBuff;
-    fdata = filtfilt(b, a, double(data(tRange,:)));
+    fdata = double(data(tRange,:)) - mean_data;
+    fdata = fdata - median(fdata,2);
+    fdata = filtfilt(b, a, fdata);
     fdata = fdata(preBuff+1 : end-postBuff-1, :);
     fdata = fdata * 500;
     fwrite(fileID, int16(fdata'), 'int16');
