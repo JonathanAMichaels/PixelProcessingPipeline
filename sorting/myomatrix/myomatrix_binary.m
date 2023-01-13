@@ -74,7 +74,7 @@ unipolarThresh = 120;
 bipolar = length(chanList) == 16;
 for q = 1:2
     if q == 1
-        [b, a] = butter(2, [300 7500] / (30000/2), 'bandpass');
+        [b, a] = butter(2, [350 7500] / (30000/2), 'bandpass');
     elseif q == 2
         [b, a] = butter(2, [5 70] / (30000/2), 'bandpass');
     end
@@ -133,6 +133,27 @@ save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan
 clear data_filt data_norm
 data(:,brokenChan) = 0;
 
+data = data - mean(data,1);
+data = data - median(data,2);
+[b, a] = butter(4, [350 7500]/ (30000/2), 'bandpass');
+intervals = 1 : 30000*60 : size(data,1);
+buffer = 256;
+fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
+for t = 1:length(intervals)-1
+      preBuff = buffer; postBuff = buffer;
+    if t == 1
+        preBuff = 0;
+    elseif t == length(intervals)-1
+        postBuff = 0;
+    end
+    tRange = intervals(t)-preBuff : intervals(t+1)+postBuff;
+    fdata = filtfilt(b, a, double(data(tRange,:)));
+    fdata = fdata(preBuff+1 : end-postBuff-1, :);
+    fdata = fdata * 500;
+    fwrite(fileID, int16(fdata'), 'int16');
+end
+fclose(fileID);
+
 if false
     % Generate "Bulk EMG" dataset
     notBroken = 1:size(data,2);
@@ -150,9 +171,6 @@ if false
     clear bEMG
     disp('Saved generated bulk EMG')
 end
-fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
-fwrite(fileID, int16(data'), 'int16');
-fclose(fileID);
 clear data
 disp('Saved myomatrix data binary')
 quit
