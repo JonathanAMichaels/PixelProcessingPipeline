@@ -135,7 +135,7 @@ data(:,brokenChan) = 0;
 
 mean_data = mean(data,1);
 [b, a] = butter(4, [350 7500]/ (30000/2), 'bandpass');
-intervals = 1 : 30000*60 : size(data,1);
+intervals = round(linspace(1, size(data,1), 30000*60));
 buffer = 256;
 fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
 for t = 1:length(intervals)-1
