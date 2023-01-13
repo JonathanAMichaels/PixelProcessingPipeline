@@ -71,6 +71,6 @@ fprintf('found %d good units \n', sum(rez.good>0))
 fprintf('Saving results to Phy  \n')
 rezToPhy(rez, myomatrix_folder);
 
-delete(ops.fproc);
+%delete(ops.fproc);
 
 quit;
