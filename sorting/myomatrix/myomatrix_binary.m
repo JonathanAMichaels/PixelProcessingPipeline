@@ -150,7 +150,7 @@ for t = 1:length(intervals)-1
     fdata = fdata - median(fdata,2);
     fdata = filtfilt(b, a, fdata);
     fdata = fdata(preBuff+1 : end-postBuff-1, :);
-    fdata = fdata * 500;
+    fdata = fdata * 4;
     fwrite(fileID, int16(fdata'), 'int16');
 end
 fclose(fileID);
@@ -172,6 +172,5 @@ if false
     clear bEMG
     disp('Saved generated bulk EMG')
 end
-clear data
 disp('Saved myomatrix data binary')
 quit
