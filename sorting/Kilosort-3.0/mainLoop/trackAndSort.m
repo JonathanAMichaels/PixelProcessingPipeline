@@ -142,7 +142,7 @@ for ibatch = 1:niter
     
     % \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     % \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    
+    asdsds
     % main CUDA function in the whole codebase. does the iterative template matching
     % based on the current templates, gets features for these templates if requested (featW, featPC),
     % gets scores for the template fits to each spike (vexp), outputs the average of
