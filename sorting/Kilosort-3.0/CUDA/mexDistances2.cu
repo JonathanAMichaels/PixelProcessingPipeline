@@ -45,6 +45,7 @@ __global__ void computeCost(const double *Params, const float *Ws, const float *
               for (j=0;j<NrankPC;j++)
                     xsum += Ws[j + NrankPC*k + NrankPC*NchanNear * tid] *
                             W[j + NrankPC*this_chan + NrankPC*Nchan * bid];
+              
           }
           
           Ci = mu[bid]*mu[bid] + mus[tid]*mus[tid] -2*mus[tid]*mu[bid]*xsum;
@@ -60,6 +61,7 @@ __global__ void bestFilter(const double *Params, const bool *iMatch,
         const int *Wh, const float *cmax, const float *mus, int *id, float *x){
     
   int tid,tind,bid, my_chan, ind, Nspikes, Nfilters, Nthreads, Nchan, Nblocks;
+  float max_running = 0.0f; 
   
   Nspikes               = (int) Params[0];
   Nfilters              = (int) Params[2];
@@ -73,15 +75,16 @@ __global__ void bestFilter(const double *Params, const bool *iMatch,
   tind = tid + bid * Nthreads;
   
   while (tind<Nspikes){      
-      x[tind] = mus[tind] * mus[tind];
-      id[tind] = -1;
+      max_running = mus[tind] * mus[tind];
+      id[tind] = 0;
       my_chan = Wh[tind];      
       for(ind=0; ind<Nfilters; ind++)          
           if (iMatch[my_chan + ind * Nchan])
-              if (cmax[tind + ind*Nspikes] < x[tind]){
+              if (cmax[tind + ind*Nspikes] < max_running){
                   id[tind] = ind;
-                  x[tind] = cmax[tind + ind*Nspikes];
+                  max_running = cmax[tind + ind*Nspikes];
               }
+      x[tind] = max_running;       
       tind += Nblocks*Nthreads; 
   } 
   

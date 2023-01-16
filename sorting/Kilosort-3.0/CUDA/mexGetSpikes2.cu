@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024, maxFR = 5000, NrankMax = 6;
+const int  Nthreads = 1024, maxFR = 5000, NrankMax = 6, nt0max = 201;
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void  sumChannels(const double *Params, const float *data, 
 	float *datasum, int *kkmax, const int *iC){
@@ -58,7 +58,11 @@ __global__ void  sumChannels(const double *Params, const float *data,
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	Conv1D(const double *Params, const float *data, const float *W, float *conv_sig){
-    volatile __shared__ float  sW[81*NrankMax], sdata[(Nthreads+81)];
+    //volatile __shared__ float  sW[201*NrankMax], sdata[(Nthreads+201)];
+    extern __shared__ float array[];
+    float* sW = (float*)&array;
+    float* sdata = (float*)&sW[nt0max*NrankMax];
+
     float y;
     int tid, tid0, bid, i, nid, Nrank, NT, nt0,  Nchan;
 
@@ -127,7 +131,9 @@ __global__ void	cleanup_spikes(const double *Params, const float *err,
 	const int *ftype, float *x, int *st, int *id, int *counter){
     
   int lockout, indx, tid, bid, NT, tid0,  j, t0;
-  volatile __shared__ float sdata[Nthreads+2*81+1];
+  //volatile __shared__ float sdata[Nthreads+2*201+1];
+  extern __shared__ float sdata[];
+
   bool flag=0;
   float err0, Th;
   
@@ -178,7 +184,11 @@ __global__ void	cleanup_heights(const double *Params, const float *x,
         const int *st, const int *id, int *st1, int *id1, int *counter){
     
   int indx, tid, bid, t, d, Nmax;
-  volatile __shared__ float s_id[maxFR], s_x[maxFR];
+  //volatile __shared__ float s_id[maxFR], s_x[maxFR];
+  extern __shared__ float array[];
+  float* s_id = (float*)&array;
+  float* s_x = (float*)&s_id[maxFR];
+
   bool flag=0;
   float xmax;
   
@@ -280,6 +290,12 @@ __global__ void extract_snips2(const double *Params, const float *err, const int
 void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
+
+  int maxbytes = 166912; // 163 KiB
+  cudaFuncSetAttribute(cleanup_heights, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+  cudaFuncSetAttribute(cleanup_spikes, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+  cudaFuncSetAttribute(Conv1D, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+
   /* Initialize the MathWorks GPU API. */
   mxInitGPU();
 
@@ -295,8 +311,9 @@ void mexFunction(int nlhs, mxArray *plhs[],
   Nnearest  = (unsigned int) Params[5];
   Nrank     = (unsigned int) Params[14];
   
-  dim3 tpB(8, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 16);
-        
+  //dim3 tpB(8, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 8); // tpS was (nt0, 16), which can call too many threads if nt0 > 64
+  dim3 tpS(nt0, Nthreads/nt0); // !!
+
   cudaMalloc(&d_Params,      sizeof(double)*mxGetNumberOfElements(prhs[0]));
   cudaMemcpy(d_Params,Params,sizeof(double)*mxGetNumberOfElements(prhs[0]),cudaMemcpyHostToDevice);
 
@@ -351,7 +368,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   counter = (unsigned int*) calloc(1,sizeof(unsigned int));
   
   // filter the data with the temporal templates
-  Conv1D<<<Nchan, Nthreads>>>(d_Params, d_data, d_W, d_dfilt);
+  Conv1D<<<Nchan, Nthreads, sizeof(float)*(nt0max*NrankMax + Nthreads+nt0max)>>>(d_Params, d_data, d_W, d_dfilt);
   
   // sum each template across channels, square, take max
   sumChannels<<<NT/Nthreads,Nthreads>>>(d_Params, d_dfilt, d_dout, d_kkmax, d_iC);
@@ -360,11 +377,11 @@ void mexFunction(int nlhs, mxArray *plhs[],
   bestFilter<<<NT/Nthreads,Nthreads>>>(d_Params, d_dout, d_err, d_ftype, d_kkmax, d_kk);
  
   // ignore peaks that are smaller than another nearby peak
-  cleanup_spikes<<<NT/Nthreads,Nthreads>>>(d_Params,
+  cleanup_spikes<<<NT/Nthreads, Nthreads, sizeof(float)*(Nthreads+2*nt0max+1)>>>(d_Params,
           d_err, d_ftype, d_x, d_st, d_id, d_counter); // NT/Nthreads 
    
   // ignore peaks that are smaller than another nearby peak
-  cleanup_heights<<<1 + maxFR/32 , 32>>>(d_Params, d_x, d_st, d_id, d_st1, d_id1, d_counter); // 1 + maxFR/32
+  cleanup_heights<<<1 + maxFR/32 , 32, sizeof(float)*(maxFR + maxFR)>>>(d_Params, d_x, d_st, d_id, d_st1, d_id1, d_counter); // 1 + maxFR/32
    
   // add new spikes to 2nd counter
   cudaMemcpy(counter,     d_counter+1, sizeof(int), cudaMemcpyDeviceToHost);
@@ -388,9 +405,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
       cudaMemcpy(d_WU1, d_WU, nt0*Nchan*counter[0]*sizeof(float), cudaMemcpyDeviceToDevice);  
   
   // dWU stays a GPU array
-  plhs[0] 	= mxGPUCreateMxArrayOnGPU(WU1);  
-  plhs[1] 	= mxGPUCreateMxArrayOnGPU(dout); 
-
+  plhs[0] 	= mxGPUCreateMxArrayOnGPU(WU1);
   
   cudaFree(d_ftype);
   cudaFree(d_kkmax);
@@ -409,6 +424,6 @@ void mexFunction(int nlhs, mxArray *plhs[],
   mxGPUDestroyGPUArray(W);  
   mxGPUDestroyGPUArray(iC);
   mxGPUDestroyGPUArray(data);
-  mxGPUDestroyGPUArray(WU1);  
+  mxGPUDestroyGPUArray(WU1);
   mxGPUDestroyGPUArray(dout);
 }
