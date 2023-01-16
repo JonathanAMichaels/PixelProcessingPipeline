@@ -43,7 +43,7 @@ ops
 
 rez                = preprocessDataSub(ops);
 
-rez                = datashift2(rez, 1);
+rez                = datashift2_ORIGINAL(rez, 1);
 
 [rez, st3, tF]     = extract_spikes(rez);
 
