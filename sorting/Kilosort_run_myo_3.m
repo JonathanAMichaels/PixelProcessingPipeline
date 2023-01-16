@@ -32,6 +32,7 @@ ops.Th = [9 4];
 ops.scaleproc = 1;
 ops.filter = false;
 ops.nblocks = 0;
+ops.nt0min = ceil(ops.nt0/2);
 
 if trange(2) == 0
     ops.trange = [0 Inf];
@@ -41,7 +42,7 @@ end
 
 ops
 
-rez                = preprocessDataSub(ops);
+rez                = preprocessDataSub_myo(ops);
 
 rez                = datashift2_ORIGINAL(rez, 1);
 
