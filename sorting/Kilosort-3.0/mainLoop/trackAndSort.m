@@ -142,7 +142,7 @@ for ibatch = 1:niter
     
     % \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     % \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    asdsds
+
     % main CUDA function in the whole codebase. does the iterative template matching
     % based on the current templates, gets features for these templates if requested (featW, featPC),
     % gets scores for the template fits to each spike (vexp), outputs the average of
@@ -211,7 +211,7 @@ for ibatch = 1:niter
     if (rem(ibatch, 100)==1)
         % this is some of the relevant diagnostic information to be printed during training
         fprintf('%2.2f sec, %d / %d batches, %d units, nspks: %d, mu: %2.4f, nst0: %d \n', ...
-            toc, ibatch, niter, Nfilt, ntot, median(mu), numel(st0))
+            toc, ibatch, niter, Nfilt, ntot, median(gather(mu)), numel(gather(st0)))
         
         % these diagnostic figures should be mostly self-explanatory
         if ops.fig
