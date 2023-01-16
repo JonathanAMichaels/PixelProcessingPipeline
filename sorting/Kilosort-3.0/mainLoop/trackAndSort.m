@@ -211,7 +211,7 @@ for ibatch = 1:niter
     if (rem(ibatch, 100)==1)
         % this is some of the relevant diagnostic information to be printed during training
         fprintf('%2.2f sec, %d / %d batches, %d units, nspks: %d, mu: %2.4f, nst0: %d \n', ...
-            toc, ibatch, niter, Nfilt, ntot, median(gather(mu)), numel(gather(st0)))
+            toc, ibatch, niter, Nfilt, ntot, median(mu), numel(st0))
         
         % these diagnostic figures should be mostly self-explanatory
         if ops.fig
