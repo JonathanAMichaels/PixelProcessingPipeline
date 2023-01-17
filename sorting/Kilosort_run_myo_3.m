@@ -23,7 +23,7 @@ ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
 ops.nt0 = 201;
-ops.NT = 32*64*1024 + ops.ntbuff;
+ops.NT = 64*64*1024 + ops.ntbuff;
 ops.nskip           = 10;  % how many batches to skip for determining spike PCs
 ops.nSkipCov            = 10; % compute whitening matrix from every N-th batch
 ops.reorder = 1;
