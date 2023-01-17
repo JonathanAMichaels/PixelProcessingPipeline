@@ -8,7 +8,7 @@ function rezToPhy2(rez, savePath, varargin)
 
 [~, Nfilt, Nrank] = size(rez.W);
 %rez.Wphy = cat(1, zeros(1+rez.ops.nt0min, Nfilt, Nrank), rez.W); % for Phy, we need to pad the spikes with zeros so the spikes are aligned to the center of the window
-rez.Wphy = W;
+rez.Wphy = rez.W;
 
 % spikeTimes will be in samples, not seconds
 rez.W = gather(single(rez.Wphy));
