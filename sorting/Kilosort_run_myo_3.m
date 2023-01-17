@@ -23,14 +23,12 @@ ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
 ops.nt0 = 201;
-ops.NT = 32*64*1024 + ops.ntbuff;
-ops.nskip           = 2;  % how many batches to skip for determining spike PCs
-ops.nSkipCov            = 2; % compute whitening matrix from every N-th batch
-ops.reorder = 1;
-ops.sigmaMask = 1e10; % we don't want a distance-dependant decay
-ops.Th = [9 4];
-%ops.scaleproc = 1;
-ops.filter = false;
+ops.NT = 8*64*1024 + ops.ntbuff;
+ops.nskip           = 10;  % how many batches to skip for determining spike PCs
+ops.nSkipCov            = 10; % compute whitening matrix from every N-th batch
+#ops.sigmaMask = 1e10; % we don't want a distance-dependant decay
+ops.Th = [9 9];
+ops.filter = true;
 ops.nblocks = 0;
 ops.nt0min = ceil(ops.nt0/2);
 
@@ -55,8 +53,6 @@ rez                = template_learning(rez, tF, st3);
 rez                = final_clustering(rez, tF, st3);
 
 rez                = find_merges(rez, 1);
-
-fprintf('found %d good units \n', sum(rez.good>0))
 
 % write to Phy
 fprintf('Saving results to Phy  \n')

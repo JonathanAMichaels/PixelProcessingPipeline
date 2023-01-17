@@ -132,25 +132,29 @@ disp(['Broken/inactive channels are: ' num2str(brokenChan')])
 save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
 clear data_filt data_norm
 
-mean_data = mean(data,1);
-[b, a] = butter(4, [350 7500]/ (30000/2), 'bandpass');
-intervals = round(linspace(1, size(data,1), round(size(data,1)/(30000*60))));
-buffer = 256;
 fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
-for t = 1:length(intervals)-1
-      preBuff = buffer; postBuff = buffer;
-    if t == 1
-        preBuff = 0;
-    elseif t == length(intervals)-1
-        postBuff = 0;
+if false
+    mean_data = mean(data,1);
+    [b, a] = butter(4, [350 7500]/ (30000/2), 'bandpass');
+    intervals = round(linspace(1, size(data,1), round(size(data,1)/(30000*60))));
+    buffer = 256;
+    for t = 1:length(intervals)-1
+          preBuff = buffer; postBuff = buffer;
+        if t == 1
+            preBuff = 0;
+        elseif t == length(intervals)-1
+            postBuff = 0;
+        end
+        tRange = intervals(t)-preBuff : intervals(t+1)+postBuff;
+        fdata = double(data(tRange,:)) - mean_data;
+        fdata = fdata - median(fdata,2);
+        fdata = filtfilt(b, a, fdata);
+        fdata = fdata(preBuff+1 : end-postBuff-1, :);
+        fdata(:,brokenChan) = 0;
+        fwrite(fileID, int16(fdata'), 'int16');
     end
-    tRange = intervals(t)-preBuff : intervals(t+1)+postBuff;
-    fdata = double(data(tRange,:)) - mean_data;
-    fdata = fdata - median(fdata,2);
-    fdata = filtfilt(b, a, fdata);
-    fdata = fdata(preBuff+1 : end-postBuff-1, :);
-    fdata(:,brokenChan) = 0;
-    fwrite(fileID, int16(fdata'), 'int16');
+else
+    fwrite(fileID, int16(data'), 'int16');
 end
 fclose(fileID);
 
