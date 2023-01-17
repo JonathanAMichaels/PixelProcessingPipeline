@@ -31,7 +31,8 @@ ycup = sum(uweigh .* rez.yc, 1);
 xcup = sum(uweigh .* rez.xc, 1);
 
 Nfilt =  size(rez.W,2);
-dWU = gpuArray.zeros(ops.nt0, ops.Nchan, Nfilt, 'double');
+%dWU = gpuArray.zeros(ops.nt0, ops.Nchan, Nfilt, 'double');
+dWU = zeros(ops.nt0, ops.Nchan, Nfilt, 'double');
 for j = 1:Nfilt
     dWU(:,:,j) = rez.mu(j) * squeeze(rez.W(:, j, :)) * squeeze(rez.U(:, j, :))';
 end
