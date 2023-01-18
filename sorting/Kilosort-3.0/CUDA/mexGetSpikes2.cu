@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024, maxFR = 5000, NrankMax = 3, nt0max = 201;
+const int  Nthreads = 1024, maxFR = 5000, NrankMax = 3, nt0max = 155;
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void  sumChannels(const double *Params, const float *data,
 	float *datasum, int *kkmax, const int *iC){
@@ -291,7 +291,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
 
-  int maxbytes = 166912; // 163 KiB
+  int maxbytes = 101376; // 99 KiB
   cudaFuncSetAttribute(cleanup_heights, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
   cudaFuncSetAttribute(cleanup_spikes, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
   cudaFuncSetAttribute(Conv1D, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);

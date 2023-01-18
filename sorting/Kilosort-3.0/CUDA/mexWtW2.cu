@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int nblock = 32, nt0max = 201;
+const int nblock = 32, nt0max = 155;
 //////////////////////////////////////////////////////////////////////////////////////////
 
 __global__ void	crossFilter(const double *Params, const float *W1, const float *W2,
@@ -84,7 +84,7 @@ __global__ void	crossFilter(const double *Params, const float *W1, const float *
 void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
-  int maxbytes = 166912; // 163 KiB
+  int maxbytes = 101376; // 99 KiB
   cudaFuncSetAttribute(crossFilter, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
 
     /* Declare input variables*/
