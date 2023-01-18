@@ -49,7 +49,7 @@ ops.NT                  = 64*1024+ ops.ntbuff;
 ops.whiteningRange      = 32; % number of channels to use for whitening each channel
 ops.nSkipCov            = 25; % compute whitening matrix from every N-th batch
 ops.scaleproc           = 200;   % int16 scaling of whitened data
-ops.nPCs                = 3; % how many PCs to project the spikes into
+ops.nPCs                = 4; % how many PCs to project the spikes into
 ops.useRAM              = 0; % not yet available
 
 %%
