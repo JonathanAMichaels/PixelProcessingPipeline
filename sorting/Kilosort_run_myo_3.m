@@ -29,6 +29,7 @@ ops.nSkipCov            = 10; % compute whitening matrix from every N-th batch
 %ops.sigmaMask = 1e10; % we don't want a distance-dependant decay
 ops.Th = [10 3];
 %ops.nfilt_factor = 8;
+ops.spkTh = -8;
 ops.nPCs = 3;
 ops.filter = false;
 ops.nblocks = 0;
