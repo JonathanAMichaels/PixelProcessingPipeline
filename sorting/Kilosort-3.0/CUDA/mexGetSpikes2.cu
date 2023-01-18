@@ -377,7 +377,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   bestFilter<<<NT/Nthreads,Nthreads>>>(d_Params, d_dout, d_err, d_ftype, d_kkmax, d_kk);
 
   // ignore peaks that are smaller than another nearby peak
-  cleanup_spikes<<<NT/Nthreads, Nthreads, sizeof(float)*(Nthreads+2*nt0max+1)>>>(d_Params,
+  cleanup_spikes<<<NT/Nthreads, Nthreads, sizeof(float)*(Nthreads + 2*nt0max + 1)>>>(d_Params,
           d_err, d_ftype, d_x, d_st, d_id, d_counter); // NT/Nthreads
 
   // ignore peaks that are smaller than another nearby peak
