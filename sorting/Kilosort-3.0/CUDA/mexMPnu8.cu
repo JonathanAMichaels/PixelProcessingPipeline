@@ -1071,8 +1071,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
 
   // compute PC features from reziduals + subtractions
   if (Params[12]>0)
-//  sPCA[2*201 * NrankMax], sW[201 * NrankMax], sU[NchanMax * NrankMax];
-     computePCfeatures<<<Nfilt, tpPC, sizeof(float)*2*201*NrankMax+201*NrankMax+NchanMax*NrankMax>>>(d_Params, d_counter, d_draw, d_st,
+     computePCfeatures<<<Nfilt, tpPC, sizeof(float)*(2*201*NrankMax+201*NrankMax+NchanMax*NrankMax)>>>(d_Params, d_counter, d_draw, d_st,
              d_id, d_y, d_W, d_U, d_mu, d_iW, d_iC, d_wPCA, d_featPC);
 
   //jic addition of time sorting prior to average_snips
