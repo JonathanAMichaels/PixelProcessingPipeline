@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <iostream>
 using namespace std;
-const int  Nthreads = 1024, NrankMax = 6;
+const int  Nthreads = 1024, 4;
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	Conv1D(const double *Params, const float *data, const float *W, float *conv_sig){    
   volatile __shared__ float  sW[201*NrankMax], sdata[(Nthreads+201)*NrankMax];
