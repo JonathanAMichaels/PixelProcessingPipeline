@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024, maxFR = 5000, NrankMax = 4, nt0max = 201;
+const int  Nthreads = 1024, maxFR = 5000, NrankMax = 3, nt0max = 201;
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void  sumChannels(const double *Params, const float *data,
 	float *datasum, int *kkmax, const int *iC){
@@ -58,7 +58,7 @@ __global__ void  sumChannels(const double *Params, const float *data,
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	Conv1D(const double *Params, const float *data, const float *W, float *conv_sig){
-    //volatile __shared__ float  sW[201*NrankMax], sdata[(Nthreads+201)];
+    //volatile __shared__ float  sW[nt0max*NrankMax], sdata[(Nthreads+nt0max)];
     extern __shared__ float array[];
     float* sW = (float*)&array;
     float* sdata = (float*)&sW[nt0max*NrankMax];
@@ -131,7 +131,7 @@ __global__ void	cleanup_spikes(const double *Params, const float *err,
 	const int *ftype, float *x, int *st, int *id, int *counter){
 
   int lockout, indx, tid, bid, NT, tid0,  j, t0;
-  //volatile __shared__ float sdata[Nthreads+2*201+1];
+  //volatile __shared__ float sdata[Nthreads+2*nt0max+1];
   extern __shared__ float sdata[];
 
   bool flag=0;

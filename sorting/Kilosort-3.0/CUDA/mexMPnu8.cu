@@ -22,7 +22,7 @@ using namespace std;
     #include "mexNvidia_quicksort.cu"
 #endif
             
-const int  Nthreads = 1024, maxFR = 100000, NrankMax = 4, nmaxiter = 500, NchanMax = 32;
+const int  Nthreads = 1024, maxFR = 100000, NrankMax = 3, nmaxiter = 500, NchanMax = 32;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	spaceFilter(const double *Params, const float *data, const float *U,
@@ -189,7 +189,7 @@ __global__ void	spaceFilterUpdate_v2(const double *Params, const double *data, c
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	timeFilter(const double *Params, const float *data, const float *W,float *conv_sig){
-  volatile __shared__ float  sW2[201*NrankMax], sW[201*NrankMax], sdata[(Nthreads+201)*NrankMax];
+  volatile __shared__ float  sW2[nt0max*NrankMax], sW[nt0max*NrankMax], sdata[(Nthreads+nt0max)*NrankMax];
   float x;
   int tid, tid0, bid, i, nid, Nrank, NT, Nfilt, nt0, irank;
 
@@ -247,7 +247,7 @@ __global__ void	timeFilter(const double *Params, const float *data, const float 
 __global__ void	timeFilterUpdate(const double *Params, const float *data, const float *W,
         const bool *UtU, float *conv_sig, const int *st, const int *id, const int *counter){
 
-  volatile __shared__ float  sW[201*NrankMax], sW2[201*NrankMax];
+  volatile __shared__ float  sW[nt0max*NrankMax], sW2[nt0max*NrankMax];
   float x;
   int tid, tid0, bid, t, k,ind, Nrank, NT, Nfilt, nt0;
 
@@ -382,7 +382,7 @@ __global__ void	cleanup_spikes(const double *Params, const float *data,
         const float *mu, const float *err, const float *eloss, const int *ftype, int *st,
         int *id, float *x, float *y,  float *z, int *counter){
 
-  volatile __shared__ float sdata[Nthreads+2*201+1];
+  volatile __shared__ float sdata[Nthreads+2*nt0max+1];
   float err0, Th;
   int lockout, indx, tid, bid, NT, tid0,  j, id0, t0;
   bool flag=0;
@@ -717,12 +717,12 @@ __global__ void	computePCfeatures(const double *Params, const int *counter,
         const float *W, const float *U, const float *mu, const int *iW, const int *iC,
         const float *wPCA, float *featPC){
 
-  //volatile __shared__ float  sPCA[2*201 * NrankMax], sW[201 * NrankMax], sU[NchanMax * NrankMax];
+  //volatile __shared__ float  sPCA[2*nt0max * NrankMax], sW[nt0max * NrankMax], sU[NchanMax * NrankMax];
   extern __shared__ float array[];
 
   float* sPCA = (float*)array;
-  float* sW = (float*)&sPCA[2*201*NrankMax];
-  float* sU = (float*)&sW[201*NrankMax];
+  float* sW = (float*)&sPCA[2*nt0max*NrankMax];
+  float* sU = (float*)&sW[nt0max*NrankMax];
 
   volatile __shared__ int iU[NchanMax];
 
@@ -1071,7 +1071,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
 
   // compute PC features from reziduals + subtractions
   if (Params[12]>0)
-     computePCfeatures<<<Nfilt, tpPC, sizeof(float)*(2*201*NrankMax+201*NrankMax+NchanMax*NrankMax)>>>(d_Params, d_counter, d_draw, d_st,
+     computePCfeatures<<<Nfilt, tpPC, sizeof(float)*(2*nt0max*NrankMax+nt0max*NrankMax+NchanMax*NrankMax)>>>(d_Params, d_counter, d_draw, d_st,
              d_id, d_y, d_W, d_U, d_mu, d_iW, d_iC, d_wPCA, d_featPC);
 
   //jic addition of time sorting prior to average_snips
