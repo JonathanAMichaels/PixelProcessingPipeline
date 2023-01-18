@@ -717,7 +717,13 @@ __global__ void	computePCfeatures(const double *Params, const int *counter,
         const float *W, const float *U, const float *mu, const int *iW, const int *iC,
         const float *wPCA, float *featPC){
 
-  volatile __shared__ float  sPCA[2*201 * NrankMax], sW[201 * NrankMax], sU[NchanMax * NrankMax];
+  //volatile __shared__ float  sPCA[2*201 * NrankMax], sW[201 * NrankMax], sU[NchanMax * NrankMax];
+  extern __shared__ float array[];
+
+  float* sPCA = (float*)array;
+  float* sW = (float*)&sPCA[2*201*NrankMax];
+  float* sU = (float*)&sW[201*NrankMax];
+
   volatile __shared__ int iU[NchanMax];
 
   float X = 0.0f, Y = 0.0f;
@@ -824,6 +830,9 @@ __global__ void set_idx( unsigned int *idx, const unsigned int nitems ) {
 void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
+  int maxbytes = 166912; // 163 KiB
+  cudaFuncSetAttribute(computePCfeatures, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+
   /* Initialize the MathWorks GPU API. */
   mxInitGPU();
 
@@ -1062,7 +1071,8 @@ void mexFunction(int nlhs, mxArray *plhs[],
 
   // compute PC features from reziduals + subtractions
   if (Params[12]>0)
-     computePCfeatures<<<Nfilt, tpPC>>>(d_Params, d_counter, d_draw, d_st,
+//  sPCA[2*201 * NrankMax], sW[201 * NrankMax], sU[NchanMax * NrankMax];
+     computePCfeatures<<<Nfilt, tpPC, sizeof(float)*2*201*NrankMax+201*NrankMax+NchanMax*NrankMax>>>(d_Params, d_counter, d_draw, d_st,
              d_id, d_y, d_W, d_U, d_mu, d_iW, d_iC, d_wPCA, d_featPC);
 
   //jic addition of time sorting prior to average_snips
