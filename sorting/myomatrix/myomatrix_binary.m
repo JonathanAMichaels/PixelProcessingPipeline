@@ -133,7 +133,7 @@ save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan
 clear data_filt data_norm
 
 fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
-if true
+if false
     mean_data = mean(data,1);
     [b, a] = butter(4, [350 7500]/ (30000/2), 'bandpass');
     intervals = round(linspace(1, size(data,1), round(size(data,1)/(30000*60))));
