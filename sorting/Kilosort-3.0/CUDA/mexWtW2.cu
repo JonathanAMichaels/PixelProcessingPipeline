@@ -17,15 +17,12 @@
 #include <iostream>
 using namespace std;
 
-const int nblock = 32, nt0max = 155;
+const int nblock = 32;
 //////////////////////////////////////////////////////////////////////////////////////////
 
 __global__ void	crossFilter(const double *Params, const float *W1, const float *W2,
         const float *UtU, float *WtW){    
-  //__shared__ float shW1[nblock*nt0max], shW2[nblock*nt0max];
-  extern __shared__ float array[];
-  float* shW1 = (float*)&array;
-  float* shW2 = (float*)&shW1[nblock*nt0max];
+  __shared__ float shW1[nblock*81], shW2[nblock*81]; 
 
   float x;
   int nt0, tidx, tidy , bidx, bidy, i, Nfilt, t, tid1, tid2;
@@ -84,9 +81,6 @@ __global__ void	crossFilter(const double *Params, const float *W1, const float *
 void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
-  int maxbytes = 101376; // 99 KiB
-  cudaFuncSetAttribute(crossFilter, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
-
     /* Declare input variables*/
   double *Params, *d_Params;
   unsigned int nt0, Nfilt;
@@ -122,7 +116,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
 
   dim3 grid(1 + (Nfilt/nblock), 1 + (Nfilt/nblock));
   dim3 block(nblock, nblock);
-  crossFilter<<<grid, block, sizeof(float)*(nblock*nt0max + nblock*nt0max)>>>(d_Params, d_W1, d_W2, d_UtU, d_WtW);
+  crossFilter<<<grid, block>>>(d_Params, d_W1, d_W2, d_UtU, d_WtW); 
 
   plhs[0] 	= mxGPUCreateMxArrayOnGPU(WtW);
 

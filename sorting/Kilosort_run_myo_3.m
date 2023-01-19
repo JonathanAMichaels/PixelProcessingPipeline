@@ -22,15 +22,15 @@ ops.brokenChan = fullfile(myomatrix_folder, 'brokenChan.mat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
-ops.nt0 = 155;
+ops.nt0 = 61;
 ops.NT = 64*1024 + ops.ntbuff;
 ops.nskip           = 10;  % how many batches to skip for determining spike PCs
 ops.nSkipCov            = 10; % compute whitening matrix from every N-th batch
 %ops.sigmaMask = 1e10; % we don't want a distance-dependant decay
-ops.Th = [9 3]; % 9 2
+ops.Th = [9 8]; % 9 2
 %ops.nfilt_factor = 12;
 %ops.nPCs = 3;
-ops.filter = true;
+%ops.filter = true;
 ops.nblocks = 0;
 ops.nt0min = ceil(ops.nt0/2);
 

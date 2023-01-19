@@ -142,7 +142,7 @@ for ibatch = 1:niter
     
     % \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     % \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
+    
     % main CUDA function in the whole codebase. does the iterative template matching
     % based on the current templates, gets features for these templates if requested (featW, featPC),
     % gets scores for the template fits to each spike (vexp), outputs the average of
@@ -152,7 +152,6 @@ for ibatch = 1:niter
     [st0, id0, x0, featW, dWU0, drez, nsp0, featPC, vexp, errmsg] = ...
         mexMPnu8(Params, dataRAW, single(U), single(W), single(mu), iC-1, iW-1, UtU, iList-1, ...
         wPCA);
-
     
     % \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     % \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\

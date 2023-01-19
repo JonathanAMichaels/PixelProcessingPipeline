@@ -68,12 +68,7 @@ for j = 1:numel(ycenter)
 %     size(data)
     
     
-   try
-        ich = unique(iC(:, itemp));
-    catch
-        tmpS = iC(:, itemp);
-        ich = unique(tmpS);
-   end
+    ich = unique(iC(:, itemp));
 %     ch_min = ich(1)-1;
 %     ch_max = ich(end);
     
@@ -105,7 +100,7 @@ end
 Wpca = Wpca(:,:,1:n0);
 toc
 %%
-rez.W = zeros(ops.nt0,0, 3, 'single');
+rez.W = zeros(61,0, 3, 'single');
 rez.U = zeros(ops.Nchan,0,3, 'single');
 rez.mu = zeros(1,0, 'single');
 for  t = 1:n0

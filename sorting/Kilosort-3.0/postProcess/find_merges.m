@@ -2,13 +2,9 @@ function rez = find_merges(rez, flag)
 % this function merges clusters based on template correlation
 % however, a merge is veto-ed if refractory period violations are introduced
 
-corrThresh = 0.5; % 0.7 original
-Qcrit = 0.2; % original is 0.2
-Rcrit = 0.05; % original is 0.05
-tlag = [-2:-1, 1:2]; % [-2, -1, 1, 2] is original
-
 wPCA  = rez.wPCA;
 wroll = [];
+tlag = [-2, -1, 1, 2];
 for j = 1:length(tlag)
     wroll(:,:,j) = circshift(wPCA, tlag(j), 1)' * wPCA;
 end
@@ -61,7 +57,7 @@ for j = 1:Nk
     end
     % sort all the pairs of this neuron, discarding any that have fewer spikes
     [ccsort, ix] = sort(Xsim(isort(j),:) .* (nspk'>numel(s1)), 'descend');
-    ienu = find(ccsort<corrThresh, 1) - 1; % find the first pair which has too low of a correlation
+    ienu = find(ccsort<.7, 1) - 1; % find the first pair which has too low of a correlation
 
     
     % for all pairs above 0.5 correlation
@@ -73,7 +69,7 @@ for j = 1:Nk
         R = min(rir); % R is the estimated probability that any of the center bins are refractory, and kicks in when there are very few spikes
 
         if flag
-            if Q<Qcrit && R<Rcrit % if both refractory criteria are met
+            if Q<.2 && R<.05 % if both refractory criteria are met
                 i = ix(k);
                 % now merge j into i and move on
                 rez.st3(rez.st3(:,2)==isort(j),2) = i; % simply overwrite all the spikes of neuron j with i (i>j by construction)
@@ -104,3 +100,5 @@ ss = double(rez.st3(:,1)) / ops.fs;
 clust_good = check_clusters(hid, ss, 0.2);
 sum(clust_good)
 rez.good = clust_good;
+
+
