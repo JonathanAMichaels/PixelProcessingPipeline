@@ -76,8 +76,8 @@ rez.ops.chanMap = chanMap;
 fprintf('Time %3.0fs. Computing whitening matrix.. \n', toc);
 
 % this requires removing bad channels first
-%Wrot = get_whitening_matrix(rez); % outputs a rotation matrix (Nchan by Nchan) which whitens the zero-timelag covariance of the data
-Wrot = ops.scaleproc * gpuArray.eye(ops.Nchan, 'single');
+Wrot = get_whitening_matrix(rez); % outputs a rotation matrix (Nchan by Nchan) which whitens the zero-timelag covariance of the data
+%Wrot = ops.scaleproc * gpuArray.eye(ops.Nchan, 'single');
 condition_number = cond(gather(Wrot));
 disp(['Computed the whitening matrix cond = ' num2str(condition_number)])
 if condition_number > 50
