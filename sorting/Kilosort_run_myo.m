@@ -23,13 +23,12 @@ ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
 ops.nt0 = 201;
-ops.NT = 4*64*1024 + ops.ntbuff;
-ops.nskip           = 5;  % how many batches to skip for determining spike PCs
-ops.nSkipCov            = 5; % compute whitening matrix from every N-th batch
+ops.NT = 64*1024 + ops.ntbuff; % 4*64*1024 good
+ops.nskip           = 10;  % how many batches to skip for determining spike PCs
+ops.nSkipCov            = 10; % compute whitening matrix from every N-th batch
 ops.reorder = 1;
 ops.sigmaMask = 1e10; % we don't want a distance-dependant decay
-ops.Th = [9 3];
-%ops.scaleproc = 1;
+ops.Th = [9 3]; % [9 3] good
 ops.filter = false;
 
 if trange(2) == 0
