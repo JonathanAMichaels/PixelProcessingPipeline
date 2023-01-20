@@ -94,7 +94,12 @@ for k = 1:ops.Nbatch
     toff = ops.nt0min + t0 + ops.NT *(k-1);
     st(1,:) = st(1,:) + toff;
     st = double(st);
-    st(5,:) = cF;
+    % https://github.com/MouseLand/Kilosort/issues/427
+    try
+        st(5,:) = cF;
+    catch
+        st = [st; cF];
+    end
     st(6,:) = k-1;
     
     st3(nsp + [1:ns], :) = gather(st)';    
