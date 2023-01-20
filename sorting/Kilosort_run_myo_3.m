@@ -42,9 +42,9 @@ end
 
 ops
 
-rez                = preprocessDataSub_myo(ops);
+rez                = preprocessDataSub(ops);
 
-rez                = datashift2_ORIGINAL(rez, 1);
+rez                = datashift2(rez, 1);
 
 [rez, st3, tF]     = extract_spikes(rez);
 
@@ -60,6 +60,6 @@ rez                = find_merges(rez, 1);
 fprintf('Saving results to Phy  \n')
 rezToPhy2(rez, myomatrix_folder);
 
-%delete(ops.fproc);
+delete(ops.fproc);
 
 quit;
