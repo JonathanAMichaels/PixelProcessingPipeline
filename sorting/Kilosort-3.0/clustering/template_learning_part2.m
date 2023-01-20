@@ -99,7 +99,7 @@ clust_good = check_clusters(hid, ss);
 sum(clust_good)
 
 
-rez.W = zeros(61,0, 3, 'single');
+rez.W = zeros(ops.nt0,0, 3, 'single');
 rez.U = zeros(ops.Nchan,0,3, 'single');
 rez.mu = zeros(1,0, 'single');
 for  t = 1:n0
@@ -135,7 +135,7 @@ rez1.mu = sum(sum(rez1.U.^2, 1),3).^.5;
 rez1.U = rez1.U ./ rez1.mu;
 rez1.mu = rez1.mu(:);
 
-rez1.W = reshape(rez.wPCA, [61, 1, 6]);
+rez1.W = reshape(rez.wPCA, [ops.nt0, 1, 6]);
 rez1.W = repmat(rez1.W, [1, n0, 1]);
 rez1.est_contam_rate = ones(n0,1);
 

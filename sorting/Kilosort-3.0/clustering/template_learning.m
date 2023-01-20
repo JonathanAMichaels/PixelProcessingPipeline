@@ -105,7 +105,7 @@ end
 Wpca = Wpca(:,:,1:n0);
 toc
 %%
-rez.W = zeros(61,0, 3, 'single');
+rez.W = zeros(ops.nt0,0, 3, 'single');
 rez.U = zeros(ops.Nchan,0,3, 'single');
 rez.mu = zeros(1,0, 'single');
 for  t = 1:n0
