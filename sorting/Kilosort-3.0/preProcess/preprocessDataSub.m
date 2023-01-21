@@ -80,6 +80,13 @@ Wrot = get_whitening_matrix(rez); % outputs a rotation matrix (Nchan by Nchan) w
 % Wrot = gpuArray.eye(size(Wrot,1), 'single');
 % Wrot = diag(Wrot);
 
+condition_number = cond(gather(Wrot));
+disp(['Computed the whitening matrix cond = ' num2str(condition_number)])
+if condition_number > 50
+    disp('High conditioning of the whitening matrix can result in noisy and poor results')
+    disp('CHECK YO-SELF BEFORE YOU WRECK YO-SELF')
+end
+
 fprintf('Time %3.0fs. Loading raw data and applying filters... \n', toc);
 
 fid         = fopen(ops.fbinary, 'r'); % open for reading raw data
