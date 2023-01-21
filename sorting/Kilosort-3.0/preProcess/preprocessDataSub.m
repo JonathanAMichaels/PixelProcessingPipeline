@@ -35,13 +35,15 @@ ops.NchanTOT = getOr(ops, 'NchanTOT', NchanTOTdefault); % if NchanTOT was left e
 
 % determine bad channels
 fprintf('Time %3.0fs. Determining good channels.. \n', toc);
-if isfile(ops.brokenChan)
-    load(ops.brokenChan)
-    igood = 1:NchanTOT;
-    igood(brokenChan) = [];
-else
-    igood = true(size(chanMap));
+igood = true(size(chanMap));
+if isfield(ops, 'brokenChan')
+    if isfile(ops.brokenChan)
+        load(ops.brokenChan)
+        igood = 1:NchanTOT;
+        igood(brokenChan) = [];
+    end
 end
+
 chanMap = chanMap(igood); %it's enough to remove bad channels from the channel map, which treats them as if they are dead
 xc = xc(igood); % removes coordinates of bad channels
 yc = yc(igood);
