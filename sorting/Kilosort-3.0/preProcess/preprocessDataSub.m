@@ -39,8 +39,8 @@ igood = true(size(chanMap));
 if isfield(ops, 'brokenChan')
     if isfile(ops.brokenChan)
         load(ops.brokenChan)
-        igood = 1:NchanTOT;
-        igood(brokenChan) = [];
+        igood = true(NchanTOT,1);
+        igood(brokenChan) = false;
     end
 end
 
@@ -50,7 +50,6 @@ yc = yc(igood);
 kcoords = kcoords(igood);
 ops.igood = igood;
 disp('good channels:')
-ops.igood
 
 ops.Nchan = numel(chanMap); % total number of good channels that we will spike sort
 ops.Nfilt = getOr(ops, 'nfilt_factor', 4) * ops.Nchan; % upper bound on the number of templates we can have
