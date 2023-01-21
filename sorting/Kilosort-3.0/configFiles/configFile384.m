@@ -8,7 +8,7 @@ ops.fs = 30000;
 ops.fshigh = 300;   
 
 % threshold on projections (like in Kilosort1, can be different for last pass like [10 4])
-ops.Th = [9 9];  
+ops.Th = [9 8];
 
 % how important is the amplitude penalty (like in Kilosort1, 0 means not used, 10 is average, 50 is a lot) 
 ops.lam = 20;  
@@ -29,14 +29,14 @@ ops.ThPre = 8;
 ops.sig = 20;
 
 % type of data shifting (0 = none, 1 = rigid, 2 = nonrigid)
-ops.nblocks = 5;
+ops.nblocks = 0;
 
 
 %% danger, changing these settings can lead to fatal errors
 % options for determining PCs
 ops.spkTh           = -6;      % spike threshold in standard deviations (-6)
 ops.reorder         = 1;       % whether to reorder batches for drift correction. 
-ops.nskip           = 25;  % how many batches to skip for determining spike PCs
+ops.nskip           = 10;  % how many batches to skip for determining spike PCs
 
 ops.GPU                 = 1; % has to be 1, no CPU version yet, sorry
 % ops.Nfilt               = 1024; % max number of clusters
@@ -44,9 +44,12 @@ ops.nfilt_factor        = 4; % max number of clusters per good channel (even tem
 ops.ntbuff              = 64;    % samples of symmetrical buffer for whitening and spike detection
 ops.NT                  = 64*1024+ ops.ntbuff; % must be multiple of 32 + ntbuff. This is the batch size (try decreasing if out of memory). 
 ops.whiteningRange      = 32; % number of channels to use for whitening each channel
-ops.nSkipCov            = 25; % compute whitening matrix from every N-th batch
+ops.nSkipCov            = 10; % compute whitening matrix from every N-th batch
 ops.scaleproc           = 200;   % int16 scaling of whitened data
 ops.nPCs                = 3; % how many PCs to project the spikes into
 ops.useRAM              = 0; % not yet available
+
+ops.nt0 = 151;
+ops.nt0min = floor(ops.nt0/2);
 
 %%
