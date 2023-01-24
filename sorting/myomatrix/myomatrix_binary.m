@@ -74,7 +74,7 @@ unipolarThresh = 120;
 bipolar = length(chanList) == 16;
 for q = 1:2
     if q == 1
-        [b, a] = butter(2, [350 7500] / (30000/2), 'bandpass');
+        [b, a] = butter(2, [300 9000] / (30000/2), 'bandpass');
     elseif q == 2
         [b, a] = butter(2, [5 70] / (30000/2), 'bandpass');
     end
@@ -93,7 +93,7 @@ for q = 1:2
         S(:,q) = std(data_filt,[],1);
     else
         data_norm = data_filt ./ repmat(std(data_filt,[],1), [size(data_filt,1) 1]);
-        spk = sum(data_norm < -8, 1);
+        spk = sum(data_norm < -6, 1);
         S(:,q) = spk / size(data_norm,1) * 30000;
     end
 
@@ -135,7 +135,7 @@ clear data_filt data_norm
 fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
 if true
     mean_data = mean(data,1);
-    [b, a] = butter(4, [350 7500]/ (30000/2), 'bandpass');
+    [b, a] = butter(4, [300 9000]/ (30000/2), 'bandpass');
     intervals = round(linspace(1, size(data,1), round(size(data,1)/(30000*60))));
     buffer = 256;
     for t = 1:length(intervals)-1

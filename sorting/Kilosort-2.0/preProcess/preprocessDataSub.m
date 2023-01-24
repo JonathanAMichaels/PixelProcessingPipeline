@@ -44,13 +44,8 @@ if getOr(ops, 'minfr_goodchannels', .1)>0 % discard channels that have very few 
     xc = xc(igood); % removes coordinates of bad channels
     yc = yc(igood);
     kcoords = kcoords(igood);
-
-    ops.igood = igood;
-else
-    ops.igood = true(size(chanMap));
 end
-disp('good channels:')
-ops.igood
+ops.igood = true(size(chanMap));
 
 ops.Nchan = numel(chanMap); % total number of good channels that we will spike sort
 ops.Nfilt = getOr(ops, 'nfilt_factor', 4) * ops.Nchan; % upper bound on the number of templates we can have
