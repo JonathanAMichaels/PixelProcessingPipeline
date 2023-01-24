@@ -53,6 +53,7 @@ kcoords = kcoords(igood);
 ops.igood = igood;
 
 ops.Nchan = numel(chanMap); % total number of good channels that we will spike sort
+disp(ops.Nchan)
 ops.Nfilt = getOr(ops, 'nfilt_factor', 4) * ops.Nchan; % upper bound on the number of templates we can have
 
 rez.ops         = ops; % memorize ops
