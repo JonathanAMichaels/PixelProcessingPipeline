@@ -28,27 +28,23 @@ ops.Nbatch = Nbatch;
 [chanMap, xc, yc, kcoords, NchanTOTdefault] = loadChanMap(ops.chanMap); % function to load channel map file
 ops.NchanTOT = getOr(ops, 'NchanTOT', NchanTOTdefault); % if NchanTOT was left empty, then overwrite with the default
 
-%{
-if getOr(ops, 'minfr_goodchannels', .1)>0 % discard channels that have very few spikes
-    % determine bad channels
-    fprintf('Time %3.0fs. Determining good channels.. \n', toc);
+% determine bad channels
+fprintf('Time %3.0fs. Determining good channels.. \n', toc);
+igood = true(size(chanMap));
+if isfield(ops, 'brokenChan')
     if isfile(ops.brokenChan)
         load(ops.brokenChan)
-        igood = 1:NchanTOT;
-        igood(brokenChan) = [];
-    else
-        igood = get_good_channels(ops, chanMap);
+        igood = true(NchanTOT,1);
+        igood(brokenChan) = false;
     end
-
-    chanMap = chanMap(igood); %it's enough to remove bad channels from the channel map, which treats them as if they are dead
-
-    xc = xc(igood); % removes coordinates of bad channels
-    yc = yc(igood);
-    kcoords = kcoords(igood);
 end
-%}
+ %igood = get_good_channels(ops, chanMap);
+chanMap = chanMap(igood); %it's enough to remove bad channels from the channel map, which treats them as if they are dead
+xc = xc(igood); % removes coordinates of bad channels
+yc = yc(igood);
+kcoords = kcoords(igood);
 
-ops.igood = true(size(chanMap));
+ops.igood = igood;
 
 ops.Nchan = numel(chanMap); % total number of good channels that we will spike sort
 ops.Nfilt = getOr(ops, 'nfilt_factor', 4) * ops.Nchan; % upper bound on the number of templates we can have

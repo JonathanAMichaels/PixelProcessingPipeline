@@ -23,14 +23,14 @@ ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
 ops.nt0 = 155;
-ops.NT = 64*1024 + ops.ntbuff; % 4*64*1024 good
+ops.NT = 4*64*1024 + ops.ntbuff; % 4*64*1024 good
 ops.nskip           = 10;  % how many batches to skip for determining spike PCs
 ops.nSkipCov            = 10; % compute whitening matrix from every N-th batch
 ops.reorder = 1;
 ops.sigmaMask = 1e10; % we don't want a distance-dependant decay
 ops.Th = [9 8]; % [9 3] good
 ops.nfilt_factor = floor(1024 / ops.NchanTOT);
-ops.filter = true;
+ops.filter = false;
 
 if trange(2) == 0
     ops.trange = [0 Inf];
