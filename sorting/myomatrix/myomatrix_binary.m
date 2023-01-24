@@ -93,7 +93,7 @@ for q = 1:2
         S(:,q) = std(data_filt,[],1);
     else
         data_norm = data_filt ./ repmat(std(data_filt,[],1), [size(data_filt,1) 1]);
-        spk = sum(data_norm < -6, 1);
+        spk = sum(data_norm < -5, 1);
         S(:,q) = spk / size(data_norm,1) * 30000;
     end
 
@@ -133,7 +133,7 @@ save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan
 clear data_filt data_norm
 
 fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
-if true
+if false
     mean_data = mean(data,1);
     [b, a] = butter(4, [300 9000]/ (30000/2), 'bandpass');
     intervals = round(linspace(1, size(data,1), round(size(data,1)/(30000*60))));
@@ -154,6 +154,7 @@ if true
         fwrite(fileID, int16(fdata'), 'int16');
     end
 else
+    data(:,brokenChan) = randn(size(data(:,brokenChan)));
     fwrite(fileID, int16(data'), 'int16');
 end
 fclose(fileID);
