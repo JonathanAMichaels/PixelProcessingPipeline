@@ -36,6 +36,7 @@ ops.NchanTOT = getOr(ops, 'NchanTOT', NchanTOTdefault); % if NchanTOT was left e
 % determine bad channels
 fprintf('Time %3.0fs. Determining good channels.. \n', toc);
 igood = true(size(chanMap));
+%{
 if isfield(ops, 'brokenChan')
     if isfile(ops.brokenChan)
         load(ops.brokenChan)
@@ -43,13 +44,13 @@ if isfield(ops, 'brokenChan')
         igood(brokenChan) = false;
     end
 end
+%}
 
 chanMap = chanMap(igood); %it's enough to remove bad channels from the channel map, which treats them as if they are dead
 xc = xc(igood); % removes coordinates of bad channels
 yc = yc(igood);
 kcoords = kcoords(igood);
 ops.igood = igood;
-disp('good channels:')
 
 ops.Nchan = numel(chanMap); % total number of good channels that we will spike sort
 ops.Nfilt = getOr(ops, 'nfilt_factor', 4) * ops.Nchan; % upper bound on the number of templates we can have
