@@ -93,7 +93,7 @@ for q = 1:2
         S(:,q) = std(data_filt,[],1);
     else
         data_norm = data_filt ./ repmat(std(data_filt,[],1), [size(data_filt,1) 1]);
-        spk = sum(data_norm < -5, 1);
+        spk = sum(data_norm < -7, 1);
         S(:,q) = spk / size(data_norm,1) * 30000;
     end
 
