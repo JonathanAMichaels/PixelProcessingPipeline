@@ -74,7 +74,7 @@ unipolarThresh = 120;
 bipolar = length(chanList) == 16;
 for q = 1:2
     if q == 1
-        [b, a] = butter(2, [300 9000] / (30000/2), 'bandpass');
+        [b, a] = butter(2, [350 3000] / (30000/2), 'bandpass');
     elseif q == 2
         [b, a] = butter(2, [5 70] / (30000/2), 'bandpass');
     end
@@ -99,7 +99,7 @@ for q = 1:2
 
     subplot(1,2,q)
     if q == 1
-        title('Filtered Signal Snippet (300-7500Hz)')
+        title('Filtered Signal Snippet (350-3000Hz)')
     else
         title('Filtered Noise Snippet (5-70Hz)')
     end
@@ -135,7 +135,7 @@ clear data_filt data_norm
 fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
 if true
     mean_data = mean(data,1);
-    [b, a] = butter(4, [300 9000]/ (30000/2), 'bandpass');
+    [b, a] = butter(4, [350 3000]/ (30000/2), 'bandpass');
     intervals = round(linspace(1, size(data,1), round(size(data,1)/(30000*60))));
     buffer = 256;
     for t = 1:length(intervals)-1
