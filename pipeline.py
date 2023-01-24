@@ -81,13 +81,13 @@ if cluster:
     neuro_sorting = False
 
 # Search working folder for existing configuration file
-config_file = find('*.yaml', folder)
+config_file = find('config.yaml', folder)
 if len(config_file) > 1:
     raise SystemExit("There shouldn't be more than one config file in here (something went wrong)")
 elif len(config_file) == 0:
     print('No config file found - creating one now')
     create_config(script_folder, folder)
-    config_file = find('*.yaml', folder)
+    config_file = find('config.yaml', folder)
 config_file = config_file[0]
 
 # Load config
