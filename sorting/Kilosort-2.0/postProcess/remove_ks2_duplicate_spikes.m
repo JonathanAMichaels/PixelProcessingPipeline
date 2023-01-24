@@ -37,7 +37,7 @@
 function rez = remove_ks2_duplicate_spikes(rez, varargin)
     input_parser = inputParser;
     addParameter(input_parser, 'overlap_s', 5e-4, @(x) (isnumeric(x))) % the temporal window within which pairs of spikes will be considered duplicates (if they are also within the spatial window)
-    addParameter(input_parser, 'channel_separation_um', 100, @(x) (ischar(x))) % the spatial window within which pairs of spikes will be considered duplicates (if they are also within the temporal window)
+    addParameter(input_parser, 'channel_separation_um', 100, @(x) (isnumeric(x))) % the spatial window within which pairs of spikes will be considered duplicates (if they are also within the temporal window)
     parse(input_parser, varargin{:});
     P = input_parser.Results;
 
