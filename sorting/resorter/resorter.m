@@ -58,7 +58,7 @@ if ~isfield(params, 'consistencyThreshold')
 end
 % Spikes below this refractory time limit will be considered duplicates
 if ~isfield(params, 'refractoryLim')
-    params.refractoryLim = 4;
+    params.refractoryLim = 5;
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
