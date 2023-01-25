@@ -8,7 +8,7 @@ ops = rez.ops;
 
 NrankPC = 6;
 
-NchanNear = ops.Nchan; %% CHANGED
+NchanNear = min(ops.Nchan, 16); %% CHANGED
 [iC, dist] = getClosestChannels2(ycup, xcup, rez.yc, rez.xc, NchanNear);
 
 igood = dist(1,:)<dNearActiveSite;

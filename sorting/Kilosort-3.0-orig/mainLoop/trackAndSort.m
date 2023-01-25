@@ -47,7 +47,7 @@ NT  	= ops.NT;
 
 
 % two variables for the same thing? number of nearest channels to each primary channel
-NchanNear   = min(ops.Nchan, 32); %% CHANGED
+NchanNear   = min(ops.Nchan, 16); %% CHANGED
 Nnearest    = min(ops.Nchan, 32);
 
 % decay of gaussian spatial mask centered on a channel

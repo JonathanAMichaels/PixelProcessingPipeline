@@ -41,7 +41,7 @@ dNearActiveSite = median(diff(unique(rez.yc)));
 NrankPC = 6;
 [wTEMP, wPCA]    = extractTemplatesfromSnippets(rez, NrankPC);
 
-NchanNear = ops.Nchan; %% CHANGED (NchanNear = 8)
+NchanNear = min(ops.Nchan, 16); %% CHANGED (NchanNear = 8)
 [iC, dist] = getClosestChannels2(ycup, xcup, rez.yc, rez.xc, NchanNear);
 
 igood = dist(1,:)<dNearActiveSite;

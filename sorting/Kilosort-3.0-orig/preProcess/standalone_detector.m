@@ -22,7 +22,7 @@ wPCA = gpuArray(rez.wPCA);
 
 % Get nearest channels for every template center. 
 % Template products will only be computed on these channels. 
-NchanNear = ops.Nchan; %% CHANGED
+NchanNear = min(ops.Nchan, 16); %% CHANGED
 [iC, dist] = getClosestChannels2(ycup, xcup, rez.yc, rez.xc, NchanNear);
 
 % Templates with centers that are far from an active site are discarded
