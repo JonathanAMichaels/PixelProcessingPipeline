@@ -5,7 +5,7 @@ ops.chanMap             = 'D:\GitHub\KiloSort2\configFiles\neuropixPhase3A_kilos
 ops.fs = 30000;  
 
 % frequency for high pass filtering (150)
-ops.fshigh = 300;   
+ops.fshigh = 250;
 
 % threshold on projections (like in Kilosort1, can be different for last pass like [10 4])
 ops.Th = [9 8];
