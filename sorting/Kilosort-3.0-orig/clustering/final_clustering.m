@@ -38,7 +38,7 @@ end
 
 
 ops = rez.ops;
-NchanNear   = min(ops.Nchan, 16);
+NchanNear   = min(ops.Nchan, 32); %% CHANGED
 
 [iC, mask, C2C] = getClosestChannels(rez, ops.sigmaMask, NchanNear);
 
