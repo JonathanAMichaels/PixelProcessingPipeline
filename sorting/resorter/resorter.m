@@ -107,7 +107,7 @@ end
 
 if ~params.skipFilter
     % Extract individual waveforms from kilosort binary
-    [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
+    [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
 
     if false
     % re-center all spike times
@@ -141,7 +141,7 @@ disp(['Number of spikes to work with: ' num2str(length(I))])
 keepGoing = 1;
 while keepGoing
     % Extract individual waveforms from kilosort binary
-    [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
+    [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
 
     if false
     % re-center all spike times
@@ -390,7 +390,7 @@ recordSize = 2; % 2 bytes for int16
 nChan = size(params.chanMap,1);
 spt = recordSize*nChan;
 badChan = params.brokenChan; % Zero out channels that are bad
-Wrot_orig = 1;%pinv(Wrot) * 200; % recover the original whitening matrix (specific to pykilosort 2.5)
+Wrot_orig = Wrot; % recover the original whitening matrix
 totalT = double(max(T));
 sections = linspace(1, totalT, 3); % split into 2 equal parts
 waveParcel = floor(params.waveCount/(length(sections)-1));
@@ -412,7 +412,7 @@ for j = 1:length(C)
             fseek(f, (useTimes(t)-params.backSp) * spt, 'bof');
             tempdata(:,:,t,q) = fread(f, [nChan, params.backSp+params.forwardSp], '*int16')';
             if unwhiten
-                tempdata(:,:,t,q) = tempdata(:,:,t,q) / Wrot_orig; % unwhiten and rescale data to uV
+                tempdata(:,:,t,q) = Wrot * tempdata(:,:,t,q); % unwhiten and rescale data to uV
             end
             tempdata(:,badChan,t,q) = 0;
         end
