@@ -13,6 +13,7 @@ params.waveCount = 2000;
 %params.consistencyThreshold = 0.75;
 params.consistencyThreshold = -Inf;
 params.crit = 0.8;
+params.skipFilter = true;
 % make sure a sorting exists
 if isfile([myomatrix_folder '/spike_times.npy'])
     resorter(params)
