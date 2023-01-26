@@ -108,7 +108,7 @@ end
 
 if ~params.skipFilter
     % Extract individual waveforms from kilosort binary
-    [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
+    [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
     if false
     % re-center all spike times
@@ -142,7 +142,7 @@ disp(['Number of spikes to work with: ' num2str(length(I))])
 keepGoing = 1;
 while keepGoing
     % Extract individual waveforms from kilosort binary
-    [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
+    [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
     if false
     % re-center all spike times
