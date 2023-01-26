@@ -26,7 +26,8 @@ for s = 1:sum(inclSpikes)
     
     % this is the reconstruction of the spatial part
     
-    theseSamps = st(s)+(1:buff)-19-samps(1)+buff*2;
+    %theseSamps = st(s)+(1:buff)-19-samps(1)+buff*2; %% This assumes an nt0min of 20...
+    theseSamps = st(s)+(1:buff)-(rez.ops.nt0min-1)-samps(1)+buff*2; %% Corrected
     predData(:,theseSamps) = predData(:,theseSamps) + Ui * Wi' * ampi;
     
     %     predData(:,theseSamps) = predData(:,theseSamps) + ...
