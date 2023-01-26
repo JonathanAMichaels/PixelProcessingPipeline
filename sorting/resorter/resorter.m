@@ -390,7 +390,7 @@ recordSize = 2; % 2 bytes for int16
 nChan = size(params.chanMap,1);
 spt = recordSize*nChan;
 badChan = params.brokenChan; % Zero out channels that are bad
-Wrot_orig = Wrot; % recover the original whitening matrix
+Wrot_orig = Wrot / 200; % recover the original whitening matrix
 totalT = double(max(T));
 sections = linspace(1, totalT, 3); % split into 2 equal parts
 waveParcel = floor(params.waveCount/(length(sections)-1));
@@ -412,7 +412,7 @@ for j = 1:length(C)
             fseek(f, (useTimes(t)-params.backSp) * spt, 'bof');
             tempdata(:,:,t,q) = fread(f, [nChan, params.backSp+params.forwardSp], '*int16')';
             if unwhiten
-                tempdata(:,:,t,q) = tempdata(:,:,t,q) * Wrot; % unwhiten and rescale data to uV
+                tempdata(:,:,t,q) = tempdata(:,:,t,q) * Wrot_orig; % unwhiten and rescale data to uV
             end
             tempdata(:,badChan,t,q) = 0;
         end
