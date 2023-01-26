@@ -20,7 +20,7 @@ ops.AUCsplit = 0.8;
 ops.minFR = 1/50; 
 
 % spatial constant in um for computing residual variance of spike
-ops.sigmaMask = 30; 
+ops.sigmaMask = Inf;
 
 % threshold crossings for pre-clustering (in PCA projection space)
 ops.ThPre = 8; 
