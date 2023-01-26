@@ -58,6 +58,6 @@ rez                = find_merges(rez, 1);
 fprintf('Saving results to Phy  \n')
 rezToPhy2(rez, myomatrix_folder);
 
-delete(ops.fproc);
+%delete(ops.fproc);
 
 quit;
