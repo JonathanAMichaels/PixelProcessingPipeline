@@ -74,8 +74,7 @@ templateFeatureInds = uint32(rez.iNeigh);
 pcFeatures = rez.cProjPC;
 pcFeatureInds = uint32(rez.iNeighPC);
 
-% whiteningMatrix = rez.Wrot/rez.ops.scaleproc;
-whiteningMatrix = eye(size(rez.Wrot)) / rez.ops.scaleproc;
+whiteningMatrix = rez.Wrot;
 whiteningMatrixInv = whiteningMatrix^-1;
 
 % here we compute the amplitude of every template...
