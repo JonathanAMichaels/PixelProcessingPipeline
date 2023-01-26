@@ -86,7 +86,7 @@ disp('Reading kilosort output')
 T = readNPY([params.kiloDir '/spike_times.npy']);
 I = readNPY([params.kiloDir '/spike_clusters.npy']);
 %Wrot = readNPY([params.kiloDir '/whitening_mat_inv.npy']);
-Wrot = load([params.kiloDir '/whitening_mat_inv.mat']);
+load([params.kiloDir '/whitening_mat_inv.mat']);
 load([params.kiloDir '/brokenChan']);
 params.brokenChan = brokenChan;
 
@@ -391,7 +391,7 @@ recordSize = 2; % 2 bytes for int16
 nChan = size(params.chanMap,1);
 spt = recordSize*nChan;
 badChan = params.brokenChan; % Zero out channels that are bad
-Wrot_orig = Wrot / 200; % recover the original whitening matrix
+Wrot_orig = Wrot; % recover the original whitening matrix
 totalT = double(max(T));
 sections = linspace(1, totalT, 3); % split into 2 equal parts
 waveParcel = floor(params.waveCount/(length(sections)-1));
