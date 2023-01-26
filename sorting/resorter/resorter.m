@@ -108,7 +108,7 @@ end
 
 if ~params.skipFilter
     % Extract individual waveforms from kilosort binary
-    [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
+    [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
 
     if false
     % re-center all spike times
@@ -142,7 +142,7 @@ disp(['Number of spikes to work with: ' num2str(length(I))])
 keepGoing = 1;
 while keepGoing
     % Extract individual waveforms from kilosort binary
-    [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
+    [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
 
     if false
     % re-center all spike times
@@ -237,7 +237,7 @@ end
 end
 
 % Re-extract
-[mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
+[mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
 % use first vs last quartel as consistency check
 RR = consistency.R;
 RR(isnan(RR) | RR < 0) = 0;

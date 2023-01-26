@@ -150,11 +150,11 @@ if true
         fdata = fdata - median(fdata,2);
         fdata = filtfilt(b, a, fdata);
         fdata = fdata(preBuff+1 : end-postBuff-1, :);
-        fdata(:,brokenChan) = 0;
+        fdata(:,brokenChan) = randn(size(fdata(:,brokenChan)))*5;
         fwrite(fileID, int16(fdata'), 'int16');
     end
 else
-    data(:,brokenChan) = randn(size(data(:,brokenChan)));
+    data(:,brokenChan) = randn(size(data(:,brokenChan)))*5;
     fwrite(fileID, int16(data'), 'int16');
 end
 fclose(fileID);
