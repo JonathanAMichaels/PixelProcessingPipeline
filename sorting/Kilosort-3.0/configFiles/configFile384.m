@@ -51,6 +51,5 @@ ops.useRAM              = 0; % not yet available
 
 ops.nt0 = 151;
 ops.nt0min = floor(ops.nt0/2);
-ops.nfilt_factor = 1024/32;
 
 %%
