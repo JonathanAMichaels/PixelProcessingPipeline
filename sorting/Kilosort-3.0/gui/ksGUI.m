@@ -789,6 +789,7 @@ classdef ksGUI < handle
                 % pre-clustering to re-order batches by depth
 %                 obj.log('Pre-clustering to re-order batches by depth')
 %                 obj.rez = clusterSingleBatches(obj.rez);
+                ops
                 
                 % main optimization
                 obj.log('Extracting spikes for clustering')
