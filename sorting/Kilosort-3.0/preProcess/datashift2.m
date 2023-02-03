@@ -1,6 +1,6 @@
 function rez = datashift2(rez, do_correction)
 
-NrankPC = 6;
+NrankPC = ops.nPCs;
 [wTEMP, wPCA]    = extractTemplatesfromSnippets(rez, NrankPC);
 rez.wTEMP = gather(wTEMP);
 rez.wPCA  = gather(wPCA);
