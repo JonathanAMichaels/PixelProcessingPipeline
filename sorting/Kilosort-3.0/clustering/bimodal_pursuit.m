@@ -88,7 +88,7 @@ if flag==1
     r0 = mean((wav1-wav2).^2);
     for j = 1:size(wroll,3)
         
-       wav = wroll(:,:,j) * reshape(wav2, [6, numel(wav2)/6]);
+       wav = wroll(:,:,j) * reshape(wav2, [size(wroll,2), numel(wav2)/size(wroll,2)]);
        wav = wav(:)';
        
        if j==1 || r0 > mean((wav1-wav).^2)
