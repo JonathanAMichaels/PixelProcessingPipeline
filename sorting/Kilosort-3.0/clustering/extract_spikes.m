@@ -38,7 +38,7 @@ dNearActiveSite = median(diff(unique(rez.yc)));
 
 [ycup, xcup] = meshgrid(ops.yup, ops.xup);
 
-NrankPC = 6;
+NrankPC = ops.nPCs; %!!
 [wTEMP, wPCA]    = extractTemplatesfromSnippets(rez, NrankPC);
 
 NchanNear = min(ops.Nchan, 16); %% CHANGED: was 8
