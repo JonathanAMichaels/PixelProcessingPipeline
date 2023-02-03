@@ -18,14 +18,14 @@ dmu = 2 * abs(rez.mu' - rez.mu ) ./ (rez.mu' + rez.mu);
 
 U = permute(rez.U, [2,1,3]);
 W = permute(rez.W, [2,1,3]);
-simScore = (U(:,:) * U(:,:)') .* (W(:,:) * W(:,:)')/6;
+simScore = (U(:,:) * U(:,:)') .* (W(:,:) * W(:,:)')/size(rez.U,3);
 
 for j = 1:size(wroll,3)
     [Nfilt, nt0, ~] = size(W);
-    Wr = reshape(W, [Nfilt * nt0, 6]);
+    Wr = reshape(W, [Nfilt * nt0, size(rez.U,3)]);
     Wr = Wr * wroll(:,:,j)';
-    Wr = reshape(Wr, [Nfilt, nt0, 6]);
-    Xsim =  (U(:,:) * U(:,:)') .* (Wr(:,:) * W(:,:)')/6;
+    Wr = reshape(Wr, [Nfilt, nt0, size(rez.U,3)]);
+    Xsim =  (U(:,:) * U(:,:)') .* (Wr(:,:) * W(:,:)')/size(rez.U,3);
     simScore = max(simScore, Xsim); 
 end
 rez.simScore = simScore;
