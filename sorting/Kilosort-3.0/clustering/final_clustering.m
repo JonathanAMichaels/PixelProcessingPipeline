@@ -118,15 +118,15 @@ clust_good = check_clusters(hid, ss, .2);
 sum(clust_good)
 
 % waveform length was hardcoded at 61. Should be parametric, w/min index for consistent trough polarity
-rez.W = zeros(ops.nt0,   0, ops.nEigs, 'single');
-rez.U = zeros(ops.Nchan, 0, ops.nEigs, 'single');
+rez.W = zeros(ops.nt0,   0, ops.nEig, 'single');
+rez.U = zeros(ops.Nchan, 0, ops.nEig, 'single');
 rez.mu = zeros(1,0, 'single');
 for  t = 1:n0
     dWU = wPCA * gpuArray(Wpca(:,:,t));
     [w,s,u] = svdecon(dWU);
     wsign = -sign(w(ops.nt0min+1, 1));
-    rez.W(:,t,:) = wsign * w(:,1:ops.nEigs);
-    rez.U(:,t,:) = wsign * u(:,1:ops.nEigs) * s(1:ops.nEigs,1:ops.nEigs);
+    rez.W(:,t,:) = wsign * w(:,1:ops.nEig);
+    rez.U(:,t,:) = wsign * u(:,1:ops.nEig) * s(1:ops.nEig,1:ops.nEig);
     rez.mu(t) = sum(sum(rez.U(:,t,:).^2))^.5;
     rez.U(:,t,:) = rez.U(:,t,:) / rez.mu(t);
 end
