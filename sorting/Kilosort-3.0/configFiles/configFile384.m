@@ -46,12 +46,12 @@ ops.NT                  = 64*1024+ ops.ntbuff; % must be multiple of 32 + ntbuff
 ops.whiteningRange      = 32; % number of channels to use for whitening each channel
 ops.nSkipCov            = 10; % compute whitening matrix from every N-th batch
 ops.scaleproc           = 200;   % int16 scaling of whitened data
-ops.nPCs                = 12;
-ops.nEig                = 6;
+ops.nPCs                = 6;
+ops.nEig                = 3;
 ops.useRAM              = 0; % not yet available
 
 ops.nt0 = 151;
 ops.nt0min = floor(ops.nt0/2);
-ops.Th = [9 3];
+ops.Th = [9 8];
 
 %%
