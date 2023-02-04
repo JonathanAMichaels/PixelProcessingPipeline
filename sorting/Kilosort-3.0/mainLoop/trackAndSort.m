@@ -19,8 +19,6 @@ ops = rez.ops;
 % revert to the saved templates
 W = gpuArray(rez.W);
 U = gpuArray(rez.U);
-disp(U(:,1,end))
-disp(size(U))
 mu = gpuArray(rez.mu);
 
 Nfilt 	= size(W,2);
