@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <iostream>
 using namespace std;
-const int  Nthreads = 1024, NrankMax = 3;
+const int  Nthreads = 1024, NrankMax = 6;
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	Conv1D(const double *Params, const float *data, const float *W, float *conv_sig){    
   volatile __shared__ float  sW[81*NrankMax], sdata[(Nthreads+81)*NrankMax]; 
@@ -36,7 +36,7 @@ __global__ void	Conv1D(const double *Params, const float *data, const float *W, 
   
   tid0 = 0;
   while (tid0<NT-Nthreads-nt0+1){
-	  if (tid<nt0*NrankMax) 
+	  if (tid<nt0*Nrank)
           sdata[tid%nt0 + (tid/nt0)*(Nthreads+nt0)] = 
 			data[tid0 + tid%nt0+ NT*bid];
 	  
