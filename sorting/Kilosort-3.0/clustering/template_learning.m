@@ -105,6 +105,7 @@ end
 Wpca = Wpca(:,:,1:n0);
 toc
 %%
+sdfdsfdf
 rez.W = zeros(ops.nt0, 0, ops.nEig, 'single');
 rez.U = zeros(ops.Nchan, 0, ops.nEig, 'single');
 rez.mu = zeros(1,0, 'single');
@@ -117,7 +118,6 @@ for  t = 1:n0
     rez.mu(t) = gather(sum(sum(rez.U(:,t,:).^2))^.5);
     rez.U(:,t,:) = rez.U(:,t,:) / rez.mu(t);
 end
-
 %%
 rez.ops.wPCA = wPCA;
 
