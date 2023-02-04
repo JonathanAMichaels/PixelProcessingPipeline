@@ -132,14 +132,14 @@ disp(['Broken/inactive channels are: ' num2str(brokenChan')])
 save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
 clear data_filt data_norm
 
-data = data(1:3000000,:);
+data = data(1:(30000*60*5),:);
 
 fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
 if true
     mean_data = mean(data,1);
     [b, a] = butter(4, [250 4400]/ (30000/2), 'bandpass');
     intervals = round(linspace(1, size(data,1), round(size(data,1)/(30000*60))));
-    buffer = 256;
+    buffer = 128;
     for t = 1:length(intervals)-1
           preBuff = buffer; postBuff = buffer;
         if t == 1
