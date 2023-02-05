@@ -24,6 +24,9 @@ wTEMP = gpuArray(wTEMP);
 wPCAd = double(wPCA); % convert to double for extra precision
 ops.wPCA = gather(wPCA);
 ops.wTEMP = gather(wTEMP);
+size(ops.wPCA)
+size(ops.wTEMP)
+asd
 nt0 = ops.nt0;
 nt0min  = rez.ops.nt0min;
 rez.ops = ops;
