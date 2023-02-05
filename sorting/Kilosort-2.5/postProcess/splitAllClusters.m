@@ -197,7 +197,6 @@ rez.iNeigh   = gather(iList(:, 1:Nfilt)); % get the new neighbor templates
 rez.iNeighPC    = gather(iC(:, iW(1:Nfilt))); % get the new neighbor channels
 
 rez.Wphy = cat(1, zeros(int16(((ops.nt0-ops.nt0min)/ops.nt0-0.5)*ops.nt0), Nfilt, Nrank), rez.W); % for Phy, we need to pad the spikes with zeros so the spikes are aligned to the center of the window
-
 rez.isplit = isplit; % keep track of origins for each cluster
 
 

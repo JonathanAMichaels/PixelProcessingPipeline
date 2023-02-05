@@ -31,8 +31,8 @@ ops.Th = [10 4];
 ops.nfilt_factor = 4;
 ops.nblocks = 0;
 ops.nt0min = ceil(ops.nt0/2);
-ops.nPCs = 12;
-ops.nEig = 6;
+ops.nPCs = 6;
+ops.nEig = 3;
 
 if trange(2) == 0
     ops.trange = [0 Inf];
