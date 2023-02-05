@@ -17,12 +17,12 @@
 #include <iostream>
 using namespace std;
 
-const int nblock = 32;
+const int nblock = 32, nt0max = 151;
 //////////////////////////////////////////////////////////////////////////////////////////
 
 __global__ void	crossFilter(const double *Params, const float *W1, const float *W2,
         const float *UtU, float *WtW){    
-  __shared__ float shW1[nblock*81], shW2[nblock*81]; 
+  __shared__ float shW1[nblock*nt0max], shW2[nblock*nt0max];
 
   float x;
   int nt0, tidx, tidy , bidx, bidy, i, Nfilt, t, tid1, tid2;
