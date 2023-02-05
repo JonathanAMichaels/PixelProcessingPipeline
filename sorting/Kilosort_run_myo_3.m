@@ -49,14 +49,13 @@ rez                = datashift2(rez, 1);
 [rez, st3, tF]     = extract_spikes(rez);
 
 rez                = template_learning(rez, tF, st3);
-rez.U(:,1,end)
 
 [rez, st3, tF]     = trackAndSort(rez);
-rez.U(:,1,end)
+
 rez                = final_clustering(rez, tF, st3);
-rez.U(:,1,end)
+
 rez                = find_merges(rez, 1);
-rez.U(:,1,end)
+
 % write to Phy
 fprintf('Saving results to Phy  \n')
 rezToPhy2(rez, myomatrix_folder);
