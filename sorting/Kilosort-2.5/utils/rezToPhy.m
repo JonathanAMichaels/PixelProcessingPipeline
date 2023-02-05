@@ -49,7 +49,6 @@ chanMap     = rez.ops.chanMap(:);
 chanMap0ind = chanMap - 1;
 
 nt0 = size(rez.W,1);
-nt0
 U = rez.U;
 W = rez.W;
 
@@ -78,7 +77,6 @@ tempsUnW = zeros(size(templates));
 for t = 1:size(templates,1)
     tempsUnW(t,:,:) = squeeze(templates(t,:,:))*whiteningMatrixInv;
 end
-size(templates)
 
 % The amplitude on each channel is the positive peak minus the negative
 tempChanAmps = squeeze(max(tempsUnW,[],2))-squeeze(min(tempsUnW,[],2));
