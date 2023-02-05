@@ -127,8 +127,8 @@ while ik<Nfilt
     end
 
     % now decide if the split would result in waveforms that are too similar
-    c1  = wPCA * reshape(mean(clp0(ilow,:),1), 3, []); %  the reconstructed mean waveforms for putatiev cluster 1
-    c2  = wPCA * reshape(mean(clp0(~ilow,:),1), 3, []); %  the reconstructed mean waveforms for putative cluster 2
+    c1  = wPCA * reshape(mean(clp0(ilow,:),1), size(wPCA,2), []); %  the reconstructed mean waveforms for putatiev cluster 1
+    c2  = wPCA * reshape(mean(clp0(~ilow,:),1), size(wPCA,2), []); %  the reconstructed mean waveforms for putative cluster 2
     cc = corrcoef(c1, c2); % correlation of mean waveforms
     n1 =sqrt(sum(c1(:).^2)); % the amplitude estimate 1
     n2 =sqrt(sum(c2(:).^2)); % the amplitude estimate 2
