@@ -223,7 +223,7 @@ if myo_sorting:
         print('Starting spike sorting of ' + config_kilosort['myomatrix_folder'])
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
-                  path_to_add + '\'); Kilosort_run_myo_3"')
+                  path_to_add + '\'); Kilosort_run_myo_25"')
 
         #myo_function(config_kilosort)
 

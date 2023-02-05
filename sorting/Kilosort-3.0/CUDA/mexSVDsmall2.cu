@@ -363,7 +363,6 @@ void mexFunction(int nlhs, mxArray *plhs[],
   // compute U by W' * dWU
   getU<<<Nfilt, tpK>>>(d_Params, d_dWUb, d_W, d_U);
 
-
   // normalize U, get S, get mu, renormalize W
   reNormalize<<<Nfilt, nt0, sizeof(double)*(NrankMax*nt0max + NchanMax*NrankMax + NrankMax+1 + nt0max*10)>>>(d_Params, d_A, d_B, d_W, d_U, d_mu);
 
