@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024, maxFR = 5000, NrankMax = 12, nt0max = 151;
+const int  Nthreads = 1024, maxFR = 5000, NrankMax = 12, nt0max = 107;
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void  sumChannels(const double *Params, const float *data, 
 	float *datasum, int *kkmax, const int *iC){
