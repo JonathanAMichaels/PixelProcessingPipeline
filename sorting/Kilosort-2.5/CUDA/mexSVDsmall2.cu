@@ -163,8 +163,14 @@ __global__ void reNormalize(const double *Params, const double *A, const double 
     int Nfilt, nt0, tid, bid, Nchan,k, Nrank, imax, t, ishift, tmax;
     double x, xmax, xshift, sgnmax;
 
-    volatile __shared__ double sW[NrankMax*nt0max], sU[NchanMax*NrankMax], sS[NrankMax+1],
-            sWup[nt0max*10];
+    // volatile __shared__ double sW[NrankMax*nt0max], sU[NchanMax*NrankMax], sS[NrankMax+1],
+   //         sWup[nt0max*10];
+
+   extern __shared__ double array2[];
+   double* sW = (double*)array2;
+   double* sU = (double*)&sW[NrankMax*nt0max];
+   double* sS = (double*)&sU[NchanMax*NrankMax];
+   double* sWup = (double*)&sS[NrankMax+1];
 
     nt0       = (int) Params[4];
     Nchan     = (int) Params[9];

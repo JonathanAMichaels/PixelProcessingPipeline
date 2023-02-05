@@ -292,6 +292,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
 {
   int maxbytes = 101376; // 99 KiB
   cudaFuncSetAttribute(getW, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+  cudaFuncSetAttribute(reNormalize, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
 
   /* Initialize the MathWorks GPU API. */
   mxInitGPU();
@@ -354,10 +355,10 @@ void mexFunction(int nlhs, mxArray *plhs[],
   blankdWU<<<Nfilt, tpS>>>(d_Params, d_dWU, d_iC, d_iW, d_dWUb);
   
   // compute dWU * dWU'
-  getwtw<<<Nfilt, tpS, sizeof(float)*(nt0max*nt0max + nt0max*NrankMax)>>>(d_Params, d_dWUb, d_wtw);
+  getwtw<<<Nfilt, tpS>>>(d_Params, d_dWUb, d_wtw);
   
   // get W by power svd iterations
-  getW<<<Nfilt, nt0>>>(d_Params, d_wtw, d_W);
+  getW<<<Nfilt, nt0, sizeof(float)*(nt0max*nt0max + nt0max*NrankMax)>>>(d_Params, d_wtw, d_W);
   
   // compute U by W' * dWU
   getU<<<Nfilt, tpK>>>(d_Params, d_dWUb, d_W, d_U);
