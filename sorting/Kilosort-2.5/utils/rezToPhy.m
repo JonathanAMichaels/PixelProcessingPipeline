@@ -54,10 +54,13 @@ W = rez.W;
 
 Nfilt = size(W,2);
 
+nt0
 templates = zeros(Nchan, nt0, Nfilt, 'single');
+size(templates)
 for iNN = 1:size(templates,3)
    templates(:,:,iNN) = squeeze(U(:,iNN,:)) * squeeze(W(:,iNN,:))';
 end
+size(templates)
 templates = permute(templates, [3 2 1]); % now it's nTemplates x nSamples x nChannels
 templatesInds = repmat([0:size(templates,3)-1], size(templates,1), 1); % we include all channels so this is trivial
 
