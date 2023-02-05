@@ -7,7 +7,7 @@ function rezToPhy2(rez, savePath, varargin)
 
 
 [~, Nfilt, Nrank] = size(rez.W);
-%rez.Wphy = cat(1, zeros(1+rez.ops.nt0min, Nfilt, Nrank), rez.W); % for Phy, we need to pad the spikes with zeros so the spikes are aligned to the center of the window
+rez.Wphy = cat(1, zeros(1+((ops.nt0-ops.nt0min)-0.5)*ops.nt0, Nfilt, Nrank), rez.W); % for Phy, we need to pad the spikes with zeros so the spikes are aligned to the center of the window
 rez.Wphy = rez.W; % if nt0min is centered, we don't need to pad..
 
 % spikeTimes will be in samples, not seconds
