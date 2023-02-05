@@ -177,7 +177,7 @@ fprintf('Finished splitting. Found %d splits, checked %d/%d clusters, nccg %d \n
 
 
 Nfilt = size(rez.W,2); % new number of templates
-Nrank = 3;
+Nrank = ops.nEig;
 Nchan = ops.Nchan;
 Params     = double([0 Nfilt 0 0 size(rez.W,1) Nnearest ...
     Nrank 0 0 Nchan NchanNear ops.nt0min 0]); % make a new Params to pass on parameters to CUDA
