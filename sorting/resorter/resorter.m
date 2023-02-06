@@ -108,9 +108,9 @@ end
 
 if ~params.skipFilter
     % Extract individual waveforms from kilosort binary
-    [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
+    [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
-    if false
+    if true
     % re-center all spike times
     temp = permute(mdata, [3 1 2]);
     [~, minTime] = min(min(temp,[],3),[],2);
@@ -126,7 +126,7 @@ if ~params.skipFilter
     % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
     % spike times to be close together.
     % Take only 'good' single units with sufficient SNR
-    C = C(C_ident == 1 | (SNR > params.multiSNRThreshold & spkCount > 50));
+    C = C((C_ident == 1 | SNR > params.multiSNRThreshold) & spkCount > 200);
 end
 
 % Let's straight up trim off everything we don't need to save time
@@ -142,9 +142,9 @@ disp(['Number of spikes to work with: ' num2str(length(I))])
 keepGoing = 1;
 while keepGoing
     % Extract individual waveforms from kilosort binary
-    [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
+    [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
-    if false
+    if true
     % re-center all spike times
     temp = permute(mdata, [3 1 2]);
     [~, minTime] = min(min(temp,[],3),[],2);
@@ -227,7 +227,7 @@ while keepGoing
 end
 disp('Finished merging clusters')
 
-if false
+if true
 % re-center all spike times
 temp = permute(mdata, [3 1 2]);
 [~, minTime] = min(min(temp,[],3),[],2);
@@ -237,7 +237,7 @@ end
 end
 
 % Re-extract
-[mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, false);
+[mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 % use first vs last quartel as consistency check
 RR = consistency.R;
 RR(isnan(RR) | RR < 0) = 0;
@@ -250,7 +250,7 @@ disp('SNR')
 SNR
 
 % Remove clusters that don't meet inclusion criteria
-saveUnits = find(SNR > params.SNRThreshold & spkCount > 50 & ...
+saveUnits = find(SNR > params.SNRThreshold & spkCount > 200 & ...
     RR >= params.consistencyThreshold);
 keepSpikes = find(ismember(I, saveUnits));
 T = T(keepSpikes);
@@ -381,6 +381,7 @@ for j = 1:size(mdata,3)
     % calculate SNR
     tempSNR = squeeze(sum((max(useData,[],1) - min(useData,[],1)) ./ (2 * std(useData - mWave,[],1))) / size(useData,2));
     SNR(j) = max(tempSNR);
+    SNR(isinf(SNR) | isnan(SNR)) = 0;
 end
 end
 
