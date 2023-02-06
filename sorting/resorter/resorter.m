@@ -86,6 +86,7 @@ disp('Reading kilosort output')
 T = readNPY([params.kiloDir '/spike_times.npy']);
 I = readNPY([params.kiloDir '/spike_clusters.npy']);
 Wrot = readNPY([params.kiloDir '/whitening_mat_inv.npy']);
+Wrot = 1;
 %load([params.kiloDir '/whitening_mat_inv.mat']);
 load([params.kiloDir '/brokenChan']);
 params.brokenChan = brokenChan;
