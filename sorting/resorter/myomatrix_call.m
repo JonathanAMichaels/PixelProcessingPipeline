@@ -9,9 +9,9 @@ params.kiloDir = myomatrix_folder;
 params.binaryFile = [myomatrix_folder '/proc.dat'];
 params.userSorted = false;
 params.savePlots = true;
-params.waveCount = 1000;
+params.waveCount = 2000;
 params.consistencyThreshold = 0.7;
-params.crit = 0.75; % 0.7 for whitened
+params.crit = 0.7;
 params.skipFilter = false;
 % make sure a sorting exists
 if isfile([myomatrix_folder '/spike_times.npy'])
