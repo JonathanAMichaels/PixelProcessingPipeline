@@ -62,10 +62,10 @@ if ~isfield(params, 'refractoryLim')
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
-    params.backSp = round(params.sr * 0.0025);
+    params.backSp = round(params.sr * 0.0035);
 end
 if ~isfield(params, 'forwardSp')
-    params.forwardSp = round(params.sr * 0.0025);
+    params.forwardSp = round(params.sr * 0.0035);
 end
 % Time range for cross-correlation
 if ~isfield(params, 'corrRange')
@@ -168,10 +168,9 @@ while keepGoing
     m(isnan(m)) = 0;
     mL = lags(mL);
 
-    [m, rCross]
 
     % Let's choose what to merge
-    J = m > params.crit | (m > 0.6 & rCross > 0.3);
+    J = m > params.crit | (rCross > 0.2);
     
     % Create graph of connected clusters
     J = graph(J);
