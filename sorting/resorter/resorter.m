@@ -87,7 +87,6 @@ T = readNPY([params.kiloDir '/spike_times.npy']);
 I = readNPY([params.kiloDir '/spike_clusters.npy']);
 Wrot = readNPY([params.kiloDir '/whitening_mat_inv.npy']);
 Wrot = 1;
-%load([params.kiloDir '/whitening_mat_inv.mat']);
 load([params.kiloDir '/brokenChan']);
 params.brokenChan = brokenChan;
 
@@ -494,7 +493,9 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
     end
     rCross = zeros(size(S,2), size(S,2));
     for i = 1:size(S,2)
+        disp(i)
         for j = 1:size(S,2)
+            disp(j)
             rCross(i,j) = corr(S(:,i), S(:,j));
         end
     end
