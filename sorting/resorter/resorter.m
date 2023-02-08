@@ -167,7 +167,9 @@ while keepGoing
     m = squeeze(m); mL = squeeze(mL);
     m(isnan(m)) = 0;
     mL = lags(mL);
-    
+
+    [m, rCross]
+
     % Let's choose what to merge
     J = m > params.crit | (m > 0.6 & rCross > 0.3);
     
@@ -484,11 +486,11 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
     end
 
 
-    % Calculate zero-lag auto and cross-correlograms in spike timing (using a 5ms bin)
-    M = ceil(double(max(T)/30/5));
+    % Calculate zero-lag auto and cross-correlograms in spike timing (using a 1ms bin)
+    M = ceil(double(max(T)/30));
     S = zeros(M,length(C),'logical');
     for j = 1:length(C)
-        spk = round(double(T(I == C(j)))/30/5);
+        spk = round(double(T(I == C(j)))/30);
         S(spk,j) = 1;
     end
     rCross = zeros(size(S,2), size(S,2));
