@@ -9,8 +9,8 @@ function rez = preprocessDataSub(ops)
 % 5) scaling to int16 values
 
 tic;
-ops.nt0 	  = getOr(ops, {'nt0'}, 61); % number of time samples for the templates (has to be <=61 due to GPU shared memory)
-ops.nt0min  = getOr(ops, 'nt0min', ceil(0.5 * ops.nt0)); % time sample where the negative peak should be aligned (changed to dead center of template)
+ops.nt0 	  = getOr(ops, {'nt0'}, 61); % number of time samples for the templates (has to be <=81 due to GPU shared memory)
+ops.nt0min  = getOr(ops, 'nt0min', ceil(20 * ops.nt0/61)); % time sample where the negative peak should be aligned
 
 NT       = ops.NT ; % number of timepoints per batch
 NchanTOT = ops.NchanTOT; % total number of channels in the raw binary file, including dead, auxiliary etc
@@ -28,23 +28,21 @@ ops.Nbatch = Nbatch;
 [chanMap, xc, yc, kcoords, NchanTOTdefault] = loadChanMap(ops.chanMap); % function to load channel map file
 ops.NchanTOT = getOr(ops, 'NchanTOT', NchanTOTdefault); % if NchanTOT was left empty, then overwrite with the default
 
-% determine bad channels
-fprintf('Time %3.0fs. Determining good channels.. \n', toc);
-igood = true(size(chanMap));
-if isfield(ops, 'brokenChan')
-    if isfile(ops.brokenChan)
-        load(ops.brokenChan)
-        igood = true(NchanTOT,1);
-        igood(brokenChan) = false;
-    end
-end
- %igood = get_good_channels(ops, chanMap);
-chanMap = chanMap(igood); %it's enough to remove bad channels from the channel map, which treats them as if they are dead
-xc = xc(igood); % removes coordinates of bad channels
-yc = yc(igood);
-kcoords = kcoords(igood);
+if getOr(ops, 'minfr_goodchannels', .1)>0 % discard channels that have very few spikes
+    % determine bad channels
+    fprintf('Time %3.0fs. Determining good channels.. \n', toc);
+    igood = get_good_channels(ops, chanMap);
 
-ops.igood = igood;
+    chanMap = chanMap(igood); %it's enough to remove bad channels from the channel map, which treats them as if they are dead
+
+    xc = xc(igood); % removes coordinates of bad channels
+    yc = yc(igood);
+    kcoords = kcoords(igood);
+
+    ops.igood = igood;
+else
+    ops.igood = true(size(chanMap));
+end
 
 ops.Nchan = numel(chanMap); % total number of good channels that we will spike sort
 ops.Nfilt = getOr(ops, 'nfilt_factor', 4) * ops.Nchan; % upper bound on the number of templates we can have
@@ -71,12 +69,7 @@ fprintf('Time %3.0fs. Computing whitening matrix.. \n', toc);
 
 % this requires removing bad channels first
 Wrot = get_whitening_matrix(rez); % outputs a rotation matrix (Nchan by Nchan) which whitens the zero-timelag covariance of the data
-%Wrot = ops.scaleproc * gpuArray.eye(ops.Nchan, 'single');
-condition_number = cond(gather(Wrot));
-disp(['Computed the whitening matrix cond = ' num2str(condition_number)])
-if condition_number > 50
-    disp('high conditioning of the whitening matrix can result in noisy and poor results')
-end
+
 
 fprintf('Time %3.0fs. Loading raw data and applying filters... \n', toc);
 
@@ -122,13 +115,10 @@ for ibatch = 1:Nbatch
     end
 end
 
-fclose(fidW); % close the files
-fclose(fid);
-
-
-
 rez.Wrot    = gather(Wrot); % gather the whitening matrix as a CPU variable
 
+fclose(fidW); % close the files
+fclose(fid);
 
 fprintf('Time %3.0fs. Finished preprocessing %d batches. \n', toc, Nbatch);
 

@@ -63,8 +63,6 @@ end
 
 if isfield(cmIn, 'connected') && ~isempty(cmIn.connected) 
     connected = logical(cmIn.connected(:));
-    connected = logical(ones(length(connected),1));
-
     chanMap = chanMap(connected);
     xcoords = xcoords(connected);
     ycoords = ycoords(connected);

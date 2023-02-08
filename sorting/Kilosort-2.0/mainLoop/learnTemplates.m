@@ -104,11 +104,11 @@ for ibatch = 1:niter
     dat = fread(fid, [NT ops.Nchan], '*int16');
     dataRAW = single(gpuArray(dat))/ ops.scaleproc;
 
+
     if ibatch==1
        % only on the first batch, we first get a new set of spikes from the residuals,
        % which in this case is the unmodified data because we start with no templates
-
-        dWU = mexGetSpikes2(Params, dataRAW, wTEMP, iC-1); % CUDA function to get spatiotemporal clips from spike detections
+        [dWU, cmap] = mexGetSpikes2(Params, dataRAW, wTEMP, iC-1); % CUDA function to get spatiotemporal clips from spike detections
         dWU = double(dWU);
         dWU = reshape(wPCAd * (wPCAd' * dWU(:,:)), size(dWU)); % project these into the wPCA waveforms
 
@@ -128,6 +128,7 @@ for ibatch = 1:niter
     W = W(:,isort, :); % user ordering to resort all the other template variables
     dWU = dWU(:,:,isort);
     nsp = nsp(isort);
+    
 
     % decompose dWU by svd of time and space (via covariance matrix of 61 by 61 samples)
     % this uses a "warm start" by remembering the W from the previous iteration
@@ -137,6 +138,7 @@ for ibatch = 1:niter
     % it tells us which pairs of templates are likely to "interfere" with each other
     % such as when we subtract off a template
     [UtU, maskU] = getMeUtU(iW, iC, mask, Nnearest, Nchan); % this needs to change (but I don't know why!)
+
 
     % main CUDA function in the whole codebase. does the iterative template matching
     % based on the current templates, gets features for these templates if requested (featW, featPC),
@@ -190,20 +192,22 @@ for ibatch = 1:niter
         Params(2) = Nfilt;
         
         % this adds new templates if they are detected in the residual
-        dWU0 = mexGetSpikes2(Params, drez, wTEMP, iC-1);
-
+        [dWU0,cmap] = mexGetSpikes2(Params, drez, wTEMP, iC-1);
+        
         if size(dWU0,3)>0
             % new templates need to be integrated into the same format as all templates
             dWU0 = double(dWU0);
             dWU0 = reshape(wPCAd * (wPCAd' * dWU0(:,:)), size(dWU0)); % apply PCA for smoothing purposes
             dWU = cat(3, dWU, dWU0);
-
+            
             W(:,Nfilt + [1:size(dWU0,3)],:) = W0(:,ones(1,size(dWU0,3)),:); % initialize temporal components of waveforms
+            
             nsp(Nfilt + [1:size(dWU0,3)]) = ops.minFR * NT/ops.fs; % initialize the number of spikes with the minimum allowed
             mu(Nfilt + [1:size(dWU0,3)])  = 10; % initialize the amplitude of this spike with a lowish number
+            
             Nfilt = min(ops.Nfilt, size(W,2)); % if the number of filters exceed the maximum allowed, clip it
             Params(2) = Nfilt;
-
+            
             W   = W(:, 1:Nfilt, :); % remove any new filters over the maximum allowed
             dWU = dWU(:, :, 1:Nfilt); % remove any new filters over the maximum allowed
             nsp = nsp(1:Nfilt); % remove any new filters over the maximum allowed

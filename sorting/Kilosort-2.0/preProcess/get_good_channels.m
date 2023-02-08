@@ -63,8 +63,6 @@ ich = ich(1:k);
 nc = histcounts(ich, .5 + [0:Nchan]); % count how many spikes each channel got
 nc = nc/ttime; % divide by total time to get firing rate
 
-nc
-
 % igood = nc>.1;
 igood = nc>=getOr(ops, 'minfr_goodchannels', .1); % keep only those channels above the preset mean firing rate
 
