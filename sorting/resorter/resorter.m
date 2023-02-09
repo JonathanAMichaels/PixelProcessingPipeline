@@ -491,7 +491,9 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
             CCG(i,j) = sum(ismember(T_d(I == C(i)), T_d(I == C(j)))) / sum(I == C(i));
         end
     end
-    rCross = CCG;
+    CCG_temp = max(cat(3, triu(CCG,1), triu(CCG.',1)),[],3);
+    CCG_temp = CCG_temp + CCG_temp';
+    rCross = CCG_temp;
 
     if false
     % Calculate zero-lag auto and cross-correlograms in spike timing (using a 1ms bin)

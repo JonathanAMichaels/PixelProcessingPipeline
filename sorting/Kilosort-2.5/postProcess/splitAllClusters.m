@@ -31,7 +31,7 @@ isplit = 1:Nfilt; % keep track of original cluster for each cluster. starts with
 dt = 1/1000;
 nccg = 0;
 
-while ik<Nfilt
+while ik<Nfilt && false
     if rem(ik, 100)==1
       % periodically write updates
        fprintf('Found %d splits, checked %d/%d clusters, nccg %d \n', nsplits, ik, Nfilt, nccg)
