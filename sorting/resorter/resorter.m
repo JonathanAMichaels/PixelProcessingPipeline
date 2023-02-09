@@ -484,28 +484,13 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
     end
 
     T_d = round(double(T)/30);
-    %keepSpikes = randsample(length(T_d), round(length(T_d)*0.25), false);
-    keepSpikes = 1:length(T_d);
-    T_d = T_d(keepSpikes);
-    I_d = I(keepSpikes);
-    tshift = 1;
-    CCG = zeros(tshift*2+1,length(C),length(C));
-    for t = 1:length(T_d)
-        c1 = find(C == I_d(t));
-        ind = find(T_d >= T_d(t)-tshift & T_d <= T_d(t)+tshift);
-        for j = 1:length(ind)
-            c2 = find(C == I_d(ind(j)));
-            if ~(c1 == c2 && ind(j) == t)
-                CCG(T_d(ind(j)) - T_d(t) + tshift + 1, c1, c2) = CCG(T_d(ind(j)) - T_d(t) + tshift + 1, c1, c2) + 1;
-            end
+    CCG = zeros(length(C),length(C));
+    for i = 1:length(C)
+        for j = 1:length(C)
+            CCG(i,j) = sum(ismember(T_d(I == C(i)), T_d(I == C(j)))) / sum(I == C(i));
         end
     end
-    CCG_N = CCG;
-    for i = 1:size(CCG,2)
-        cc = sum(I_d == C(i));
-        CCG_N(:,i,:) = CCG(:,i,:) / cc;
-    end
-    rCross = squeeze(CCG_N(tshift+1,:,:));
+    rCross = CCG;
 
     if false
     % Calculate zero-lag auto and cross-correlograms in spike timing (using a 1ms bin)
