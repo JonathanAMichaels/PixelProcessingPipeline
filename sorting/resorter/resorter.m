@@ -484,7 +484,8 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
     end
 
     T_d = round(double(T)/30);
-    keepSpikes = round(linspace(1,length(T_d), 0.25*length(T_d)));
+    %keepSpikes = randsample(length(T_d), round(length(T_d)*0.25), false);
+    keepSpikes = 1:length(T_d);
     T_d = T_d(keepSpikes);
     I_d = I(keepSpikes);
     tshift = 1;
