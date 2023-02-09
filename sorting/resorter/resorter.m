@@ -164,7 +164,7 @@ while keepGoing
     mL = lags(mL);
 
     % Let's choose what to merge
-    J = m > params.crit | (m > 0.5 & rCross > 0.1);
+    J = m > params.crit | (m > 0.5 & rCross > 0.2);
     
     % Create graph of connected clusters
     J = graph(J);
