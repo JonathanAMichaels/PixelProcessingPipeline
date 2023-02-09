@@ -58,7 +58,7 @@ if ~isfield(params, 'consistencyThreshold')
 end
 % Spikes below this refractory time limit will be considered duplicates
 if ~isfield(params, 'refractoryLim')
-    params.refractoryLim = 5;
+    params.refractoryLim = 4;
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
@@ -110,13 +110,11 @@ if ~params.skipFilter
     % Extract individual waveforms from kilosort binary
     [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
-    if true
     % re-center all spike times
     temp = permute(mdata, [3 1 2]);
     [~, minTime] = min(min(temp,[],3),[],2);
     for j = 1:length(C)
         T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp;
-    end
     end
 
     % calc stats
@@ -144,7 +142,6 @@ while keepGoing
     % Extract individual waveforms from kilosort binary
     [mdata, ~, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 
-    if true
     % re-center all spike times
     temp = permute(mdata, [3 1 2]);
     [~, minTime] = min(min(temp,[],3),[],2);
@@ -155,7 +152,6 @@ while keepGoing
         new_mdata((size(mdata,1)+1:size(mdata,1)*2) - (minTime(j) - params.backSp - 1),:,j) = mdata(:,:,j);
     end
     mdata = new_mdata((size(mdata,1)+1:size(mdata,1)*2),:,:);
-    end
 
     % calculate cross-correlation
     [bigR, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C);
@@ -166,7 +162,6 @@ while keepGoing
     m = squeeze(m); mL = squeeze(mL);
     m(isnan(m)) = 0;
     mL = lags(mL);
-
 
     % Let's choose what to merge
     J = m > params.crit | (m > 0.5 & rCross > 0.1);
