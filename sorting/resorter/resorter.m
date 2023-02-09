@@ -169,7 +169,7 @@ while keepGoing
 
 
     % Let's choose what to merge
-    J = m > params.crit | (rCross > 0.2);
+    J = m > params.crit | (m > 0.5 & rCross > 0.1);
     
     % Create graph of connected clusters
     J = graph(J);
@@ -483,7 +483,30 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
         r(z, logical(eye(size(r,2), size(r,3)))) = 0;
     end
 
+    T_d = round(double(T)/30);
+    keepSpikes = round(linspace(1,length(T_d), 0.25*length(T_d)));
+    T_d = T_d(keepSpikes);
+    I_d = I(keepSpikes);
+    tshift = 1;
+    CCG = zeros(tshift*2+1,length(C),length(C));
+    for t = 1:length(T_d)
+        c1 = find(C == I_d(t));
+        ind = find(T_d >= T_d(t)-tshift & T_d <= T_d(t)+tshift);
+        for j = 1:length(ind)
+            c2 = find(C == I_d(ind(j)));
+            if ~(c1 == c2 && ind(j) == t)
+                CCG(T_d(ind(j)) - T_d(t) + tshift + 1, c1, c2) = CCG(T_d(ind(j)) - T_d(t) + tshift + 1, c1, c2) + 1;
+            end
+        end
+    end
+    CCG_N = CCG;
+    for i = 1:size(CCG,2)
+        cc = sum(I_d == C(i));
+        CCG_N(:,i,:) = CCG(:,i,:) / cc;
+    end
+    rCross = squeeze(CCG_N(tshift+1,:,:));
 
+    if false
     % Calculate zero-lag auto and cross-correlograms in spike timing (using a 1ms bin)
     M = ceil(double(max(T)/30));
     S = zeros(M,length(C),'logical');
@@ -498,6 +521,7 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
             disp(j)
             rCross(i,j) = corr(S(:,i), S(:,j));
         end
+    end
     end
 end
 
