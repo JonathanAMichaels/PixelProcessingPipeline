@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024, maxFR = 100000, NrankMax = 6, nt0max = 151, NchanMax = 17;
+const int  Nthreads = 1024, maxFR = 100000, NrankMax = 6, nt0max = 107, NchanMax = 17;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	Conv1D(const double *Params, const float *data, const float *W, float *conv_sig){    
