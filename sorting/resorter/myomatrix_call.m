@@ -7,11 +7,8 @@ end
 params.chanMap = cat(2, xcoords, ycoords);
 params.kiloDir = myomatrix_folder;
 params.binaryFile = [myomatrix_folder '/data.bin'];
-params.userSorted = false;
 params.savePlots = true;
 params.waveCount = 800;
-params.consistencyThreshold = 0.7;
-params.crit = 0.8;
 params.skipFilter = false;
 % make sure a sorting exists
 if isfile([myomatrix_folder '/spike_times.npy'])

@@ -44,17 +44,17 @@ if ~isfield(params, 'savePlots')
 end
 % minimum correlation to be considered as originating from one cluster
 if ~isfield(params, 'crit')
-    params.crit = 0.75;
+    params.crit = 0.8;
 end
 % SNR threshold for keeping clusters at the end
 if ~isfield(params, 'SNRThreshold')
-    params.SNRThreshold = 3.2;
+    params.SNRThreshold = 3.0;
 end
 if ~isfield(params, 'multiSNRThreshold')
-    params.multiSNRThreshold = 3.8; % 3.8
+    params.multiSNRThreshold = 4.0
 end
 if ~isfield(params, 'consistencyThreshold')
-    params.consistencyThreshold = 0.75;
+    params.consistencyThreshold = 0.7;
 end
 % Spikes below this refractory time limit will be considered duplicates
 if ~isfield(params, 'refractoryLim')
@@ -165,7 +165,7 @@ while keepGoing
 
     % Let's choose what to merge
     rCross
-    J = m > params.crit | (m > 0.5 & rCross > 0.2);
+    J = m > params.crit | (m > 0.6 & rCross > 0.2);
     
     % Create graph of connected clusters
     J = graph(J);
