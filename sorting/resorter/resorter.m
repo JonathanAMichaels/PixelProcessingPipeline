@@ -164,7 +164,6 @@ while keepGoing
     mL = lags(mL);
 
     % Let's choose what to merge
-    rCross
     J = m > params.crit | (m > 0.6 & rCross > 0.3);
     
     % Create graph of connected clusters
@@ -456,6 +455,7 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
             mdata(:,allChan,j) = 0;
         end
     end
+    tic
     % concatenate channels together while keeping a buffer between them
     catdata = [];
     catdata = cat(1, catdata, zeros(params.corrRange, size(mdata,3)));
@@ -463,9 +463,10 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
         catdata = cat(1, catdata, single(squeeze(mdata(:,j,:))));
         catdata = cat(1, catdata, zeros(params.corrRange+1, size(mdata,3), 'single'));
     end
+    toc
 
     % xcorr can handle this without a for-loop, but it uses too much memory that way...
-    count = 1;
+    tic
     r = zeros(params.corrRange*2 + 1, size(catdata,2), size(catdata,2), 'single');
     for i = 1:size(catdata,2)
         r_temp = zeros(size(r,1), size(r,2), 'single');
@@ -474,11 +475,13 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
         end
         r(:,i,:) = r_temp;
     end
+    toc
     %r = reshape(r, [size(r,1) size(mdata,3) size(mdata,3)]);
     for z = 1:size(r,1)
         r(z, logical(eye(size(r,2), size(r,3)))) = 0;
     end
 
+    tic
     % Calculate zero-lag auto and cross-correlograms in spike timing (using a 1ms bin)
     T_d = round(double(T)/30);
     CCG = zeros(length(C),length(C));
@@ -490,6 +493,7 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
     CCG_temp = max(cat(3, triu(CCG,1), triu(CCG.',1)),[],3);
     CCG_temp = CCG_temp + CCG_temp';
     rCross = CCG_temp;
+    toc
 
     if false
     % Calculate zero-lag auto and cross-correlograms in spike timing (using a 1ms bin)
