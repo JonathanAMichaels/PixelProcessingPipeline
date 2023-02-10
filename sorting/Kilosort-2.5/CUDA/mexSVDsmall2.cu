@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024,  NrankMax = 6, nt0max = 151, NchanMax = 1024;
+const int  Nthreads = 1024,  NrankMax = 6, nt0max = 107, NchanMax = 1024;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void blankdWU(const double *Params, const double *dWU,

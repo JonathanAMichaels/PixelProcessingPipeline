@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int nblock = 32, nt0max = 151;
+const int nblock = 32, nt0max = 107;
 //////////////////////////////////////////////////////////////////////////////////////////
 
 __global__ void	crossFilter(const double *Params, const float *W1, const float *W2,
