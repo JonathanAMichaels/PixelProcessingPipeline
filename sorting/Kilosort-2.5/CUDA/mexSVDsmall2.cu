@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024,  NrankMax = 6, nt0max = 107, NchanMax = 1024;
+const int  Nthreads = 1024,  NrankMax = 6, nt0max = 151, NchanMax = 1024;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void blankdWU(const double *Params, const double *dWU,
@@ -96,10 +96,10 @@ __global__ void getW(const double *Params, double *wtw, double *W){
   int Nfilt, nt0, tid, bid, i, t, Nrank,k, tmax;
   double x, x0, xmax;
   //volatile __shared__ double sW[nt0max*NrankMax], swtw[nt0max*nt0max], xN[1];
-  extern __shared__ double array[];
-  double* sW = (double*)array;
-  double* swtw = (double*)&sW[nt0max*NrankMax];
-  double* xN = (double*)&swtw[nt0max*nt0max];
+  extern __shared__ float array[];
+  float* sW = (float*)array;
+  float* swtw = (float*)&sW[nt0max*NrankMax];
+  float* xN = (float*)&swtw[nt0max*nt0max];
 
   nt0       = (int) Params[4];
    Nrank       = (int) Params[6];
@@ -358,7 +358,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   getwtw<<<Nfilt, tpS>>>(d_Params, d_dWUb, d_wtw);
 
   // get W by power svd iterations
-  getW<<<Nfilt, nt0, sizeof(double)*(nt0max*nt0max + nt0max*NrankMax)>>>(d_Params, d_wtw, d_W);
+  getW<<<Nfilt, nt0, sizeof(float)*(nt0max*nt0max + nt0max*NrankMax)>>>(d_Params, d_wtw, d_W);
 
 
   // compute U by W' * dWU
