@@ -22,7 +22,7 @@ ops.brokenChan = fullfile(myomatrix_folder, 'brokenChan.mat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
-ops.nt0 = 155;
+ops.nt0 = 151;
 ops.NT = 4*64*1024 + ops.ntbuff;
 %ops.nskip           = 10;  % how many batches to skip for determining spike PCs
 %ops.nSkipCov            = 10; % compute whitening matrix from every N-th batch
