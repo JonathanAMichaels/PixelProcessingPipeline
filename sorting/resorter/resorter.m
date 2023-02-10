@@ -460,10 +460,9 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
     catdata = [];
     catdata = cat(1, catdata, zeros(params.corrRange, size(mdata,3)));
     for j = 1:size(mdata,2)
-        catdata = cat(1, catdata, squeeze(mdata(:,j,:)));
-        catdata = cat(1, catdata, zeros(params.corrRange+1, size(mdata,3)));
+        catdata = cat(1, catdata, single(squeeze(mdata(:,j,:))));
+        catdata = cat(1, catdata, zeros(params.corrRange+1, size(mdata,3), 'single'));
     end
-    catdata = single(catdata);
 
     % xcorr can handle this without a for-loop, but it uses too much memory that way...
     count = 1;
