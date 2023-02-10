@@ -455,7 +455,7 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
             mdata(:,allChan,j) = 0;
         end
     end
-    tic
+
     % concatenate channels together while keeping a buffer between them
     catdata = [];
     catdata = cat(1, catdata, zeros(params.corrRange, size(mdata,3)));
@@ -463,7 +463,6 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
         catdata = cat(1, catdata, single(squeeze(mdata(:,j,:))));
         catdata = cat(1, catdata, zeros(params.corrRange+1, size(mdata,3), 'single'));
     end
-    toc
 
     % xcorr can handle this without a for-loop, but it uses too much memory that way...
     tic
@@ -475,6 +474,7 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
         end
         r(:,i,:) = r_temp;
     end
+    [~, lags] = xcorr(catdata(:,i), catdata(:,j), params.corrRange, 'normalized'); % just to get lags
     toc
     %r = reshape(r, [size(r,1) size(mdata,3) size(mdata,3)]);
     for z = 1:size(r,1)
@@ -483,12 +483,14 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
 
     tic
     % Calculate zero-lag auto and cross-correlograms in spike timing (using a 1ms bin)
-    T_d = round(double(T)/30);
+    T_d = int64(round(single(T)/30));
     CCG = zeros(length(C),length(C));
     for i = 1:length(C)
-        for j = 1:length(C)
-            CCG(i,j) = sum(ismember(T_d(I == C(i)), T_d(I == C(j)))) / sum(I == C(i));
+        temp_CCG = zeros(1,length(C));
+        parfor j = 1:length(C)
+            temp_CCG(j) = single(sum(ismember(T_d(I == C(i)), T_d(I == C(j))))) / single(sum(I == C(i)));
         end
+        CCG(i,:) = temp_CCG;
     end
     CCG_temp = max(cat(3, triu(CCG,1), triu(CCG.',1)),[],3);
     CCG_temp = CCG_temp + CCG_temp';
