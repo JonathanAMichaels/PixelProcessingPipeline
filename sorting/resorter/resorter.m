@@ -474,7 +474,7 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
         end
         r(:,i,:) = r_temp;
     end
-    [~, lags] = xcorr(catdata(:,i), catdata(:,j), params.corrRange, 'normalized'); % just to get lags
+    [~, lags] = xcorr(catdata(:,1), catdata(:,1), params.corrRange, 'normalized'); % just to get lags
     toc
     %r = reshape(r, [size(r,1) size(mdata,3) size(mdata,3)]);
     for z = 1:size(r,1)
@@ -482,8 +482,8 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
     end
 
     tic
-    % Calculate zero-lag auto and cross-correlograms in spike timing (using a 1ms bin)
-    T_d = int64(round(single(T)/30));
+    % Calculate zero-lag auto and cross-correlograms in spike timing (using a 1/3ms bin)
+    T_d = int64(round(double(T)/10));
     CCG = zeros(length(C),length(C));
     for i = 1:length(C)
         temp_CCG = zeros(1,length(C));
