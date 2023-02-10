@@ -165,7 +165,7 @@ while keepGoing
 
     % Let's choose what to merge
     rCross
-    J = m > params.crit | (m > 0.6 & rCross > 0.2);
+    J = m > params.crit | (m > 0.6 & rCross > 0.3);
     
     % Create graph of connected clusters
     J = graph(J);
@@ -466,14 +466,15 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
 
     % xcorr can handle this without a for-loop, but it uses too much memory that way...
     count = 1;
-    r = zeros(params.corrRange*2 + 1, size(catdata,2)^2, 'single');
+    r = zeros(params.corrRange*2 + 1, size(catdata,2), size(catdata,2), 'single');
     for i = 1:size(catdata,2)
-        for j = 1:size(catdata,2)
-            [r(:,count), lags] = xcorr(catdata(:,i), catdata(:,j), params.corrRange, 'normalized');
-            count = count + 1;
+        r_temp = zeros(size(r,1), size(r,2), 'single');
+        parfor j = 1:size(catdata,2)
+            [r_temp(:,j), lags] = xcorr(catdata(:,i), catdata(:,j), params.corrRange, 'normalized');
         end
+        r(:,i,:) = r_temp;
     end
-    r = reshape(r, [size(r,1) size(mdata,3) size(mdata,3)]);
+    %r = reshape(r, [size(r,1) size(mdata,3) size(mdata,3)]);
     for z = 1:size(r,1)
         r(z, logical(eye(size(r,2), size(r,3)))) = 0;
     end
