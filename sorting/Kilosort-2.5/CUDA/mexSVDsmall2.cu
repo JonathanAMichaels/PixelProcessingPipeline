@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024,  NrankMax = 6, nt0max = 107, NchanMax = 1024;
+const int  Nthreads = 1024,  NrankMax = 6, nt0max = 151, NchanMax = 1024;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void blankdWU(const double *Params, const double *dWU,
@@ -170,11 +170,11 @@ __global__ void reNormalize(const double *Params, const double *A, const double 
     // volatile __shared__ double sW[NrankMax*nt0max], sU[NchanMax*NrankMax], sS[NrankMax+1],
    //         sWup[nt0max*10];
 
-   extern __shared__ float array2[];
-   float* sW = (float*)array2;
-   float* sU = (float*)&sW[NrankMax*nt0max];
-   float* sS = (float*)&sU[NchanMax*NrankMax];
-   float* sWup = (float*)&sS[NrankMax+1];
+   extern __shared__ double array2[];
+   double* sW = (double*)array2;
+   double* sU = (double*)&sW[NrankMax*nt0max];
+   double* sS = (double*)&sU[NchanMax*NrankMax];
+   double* sWup = (double*)&sS[NrankMax+1];
 
     nt0       = (int) Params[4];
     Nchan     = (int) Params[9];
@@ -365,7 +365,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   getU<<<Nfilt, tpK>>>(d_Params, d_dWUb, d_W, d_U);
 
 // normalize U, get S, get mu, renormalize W
-  reNormalize<<<Nfilt, nt0, sizeof(float)*(NrankMax*nt0max + NchanMax*NrankMax + NrankMax+1 + nt0max*10)>>>(d_Params, d_A, d_B, d_W, d_U, d_mu);
+  reNormalize<<<Nfilt, nt0, sizeof(double)*(NrankMax*nt0max + NchanMax*NrankMax + NrankMax+1 + nt0max*10)>>>(d_Params, d_A, d_B, d_W, d_U, d_mu);
 
   plhs[0] 	= mxGPUCreateMxArrayOnGPU(W);
   plhs[1] 	= mxGPUCreateMxArrayOnGPU(U);
