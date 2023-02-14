@@ -6,12 +6,10 @@ elseif num_chans == 32
 end
 params.chanMap = cat(2, xcoords, ycoords);
 params.kiloDir = myomatrix_folder;
-params.binaryFile = [myomatrix_folder '/proc.dat'];
-params.userSorted = false;
+params.binaryFile = [myomatrix_folder '/data.bin'];
 params.savePlots = true;
-params.waveCount = 2000;
-params.consistencyThreshold = 0.6;
-params.crit = 0.8;
+params.waveCount = 1000;
+params.skipFilter = false;
 % make sure a sorting exists
 if isfile([myomatrix_folder '/spike_times.npy'])
     resorter(params)

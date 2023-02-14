@@ -69,7 +69,7 @@ ch_min = ich(1)-1;
 ch_max = ich(end);
 
 nsp = size(data,1);
-dd = zeros(nsp, 6, ch_max-ch_min, 'single');
+dd = zeros(nsp, size(data,2), ch_max-ch_min, 'single');
 for j = 1:length(itemp)
     ix = pid==itemp(j);
     dd(ix, :, iC(:,itemp(j))-ch_min) = data(ix,:,:);

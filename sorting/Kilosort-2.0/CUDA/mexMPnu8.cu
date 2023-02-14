@@ -189,7 +189,7 @@ __global__ void	spaceFilterUpdate_v2(const double *Params, const double *data, c
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	timeFilter(const double *Params, const float *data, const float *W,float *conv_sig){    
-  volatile __shared__ float  sW2[81*NrankMax], sW[81*NrankMax], sdata[(Nthreads+81)*NrankMax];
+  volatile __shared__ float  sW2[81*NrankMax], sW[81*NrankMax], sdata[(Nthreads+81)*NrankMax]; 
   float x;
   int tid, tid0, bid, i, nid, Nrank, NT, Nfilt, nt0, irank;
 
@@ -247,7 +247,7 @@ __global__ void	timeFilter(const double *Params, const float *data, const float 
 __global__ void	timeFilterUpdate(const double *Params, const float *data, const float *W,
         const bool *UtU, float *conv_sig, const int *st, const int *id, const int *counter){    
     
-  volatile __shared__ float  sW[81*NrankMax], sW2[81*NrankMax];
+  volatile __shared__ float  sW[81*NrankMax], sW2[81*NrankMax]; 
   float x;
   int tid, tid0, bid, t, k,ind, Nrank, NT, Nfilt, nt0;
 

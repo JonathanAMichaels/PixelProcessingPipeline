@@ -7,7 +7,8 @@ function rezToPhy2(rez, savePath, varargin)
 
 
 [~, Nfilt, Nrank] = size(rez.W);
-rez.Wphy = cat(1, zeros(1+rez.ops.nt0min, Nfilt, Nrank), rez.W); % for Phy, we need to pad the spikes with zeros so the spikes are aligned to the center of the window
+rez.Wphy = cat(1, zeros(int16(((ops.nt0-ops.nt0min)/ops.nt0-0.5)*ops.nt0), Nfilt, Nrank), rez.W); % for Phy, we need to pad the spikes with zeros so the spikes are aligned to the center of the window
+rez.Wphy = rez.W; % if nt0min is centered, we don't need to pad..
 
 % spikeTimes will be in samples, not seconds
 rez.W = gather(single(rez.Wphy));
@@ -73,8 +74,7 @@ templateFeatureInds = uint32(rez.iNeigh);
 pcFeatures = rez.cProjPC;
 pcFeatureInds = uint32(rez.iNeighPC);
 
-% whiteningMatrix = rez.Wrot/rez.ops.scaleproc;
-whiteningMatrix = eye(size(rez.Wrot)) / rez.ops.scaleproc;
+whiteningMatrix = rez.Wrot;
 whiteningMatrixInv = whiteningMatrix^-1;
 
 % here we compute the amplitude of every template...

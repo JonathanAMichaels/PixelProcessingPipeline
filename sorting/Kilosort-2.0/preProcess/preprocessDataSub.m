@@ -69,7 +69,7 @@ fprintf('Time %3.0fs. Computing whitening matrix.. \n', toc);
 
 % this requires removing bad channels first
 Wrot = get_whitening_matrix(rez); % outputs a rotation matrix (Nchan by Nchan) which whitens the zero-timelag covariance of the data
-%Wrot = gpuArray.eye(ops.Nchan, 'single');
+
 
 fprintf('Time %3.0fs. Loading raw data and applying filters... \n', toc);
 
@@ -115,13 +115,10 @@ for ibatch = 1:Nbatch
     end
 end
 
-fclose(fidW); % close the files
-fclose(fid);
-
-
-
 rez.Wrot    = gather(Wrot); % gather the whitening matrix as a CPU variable
 
+fclose(fidW); % close the files
+fclose(fid);
 
 fprintf('Time %3.0fs. Finished preprocessing %d batches. \n', toc, Nbatch);
 

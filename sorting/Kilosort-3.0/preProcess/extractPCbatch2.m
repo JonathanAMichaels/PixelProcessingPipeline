@@ -7,7 +7,7 @@ function [uS, idchan] = extractPCbatch2(rez, wPCA, ibatch, iC)
 % channels to it
 
 % starts with predefined PCA waveforms
-wPCA = gpuArray(single(wPCA(:, 1:3)));
+wPCA = gpuArray(single(wPCA(:, 1:floor(rez.ops.nPCs/2))));
 ops = rez.ops;
 Nbatch      = rez.temp.Nbatch;
 NT  	      = ops.NT;

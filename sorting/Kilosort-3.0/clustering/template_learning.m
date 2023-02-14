@@ -36,7 +36,7 @@ xcenter = (min(rez.xc) + dminx-1):(2*dminx):(max(rez.xc)+dminx+1);
 xcenter = xcenter(:);
 ycenter = ycenter(:);
 
-Wpca = zeros(6, Nchan, 1000, 'single');
+Wpca = zeros(size(tF,2), Nchan, 1000, 'single');
 nst = numel(ktid);
 hid = zeros(nst,1 , 'int32');
 
@@ -67,13 +67,13 @@ for j = 1:numel(ycenter)
     end
 %     size(data)
     
-    
-   try
+    %https://github.com/MouseLand/Kilosort/issues/427
+    try
         ich = unique(iC(:, itemp));
     catch
         tmpS = iC(:, itemp);
         ich = unique(tmpS);
-   end
+    end
 %     ch_min = ich(1)-1;
 %     ch_max = ich(end);
     
@@ -82,7 +82,7 @@ for j = 1:numel(ycenter)
     end
     
     nsp = size(data,1);
-    dd = zeros(nsp, 6, numel(ich), 'single');
+    dd = zeros(nsp, size(data,2), numel(ich), 'single');
     for k = 1:length(itemp)
         ix = pid==itemp(k);
         % how to go from channels to different order
@@ -105,19 +105,18 @@ end
 Wpca = Wpca(:,:,1:n0);
 toc
 %%
-rez.W = zeros(ops.nt0,0, 3, 'single');
-rez.U = zeros(ops.Nchan,0,3, 'single');
+rez.W = zeros(ops.nt0, 0, ops.nEig, 'single');
+rez.U = zeros(ops.Nchan, 0, ops.nEig, 'single');
 rez.mu = zeros(1,0, 'single');
 for  t = 1:n0
     dWU = wPCA * gpuArray(Wpca(:,:,t));
     [w,s,u] = svdecon(dWU);
-    wsign = -sign(w(21,1));
-    rez.W(:,t,:) = gather(wsign * w(:,1:3));
-    rez.U(:,t,:) = gather(wsign * u(:,1:3) * s(1:3,1:3));
+    wsign = -sign(w(ops.nt0min,1)); %% time was hard-coded...
+    rez.W(:,t,:) = gather(wsign * w(:,1:ops.nEig));
+    rez.U(:,t,:) = gather(wsign * u(:,1:ops.nEig) * s(1:ops.nEig,1:ops.nEig));
     rez.mu(t) = gather(sum(sum(rez.U(:,t,:).^2))^.5);
     rez.U(:,t,:) = rez.U(:,t,:) / rez.mu(t);
 end
-
 %%
 rez.ops.wPCA = wPCA;
 

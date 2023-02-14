@@ -44,14 +44,14 @@ if ~isfield(params, 'savePlots')
 end
 % minimum correlation to be considered as originating from one cluster
 if ~isfield(params, 'crit')
-    params.crit = 0.75;
+    params.crit = 0.8;
 end
 % SNR threshold for keeping clusters at the end
 if ~isfield(params, 'SNRThreshold')
-    params.SNRThreshold = 3.2;
+    params.SNRThreshold = 2.0;
 end
 if ~isfield(params, 'multiSNRThreshold')
-    params.multiSNRThreshold = 3.2; % 3.8
+    params.multiSNRThreshold = 3.8;
 end
 if ~isfield(params, 'consistencyThreshold')
     params.consistencyThreshold = 0.7;
@@ -62,10 +62,10 @@ if ~isfield(params, 'refractoryLim')
 end
 % Define temporal sample range for waveforms (wider than kilosort!)
 if ~isfield(params, 'backSp')
-    params.backSp = round(params.sr * 0.004666);
+    params.backSp = round(params.sr * 0.0035);
 end
 if ~isfield(params, 'forwardSp')
-    params.forwardSp = round(params.sr * 0.004666);
+    params.forwardSp = round(params.sr * 0.0035);
 end
 % Time range for cross-correlation
 if ~isfield(params, 'corrRange')
@@ -79,11 +79,14 @@ if ~isfield(params, 'skipFilter')
     params.skipFilter = false;
 end
 
+dbstop if error
+
 % Read data from kilosort output
 disp('Reading kilosort output')
 T = readNPY([params.kiloDir '/spike_times.npy']);
 I = readNPY([params.kiloDir '/spike_clusters.npy']);
 Wrot = readNPY([params.kiloDir '/whitening_mat_inv.npy']);
+Wrot = 1;
 load([params.kiloDir '/brokenChan']);
 params.brokenChan = brokenChan;
 
@@ -121,7 +124,7 @@ if ~params.skipFilter
     % Kilosort is bad at selecting which motor units are 'good', since it uses ISI as a criteria. We expect many
     % spike times to be close together.
     % Take only 'good' single units with sufficient SNR
-    C = C((SNR > params.multiSNRThreshold & spkCount > 20));
+    C = C((C_ident == 1 | SNR > params.multiSNRThreshold) & spkCount > 200);
 end
 
 % Let's straight up trim off everything we don't need to save time
@@ -144,9 +147,9 @@ while keepGoing
     [~, minTime] = min(min(temp,[],3),[],2);
     new_mdata = zeros(size(mdata,1)*3, size(mdata,2), size(mdata,3));
     for j = 1:length(C)
-        T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp;
+        T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp - 1;
         % correct mdata centering
-        new_mdata((size(mdata,1)+1:size(mdata,1)*2) - (minTime(j) - params.backSp),:,j) = mdata(:,:,j);
+        new_mdata((size(mdata,1)+1:size(mdata,1)*2) - (minTime(j) - params.backSp - 1),:,j) = mdata(:,:,j);
     end
     mdata = new_mdata((size(mdata,1)+1:size(mdata,1)*2),:,:);
 
@@ -159,7 +162,7 @@ while keepGoing
     m = squeeze(m); mL = squeeze(mL);
     m(isnan(m)) = 0;
     mL = lags(mL);
-    
+
     % Let's choose what to merge
     J = m > params.crit | (m > 0.6 & rCross > 0.3);
     
@@ -220,20 +223,19 @@ while keepGoing
 end
 disp('Finished merging clusters')
 
+if true
 % re-center all spike times
 temp = permute(mdata, [3 1 2]);
 [~, minTime] = min(min(temp,[],3),[],2);
 for j = 1:length(C)
-    T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp;
+    T(I == C(j)) = T(I == C(j)) + minTime(j) - params.backSp - 1;
+end
 end
 
 % Re-extract
 [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, true);
 % use first vs last quartel as consistency check
-RR = mean(squeeze([consistency.R(1,2,:), consistency.R(2,3,:), consistency.R(3,4,:)]),1);
-if size(consistency.R,3) == 1
-    RR = mean(RR)
-end
+RR = consistency.R;
 RR(isnan(RR) | RR < 0) = 0;
 disp('waveform consistency')
 RR
@@ -244,7 +246,7 @@ disp('SNR')
 SNR
 
 % Remove clusters that don't meet inclusion criteria
-saveUnits = find(SNR > params.SNRThreshold & spkCount > 20 & ...
+saveUnits = find(SNR > params.SNRThreshold & spkCount > 200 & ...
     RR >= params.consistencyThreshold);
 keepSpikes = find(ismember(I, saveUnits));
 T = T(keepSpikes);
@@ -254,7 +256,7 @@ mdata = mdata(:,:,saveUnits);
 data = data(:,:,:,saveUnits);
 SNR = SNR(saveUnits);
 spkCount = spkCount(saveUnits);
-consistency.R = consistency.R(:,:,saveUnits);
+consistency.R = consistency.R(saveUnits);
 consistency.wave = consistency.wave(:,:,:,saveUnits);
 consistency.channel = consistency.channel(:,saveUnits);
 
@@ -355,7 +357,7 @@ end
 
 disp(['Number of clusters: ' num2str(length(C))])
 disp(['Number of spikes: ' num2str(length(I))])
-save([params.kiloDir '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'consistency', 'data');
+save([params.kiloDir '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'consistency');
 end
 
 
@@ -375,6 +377,7 @@ for j = 1:size(mdata,3)
     % calculate SNR
     tempSNR = squeeze(sum((max(useData,[],1) - min(useData,[],1)) ./ (2 * std(useData - mWave,[],1))) / size(useData,2));
     SNR(j) = max(tempSNR);
+    SNR(isinf(SNR) | isnan(SNR)) = 0;
 end
 end
 
@@ -385,29 +388,29 @@ recordSize = 2; % 2 bytes for int16
 nChan = size(params.chanMap,1);
 spt = recordSize*nChan;
 badChan = params.brokenChan; % Zero out channels that are bad
-Wrot_orig = pinv(Wrot) * 200; % recover the original whitening matrix (specific to pykilosort 2.5)
+Wrot_orig = Wrot; % recover the original whitening matrix
 totalT = double(max(T));
-quartels = linspace(1, totalT, 5);
-waveParcel = floor(params.waveCount/(length(quartels)-1));
+sections = linspace(1, totalT, 3); % split into 2 equal parts
+waveParcel = floor(params.waveCount/(length(sections)-1));
 % Extract each waveform
 data = nan(params.backSp + params.forwardSp, nChan, params.waveCount, length(C), 'single');
 mdata = zeros(params.backSp + params.forwardSp, nChan, length(C), 'single');
-R = zeros(length(quartels)-1,length(quartels)-1,length(C),'single');
+R = zeros(1,length(C),'single');
 consistency = struct('R',[],'wave',[],'channel',[]);
 for j = 1:length(C)
     disp(['Extracting unit ' num2str(j) ' of ' num2str(length(C))])
-    tempdata = nan(params.backSp + params.forwardSp, nChan, waveParcel, length(quartels)-1, 'single');
+    tempdata = nan(params.backSp + params.forwardSp, nChan, waveParcel, length(sections)-1, 'single');
     waveStep = 0;
-    for q = 1:(length(quartels)-1)
+    for q = 1:(length(sections)-1)
         times = T(I == C(j));
-        times = times(times >= quartels(q) & times < quartels(q+1)); % trim times
+        times = times(times >= sections(q) & times < sections(q+1)); % trim times
         innerWaveCount = min([waveParcel length(times)]);
         useTimes = times(round(linspace(1, length(times), innerWaveCount)));
         for t = 1:length(useTimes)
             fseek(f, (useTimes(t)-params.backSp) * spt, 'bof');
             tempdata(:,:,t,q) = fread(f, [nChan, params.backSp+params.forwardSp], '*int16')';
             if unwhiten
-                tempdata(:,:,t,q) = tempdata(:,:,t,q) / Wrot_orig; % unwhiten and rescale data to uV
+                tempdata(:,:,t,q) = tempdata(:,:,t,q) * Wrot_orig; % unwhiten and rescale data to uV
             end
             tempdata(:,badChan,t,q) = 0;
         end
@@ -418,13 +421,13 @@ for j = 1:length(C)
     
     % consistency check
     if nChan >= 384
-        grabChannels = 8;
+        grabChannels = 16;
     elseif nChan == 32
-        grabChannels = 6;
+        grabChannels = 16;
     elseif nChan == 16
-        grabChannels = 3;
+        grabChannels = 8;
     else
-        grabChannels = 4;
+        grabChannels = 8;
     end
     tempm = squeeze(nanmean(tempdata,3));
     ucheck = permute(tempm, [2 1 3]);
@@ -434,7 +437,8 @@ for j = 1:length(C)
     consistency.channel(:,j) = ind(1:grabChannels);
     tempm = permute(tempm(:,ind(1:grabChannels),:), [3 1 2]);
     tempm = tempm(:,:)';
-    R(:,:,j) = corr(tempm);
+    tempCorr = corr(tempm);
+    R(j) = tempCorr(1,2);
 end
 fclose(f);
 consistency.R = R;
@@ -451,42 +455,64 @@ function [r, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C)
             mdata(:,allChan,j) = 0;
         end
     end
+
     % concatenate channels together while keeping a buffer between them
     catdata = [];
     catdata = cat(1, catdata, zeros(params.corrRange, size(mdata,3)));
     for j = 1:size(mdata,2)
-        catdata = cat(1, catdata, squeeze(mdata(:,j,:)));
-        catdata = cat(1, catdata, zeros(params.corrRange+1, size(mdata,3)));
+        catdata = cat(1, catdata, single(squeeze(mdata(:,j,:))));
+        catdata = cat(1, catdata, zeros(params.corrRange+1, size(mdata,3), 'single'));
     end
-    catdata = single(catdata);
 
     % xcorr can handle this without a for-loop, but it uses too much memory that way...
-    count = 1;
-    r = zeros(params.corrRange*2 + 1, size(catdata,2)^2, 'single');
+    tic
+    r = zeros(params.corrRange*2 + 1, size(catdata,2), size(catdata,2), 'single');
     for i = 1:size(catdata,2)
-        for j = 1:size(catdata,2)
-            [r(:,count), lags] = xcorr(catdata(:,i), catdata(:,j), params.corrRange, 'normalized');
-            count = count + 1;
+        r_temp = zeros(size(r,1), size(r,2), 'single');
+        parfor j = 1:size(catdata,2)
+            [r_temp(:,j), lags] = xcorr(catdata(:,i), catdata(:,j), params.corrRange, 'normalized');
         end
+        r(:,i,:) = r_temp;
     end
-    r = reshape(r, [size(r,1) size(mdata,3) size(mdata,3)]);
+    [~, lags] = xcorr(catdata(:,1), catdata(:,1), params.corrRange, 'normalized'); % just to get lags
+    toc
+    %r = reshape(r, [size(r,1) size(mdata,3) size(mdata,3)]);
     for z = 1:size(r,1)
         r(z, logical(eye(size(r,2), size(r,3)))) = 0;
     end
 
+    tic
+    % Calculate zero-lag auto and cross-correlograms in spike timing (using a 1/3ms bin)
+    T_d = int64(round(double(T)/10));
+    CCG = zeros(length(C),length(C));
+    for i = 1:length(C)
+        temp_CCG = zeros(1,length(C));
+        parfor j = 1:length(C)
+            temp_CCG(j) = single(sum(ismember(T_d(I == C(i)), T_d(I == C(j))))) / single(sum(I == C(i)));
+        end
+        CCG(i,:) = temp_CCG;
+    end
+    CCG_temp = max(cat(3, triu(CCG,1), triu(CCG.',1)),[],3);
+    CCG_temp = CCG_temp + CCG_temp';
+    rCross = CCG_temp;
+    toc
 
-    % Calculate zero-lag auto and cross-correlograms in spike timing (using a 5ms bin)
-    M = ceil(double(max(T)/30/5));
+    if false
+    % Calculate zero-lag auto and cross-correlograms in spike timing (using a 1ms bin)
+    M = ceil(double(max(T)/30));
     S = zeros(M,length(C),'logical');
     for j = 1:length(C)
-        spk = round(double(T(I == C(j)))/30/5);
+        spk = round(double(T(I == C(j)))/30);
         S(spk,j) = 1;
     end
     rCross = zeros(size(S,2), size(S,2));
     for i = 1:size(S,2)
+        disp(i)
         for j = 1:size(S,2)
+            disp(j)
             rCross(i,j) = corr(S(:,i), S(:,j));
         end
+    end
     end
 end
 

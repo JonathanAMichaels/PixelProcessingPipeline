@@ -22,7 +22,7 @@ using namespace std;
     #include "mexNvidia_quicksort.cu"
 #endif
             
-const int  Nthreads = 1024, maxFR = 100000, NrankMax = 3, nmaxiter = 500, NchanMax = 32;
+const int  Nthreads = 1024, maxFR = 100000, NrankMax = 6, nmaxiter = 500, NchanMax = 32;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	spaceFilter(const double *Params, const float *data, const float *U,
@@ -189,7 +189,7 @@ __global__ void	spaceFilterUpdate_v2(const double *Params, const double *data, c
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	timeFilter(const double *Params, const float *data, const float *W,float *conv_sig){
-  volatile __shared__ float  sW2[81*NrankMax], sW[81*NrankMax], sdata[(Nthreads+81)*NrankMax];
+  volatile __shared__ float  sW2[151*NrankMax], sW[151*NrankMax], sdata[(Nthreads+151)*NrankMax];
   float x;
   int tid, tid0, bid, i, nid, Nrank, NT, Nfilt, nt0, irank;
 
@@ -217,7 +217,7 @@ __global__ void	timeFilter(const double *Params, const float *data, const float 
 
     tid0 = 0;
     while (tid0<NT-Nthreads-nt0+1){
-	    if (tid<nt0*NrankMax){
+	    if (tid<nt0*Nrank){ // changed NrankMax to Nrank
             sdata[tid%nt0 + irank*(Nthreads+nt0)] =
 			    data[tid0 + tid%nt0 + NT*(bid + Nfilt*irank)];
         }
@@ -247,7 +247,7 @@ __global__ void	timeFilter(const double *Params, const float *data, const float 
 __global__ void	timeFilterUpdate(const double *Params, const float *data, const float *W,
         const bool *UtU, float *conv_sig, const int *st, const int *id, const int *counter){
 
-  volatile __shared__ float  sW[81*NrankMax], sW2[81*NrankMax];
+  volatile __shared__ float  sW[151*NrankMax], sW2[151*NrankMax];
   float x;
   int tid, tid0, bid, t, k,ind, Nrank, NT, Nfilt, nt0;
 
@@ -382,7 +382,7 @@ __global__ void	cleanup_spikes(const double *Params, const float *data,
         const float *mu, const float *err, const float *eloss, const int *ftype, int *st,
         int *id, float *x, float *y,  float *z, int *counter){
 
-  volatile __shared__ float sdata[Nthreads+2*81+1];
+  volatile __shared__ float sdata[Nthreads+2*151+1];
   float err0, Th;
   int lockout, indx, tid, bid, NT, tid0,  j, id0, t0;
   bool flag=0;
@@ -717,7 +717,7 @@ __global__ void	computePCfeatures(const double *Params, const int *counter,
         const float *W, const float *U, const float *mu, const int *iW, const int *iC,
         const float *wPCA, float *featPC){
 
-  volatile __shared__ float  sPCA[2*81 * NrankMax], sW[81 * NrankMax], sU[NchanMax * NrankMax];
+  volatile __shared__ float  sPCA[2*151 * NrankMax], sW[151 * NrankMax], sU[NchanMax * NrankMax];
   volatile __shared__ int iU[NchanMax];
 
   float X = 0.0f, Y = 0.0f;
@@ -935,7 +935,8 @@ void mexFunction(int nlhs, mxArray *plhs[],
   cudaMemset(d_stSort, 0,  maxFR * sizeof(int));
 
 
-  dim3 tpB(8, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 16), tpW(Nnearest, Nrank), tpPC(NchanU, 2*Nrank);
+  //dim3 tpB(8, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 16), tpW(Nnearest, Nrank), tpPC(NchanU, 2*Nrank);
+  dim3 tpB(3, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 5), tpW(Nnearest, 3), tpPC(NchanU, 3);
 
   // filter the data with the spatial templates
   spaceFilter<<<Nfilt, Nthreads>>>(d_Params, d_draw, d_U, d_iC, d_iW, d_data);
