@@ -74,11 +74,11 @@ unipolarThresh = 120;
 bipolar = length(chanList) == 16;
 for q = 1:2
     if q == 1
-        [b, a] = butter(2, [300 7500] / (30000/2), 'bandpass');
+        [b, a] = butter(2, [250 4400] / (30000/2), 'bandpass');
     elseif q == 2
         [b, a] = butter(2, [5 70] / (30000/2), 'bandpass');
     end
-    useSeconds = 300;
+    useSeconds = 600;
     if size(data,1) < useSeconds*2*30000
         useSeconds = floor(size(data,1)/30000/2)-1;
     end
@@ -88,19 +88,32 @@ for q = 1:2
     for i = 1:size(data,2)
         data_filt(:,i) = single(filtfilt(b, a, double(data(tRange,i))));
     end
-    S(:,q) = std(data_filt,[],1);
+
+    if q == 2
+        S(:,q) = std(data_filt,[],1);
+    else
+        data_norm = data_filt ./ repmat(std(data_filt,[],1), [size(data_filt,1) 1]);
+        spk = sum(data_norm < -7, 1);
+        S(:,q) = spk / size(data_norm,1) * 30000;
+    end
+
     subplot(1,2,q)
     if q == 1
-        title('Filtered Signal Snippet (300-7500Hz)')
+        title('Filtered Signal Snippet (250-4400Hz)')
     else
         title('Filtered Noise Snippet (5-70Hz)')
     end
     hold on
     for i = 1:size(data,2)
-        if (bipolar && S(i,2) > bipolarThresh) || (~bipolar && S(i,2) > unipolarThresh)
-            cmap = [1 0.2 0.2];
+        cmap = [0 0 0];
+        if q == 1
+            if S(i,1) < 1
+                 cmap = [1 0.2 0.2];
+            end
         else
-            cmap = [0 0 0];
+            if (bipolar && S(i,2) > bipolarThresh) || (~bipolar && S(i,2) > unipolarThresh)
+                cmap = [1 0.2 0.2];
+            end
         end
         plot(data_filt(:,i) + i*1600, 'Color', cmap)
     end
@@ -109,34 +122,59 @@ for q = 1:2
 end
 print([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.png'], '-dpng')
 S
-if length(chanList) == 16
-    brokenChan = find(S(:,2) > bipolarThresh);
-else
-    brokenChan = find(S(:,2) > unipolarThresh);
-end
-disp(['Broken channels are: ' num2str(brokenChan')])
-save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
-data(:,brokenChan) = randn(size(data,1), length(brokenChan));%*3e-1;
-clear data_filt
 
-% Generate "Bulk EMG" dataset
-notBroken = 1:size(data,2);
-notBroken(brokenChan) = [];
-if length(dataChan) == 32
-    bottomHalf = [9:16 25:32];
-    topHalf = [1:8 17:24];
-    bottomHalf(ismember(bottomHalf, brokenChan)) = [];
-    topHalf(ismember(topHalf, brokenChan)) = [];
-    bEMG = int16(mean(data(:,bottomHalf),2)) - int16(mean(data(:,topHalf),2));
+if length(chanList) == 16
+    brokenChan = find(S(:,2) > bipolarThresh | S(:,1) < 1);
 else
-    bEMG = int16(mean(data(:,notBroken),2));
+    brokenChan = find(S(:,2) > unipolarThresh | S(:,1) < 1);
 end
-save([myomatrix '/sorted' num2str(myomatrix_num) '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
-clear bEMG
-disp('Saved generated bulk EMG')
+disp(['Broken/inactive channels are: ' num2str(brokenChan')])
+save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
+clear data_filt data_norm
+
 fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
-fwrite(fileID, int16(data'), 'int16');
+if true
+    mean_data = mean(data,1);
+    [b, a] = butter(4, [250 4400]/ (30000/2), 'bandpass');
+    intervals = round(linspace(1, size(data,1), round(size(data,1)/(30000*60))));
+    buffer = 128;
+    for t = 1:length(intervals)-1
+          preBuff = buffer; postBuff = buffer;
+        if t == 1
+            preBuff = 0;
+        elseif t == length(intervals)-1
+            postBuff = 0;
+        end
+        tRange = intervals(t)-preBuff : intervals(t+1)+postBuff;
+        fdata = double(data(tRange,:)) - mean_data;
+        fdata = fdata - median(fdata,2);
+        fdata = filtfilt(b, a, fdata);
+        fdata = fdata(preBuff+1 : end-postBuff-1, :);
+        fdata(:,brokenChan) = randn(size(fdata(:,brokenChan)))*5;
+        fwrite(fileID, int16(fdata'), 'int16');
+    end
+else
+    data(:,brokenChan) = randn(size(data(:,brokenChan)))*5;
+    fwrite(fileID, int16(data'), 'int16');
+end
 fclose(fileID);
-clear data
+
+if false
+    % Generate "Bulk EMG" dataset
+    notBroken = 1:size(data,2);
+    notBroken(brokenChan) = [];
+    if length(dataChan) == 32
+        bottomHalf = [9:16 25:32];
+        topHalf = [1:8 17:24];
+        bottomHalf(ismember(bottomHalf, brokenChan)) = [];
+        topHalf(ismember(topHalf, brokenChan)) = [];
+        bEMG = int16(mean(data(:,bottomHalf),2)) - int16(mean(data(:,topHalf),2));
+    else
+        bEMG = int16(mean(data(:,notBroken),2));
+    end
+    save([myomatrix '/sorted' num2str(myomatrix_num) '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
+    clear bEMG
+    disp('Saved generated bulk EMG')
+end
 disp('Saved myomatrix data binary')
 quit

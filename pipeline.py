@@ -81,13 +81,13 @@ if cluster:
     neuro_sorting = False
 
 # Search working folder for existing configuration file
-config_file = find('*.yaml', folder)
+config_file = find('config.yaml', folder)
 if len(config_file) > 1:
     raise SystemExit("There shouldn't be more than one config file in here (something went wrong)")
 elif len(config_file) == 0:
     print('No config file found - creating one now')
     create_config(script_folder, folder)
-    config_file = find('*.yaml', folder)
+    config_file = find('config.yaml', folder)
 config_file = config_file[0]
 
 # Load config
@@ -220,7 +220,12 @@ if myo_sorting:
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
                   path_to_add + '\')); myomatrix_binary"')
 
-        myo_function(config_kilosort)
+        print('Starting spike sorting of ' + config_kilosort['myomatrix_folder'])
+        scipy.io.savemat('/tmp/config.mat', config_kilosort)
+        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
+                  path_to_add + '\'); Kilosort_run_myo_3"')
+
+        #myo_function(config_kilosort)
 
 # Proceed with myo post-processing
 if myo_post:

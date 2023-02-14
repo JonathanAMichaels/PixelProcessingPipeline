@@ -21,7 +21,7 @@ const int  Nthreads = 1024, maxFR = 100000, NrankMax = 3, nt0max=81, NchanMax = 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	Conv1D(const double *Params, const float *data, const float *W, float *conv_sig){    
-  volatile __shared__ float  sW[81*NrankMax], sdata[Nthreads+81];
+  volatile __shared__ float  sW[81*NrankMax], sdata[Nthreads+81]; 
   float x, y;
   int tid, tid0, bid, i, nid, Nrank, NT, nt0;
 

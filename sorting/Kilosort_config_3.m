@@ -1,7 +1,5 @@
 % sample rate
-ops.fs = 30000;  
-
-ops.doFilter = 1;
+ops.fs = 30000;
 
 ops.sig = 10;  % spatial smoothness constant for registration
 ops.CAR = 1;
