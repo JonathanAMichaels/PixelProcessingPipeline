@@ -22,10 +22,8 @@ ops.brokenChan = fullfile(myomatrix_folder, 'brokenChan.mat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
-ops.nt0 = 151;
-ops.NT = 64*1024 + ops.ntbuff;
-ops.nskip           = 10;  % how many batches to skip for determining spike PCs
-ops.nSkipCov            = 10; % compute whitening matrix from every N-th batch
+ops.nt0 = 201;
+ops.NT = 2*64*1024 + ops.ntbuff;
 ops.sigmaMask = Inf; % we don't want a distance-dependant decay
 ops.Th = [9 8];
 ops.nfilt_factor = 4;
@@ -58,6 +56,6 @@ rez                = find_merges(rez, 1);
 fprintf('Saving results to Phy  \n')
 rezToPhy2(rez, myomatrix_folder);
 
-%delete(ops.fproc);
+delete(ops.fproc);
 
 quit;

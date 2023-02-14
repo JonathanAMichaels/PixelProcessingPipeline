@@ -49,7 +49,7 @@ ops.scaleproc           = 200;   % int16 scaling of whitened data
 ops.nPCs                = 3; % how many PCs to project the spikes into
 ops.useRAM              = 0; % not yet available
 
-ops.nt0 = 151;
+ops.nt0 = 201;
 ops.nt0min = floor(ops.nt0/2);
 ops.Th = [9 3];
 

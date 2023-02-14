@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024,  NrankMax = 3, nt0max = 151, NchanMax = 1024;
+const int  Nthreads = 1024,  NrankMax = 3, nt0max = 201, NchanMax = 1024;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void blankdWU(const double *Params, const double *dWU,  
@@ -284,7 +284,7 @@ __global__ void reNormalize(const double *Params, const double *A, const double 
 void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
-  int maxbytes = 101376; // 99 KiB
+  int maxbytes = 166912; // 163 KiB
   cudaFuncSetAttribute(getW, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
 
   /* Initialize the MathWorks GPU API. */
