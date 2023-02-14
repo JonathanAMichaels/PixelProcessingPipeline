@@ -81,6 +81,9 @@ __global__ void	crossFilter(const double *Params, const float *W1, const float *
 void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
+  int maxbytes = 166912; // 163 KiB
+  cudaFuncSetAttribute(crossFilter, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+
     /* Declare input variables*/
   double *Params, *d_Params;
   unsigned int nt0, Nfilt;
@@ -116,7 +119,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
 
   dim3 grid(1 + (Nfilt/nblock), 1 + (Nfilt/nblock));
   dim3 block(nblock, nblock);
-  crossFilter<<<grid, block>>>(d_Params, d_W1, d_W2, d_UtU, d_WtW); 
+  crossFilter<<<grid, block, sizeof(float)*(nblock*201*2)>>>(d_Params, d_W1, d_W2, d_UtU, d_WtW);
 
   plhs[0] 	= mxGPUCreateMxArrayOnGPU(WtW);
 
