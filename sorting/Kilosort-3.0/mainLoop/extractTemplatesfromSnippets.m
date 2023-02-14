@@ -51,11 +51,6 @@ fclose(fid);
 % discard empty samples
 dd = dd(:, 1:k);
 
-sdd = size(dd,2);
-if sdd < nPCs
-    dd(:,sdd+1:nPCs) = randn(size(dd,1),nPCs-sdd) * 10e-5;
-end
-
 % initialize the template clustering with random waveforms
 % wTEMP = dd(:, randperm(size(dd,2), nPCs));
 wTEMP = dd(:, round(linspace(1, size(dd,2), nPCs)));

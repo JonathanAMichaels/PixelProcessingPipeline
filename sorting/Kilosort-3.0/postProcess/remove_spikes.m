@@ -16,7 +16,7 @@ function rez = remove_spikes(rez,remove_idx,label,varargin)
         rez.removed.cProjPC = cat(1,rez.removed.cProjPC,rez.cProjPC(remove_idx,:,:));
     end
     rez.removed.st3 = cat(1,rez.removed.st3,rez.st3(remove_idx,:));
-  %  rez.removed.st2 = cat(1,rez.removed.st2,rez.st2(remove_idx,:));
+    rez.removed.st2 = cat(1,rez.removed.st2,rez.st2(remove_idx,:));
 
     rez.removed.label = cat(1,rez.removed.label,repmat({label},sum(remove_idx),1));
     k=0;
@@ -48,5 +48,5 @@ function rez = remove_spikes(rez,remove_idx,label,varargin)
         rez.cProjPC = rez.cProjPC(~remove_idx,:,:);
     end
     rez.st3 = rez.st3(~remove_idx,:);
-  %  rez.st2 = rez.st2(~remove_idx,:);
+    rez.st2 = rez.st2(~remove_idx,:);
 end

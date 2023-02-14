@@ -41,7 +41,7 @@ dNearActiveSite = median(diff(unique(rez.yc)));
 NrankPC = 6;
 [wTEMP, wPCA]    = extractTemplatesfromSnippets(rez, NrankPC);
 
-NchanNear = 8;
+NchanNear = min(ops.Nchan, 16); %% CHANGED: was 8
 [iC, dist] = getClosestChannels2(ycup, xcup, rez.yc, rez.xc, NchanNear);
 
 igood = dist(1,:)<dNearActiveSite;
@@ -94,9 +94,10 @@ for k = 1:ops.Nbatch
     toff = ops.nt0min + t0 + ops.NT *(k-1);
     st(1,:) = st(1,:) + toff;
     st = double(st);
-     try
+    % https://github.com/MouseLand/Kilosort/issues/427
+    try
         st(5,:) = cF;
-    catch 
+    catch
         st = [st; cF];
     end
     st(6,:) = k-1;

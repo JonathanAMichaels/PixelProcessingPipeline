@@ -67,13 +67,13 @@ for j = 1:numel(ycenter)
     end
 %     size(data)
     
-    
-   try
+    %https://github.com/MouseLand/Kilosort/issues/427
+    try
         ich = unique(iC(:, itemp));
     catch
         tmpS = iC(:, itemp);
         ich = unique(tmpS);
-   end
+    end
 %     ch_min = ich(1)-1;
 %     ch_max = ich(end);
     
@@ -105,13 +105,13 @@ end
 Wpca = Wpca(:,:,1:n0);
 toc
 %%
-rez.W = zeros(ops.nt0,0, 3, 'single');
-rez.U = zeros(ops.Nchan,0,3, 'single');
+rez.W = zeros(ops.nt0, 0, 3, 'single');
+rez.U = zeros(ops.Nchan, 0, 3, 'single');
 rez.mu = zeros(1,0, 'single');
 for  t = 1:n0
     dWU = wPCA * gpuArray(Wpca(:,:,t));
     [w,s,u] = svdecon(dWU);
-    wsign = -sign(w(21,1));
+    wsign = -sign(w(ops.nt0min,1));
     rez.W(:,t,:) = gather(wsign * w(:,1:3));
     rez.U(:,t,:) = gather(wsign * u(:,1:3) * s(1:3,1:3));
     rez.mu(t) = gather(sum(sum(rez.U(:,t,:).^2))^.5);

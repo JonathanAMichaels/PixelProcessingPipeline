@@ -17,12 +17,12 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024,  NrankMax = 6, maxFR = 10000, nt0max=81, NchanMax = 17, nsizes = 5;
+const int  Nthreads = 1024,  NrankMax = 6, maxFR = 10000, nt0max=201, NchanMax = 17, nsizes = 5;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	Conv1D(const double *Params, const float *data, const float *W, float *conv_sig){
-    volatile __shared__ float  sW[81*NrankMax], sdata[(Nthreads+81)];
+    volatile __shared__ float  sW[201*NrankMax], sdata[(Nthreads+201)];
     float y;
     int tid, tid0, bid, i, nid, Nrank, NT, nt0,  Nchan;
 
@@ -149,7 +149,7 @@ __global__ void  spikePC(const double *Params, const float *data,
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	max1D(const double *Params, const float *data, float *conv_sig){
     
-    volatile __shared__ float  sdata[Nthreads+81];
+    volatile __shared__ float  sdata[Nthreads+201];
     float y, spkTh;
     int tid, tid0, bid, i, NT, nt0, nt0min;
     

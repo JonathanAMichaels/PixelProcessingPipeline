@@ -684,7 +684,7 @@ classdef ksGUI < handle
             
             obj.ops.nblocks = str2double(obj.H.settings.setMinfrEdt.String);
             if isempty(obj.ops.nblocks)||isnan(obj.ops.nblocks)
-                obj.ops.nblocks = 5;
+                obj.ops.nblocks = 0;
             end
             obj.ops.throw_out_channels = false;
             obj.H.settings.setMinfrEdt.String = num2str(obj.ops.nblocks);
@@ -696,13 +696,13 @@ classdef ksGUI < handle
                         
             obj.ops.Th = str2num(obj.H.settings.setThEdt.String);
             if isempty(obj.ops.Th)||any(isnan(obj.ops.Th))
-                obj.ops.Th = [9 9];
+                obj.ops.Th = [9 8];
             end
             obj.H.settings.setThEdt.String = num2str(obj.ops.Th);
             
             obj.ops.lam = str2num(obj.H.settings.setLambdaEdt.String);
             if isempty(obj.ops.lam)||isnan(obj.ops.lam)
-                obj.ops.lam = 10;
+                obj.ops.lam = 20;
             end
             obj.H.settings.setLambdaEdt.String = num2str(obj.ops.lam);
             
@@ -789,6 +789,8 @@ classdef ksGUI < handle
                 % pre-clustering to re-order batches by depth
 %                 obj.log('Pre-clustering to re-order batches by depth')
 %                 obj.rez = clusterSingleBatches(obj.rez);
+                obj.rez
+
                 
                 % main optimization
                 obj.log('Extracting spikes for clustering')
