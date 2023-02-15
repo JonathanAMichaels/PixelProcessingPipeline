@@ -181,11 +181,12 @@ if neuro_sorting:
 
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
-        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
-                  path_to_add + '\'); Kilosort_run"')
+        #os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
+        #          path_to_add + '\'); Kilosort_run"')
 
         print('Starting alf post-processing of ' + config_kilosort['neuropixel'])
         alf_dir = Path(config_kilosort['neuropixel_folder'] + '/sorted/alf')
+        shutil.rmtree(alf_dir, ignore_errors=True)
         ks_dir = Path(config_kilosort['neuropixel_folder'] + '/sorted')
         ks2_to_alf(ks_dir, Path(config_kilosort['neuropixel']), alf_dir)
 
