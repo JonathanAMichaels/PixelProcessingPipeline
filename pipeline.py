@@ -166,7 +166,7 @@ if neuro_sorting:
     config_kilosort['type'] = 1
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
     path_to_add = script_folder + '/sorting/'
-    for pixel in range(config['num_neuropixels']):
+    for pixel in [0]:#range(config['num_neuropixels']):
         config_kilosort['neuropixel_folder'] = neuro_folders[pixel]
         tmp = glob.glob(neuro_folders[pixel] + '/*_t*.imec' + str(pixel) + '.ap.bin')
         config_kilosort['neuropixel'] = tmp[0]
@@ -177,7 +177,7 @@ if neuro_sorting:
             extract_sync(config_kilosort)
 
         print('Starting drift correction of ' + config_kilosort['neuropixel'])
-        kilosort(config_kilosort)
+        #kilosort(config_kilosort)
 
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
         scipy.io.savemat('/tmp/config.mat', config_kilosort)
