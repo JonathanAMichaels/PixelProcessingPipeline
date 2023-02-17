@@ -74,7 +74,7 @@ unipolarThresh = 120;
 bipolar = length(chanList) == 16;
 for q = 1:2
     if q == 1
-        [b, a] = butter(2, [250 4400] / (30000/2), 'bandpass');
+        [b, a] = butter(2, [100 4400] / (30000/2), 'bandpass');
     elseif q == 2
         [b, a] = butter(2, [5 70] / (30000/2), 'bandpass');
     end
@@ -132,10 +132,12 @@ disp(['Broken/inactive channels are: ' num2str(brokenChan')])
 save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
 clear data_filt data_norm
 
+data = data(30000*60*3 : 30000*60*6,:);
+
 fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
 if true
     mean_data = mean(data,1);
-    [b, a] = butter(4, [250 4400]/ (30000/2), 'bandpass');
+    [b, a] = butter(3, [100 4400]/ (30000/2), 'bandpass');
     intervals = round(linspace(1, size(data,1), round(size(data,1)/(30000*60))));
     buffer = 128;
     for t = 1:length(intervals)-1
