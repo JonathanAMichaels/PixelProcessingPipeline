@@ -7,7 +7,6 @@ from tqdm.auto import tqdm, trange
 
 from dredge.python.reglib import lfpreg, ap_filter
 
-%matplotlib inline
 plt.rc("figure", dpi=200)
 SMALL_SIZE = 8
 MEDIUM_SIZE = 10
