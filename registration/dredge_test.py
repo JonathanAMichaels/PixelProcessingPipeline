@@ -42,18 +42,19 @@ geom.shape
 # alternatively, you could set avg_depth=False and csd=True to compute
 # the csd (which is done columnwise and then averaged across depth,
 # which is smarter.)
-ap_filter.run_preprocessing(
-    raw_lfp_bin,
-    ppx_lfp_bin,
-    geom=geom,
-    fs=2500,
-    bp=(0.5, 250),
-    extra_channels=1,
-    resample_to=250,
-    lfp_destripe=True,
-    avg_depth=False,
-    csd=True,
-);
+
+#ap_filter.run_preprocessing(
+#    raw_lfp_bin,
+#    ppx_lfp_bin,
+#    geom=geom,
+#    fs=2500,
+#    bp=(0.5, 250),
+#    extra_channels=1,
+#    resample_to=250,
+#    lfp_destripe=True,
+#    avg_depth=False,
+#    csd=True,
+#);
 
 y_unique = np.unique(geom[:, 1])
 lfp = np.memmap(ppx_lfp_bin, dtype=np.float32).reshape(-1, y_unique.size)
@@ -62,7 +63,8 @@ lfp = np.memmap(ppx_lfp_bin, dtype=np.float32).reshape(-1, y_unique.size)
 # this took about ~15mins on my laptop (no GPU) but is much faster on GPU
 p = lfpreg.online_register_rigid(
     lfp.T,
-    mincorr=0.8,
+    adaptive_mincorr_percentile=0.1,
+    prior_lambda=1
 )
 
 import scipy.io
