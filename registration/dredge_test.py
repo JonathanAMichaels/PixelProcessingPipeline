@@ -65,6 +65,9 @@ p = lfpreg.online_register_rigid(
     mincorr=0.8,
 )
 
+import scipy.io
+scipy.io.savemat('/home/ROBARTS/jmichaels/PixelProcessingPipeline/registration/p.mat', {'p': p})
+
 # plot the estimated displacement over the signal throughout the
 # whole recording so we can see how it looks
 plot_chunk_len_s = 10
@@ -92,7 +95,7 @@ for start, ax in zip(chunk_starts_samples, axes):
         np.arange(start / fs, start / fs + plot_chunk_len_s, 2.5)
     )
     ax.set_ylabel("depth (um)")
-    plt.savefig('plots/test' + str(start) + '.png')
+    plt.savefig('/home/ROBARTS/jmichaels/PixelProcessingPipeline/registration/plots/test' + str(start) + '.png')
 
 ax.set_xlabel("time (s)")
 fig.tight_layout()
