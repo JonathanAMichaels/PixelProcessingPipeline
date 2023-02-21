@@ -67,7 +67,7 @@ lfp = np.memmap(ppx_lfp_bin, dtype=np.float32).reshape(-1, y_unique.size)
 p = lfpreg.online_register_rigid(
     lfp.T,
     disp=50,
-    adaptive_mincorr_percentile=0.05)
+    adaptive_mincorr_percentile=5)
     #prior_lambda=True
 #)
 
