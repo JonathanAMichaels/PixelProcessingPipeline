@@ -43,7 +43,7 @@ geom.shape
 # the csd (which is done columnwise and then averaged across depth,
 # which is smarter.)
 
-if True:
+if False:
     ap_filter.run_preprocessing(
         raw_lfp_bin,
         ppx_lfp_bin,
@@ -64,8 +64,7 @@ lfp = np.memmap(ppx_lfp_bin, dtype=np.float32).reshape(-1, y_unique.size)
 # this took about ~15mins on my laptop (no GPU) but is much faster on GPU
 p = lfpreg.online_register_rigid(
     lfp.T,
-    disp=50,
-    adaptive_mincorr_percentile=0.1,
+    adaptive_mincorr_percentile=1,
     prior_lambda=1.0)
 #)
 
