@@ -70,7 +70,7 @@ lfp = np.memmap(ppx_lfp_bin, dtype=np.float32).reshape(-1, y_unique.size)
 p, rr, total_shift = lfpreg.register_nonrigid(
     lfp,
     mincorr=0.7,
-    disp=None,
+    disp=500,
     n_windows=5,
     widthmul=0.5,
     batch_size=32,
