@@ -64,8 +64,8 @@ lfp = np.memmap(ppx_lfp_bin, dtype=np.float32).reshape(-1, y_unique.size)
 # this took about ~15mins on my laptop (no GPU) but is much faster on GPU
 p = lfpreg.online_register_rigid(
     lfp.T,
-    adaptive_mincorr_percentile=10,
-    prior_lambda=1.0)
+    adaptive_mincorr_percentile=5,
+    prior_lambda=10)
 #)
 
 
