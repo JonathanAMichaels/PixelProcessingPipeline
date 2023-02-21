@@ -19,7 +19,7 @@ plt.rc('ytick', labelsize=SMALL_SIZE)
 plt.rc('legend', fontsize=SMALL_SIZE)
 plt.rc('figure', titlesize=BIGGER_SIZE)
 
-data_home = Path("/cifs/pruszynski/Malfoy/021723/021723_g0/021723_g0_imec0").expanduser()
+data_home = Path("/cifs/pruszynski/Malfoy/042022/042022_g0/042022_g0_imec0").expanduser()
 raw_dir = data_home
 raw_lfp_bin = next(raw_dir.glob("*lf.bin"))
 raw_lfp_bin
@@ -43,7 +43,7 @@ geom.shape
 # the csd (which is done columnwise and then averaged across depth,
 # which is smarter.)
 
-if False:
+if True:
     ap_filter.run_preprocessing(
         raw_lfp_bin,
         ppx_lfp_bin,
@@ -55,8 +55,6 @@ if False:
         lfp_destripe=True,
         avg_depth=False,
         csd=True,
-        t_start=60*60,
-        t_end=60*68
     )
 
 y_unique = np.unique(geom[:, 1])

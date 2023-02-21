@@ -465,7 +465,6 @@ def online_register_rigid(
         mincorr = np.percentile(
             np.diagonal(C00, 1), adaptive_mincorr_percentile
         )
-    print(mincorr)
     p0 = psolvecorr(D00, C00, mincorr=mincorr, prior_lambda=prior_lambda)
 
     # -- loop
@@ -491,6 +490,7 @@ def online_register_rigid(
             mincorr = np.percentile(
                 np.diagonal(C11, 1), adaptive_mincorr_percentile
             )
+        print(mincorr)
         p1 = psolveonline(
             D01, C01, D11, C11, p0, mincorr=mincorr, prior_lambda=prior_lambda
         )
