@@ -52,10 +52,9 @@ if True:
         bp=(0.5, 250),
         extra_channels=1,
         resample_to=250,
-        lfp_destripe=True,
+        lfp_destripe=False,
         avg_depth=False,
         csd=True,
-        standardize='perchan'
     )
 
 y_unique = np.unique(geom[:, 1])
