@@ -61,14 +61,26 @@ lfp = np.memmap(ppx_lfp_bin, dtype=np.float32).reshape(-1, y_unique.size)
 
 # recall that `lfp` is the full recording in a memmap (not in memory)
 # this took about ~15mins on my laptop (no GPU) but is much faster on GPU
-p = lfpreg.online_register_rigid(
+#p = lfpreg.online_register_rigid(
+#    lfp.T,
+#    adaptive_mincorr_percentile=0.1,
+#    prior_lambda=1
+#)
+
+p, rr, total_shift = lfpreg.register_nonrigid(
     lfp.T,
-    adaptive_mincorr_percentile=0.1,
-    prior_lambda=1
+    mincorr=0.7,
+    disp=None,
+    n_windows=5,
+    widthmul=0.5,
+    batch_size=32,
+    step_size=1,
+    rigid_init=True,
 )
 
+
 import scipy.io
-scipy.io.savemat('/home/ROBARTS/jmichaels/PixelProcessingPipeline/registration/p.mat', {'p': p})
+scipy.io.savemat('/home/ROBARTS/jmichaels/PixelProcessingPipeline/registration/p.mat', {'p': p, 'rr': rr, 'total_shift': total_shift})
 
 # plot the estimated displacement over the signal throughout the
 # whole recording so we can see how it looks
