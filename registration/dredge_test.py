@@ -43,7 +43,7 @@ geom.shape
 # the csd (which is done columnwise and then averaged across depth,
 # which is smarter.)
 
-if False:
+if True:
     ap_filter.run_preprocessing(
         raw_lfp_bin,
         ppx_lfp_bin,
@@ -55,13 +55,14 @@ if False:
         lfp_destripe=True,
         avg_depth=False,
         csd=True,
+        standardize='perchan'
     )
 
 y_unique = np.unique(geom[:, 1])
 
 # plot original
 lfp0 = np.memmap(raw_lfp_bin, dtype=np.int16).reshape(-1, 385)[:, :-1]
-plt.imshow(lfp0[250*2500:250*2500 + 120 * 2500].T, aspect=10, cmap=plt.cm.bone);
+plt.imshow(lfp0[250*2500:250*2500 + 60 * 2500].T, aspect=10, cmap=plt.cm.bone);
 plt.title("raw lfp")
 plt.axis("off")
 plt.savefig('/home/ROBARTS/jmichaels/PixelProcessingPipeline/registration/plots/orig.png')
@@ -69,7 +70,7 @@ plt.savefig('/home/ROBARTS/jmichaels/PixelProcessingPipeline/registration/plots/
 lfp = np.memmap(ppx_lfp_bin, dtype=np.float32).reshape(-1, y_unique.size)
 
 # load 20 seconds starting at 250s
-chunk = lfp[100 * 250 : 220 * 250]
+chunk = lfp[100 * 250 : 160 * 250]
 
 # vis to check preprocessing went alright
 fig, ax = plt.subplots()
