@@ -19,7 +19,7 @@ plt.rc('ytick', labelsize=SMALL_SIZE)
 plt.rc('legend', fontsize=SMALL_SIZE)
 plt.rc('figure', titlesize=BIGGER_SIZE)
 
-data_home = Path("/cifs/pruszynski/Malfoy/042022/042022_g0/042022_g0_imec0").expanduser()
+data_home = Path("/cifs/pruszynski/Malfoy/020223/020223_g0/020223_g0_imec0").expanduser()
 raw_dir = data_home
 raw_lfp_bin = next(raw_dir.glob("*lf.bin"))
 raw_lfp_bin
