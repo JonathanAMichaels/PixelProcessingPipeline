@@ -35,6 +35,8 @@ def myomatrix_bipolar_probe():
                          310, 310, 310, 310])
     probe.yc = np.array([8800, 6600, 4400, 2200, 2200, 4400, 6600, 8800, 11000, 13200, 15400, 17600,
                          17600, 15400, 13200, 11000])
+    # probe.xc = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    # probe.yc = 1e3*np.arange(16)
     probe.kcoords = np.zeros(16)
     return probe
 

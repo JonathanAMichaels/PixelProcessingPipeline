@@ -8,13 +8,16 @@ channelLabelsBipolar = [25, 26; 27, 28; 29, 30; 31, 32; ...
     17, 18; 19, 20; 21, 22; 23, 24];
 
 chanList = chans(1) : chans(2);
-if length(chanList) == 16
-    chanMapFile = [script_dir '/geometries/bipolar_test_kilosortChanMap.mat'];
-elseif length(chanList) == 32
-    chanMapFile = [script_dir '/geometries/monopolar_test_kilosortChanMap.mat'];
-else
-    error('Channel map not implemented')
-end
+disp(chanList)
+% if length(chanList) == 16
+%     chanMapFile = [script_dir '/geometries/linear_16ch_RF400_kilosortChanMap.mat']; %[script_dir '/geometries/bipolar_test_kilosortChanMap.mat'];
+    
+% elseif length(chanList) == 32
+%     chanMapFile = [script_dir '/geometries/monopolar_test_kilosortChanMap.mat'];
+% else
+%     error('Channel map not implemented')
+% end
+chanMapFile = myo_chan_map_file
 disp(['Using this channel map: ' chanMapFile])
 
 dataChan = chanList;
@@ -49,7 +52,7 @@ else
     data = tempdata.Data.Data(1).mapped(dataChan,ops.trange(1):ops.trange(2))';
     analogData = tempdata.Data.Data(1).mapped(sync_chan,ops.trange(1):ops.trange(2))';
     analogData(analogData < 10000) = 0;
-    analodData(analogData >= 10000) = 1;
+    analogData(analogData >= 10000) = 1;
     clear tempdata
 end
 

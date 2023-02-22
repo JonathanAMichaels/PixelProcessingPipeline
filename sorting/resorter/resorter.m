@@ -8,7 +8,7 @@
 
 % INPUTS: params struct, must include:
 %   params.binaryFile: location of binary file created by kilosort
-%   params.kiloDir: directory including kilosort outputs in .npy format
+%   params.kiloDir: new directory including kilosort outputs in .npy format
 %   params.chanMap: (chan, 2) matrix of electrode spatial locations in um. This is only used for plotting.
 %   
 %   optional parameters:
@@ -81,22 +81,27 @@ end
 
 dbstop if error
 
+% create custom_merge output directory
+if ~exist(params.kiloDir, 'dir')
+    mkdir(params.kiloDir)
+end
+
 % Read data from kilosort output
 disp('Reading kilosort output')
-T = readNPY([params.kiloDir '/spike_times.npy']);
-I = readNPY([params.kiloDir '/spike_clusters.npy']);
-Wrot = readNPY([params.kiloDir '/whitening_mat_inv.npy']);
+T = readNPY([params.kiloDir '/../spike_times.npy']);
+I = readNPY([params.kiloDir '/../spike_clusters.npy']);
+Wrot = readNPY([params.kiloDir '/../whitening_mat_inv.npy']);
 Wrot = 1;
-load([params.kiloDir '/brokenChan']);
+load([params.kiloDir '/../brokenChan']);
 params.brokenChan = brokenChan;
 
 %TMP = readNPY([params.kiloDir '/templates.npy']);
 %TMP_ind = readNPY([params.kiloDir '/templates_ind.npy']);
 
 if params.userSorted
-    clusterGroup = tdfread([params.kiloDir '/cluster_group.tsv']);
+    clusterGroup = tdfread([params.kiloDir '/../cluster_group.tsv']);
 else
-    clusterGroup = tdfread([params.kiloDir '/cluster_KSLabel.tsv']);
+    clusterGroup = tdfread([params.kiloDir '/../cluster_KSLabel.tsv']);
     clusterGroup.group = clusterGroup.KSLabel;
 end
 C = []; C_ident = [];
@@ -250,8 +255,11 @@ saveUnits = find(SNR > params.SNRThreshold & spkCount > 200 & ...
     RR >= params.consistencyThreshold);
 keepSpikes = find(ismember(I, saveUnits));
 T = T(keepSpikes);
+[T,ascending_idxs] = sort(T); % also sort to make times monotonic
 I = I(keepSpikes);
+I = I(ascending_idxs);
 C = unique(I);
+mdata_orig = mdata;
 mdata = mdata(:,:,saveUnits);
 data = data(:,:,:,saveUnits);
 SNR = SNR(saveUnits);
@@ -358,6 +366,20 @@ end
 disp(['Number of clusters: ' num2str(length(C))])
 disp(['Number of spikes: ' num2str(length(I))])
 save([params.kiloDir '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'consistency');
+
+templates = permute(mdata_orig, [3 1 2]); % now it's nTemplates x nSamples x nChannels
+templatesInds = repmat([0:size(templates,3)-1], size(templates,1), 1); % we include all channels so this is trivial
+% dbstop in resorter.m at 372
+disp(['Saving custom-merged data for Phy to: ' params.kiloDir])
+writeNPY(uint64(T), [params.kiloDir '/spike_times.npy']);
+writeNPY(uint32(I-1), [params.kiloDir '/spike_templates.npy']); % -1 for zero indexing
+writeNPY(single(templates), [params.kiloDir '/templates.npy']);
+writeNPY(double(templatesInds), [params.kiloDir '/templates_ind.npy']);
+copyfile([params.kiloDir '/../whitening_mat.npy'], [params.kiloDir '/whitening_mat.npy'])
+copyfile([params.kiloDir '/../whitening_mat_inv.npy'], [params.kiloDir '/whitening_mat_inv.npy'])
+copyfile([params.kiloDir '/../channel_map.npy'], [params.kiloDir '/channel_map.npy'])
+copyfile([params.kiloDir '/../channel_positions.npy'], [params.kiloDir '/channel_positions.npy'])
+copyfile([params.kiloDir '/../params.py'], [params.kiloDir '/params.py'])
 end
 
 

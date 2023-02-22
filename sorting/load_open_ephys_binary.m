@@ -85,7 +85,9 @@ D.Header = header;
 
 switch type
     case 'continuous'
-        D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
+        if exist(fullfile(folder,'timestamps.npy'),'file')
+            D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
+        end
         contFile=fullfile(folder,'continuous.dat');
         if (continuousmap)
             file=dir(contFile);
@@ -102,8 +104,21 @@ switch type
         D.ElectrodeIndexes = readNPY(fullfile(folder,'spike_electrode_indices.npy'));
         D.SortedIndexes = readNPY(fullfile(folder,'spike_clusters.npy'));
     case 'events'
-        D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
-        D.ChannelIndex = readNPY(fullfile(folder,'channels.npy'));
+        % check first for file existence
+        if exist(fullfile(folder,'timestamps.npy'),'file')
+            D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
+        else 
+            D.Timestamps = []
+            disp('No timestamps.npy file found.')
+        end
+        if exist(fullfile(folder,'channels.npy'),'file')
+            D.Timestamps = readNPY(fullfile(folder,'channels.npy'));
+        else 
+            D.Timestamps = []
+            disp('No channels.npy file found.')
+        end
+        % D.Timestamps = readNPY(fullfile(folder,'timestamps.npy'));
+        % D.ChannelIndex = readNPY(fullfile(folder,'channels.npy'));
         f=java.io.File(folder);
         group=char(f.getName());
         if (strncmp(group,'TEXT',4))

@@ -7,8 +7,12 @@ folder:
 neuropixel:
 # number of neuropixels recorded
 num_neuropixels:
+# path to neuropixels channel map (should be a .mat file, see 'geometries' folder)
+neuropix_chan_map_file: neuropixPhase3B1_kilosortChanMap.mat
 # path to myomatrix directory (should end in _myo)
 myomatrix:
+# path to myomatrix channel map (should be a .mat file, see 'geometries' folder)
+myo_chan_map_file: bipolar_test_kilosortChanMap.mat
 # path to .kinarm files
 kinarm:
 # path to pipeline.py script (always overwritten by program)
