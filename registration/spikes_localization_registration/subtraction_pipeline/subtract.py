@@ -666,6 +666,8 @@ def subtraction_batch(
             trough_offset=trough_offset,
             buffer=buffer,
         )
+        print(cleaned_wfs.shape)
+        print(subtracted_wfs.shape)
         cleaned_wfs = full_denoising(
             cleaned_wfs + subtracted_wfs,
             spike_index[:, 1],
