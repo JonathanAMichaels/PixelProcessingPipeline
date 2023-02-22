@@ -668,15 +668,16 @@ def subtraction_batch(
         )
         print(cleaned_wfs.shape)
         print(subtracted_wfs.shape)
-        cleaned_wfs = full_denoising(
-            cleaned_wfs + subtracted_wfs,
-            spike_index[:, 1],
-            extract_channel_index,
-            radial_parents,
-            probe=probe,
-            tpca=tpca,
-            device=device,
-            denoiser=denoiser,
+        if cleaned_wfs.shape[0] > 0:
+            cleaned_wfs = full_denoising(
+                cleaned_wfs + subtracted_wfs,
+                spike_index[:, 1],
+                extract_channel_index,
+                radial_parents,
+                probe=probe,
+                tpca=tpca,
+                device=device,
+                denoiser=denoiser,
         )
 
     # strip buffer from residual and remove spikes in buffer
