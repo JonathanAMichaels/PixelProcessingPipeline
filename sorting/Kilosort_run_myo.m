@@ -5,11 +5,12 @@ try
 end
 dbstop if error
 
-if num_chans == 16
-    chanMapFile = [script_dir '/geometries/bipolar_test_kilosortChanMap.mat'];
-elseif num_chans == 32
-    chanMapFile = [script_dir '/geometries/monopolar_test_kilosortChanMap.mat'];
-end
+% if num_chans == 16
+%     chanMapFile = [script_dir '/geometries/bipolar_test_kilosortChanMap.mat'];
+% elseif num_chans == 32
+%     chanMapFile = [script_dir '/geometries/monopolar_test_kilosortChanMap.mat'];
+% end
+chanMapFile = myo_chan_map_file
 disp(['Using this channel map: ' chanMapFile])
 
 addpath(genpath([script_dir '/sorting/Kilosort-2.0']))

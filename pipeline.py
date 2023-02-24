@@ -12,6 +12,7 @@ from pipeline_utils import find, create_config, extract_sync, extract_LFP
 from registration.registration import registration as registration_function
 from sorting.pykilosort.run_myo_pykilosort import myo_sort as myo_function
 from sorting.pykilosort.run_pykilosort import kilosort
+from pdb import set_trace
 
 
 script_folder = os.path.dirname(os.path.realpath(__file__))
@@ -125,6 +126,12 @@ else:
         config['myomatrix'] = temp_folder[0]
 if config['myomatrix'] != '':
     print('Using myomatrix folder ' + config['myomatrix'])
+    
+# Search myomatrix folder for existing concatenated_data folder, if it exists, it will be used
+concatDataPath = find('concatenated_data', config['myomatrix'])
+if len(concatDataPath) > 1:
+    raise SystemExit("There shouldn't be more than one concatenated_data folder inside the myomatrix data folder")
+
 temp = glob.glob(folder + '/*.kinarm')
 if len(temp) == 0:
     print('No kinarm data in this recording session')
@@ -162,7 +169,8 @@ else:
 
 # Proceed with neural spike sorting
 if neuro_sorting:
-    config_kilosort = {'script_dir': config['script_dir'], 'trange': np.array(config['Session']['trange'])}
+    config_kilosort = {'script_dir': config['script_dir'], 'trange': np.array(config['Session']['trange']),
+                       'neuropix_chan_map_file': os.path.join(config['script_dir'],'geometries',config['neuropix_chan_map_file'])}
     config_kilosort['type'] = 1
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
     path_to_add = script_folder + '/sorting/'
@@ -192,7 +200,8 @@ if neuro_sorting:
 
 # Proceed with neuro post-processing
 if neuro_post:
-    config_kilosort = {'script_dir': config['script_dir']}
+    config_kilosort = {'script_dir': config['script_dir'],
+                       'neuropix_chan_map_file': os.path.join(config['script_dir'],'geometries',config['neuropix_chan_map_file'])}
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
     path_to_add = script_folder + '/sorting/'
     for pixel in range(config['num_neuropixels']):
@@ -205,11 +214,17 @@ if neuro_post:
 if myo_sorting:
     config_kilosort = {'myomatrix': config['myomatrix'], 'script_dir': config['script_dir'],
                        'trange': np.array(config['Session']['trange']),
-                       'sync_chan': int(config['Session']['myo_analog_chan'])}
+                       'sync_chan': int(config['Session']['myo_analog_chan']),
+                       'myo_chan_map_file': os.path.join(config['script_dir'],'geometries',config['myo_chan_map_file'])}
     path_to_add = script_folder + '/sorting/'
     for myomatrix in range(len(config['Session']['myo_chan_list'])):
-        f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
-        config_kilosort['myomatrix_data'] = f[0]
+        if len(concatDataPath)==1:
+            config_kilosort['myomatrix_data'] = concatDataPath
+            print(f"Using concatenated data from: {concatDataPath[0]}")
+        else:
+            f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
+            config_kilosort['myomatrix_data'] = f[0]
+            print(f"Using data from: {f[0]}")
         config_kilosort['myomatrix_folder'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
         config_kilosort['myomatrix_num'] = myomatrix
         config_kilosort['chans'] = np.array(config['Session']['myo_chan_list'][myomatrix])
@@ -230,7 +245,8 @@ if myo_sorting:
 
 # Proceed with myo post-processing
 if myo_post:
-    config_kilosort = {'script_dir': config['script_dir'], 'myomatrix': config['myomatrix']}
+    config_kilosort = {'script_dir': config['script_dir'], 'myomatrix': config['myomatrix'],
+                       'myo_chan_map_file': os.path.join(config['script_dir'],'geometries',config['myo_chan_map_file'])}
     path_to_add = script_folder + '/sorting/'
     for myomatrix in range(len(config['Session']['myo_chan_list'])):
         f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
