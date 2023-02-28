@@ -428,6 +428,7 @@ for j = 1:length(C)
         times = times(times >= sections(q) & times < sections(q+1)); % trim times
         innerWaveCount = min([waveParcel length(times)]);
         useTimes = times(round(linspace(1, length(times), innerWaveCount)));
+        useTimes(useTimes > (totalT - params.forwardSp - 1)) = [];
         for t = 1:length(useTimes)
             fseek(f, (useTimes(t)-params.backSp) * spt, 'bof');
             tempdata(:,:,t,q) = fread(f, [nChan, params.backSp+params.forwardSp], '*int16')';
