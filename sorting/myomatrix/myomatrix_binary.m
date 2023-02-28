@@ -110,7 +110,7 @@ for q = 1:2
     for i = 1:size(data,2)
         cmap = [0 0 0];
         if q == 1
-            if S(i,1) < 1
+            if S(i,1) < 0.5
                  cmap = [1 0.2 0.2];
             end
         else
