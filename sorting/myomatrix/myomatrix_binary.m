@@ -127,9 +127,9 @@ print([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.png'], '-dpng')
 S
 
 if length(chanList) == 16
-    brokenChan = find(S(:,2) > bipolarThresh | S(:,1) < 1);
+    brokenChan = find(S(:,2) > bipolarThresh | S(:,1) < 0.5);
 else
-    brokenChan = find(S(:,2) > unipolarThresh | S(:,1) < 1);
+    brokenChan = find(S(:,2) > unipolarThresh | S(:,1) < 0.5);
 end
 disp(['Broken/inactive channels are: ' num2str(brokenChan')])
 save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
@@ -139,7 +139,7 @@ fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
 if true
     mean_data = mean(data,1);
     [b, a] = butter(4, [250 4400]/ (30000/2), 'bandpass');
-    intervals = round(linspace(1, size(data,1), round(size(data,1)/(30000*60))));
+    intervals = round(linspace(1, size(data,1), round(size(data,1)/(30000*5))));
     buffer = 128;
     for t = 1:length(intervals)-1
           preBuff = buffer; postBuff = buffer;
