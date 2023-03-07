@@ -67,6 +67,7 @@ clf
 S = zeros(size(data,2), 2);
 bipolarThresh = 90;
 unipolarThresh = 120;
+lowThresh = 0.1;
 bipolar = length(chanList) == 16;
 for q = 1:2
     if q == 1
@@ -103,7 +104,7 @@ for q = 1:2
     for i = 1:size(data,2)
         cmap = [0 0 0];
         if q == 1
-            if S(i,1) < 0.5
+            if S(i,1) < lowThresh
                  cmap = [1 0.2 0.2];
             end
         else
@@ -120,9 +121,9 @@ print([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.png'], '-dpng')
 S
 
 if length(chanList) == 16
-    brokenChan = find(S(:,2) > bipolarThresh | S(:,1) < 0.5);
+    brokenChan = find(S(:,2) > bipolarThresh | S(:,1) < lowThresh);
 else
-    brokenChan = find(S(:,2) > unipolarThresh | S(:,1) < 0.5);
+    brokenChan = find(S(:,2) > unipolarThresh | S(:,1) < lowThresh);
 end
 disp(['Broken/inactive channels are: ' num2str(brokenChan')])
 save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
