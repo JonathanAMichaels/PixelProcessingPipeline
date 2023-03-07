@@ -1,4 +1,5 @@
-load('/tmp/config.mat')
+script_dir = pwd
+load(fullfile(script_dir, '/tmp/config.mat'))
 load([script_dir '/geometries/neuropixPhase3B1_kilosortChanMap'])
 params.chanMap = cat(2, xcoords, ycoords);
 params.kiloDir = neuropixel_folder;

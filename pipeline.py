@@ -167,10 +167,13 @@ else:
     matlab_path = glob.glob('/usr/local/MATLAB/R*')
     matlab_root = matlab_path[0] + '/bin/matlab'
 
+# if f"{config['script_dir']}/tmp" folder does not exist
+if not os.path.isdir(f"{config['script_dir']}/tmp"):
+    os.mkdir(f"{config['script_dir']}/tmp")
+
 # Proceed with neural spike sorting
 if neuro_sorting:
-    config_kilosort = {'script_dir': config['script_dir'], 'trange': np.array(config['Session']['trange']),
-                       'neuropix_chan_map_file': os.path.join(config['script_dir'],'geometries',config['neuropix_chan_map_file'])}
+    config_kilosort = {'script_dir': config['script_dir'], 'trange': np.array(config['Session']['trange'])}
     config_kilosort['type'] = 1
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
     path_to_add = script_folder + '/sorting/'
@@ -188,7 +191,7 @@ if neuro_sorting:
         kilosort(config_kilosort)
 
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
-        scipy.io.savemat('/tmp/config.mat', config_kilosort)
+        scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
                   path_to_add + '\'); Kilosort_run"')
 
@@ -200,13 +203,12 @@ if neuro_sorting:
 
 # Proceed with neuro post-processing
 if neuro_post:
-    config_kilosort = {'script_dir': config['script_dir'],
-                       'neuropix_chan_map_file': os.path.join(config['script_dir'],'geometries',config['neuropix_chan_map_file'])}
+    config_kilosort = {'script_dir': config['script_dir']}
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
     path_to_add = script_folder + '/sorting/'
     for pixel in range(config['num_neuropixels']):
         config_kilosort['neuropixel_folder'] = neuro_folders[pixel] + '/sorted'
-        scipy.io.savemat('/tmp/config.mat', config_kilosort)
+        scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
                   path_to_add + '\')); neuropixel_call"')
 
@@ -214,8 +216,7 @@ if neuro_post:
 if myo_sorting:
     config_kilosort = {'myomatrix': config['myomatrix'], 'script_dir': config['script_dir'],
                        'trange': np.array(config['Session']['trange']),
-                       'sync_chan': int(config['Session']['myo_analog_chan']),
-                       'myo_chan_map_file': os.path.join(config['script_dir'],'geometries',config['myo_chan_map_file'])}
+                       'sync_chan': int(config['Session']['myo_analog_chan'])}
     path_to_add = script_folder + '/sorting/'
     for myomatrix in range(len(config['Session']['myo_chan_list'])):
         if len(concatDataPath)==1:
@@ -227,17 +228,20 @@ if myo_sorting:
             print(f"Using data from: {f[0]}")
         config_kilosort['myomatrix_folder'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
         config_kilosort['myomatrix_num'] = myomatrix
+        # set_trace()
+        config_kilosort['myo_chan_map_file'] = os.path.join(config['script_dir'],'geometries',
+                                                            config['Session']['myo_chan_map_file'][myomatrix])
         config_kilosort['chans'] = np.array(config['Session']['myo_chan_list'][myomatrix])
         config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
 
-        scipy.io.savemat('/tmp/config.mat', config_kilosort)
+        scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
         shutil.rmtree(config_kilosort['myomatrix_folder'], ignore_errors=True)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
                   path_to_add + '\')); myomatrix_binary"')
 
         print('Starting spike sorting of ' + config_kilosort['myomatrix_folder'])
-        scipy.io.savemat('/tmp/config.mat', config_kilosort)
+        scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
                   path_to_add + '\'); Kilosort_run_myo_3"')
 
@@ -245,21 +249,22 @@ if myo_sorting:
 
 # Proceed with myo post-processing
 if myo_post:
-    config_kilosort = {'script_dir': config['script_dir'], 'myomatrix': config['myomatrix'],
-                       'myo_chan_map_file': os.path.join(config['script_dir'],'geometries',config['myo_chan_map_file'])}
+    config_kilosort = {'script_dir': config['script_dir'], 'myomatrix': config['myomatrix']}
     path_to_add = script_folder + '/sorting/'
     for myomatrix in range(len(config['Session']['myo_chan_list'])):
         f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
 
         config_kilosort['myomatrix_folder'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
+        config_kilosort['myo_chan_map_file'] = os.path.join(config['script_dir'],'geometries',
+                                                            config['Session']['myo_chan_map_file'][myomatrix])
         config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
 
-        scipy.io.savemat('/tmp/config.mat', config_kilosort)
-
+        scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
         shutil.rmtree(config_kilosort['myomatrix_folder'] + '/Plots', ignore_errors=True)
+
         print('Starting resorting of ' + config_kilosort['myomatrix_folder'])
-        scipy.io.savemat('/tmp/config.mat', config_kilosort)
+        scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
                   path_to_add + '\')); myomatrix_call"')
 

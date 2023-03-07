@@ -40,7 +40,7 @@ Extra step if and only if you're on a canada compute cluster
 
 Compile codes necessary for drift estimation and install supplementary packages
 
-    cd registration/spike_localization_registration
+    cd registration/spikes_localization_registration
     python3 setup.py build_ext --inplace
     pip install -e .
 

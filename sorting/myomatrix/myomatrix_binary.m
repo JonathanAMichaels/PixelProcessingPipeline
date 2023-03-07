@@ -1,22 +1,15 @@
-load('/tmp/config.mat')
+script_dir = pwd
+load(fullfile(script_dir, '/tmp/config.mat'))
 
 % for use with monopolar
 channelRemap = [23:-1:8 24:31 0:7] + 1;
 % for use with bipolar
-channelLabelsBipolar = [25, 26; 27, 28; 29, 30; 31, 32; ...
-    16, 15; 14, 13; 12, 11; 10, 9; 8, 7; 6, 5; 4, 3; 2, 1; ...
-    17, 18; 19, 20; 21, 22; 23, 24];
+% channelLabelsBipolar = [25, 26; 27, 28; 29, 30; 31, 32; ...
+%     16, 15; 14, 13; 12, 11; 10, 9; 8, 7; 6, 5; 4, 3; 2, 1; ...
+%     17, 18; 19, 20; 21, 22; 23, 24];
 
 chanList = chans(1) : chans(2);
 disp(chanList)
-% if length(chanList) == 16
-%     chanMapFile = [script_dir '/geometries/linear_16ch_RF400_kilosortChanMap.mat']; %[script_dir '/geometries/bipolar_test_kilosortChanMap.mat'];
-    
-% elseif length(chanList) == 32
-%     chanMapFile = [script_dir '/geometries/monopolar_test_kilosortChanMap.mat'];
-% else
-%     error('Channel map not implemented')
-% end
 chanMapFile = myo_chan_map_file
 disp(['Using this channel map: ' chanMapFile])
 

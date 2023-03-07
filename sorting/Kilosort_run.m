@@ -1,4 +1,5 @@
-load('/tmp/config.mat')
+script_dir = pwd
+load(fullfile(script_dir, '/tmp/config.mat'))
 
 try
     restoredefaultpath

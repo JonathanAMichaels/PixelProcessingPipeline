@@ -8,7 +8,7 @@
 
 % INPUTS: params struct, must include:
 %   params.binaryFile: location of binary file created by kilosort
-%   params.kiloDir: new directory including kilosort outputs in .npy format
+%   params.kiloDir: new directory including resorted (merged) kilosort outputs in .npy format
 %   params.chanMap: (chan, 2) matrix of electrode spatial locations in um. This is only used for plotting.
 %   
 %   optional parameters:

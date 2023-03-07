@@ -1,15 +1,11 @@
-load('/tmp/config.mat')
+script_dir = pwd
+load(fullfile(script_dir, '/tmp/config.mat'))
 
 try
     restoredefaultpath
 end
 dbstop if error
 
-% if num_chans == 16
-%     chanMapFile = [script_dir '/geometries/bipolar_test_kilosortChanMap.mat'];
-% elseif num_chans == 32
-%     chanMapFile = [script_dir '/geometries/monopolar_test_kilosortChanMap.mat'];
-% end
 chanMapFile = myo_chan_map_file
 disp(['Using this channel map: ' chanMapFile])
 
@@ -26,7 +22,7 @@ ops.NchanTOT = double(num_chans);
 ops.nt0 = 201;
 ops.NT = 2*64*1024 + ops.ntbuff;
 ops.sigmaMask = Inf; % we don't want a distance-dependant decay
-ops.Th = [9 8];
+ops.Th = [10 4];
 ops.nfilt_factor = 4;
 ops.nblocks = 0;
 ops.nt0min = ceil(ops.nt0/2);
