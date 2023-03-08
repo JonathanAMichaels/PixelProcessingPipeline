@@ -13,6 +13,8 @@ myomatrix:
 kinarm:
 # path to pipeline.py script (always overwritten by program)
 script_dir:
+# whether to concatenate myomatrix data
+concatenate_myo_data: False
 
 # Registration parameters
 Registration:

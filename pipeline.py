@@ -19,6 +19,9 @@ script_folder = os.path.dirname(os.path.realpath(__file__))
 opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
 args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
 
+#change initialization later
+numChannels = 17
+
 if "-f" in opts:
     folder = args[0]
     if os.path.isdir(folder):
@@ -128,9 +131,26 @@ if config['myomatrix'] != '':
     print('Using myomatrix folder ' + config['myomatrix'])
     
 # Search myomatrix folder for existing concatenated_data folder, if it exists, it will be used
+
+if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
+    matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
+elif os.path.isfile('/srv/software/matlab/R2021b/bin/matlab'):
+    matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
+else:
+    matlab_path = glob.glob('/usr/local/MATLAB/R*')
+    matlab_root = matlab_path[0] + '/bin/matlab'
+
+#ADD MATLAB function here
 concatDataPath = find('concatenated_data', config['myomatrix'])
 if len(concatDataPath) > 1:
     raise SystemExit("There shouldn't be more than one concatenated_data folder inside the myomatrix data folder")
+elif (len(concatDataPath) < 1 & config['concatenate_myo_data']):
+    #no concatenated data folder was found
+    print("No concatenated files found, concatenating data from data in recording folders")
+    path_to_add = script_folder + '/sorting/'
+    os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
+              path_to_add + f'\'); pipelineConcatDatFromDir(\'{config["myomatrix"]}\', {numChannels})"')
+    concatDataPath = find('concatenated_data', config['myomatrix'])
 
 temp = glob.glob(folder + '/*.kinarm')
 if len(temp) == 0:
@@ -159,13 +179,13 @@ config_kilosort = yaml.safe_load(open(config_file, 'r'))
 config_kilosort['myomatrix_number'] = 1
 config_kilosort['channel_list'] = 1
 
-if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
-    matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
-elif os.path.isfile('/srv/software/matlab/R2021b/bin/matlab'):
-    matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
-else:
-    matlab_path = glob.glob('/usr/local/MATLAB/R*')
-    matlab_root = matlab_path[0] + '/bin/matlab'
+# if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
+#     matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
+# elif os.path.isfile('/srv/software/matlab/R2021b/bin/matlab'):
+#     matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
+# else:
+#     matlab_path = glob.glob('/usr/local/MATLAB/R*')
+#     matlab_root = matlab_path[0] + '/bin/matlab'
 
 # if f"{config['script_dir']}/tmp" folder does not exist
 if not os.path.isdir(f"{config['script_dir']}/tmp"):
