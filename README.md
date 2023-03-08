@@ -20,8 +20,11 @@ These installation instructions were tested on the Computational Brain Science G
 Clone a copy of the repository on your local machine (for example, in the home directory)
 
     git clone https://github.com/JonathanAMichaels/PixelProcessingPipeline.git
+    
+After cloning, you can either configure a virtualenv or conda environment to run the pipeline
 
-The first time you set up your virtual environment, follow these steps:
+#### Virtual Environment
+To set up a virtualenv environment, follow these steps:
 
     virtualenv ~/pipeline
     source ~/pipeline/bin/activate
@@ -29,8 +32,8 @@ The first time you set up your virtual environment, follow these steps:
     pip3 install torch torchvision
     pip install scipy ruamel.yaml ibl-neuropixel PyWavelets scikit-image pyfftw==0.12.0 cython pydantic
     
-### Conda Environment
-We can also create a conda environment to run the file as opposed to virtualenv by following these steps:
+#### Conda Environment
+We can also create a conda environment to run the file as opposed to a virtual environment by following these steps:
 
     conda env create -f environment.yml
     conda activate pipeline
