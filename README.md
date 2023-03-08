@@ -31,6 +31,14 @@ To set up a virtualenv environment, follow these steps:
     pip install --upgrade pip setuptools wheel
     pip3 install torch torchvision
     pip install scipy ruamel.yaml ibl-neuropixel PyWavelets scikit-image pyfftw==0.12.0 cython pydantic
+    
+#### Conda Environment
+We can also create a conda environment to run the file as opposed to a virtual environment by following these steps:
+
+    conda env create -f environment.yml
+    conda activate pipeline
+    
+The pipeline environment must be activated whenever pipeline.py is ran
 
 Install the cupy version that matches your version of nvcc. For example, if running 'nvcc --version'
 shows version 10.1, then run
