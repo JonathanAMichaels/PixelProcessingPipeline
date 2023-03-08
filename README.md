@@ -31,14 +31,6 @@ To set up a virtualenv environment, follow these steps:
     pip install --upgrade pip setuptools wheel
     pip3 install torch torchvision
     pip install scipy ruamel.yaml ibl-neuropixel PyWavelets scikit-image pyfftw==0.12.0 cython pydantic
-    
-#### Conda Environment
-We can also create a conda environment to run the file as opposed to a virtual environment by following these steps:
-
-    conda env create -f environment.yml
-    conda activate pipeline
-    
-The pipeline environment must be activated whenever pipeline.py is ran
 
 Install the cupy version that matches your version of nvcc. For example, if running 'nvcc --version'
 shows version 10.1, then run
@@ -50,6 +42,7 @@ We can also create a conda environment to run the file as opposed to a virtual e
 
     conda env create -f environment.yml
 
+#### Final Installation Steps
 Extra step if and only if you're on a canada compute cluster
 
     module load gcc/9.3.0 arrow python/3.8.10 scipy-stack
@@ -66,14 +59,17 @@ Organize each experiment into one directory with a Neuropixel folder inside (e.g
 The Myomatrix folder must be organized either as 'folder_myo/Record Node ###/continuous/' for binary open ephys data,
 or as 'folder_myo/Record Node ###/***.continuous' for open ephys format data.
 
+#### VirtualEnv Activation
 Every time you open a new terminal, you must activate current source. If virtualenv was used, activate the source using
 
     source ~/pipeline/bin/activate
 
+#### Conda Activation
 If a conda environment was used, activate it using
 
     conda activate pipeline
 
+#### Final Usage Steps
 The first time you process an experiment, call
 
     python3 pipeline.py -f /path_to_experiment_folder

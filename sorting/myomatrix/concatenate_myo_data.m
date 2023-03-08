@@ -1,4 +1,4 @@
-function pipelineConcatDatFromDir(path, numChannels)
+function concatenate_myo_data(path, numChannels)
     folder = path;
     listing = struct2cell(dir(folder));
     subdir = listing(1,:);

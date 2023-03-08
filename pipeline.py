@@ -147,9 +147,9 @@ if len(concatDataPath) > 1:
 elif (len(concatDataPath) < 1 & config['concatenate_myo_data']):
     #no concatenated data folder was found
     print("No concatenated files found, concatenating data from data in recording folders")
-    path_to_add = script_folder + '/sorting/'
+    path_to_add = script_folder + '/sorting/myomatrix/'
     os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
-              path_to_add + f'\'); pipelineConcatDatFromDir(\'{config["myomatrix"]}\', {numChannels})"')
+              path_to_add + f'\'); concatenate_myo_data(\'{config["myomatrix"]}\', {numChannels})"')
     concatDataPath = find('concatenated_data', config['myomatrix'])
 
 temp = glob.glob(folder + '/*.kinarm')
