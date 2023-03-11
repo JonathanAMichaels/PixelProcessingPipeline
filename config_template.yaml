@@ -9,19 +9,22 @@ neuropixel:
 num_neuropixels:
 # path to myomatrix directory (should end in _myo)
 myomatrix:
+# whether to concatenate myomatrix data
+concatenate_myo_data: False
+# set bandpass filter settings for myomatrix data
+myo_data_passband:
+  - 250
+  - 5000
+# set bandpass filter settings for myomatrix data
+myo_data_sampling_rate: 30000
 # path to .kinarm files
 kinarm:
 # path to pipeline.py script (always overwritten by program)
 script_dir:
-# whether to concatenate myomatrix data
-concatenate_myo_data: False
-
 # Registration parameters
 Registration:
-
 # Sorting parameters
 Sorting:
-
 # Session-specific parameters
 Session:
     trange:

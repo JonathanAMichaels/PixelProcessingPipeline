@@ -1,4 +1,4 @@
-script_dir = pwd
+script_dir = pwd; % get directory where repo exists
 load(fullfile(script_dir, '/tmp/config.mat'))
 
 try
@@ -26,14 +26,14 @@ else
 end
 
 run([script_dir '/sorting/Kilosort_config_3.m']);
-ops.fproc   = fullfile(rootH, 'proc.dat');
+ops.fproc = fullfile(rootH, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.nblocks = 3;
 
-ops.NchanTOT  = 385; % total number of channels in your recording
+ops.NchanTOT = 385; % total number of channels in your recording
 
 % find the binary file
-fs          = dir(fullfile(rootZ, '*.bin'));
+fs = dir(fullfile(rootZ, '*.bin'));
 ops.fbinary = fullfile(rootZ, fs(1).name);
 
 disp(['Using ' ops.fbinary])
@@ -50,7 +50,6 @@ disp(['Using ' ops.fbinary])
 %dshift = rez.dshift;
 %save([rootH 'displacement'], 'dshift');
 
-
 %chanMap = 1:length(rez.ops.chanMap);
 %xcoords = rez.xcoords;
 %ycoords = rez.ycoords;
@@ -64,7 +63,7 @@ addpath(genpath([script_dir '/sorting/Kilosort-2.0']))
 
 run([script_dir '/sorting/Kilosort_config_2.m']);
 ops.fbinary = fullfile(rootH, 'proc.dat');
-ops.fproc   = fullfile(rootH, 'proc2.dat');
+ops.fproc = fullfile(rootH, 'proc2.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = 384; % 385
 
@@ -107,7 +106,7 @@ rez = splitAllClusters(rez, 0);
 % decide on cutoff
 rez = set_cutoff(rez);
 
-fprintf('found %d good units \n', sum(rez.good>0))
+fprintf('found %d good units \n', sum(rez.good > 0))
 
 % write to Phy
 fprintf('Saving results to Phy  \n')

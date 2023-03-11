@@ -10,17 +10,14 @@ import shutil
 from ibllib.ephys.spikes import ks2_to_alf
 from pipeline_utils import find, create_config, extract_sync, extract_LFP
 from registration.registration import registration as registration_function
-from sorting.pykilosort.run_myo_pykilosort import myo_sort as myo_function
+# from sorting.pykilosort.run_myo_pykilosort import myo_sort as myo_function
 from sorting.pykilosort.run_pykilosort import kilosort
-from pdb import set_trace
+# from pdb import set_trace
 
 
 script_folder = os.path.dirname(os.path.realpath(__file__))
 opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
 args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
-
-#change initialization later
-numChannels = 17
 
 if "-f" in opts:
     folder = args[0]
@@ -130,8 +127,7 @@ else:
 if config['myomatrix'] != '':
     print('Using myomatrix folder ' + config['myomatrix'])
     
-# Search myomatrix folder for existing concatenated_data folder, if it exists, it will be used
-
+# find MATLAB installation
 if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
     matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
 elif os.path.isfile('/srv/software/matlab/R2021b/bin/matlab'):
@@ -140,7 +136,7 @@ else:
     matlab_path = glob.glob('/usr/local/MATLAB/R*')
     matlab_root = matlab_path[0] + '/bin/matlab'
 
-#ADD MATLAB function here
+# Search myomatrix folder for existing concatenated_data folder, if it exists, it will be used
 concatDataPath = find('concatenated_data', config['myomatrix'])
 if len(concatDataPath) > 1:
     raise SystemExit("There shouldn't be more than one concatenated_data folder inside the myomatrix data folder")
@@ -149,7 +145,7 @@ elif (len(concatDataPath) < 1 & config['concatenate_myo_data']):
     print("No concatenated files found, concatenating data from data in recording folders")
     path_to_add = script_folder + '/sorting/myomatrix/'
     os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
-              path_to_add + f'\'); concatenate_myo_data(\'{config["myomatrix"]}\', {numChannels})"')
+              path_to_add + f'\'); concatenate_myo_data(\'{config["myomatrix"]}\')"')
     concatDataPath = find('concatenated_data', config['myomatrix'])
 
 temp = glob.glob(folder + '/*.kinarm')
@@ -178,14 +174,6 @@ if registration or registration_final:
 config_kilosort = yaml.safe_load(open(config_file, 'r'))
 config_kilosort['myomatrix_number'] = 1
 config_kilosort['channel_list'] = 1
-
-# if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
-#     matlab_root = '/usr/local/MATLAB/R2021a/bin/matlab'  # something else for testing locally
-# elif os.path.isfile('/srv/software/matlab/R2021b/bin/matlab'):
-#     matlab_root = '/srv/software/matlab/R2021b/bin/matlab'
-# else:
-#     matlab_path = glob.glob('/usr/local/MATLAB/R*')
-#     matlab_root = matlab_path[0] + '/bin/matlab'
 
 # if f"{config['script_dir']}/tmp" folder does not exist
 if not os.path.isdir(f"{config['script_dir']}/tmp"):
@@ -235,6 +223,8 @@ if neuro_post:
 # Proceed with myo processing and spike sorting
 if myo_sorting:
     config_kilosort = {'myomatrix': config['myomatrix'], 'script_dir': config['script_dir'],
+                       'myo_data_passband': np.array(config['myo_data_passband'],dtype=float),
+                       'myo_data_sampling_rate': float(config['myo_data_sampling_rate']),
                        'trange': np.array(config['Session']['trange']),
                        'sync_chan': int(config['Session']['myo_analog_chan'])}
     path_to_add = script_folder + '/sorting/'

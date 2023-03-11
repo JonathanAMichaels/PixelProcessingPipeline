@@ -1,4 +1,4 @@
-script_dir = pwd
+script_dir = pwd; % get directory where repo exists
 load(fullfile(script_dir, '/tmp/config.mat'))
 
 try
@@ -18,20 +18,20 @@ addpath(genpath([script_dir '/sorting/npy-matlab']))
 
 run([script_dir '/sorting/Kilosort_config_25.m']);
 ops.fbinary = fullfile(myomatrix_folder, 'data.bin');
-ops.fproc   = fullfile(myomatrix_folder, 'proc.dat');
+ops.fproc = fullfile(myomatrix_folder, 'proc.dat');
 ops.brokenChan = fullfile(myomatrix_folder, 'brokenChan.mat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
 ops.nt0 = 151;
-ops.NT = 4*64*1024 + ops.ntbuff;
+ops.NT = 4 * 64 * 1024 + ops.ntbuff;
 %ops.nskip           = 10;  % how many batches to skip for determining spike PCs
 %ops.nSkipCov            = 10; % compute whitening matrix from every N-th batch
 ops.sigmaMask = Inf; % we don't want a distance-dependant decay
 ops.Th = [9 6];
 ops.nfilt_factor = 4;
 ops.nblocks = 0;
-ops.nt0min = ceil(ops.nt0/2);
+ops.nt0min = ceil(ops.nt0 / 2);
 ops.nPCs = 12;
 ops.nEig = 6;
 
@@ -43,10 +43,9 @@ end
 
 ops
 
-rez                = preprocessDataSub(ops);
+rez = preprocessDataSub(ops);
 
-rez                = datashift2(rez, 1);
-
+rez = datashift2(rez, 1);
 
 % ORDER OF BATCHES IS NOW RANDOM, controlled by random number generator
 iseed = 1;
@@ -66,7 +65,7 @@ rez = set_cutoff(rez);
 % eliminate widely spread waveforms (likely noise)
 rez.good = get_good_units(rez);
 
-fprintf('found %d good units \n', sum(rez.good>0))
+fprintf('found %d good units \n', sum(rez.good > 0))
 
 % write to Phy
 fprintf('Saving results to Phy  \n')
