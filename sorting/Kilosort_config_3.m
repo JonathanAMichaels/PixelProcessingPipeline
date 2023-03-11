@@ -5,13 +5,13 @@ ops.sig = 10;  % spatial smoothness constant for registration
 ops.CAR = 1;
 
 % frequency for high pass filtering
-ops.fshigh = 300;   
+ops.fshigh = 250;   
 
 % minimum firing rate on a "good" channel (0 to skip)
 ops.minfr_goodchannels = 0; % this does nothing in kilosort 3
 
 % threshold on projections (like in Kilosort1, can be different for last pass like [10 4])
-ops.Th = [9 9];
+ops.Th = [9 8];
 
 % how important is the amplitude penalty (like in Kilosort1, 0 means not used, 10 is average, 50 is a lot) 
 ops.lam = 10;  

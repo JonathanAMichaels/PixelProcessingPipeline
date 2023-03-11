@@ -7,28 +7,32 @@ folder:
 neuropixel:
 # number of neuropixels recorded
 num_neuropixels:
-# path to neuropixels channel map (should be a .mat file, see 'geometries' folder)
-neuropix_chan_map_file: neuropixPhase3B1_kilosortChanMap.mat
 # path to myomatrix directory (should end in _myo)
 myomatrix:
-# path to myomatrix channel map (should be a .mat file, see 'geometries' folder)
-myo_chan_map_file: bipolar_test_kilosortChanMap.mat
+# whether to concatenate myomatrix data
+concatenate_myo_data: False
+# set bandpass filter settings for myomatrix data
+myo_data_passband:
+  - 250
+  - 5000
+# set bandpass filter settings for myomatrix data
+myo_data_sampling_rate: 30000
 # path to .kinarm files
 kinarm:
 # path to pipeline.py script (always overwritten by program)
 script_dir:
-
 # Registration parameters
 Registration:
-
 # Sorting parameters
 Sorting:
-
 # Session-specific parameters
 Session:
     trange:
         - 0
         - 0
+    myo_chan_map_file: 
+        - bipolar_test_kilosortChanMap.mat
+        - bipolar_test_kilosortChanMap.mat
     myo_chan_list:
         - [1, 16]
         - [17, 32]

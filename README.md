@@ -20,8 +20,11 @@ These installation instructions were tested on the Computational Brain Science G
 Clone a copy of the repository on your local machine (for example, in the home directory)
 
     git clone https://github.com/JonathanAMichaels/PixelProcessingPipeline.git
+    
+After cloning, you can either configure a virtualenv or conda environment to run the pipeline
 
-The first time you set up your virtual environment, follow these steps:
+#### Virtual Environment
+To set up a virtualenv environment, follow these steps:
 
     virtualenv ~/pipeline
     source ~/pipeline/bin/activate
@@ -33,14 +36,20 @@ Install the cupy version that matches your version of nvcc. For example, if runn
 shows version 10.1, then run
 
     pip install cupy-cuda101
+    
+#### Conda Environment
+We can also create a conda environment to run the file as opposed to a virtual environment by following these steps:
 
+    conda env create -f environment.yml
+
+#### Final Installation Steps
 Extra step if and only if you're on a canada compute cluster
 
     module load gcc/9.3.0 arrow python/3.8.10 scipy-stack
 
 Compile codes necessary for drift estimation and install supplementary packages
 
-    cd registration/spike_localization_registration
+    cd registration/spikes_localization_registration
     python3 setup.py build_ext --inplace
     pip install -e .
 
@@ -50,10 +59,17 @@ Organize each experiment into one directory with a Neuropixel folder inside (e.g
 The Myomatrix folder must be organized either as 'folder_myo/Record Node ###/continuous/' for binary open ephys data,
 or as 'folder_myo/Record Node ###/***.continuous' for open ephys format data.
 
-Every time you open a new terminal, activate the current source with
+#### VirtualEnv Activation
+Every time you open a new terminal, you must activate current source. If virtualenv was used, activate the source using
 
     source ~/pipeline/bin/activate
 
+#### Conda Activation
+If a conda environment was used, activate it using
+
+    conda activate pipeline
+
+#### Final Usage Steps
 The first time you process an experiment, call
 
     python3 pipeline.py -f /path_to_experiment_folder
@@ -80,4 +96,3 @@ to perform only those steps. Have fun!
 This code does not currently process .kinarm files or combine behavioural information with synced neural data. This may be added at a later date.
 
 The Neuropixels registration is based on https://github.com/int-brain-lab/spikes_localization_registration.
-
