@@ -10,11 +10,16 @@ This toolbox will:
 - For Myomatrix data:
   - Combine OpenEphys data into a single binary and automatically remove broken channels
   - Extract and save the sync signal sent from the behavioural task
-  - Create and save a 'bulk EMG' signal generated from the data
-  - Perform spike sorting with Kilosort 2.5 (pykilosort)
-  - Combine similar units and calculate motor unit stats (custom)
+  - Perform spike sorting with a modified version of Kilosort 3.0 (wider templates)
+  - Combine similar units, calculate motor unit statistics, export back to phy
 
 ## Installation
+### Requirements
+Many processing steps require a CUDA capable GPU.
+  - For Neuropixel data, a GPU with at least 10GB of onboard RAM is recommended
+  - For Myomatrix data, currently only GPUs with compute capability 8.0, 8.7, or 9.0 are supported due to shared thread memory requirements
+
+### Instructions
 These installation instructions were tested on the Computational Brain Science Group Server 'CBS GPU 10GB' image, and the Compute Canada servers. They may need to be adjusted if running on another machine type.
 
 Clone a copy of the repository on your local machine (for example, in the home directory)
@@ -43,9 +48,10 @@ We can also create a conda environment to run the file as opposed to a virtual e
     conda env create -f environment.yml
 
 #### Final Installation Steps
-Extra step if and only if you're on a canada compute cluster
-
-    module load gcc/9.3.0 arrow python/3.8.10 scipy-stack
+If you are processing Myomatrix data, open matlab and confirm that all mex files compile by running
+    
+    cd('/path_to_toolbox/sorting/Kilosort-3.0/CUDA')
+    mexGPUall.m
 
 Compile codes necessary for drift estimation and install supplementary packages
 
@@ -53,6 +59,9 @@ Compile codes necessary for drift estimation and install supplementary packages
     python3 setup.py build_ext --inplace
     pip install -e .
 
+(Optional) Extra step if and only if you're on a canada compute cluster
+
+    module load gcc/9.3.0 arrow python/3.8.10 scipy-stack
 
 ## Usage
 Organize each experiment into one directory with a Neuropixel folder inside (e.g. 041422_g0), a Myomatrix folder (e.g. 2022-04-14_09-48-02_myo, which must have _myo at the end) and any .kinarm data files generated.
@@ -78,7 +87,7 @@ This will generate a config.yaml file in that directory with all the relevant pa
 
 If the config.yaml is correct, you can run the pipeline with all steps, for example
 
-    python3 pipeline.py -f /cifs/pruszynski/Malfoy/041422 -full
+    python3 pipeline.py -f /path_to_experiment_folder -full
 
 Alternatively, you can call any combination of
 
@@ -89,7 +98,9 @@ Alternatively, you can call any combination of
     -myo_post
     -lfp_extract
 
-to perform only those steps. Have fun!
+to perform only those steps. For example, if you are processing Myomatrix data, run
+
+    python3 pipeline.py -f /path_to_experiment_folder -myo_sorting -myo_post
 
 ## Extensions
 
