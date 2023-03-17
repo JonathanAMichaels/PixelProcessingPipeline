@@ -197,8 +197,8 @@ if neuro_sorting:
             print('Extracting sync signal from ' + config_kilosort['neuropixel'] + ' and saving')
             extract_sync(config_kilosort)
 
-        print('Starting drift correction of ' + config_kilosort['neuropixel'])
-        kilosort(config_kilosort)
+        #print('Starting drift correction of ' + config_kilosort['neuropixel'])
+        #kilosort(config_kilosort)
 
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
         scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
