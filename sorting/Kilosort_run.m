@@ -17,7 +17,8 @@ rootH = [rootZ phyDir '/'];
 mkdir(rootH);
 
 run([script_dir '/sorting/Kilosort_config_2.m']);
-ops.fbinary = fullfile(rootH, 'proc.dat');
+ops.fbinary = fullfile(rootH, '/corrected2/traces_cached_seg0.raw');
+%ops.fbinary = fullfile(rootH, 'proc.dat');
 ops.fproc = fullfile(rootH, 'proc2.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = 384; % 385
