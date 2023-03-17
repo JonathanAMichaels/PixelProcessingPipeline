@@ -126,6 +126,8 @@ else:
         config['myomatrix'] = temp_folder[0]
 if config['myomatrix'] != '':
     print('Using myomatrix folder ' + config['myomatrix'])
+if not "concatenate_myo_data" in config:
+    config['concatenate_myo_data'] = False
     
 # find MATLAB installation
 if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
@@ -140,7 +142,7 @@ else:
 concatDataPath = find('concatenated_data', config['myomatrix'])
 if len(concatDataPath) > 1:
     raise SystemExit("There shouldn't be more than one concatenated_data folder inside the myomatrix data folder")
-elif (len(concatDataPath) < 1 & config['concatenate_myo_data']):
+elif len(concatDataPath) < 1 & config['concatenate_myo_data']:
     #no concatenated data folder was found
     print("No concatenated files found, concatenating data from data in recording folders")
     path_to_add = script_folder + '/sorting/myomatrix/'
