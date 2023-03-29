@@ -109,6 +109,11 @@ to perform only those steps. For example, if you are processing Myomatrix data, 
 To edit the configuration file for the processing Myomatrix data, run
 
     python3 pipeline.py -f /path_to_experiment_folder -myo_config
+    
+To edit the configuration file for the processing Neuropixel data, run
+
+    python3 pipeline.py -f /path_to_experiment_folder -neuro_config
+    
 ## Extensions
 
 This code does not currently process .kinarm files or combine behavioural information with synced neural data. This may be added at a later date.
