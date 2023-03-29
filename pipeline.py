@@ -130,6 +130,8 @@ if not "concatenate_myo_data" in config:
     config['concatenate_myo_data'] = False
 if not "myo_data_passband" in config:
     config['myo_data_passband'] = [250, 5000]
+if not "myo_data_sampling_rate" in config:
+    config['myo_data_sampling_rate'] = 30000
     
 # find MATLAB installation
 if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
