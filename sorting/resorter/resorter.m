@@ -53,7 +53,7 @@ function resorter(params)
     end
 
     if ~isfield(params, 'multiSNRThresh')
-        params.multiSNRThresh = 3.8;
+        params.multiSNRThresh = 2.5; % orig 3.8
     end
 
     % minimum correlation to be considered as originating from one cluster
@@ -187,7 +187,7 @@ function resorter(params)
         mL = lags(mL);
 
         % Let's choose what to merge
-        J = m > params.corrThresh | (m > 0.6 & rCross > 0.3);
+        J = m > params.corrThresh | (m > 0.75 & rCross > 0.4);
 
         % Create graph of connected clusters
         J = graph(J);
