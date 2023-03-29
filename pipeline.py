@@ -128,6 +128,8 @@ if config['myomatrix'] != '':
     print('Using myomatrix folder ' + config['myomatrix'])
 if not "concatenate_myo_data" in config:
     config['concatenate_myo_data'] = False
+if not "myo_data_passband" in config:
+    config['myo_data_passband'] = [250, 5000]
     
 # find MATLAB installation
 if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
