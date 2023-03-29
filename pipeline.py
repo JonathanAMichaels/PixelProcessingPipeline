@@ -1,5 +1,6 @@
 import sys
 import os
+import subprocess
 import glob
 import scipy.io
 from ruamel import yaml
@@ -30,8 +31,11 @@ else:
 
 registration = False
 registration_final = False
+config = False
+myo_config = False
 myo_sorting = False
 myo_post = False
+neuro_config = False
 neuro_sorting = False
 neuro_post = False
 lfp_extract = False
@@ -41,10 +45,16 @@ if "-registration" in opts:
     registration = True
 if "-registration_final" in opts:
     registration_final = True
+if "-config" in opts:
+    config = True
+if "-myo_config" in opts:
+    myo_config = True
 if "-myo_sorting" in opts:
     myo_sorting = True
 if "-myo_post" in opts:
     myo_post = True
+if "-neuro_config" in opts:
+    neuro_config = True
 if "-neuro_sorting" in opts:
     neuro_sorting = True
 if "-neuro_post" in opts:
@@ -91,6 +101,14 @@ elif len(config_file) == 0:
     config_file = find('config.yaml', folder)
 config_file = config_file[0]
 
+if config:
+    if os.name == 'posix': # detect Unix
+        subprocess.call(f"nano {config_file}", shell=True)
+        print('Configuration done.')
+    elif os.name == 'nt': # detect Windows
+        subprocess.call(f"notepad {config_file}", shell=True)
+        print('Configuration done.')
+        
 # Load config
 print('Using config file ' + config_file)
 config = yaml.load(open(config_file, 'r'), Loader=yaml.RoundTripLoader)
@@ -185,6 +203,14 @@ config_kilosort['channel_list'] = 1
 if not os.path.isdir(f"{config['script_dir']}/tmp"):
     os.mkdir(f"{config['script_dir']}/tmp")
 
+if neuro_config:
+    if os.name == 'posix': # detect Unix
+        subprocess.call(f"nano {config['script_dir']}/sorting/Kilosort_run.m", shell=True)
+        print('Configuration for "-neuro_sorting" done.')
+    elif os.name == 'nt': # detect Windows
+        subprocess.call(f"notepad {config['script_dir']}/sorting/Kilosort_run.m", shell=True)
+        print('Configuration for "-neuro_sorting" done.')
+
 # Proceed with neural spike sorting
 if neuro_sorting:
     config_kilosort = {'script_dir': config['script_dir'], 'trange': np.array(config['Session']['trange'])}
@@ -225,6 +251,14 @@ if neuro_post:
         scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
         os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
                   path_to_add + '\')); neuropixel_call"')
+
+if myo_config:
+    if os.name == 'posix': # detect Unix
+        subprocess.call(f"nano {config['script_dir']}/sorting/Kilosort_run_myo_3.m", shell=True)
+        print('Configuration for "-myo_sorting" done.')
+    elif os.name == 'nt': # detect Windows
+        subprocess.call(f"notepad {config['script_dir']}/sorting/Kilosort_run_myo_3.m", shell=True)
+        print('Configuration for "-myo_sorting" done.')
 
 # Proceed with myo processing and spike sorting
 if myo_sorting:
