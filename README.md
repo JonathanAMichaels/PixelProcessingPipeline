@@ -85,6 +85,10 @@ The first time you process an experiment, call
 
 This will generate a config.yaml file in that directory with all the relevant parameters for that experiment generated automatically. Open that file with any text editor and add any session specific information to the Session parameter section. For example, if you collected Myomatrix data you must specify which channels belong to which electrode and which channel contains the sync information, since this information cannot be generated automatically.
 
+Editing the main configuration file can be done by running the command below:
+    
+    python3 pipeline.py -f /path_to_experiment_folder -config
+
 If the config.yaml is correct, you can run the pipeline with all steps, for example
 
     python3 pipeline.py -f /path_to_experiment_folder -full
@@ -102,6 +106,14 @@ to perform only those steps. For example, if you are processing Myomatrix data, 
 
     python3 pipeline.py -f /path_to_experiment_folder -myo_sorting -myo_post
 
+To edit the configuration file for the processing Myomatrix data, run
+
+    python3 pipeline.py -f /path_to_experiment_folder -myo_config
+    
+To edit the configuration file for the processing Neuropixel data, run
+
+    python3 pipeline.py -f /path_to_experiment_folder -neuro_config
+    
 ## Extensions
 
 This code does not currently process .kinarm files or combine behavioural information with synced neural data. This may be added at a later date.
