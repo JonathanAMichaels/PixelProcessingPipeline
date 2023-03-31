@@ -48,7 +48,7 @@ rez = find_merges(rez, 1);
 % write to Phy
 fprintf('Saving results to Phy  \n')
 rezToPhy2(rez, myo_sorted_dir);
-save(fullfile(script_dir, '/tmp/ops.mat'), 'ops')
+save(fullfile(myo_sorted_dir, '/ops.mat'), 'ops')
 
 % delete(ops.fproc);
 

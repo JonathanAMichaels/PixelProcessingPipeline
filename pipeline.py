@@ -329,11 +329,11 @@ if myo_post:
         # extract waveforms for Phy FeatureView
         for iDir in merge_folders:
             # create symlinks to processed data
-            Path(f"{iDir}/proc.dat").symlink_to(Path(f"{config_kilosort['myo_sorted_dir']}/proc.dat"))
+            Path(f"{iDir}/proc.dat").symlink_to(Path("../../proc.dat"))
             # run Phy extract-waveforms on intermediate merges
             subprocess.run(["phy", "extract-waveforms", "params.py"],cwd=iDir, check=True)
         # run Phy extract-waveforms on final merge
-        Path(f"{config_kilosort['myo_sorted_dir']}/custom_merges/final_merge/proc.dat").symlink_to(Path(f"{config_kilosort['myo_sorted_dir']}/proc.dat"))
+        Path(f"{config_kilosort['myo_sorted_dir']}/custom_merges/final_merge/proc.dat").symlink_to(Path("../../proc.dat"))
         subprocess.run(["phy", "extract-waveforms", "params.py"],cwd=f"{config_kilosort['myo_sorted_dir']}/custom_merges/final_merge", check=True)
 
 # Proceed with LFP extraction
