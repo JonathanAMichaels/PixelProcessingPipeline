@@ -179,7 +179,7 @@ function resorter(params)
         % calculate cross-correlation
         [bigR, lags, rCross] = calcCrossCorr(params, mdata, consistency, T, I, C);
 
-        disp('Combining units and re-assigning spikes')
+        disp('Combining units') % and re-assigning spikes')
         % Find lags with maximum correlation
         [m, mL] = max(bigR, [], 1);
         m = squeeze(m); mL = squeeze(mL);
