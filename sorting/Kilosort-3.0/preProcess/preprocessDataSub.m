@@ -36,15 +36,15 @@ ops.NchanTOT = getOr(ops, 'NchanTOT', NchanTOTdefault); % if NchanTOT was left e
 % determine bad channels
 fprintf('Time %3.0fs. Determining good channels.. \n', toc);
 igood = true(size(chanMap));
-%{
-if isfield(ops, 'brokenChan')
-    if isfile(ops.brokenChan)
-        load(ops.brokenChan)
-        igood = true(NchanTOT,1);
-        igood(brokenChan) = false;
-    end
-end
-%}
+
+% if isfield(ops, 'brokenChan')
+%     if isfile(ops.brokenChan)
+%         load(ops.brokenChan)
+%         igood = true(NchanTOT,1);
+%         igood(brokenChan) = false;
+%     end
+% end
+
 
 chanMap = chanMap(igood); %it's enough to remove bad channels from the channel map, which treats them as if they are dead
 xc = xc(igood); % removes coordinates of bad channels
@@ -84,7 +84,8 @@ Wrot = get_whitening_matrix(rez); % outputs a rotation matrix (Nchan by Nchan) w
 condition_number = cond(gather(Wrot));
 disp(['Computed the whitening matrix cond = ' num2str(condition_number)])
 if condition_number > 50
-    disp('High conditioning of the whitening matrix can result in noisy and poor results')
+    disp('Warning: Your whitening matrix value is above 50.')
+    disp('High conditioning of the whitening matrix can result in noisy and poor results.')
     disp('CHECK YO-SELF BEFORE YOU WRECK YO-SELF')
 end
 

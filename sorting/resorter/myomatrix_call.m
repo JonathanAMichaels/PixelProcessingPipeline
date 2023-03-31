@@ -5,8 +5,8 @@ load(myo_chan_map_file)
 
 % resorting parameters
 params.chanMap = cat(2, xcoords, ycoords);
-params.kiloDir = [myomatrix_folder '/custom_merges'];
-params.binaryFile = [myomatrix_folder '/data.bin'];
+params.kiloDir = [myo_sorted_dir '/custom_merges'];
+params.binaryFile = [myo_sorted_dir '/data.bin'];
 params.doPlots = true; % whether to generate plots
 params.savePlots = true; % whether to save plots
 params.skipFilter = false;
@@ -17,7 +17,7 @@ params.spikeCountLim = 10; % minimum spike count to be included in output
 params.refractoryLim = 1; % spikes below this refractory time limit will be considered duplicates
 
 % make sure a sorting exists
-if isfile([myomatrix_folder '/spike_times.npy'])
+if isfile([myo_sorted_dir '/spike_times.npy'])
     resorter(params)
 else
     disp('No spike sorting to post-process')

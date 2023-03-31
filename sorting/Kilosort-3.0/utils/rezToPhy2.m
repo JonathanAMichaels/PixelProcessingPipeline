@@ -1,4 +1,3 @@
-
 function rezToPhy2(rez, savePath, varargin)
 % pull out results from kilosort's rez to either return to workspace or to
 % save in the appropriate format for the phy GUI to run on. If you provide
@@ -196,10 +195,9 @@ if ~isempty(savePath)
             [root, fname, ext] = fileparts(rez.ops.fproc);
         end
 %         fprintf(fid,['dat_path = ''',fname ext '''\n']);
-        fprintf(fid,['dat_path = ''', strrep(rez.ops.fproc, '\', '/') '''\n']);
-        
+        % make path flexible to final location of results for Phy
+        fprintf(fid,'import pathlib\ndat_path = f"{pathlib.Path().resolve()}/proc.dat"\n'); %['dat_path = ''', strrep(rez.ops.fproc, '\', '/') '''\n']);
         fprintf(fid,'n_channels_dat = %i\n',rez.ops.Nchan);
-        
         fprintf(fid,'dtype = ''int16''\n');
         fprintf(fid,'offset = 0\n');
         if mod(rez.ops.fs,1)
