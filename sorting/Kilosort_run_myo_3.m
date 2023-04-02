@@ -13,9 +13,9 @@ addpath(genpath([script_dir '/sorting/Kilosort-3.0']))
 addpath(genpath([script_dir '/sorting/npy-matlab']))
 
 run([script_dir '/sorting/Kilosort_config_3.m']);
-ops.fbinary = fullfile(myomatrix_folder, 'data.bin');
-ops.fproc = fullfile(myomatrix_folder, 'proc.dat');
-ops.brokenChan = fullfile(myomatrix_folder, 'brokenChan.mat');
+ops.fbinary = fullfile(myo_sorted_dir, 'data.bin');
+ops.fproc = fullfile(myo_sorted_dir, 'proc.dat');
+ops.brokenChan = fullfile(myo_sorted_dir, 'brokenChan.mat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = double(num_chans);
 
@@ -47,8 +47,8 @@ rez = find_merges(rez, 1);
 
 % write to Phy
 fprintf('Saving results to Phy  \n')
-rezToPhy2(rez, myomatrix_folder);
-save(fullfile(script_dir, '/tmp/ops.mat'), 'ops')
+rezToPhy2(rez, myo_sorted_dir);
+save(fullfile(myo_sorted_dir, '/ops.mat'), 'ops')
 
 % delete(ops.fproc);
 

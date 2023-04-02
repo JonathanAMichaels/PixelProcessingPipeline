@@ -11,10 +11,6 @@ import shutil
 from ibllib.ephys.spikes import ks2_to_alf
 from pipeline_utils import find, create_config, extract_sync, extract_LFP
 from registration.registration import registration as registration_function
-# from sorting.pykilosort.run_myo_pykilosort import myo_sort as myo_function
-from sorting.pykilosort.run_pykilosort import kilosort
-# from pdb import set_trace
-
 
 script_folder = os.path.dirname(os.path.realpath(__file__))
 opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
@@ -33,10 +29,10 @@ registration = False
 registration_final = False
 config = False
 myo_config = False
-myo_sorting = False
+myo_sort = False
 myo_post = False
 neuro_config = False
-neuro_sorting = False
+neuro_sort = False
 neuro_post = False
 lfp_extract = False
 cluster = False
@@ -49,23 +45,23 @@ if "-config" in opts:
     config = True
 if "-myo_config" in opts:
     myo_config = True
-if "-myo_sorting" in opts:
-    myo_sorting = True
+if "-myo_sort" in opts:
+    myo_sort = True
 if "-myo_post" in opts:
     myo_post = True
 if "-neuro_config" in opts:
     neuro_config = True
-if "-neuro_sorting" in opts:
-    neuro_sorting = True
+if "-neuro_sort" in opts:
+    neuro_sort = True
 if "-neuro_post" in opts:
     neuro_post = True
 if "-lfp_extract" in opts:
     lfp_extract = True
 if "-full" in opts:
     registration = True
-    myo_sorting = True
+    myo_sort = True
     myo_post = True
-    neuro_sorting = True
+    neuro_sort = True
     neuro_post = True
 if "-cluster" in opts:
     cluster = True
@@ -88,8 +84,8 @@ if cluster:
     os.chdir(home + 'scratch')
     os.system("sbatch slurm_job.sh")
     registration = False
-    myo_sorting = False
-    neuro_sorting = False
+    myo_sort = False
+    neuro_sort = False
 
 # Search working folder for existing configuration file
 config_file = find('config.yaml', folder)
@@ -103,10 +99,10 @@ config_file = config_file[0]
 
 if config:
     if os.name == 'posix': # detect Unix
-        subprocess.call(f"nano {config_file}", shell=True)
+        subprocess.run(f"nano {config_file}", shell=True, check=True)
         print('Configuration done.')
     elif os.name == 'nt': # detect Windows
-        subprocess.call(f"notepad {config_file}", shell=True)
+        subprocess.run(f"notepad {config_file}", shell=True, check=True)
         print('Configuration done.')
         
 # Load config
@@ -205,14 +201,14 @@ if not os.path.isdir(f"{config['script_dir']}/tmp"):
 
 if neuro_config:
     if os.name == 'posix': # detect Unix
-        subprocess.call(f"nano {config['script_dir']}/sorting/Kilosort_run.m", shell=True)
-        print('Configuration for "-neuro_sorting" done.')
+        subprocess.run(f"nano {config['script_dir']}/sorting/Kilosort_run.m", shell=True, check=True)
+        print('Configuration for "-neuro_sort" done.')
     elif os.name == 'nt': # detect Windows
-        subprocess.call(f"notepad {config['script_dir']}/sorting/Kilosort_run.m", shell=True)
-        print('Configuration for "-neuro_sorting" done.')
+        subprocess.run(f"notepad {config['script_dir']}/sorting/Kilosort_run.m", shell=True, check=True)
+        print('Configuration for "-neuro_sort" done.')
 
 # Proceed with neural spike sorting
-if neuro_sorting:
+if neuro_sort:
     config_kilosort = {'script_dir': config['script_dir'], 'trange': np.array(config['Session']['trange'])}
     config_kilosort['type'] = 1
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
@@ -232,8 +228,10 @@ if neuro_sorting:
 
         print('Starting spike sorting of ' + config_kilosort['neuropixel'])
         scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
-        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
-                  path_to_add + '\'); Kilosort_run"')
+        # os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
+        #           path_to_add + '\'); Kilosort_run"')
+        subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r",
+                        f"addpath(genpath('{path_to_add}')); Kilosort_run"], check=True)
 
         print('Starting alf post-processing of ' + config_kilosort['neuropixel'])
         alf_dir = Path(config_kilosort['neuropixel_folder'] + '/sorted/alf')
@@ -249,19 +247,21 @@ if neuro_post:
     for pixel in range(config['num_neuropixels']):
         config_kilosort['neuropixel_folder'] = neuro_folders[pixel] + '/sorted'
         scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
-        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
-                  path_to_add + '\')); neuropixel_call"')
+        # os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
+        #           path_to_add + '\')); neuropixel_call"')
+        subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r",
+                        f"addpath(genpath('{path_to_add}')); neuropixel_call"], check=True)
 
 if myo_config:
     if os.name == 'posix': # detect Unix
-        subprocess.call(f"nano {config['script_dir']}/sorting/Kilosort_run_myo_3.m", shell=True)
-        print('Configuration for "-myo_sorting" done.')
+        subprocess.run(f"nano {config['script_dir']}/sorting/Kilosort_run_myo_3.m", shell=True, check=True)
+        print('Configuration for "-myo_sort" done.')
     elif os.name == 'nt': # detect Windows
-        subprocess.call(f"notepad {config['script_dir']}/sorting/Kilosort_run_myo_3.m", shell=True)
-        print('Configuration for "-myo_sorting" done.')
+        subprocess.run(f"notepad {config['script_dir']}/sorting/Kilosort_run_myo_3.m", shell=True, check=True)
+        print('Configuration for "-myo_sort" done.')
 
 # Proceed with myo processing and spike sorting
-if myo_sorting:
+if myo_sort:
     config_kilosort = {'myomatrix': config['myomatrix'], 'script_dir': config['script_dir'],
                        'myo_data_passband': np.array(config['myo_data_passband'],dtype=float),
                        'myo_data_sampling_rate': float(config['myo_data_sampling_rate']),
@@ -276,7 +276,7 @@ if myo_sorting:
             f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
             config_kilosort['myomatrix_data'] = f[0]
             print(f"Using data from: {f[0]}")
-        config_kilosort['myomatrix_folder'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
+        config_kilosort['myo_sorted_dir'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
         config_kilosort['myomatrix_num'] = myomatrix
         # set_trace()
         config_kilosort['myo_chan_map_file'] = os.path.join(config['script_dir'],'geometries',
@@ -286,16 +286,20 @@ if myo_sorting:
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
 
         scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
-        shutil.rmtree(config_kilosort['myomatrix_folder'], ignore_errors=True)
-        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
-                  path_to_add + '\')); myomatrix_binary"')
-
-        print('Starting spike sorting of ' + config_kilosort['myomatrix_folder'])
+        shutil.rmtree(config_kilosort['myo_sorted_dir'], ignore_errors=True)
+        # os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
+        #           path_to_add + '\')); myomatrix_binary"')
+        subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r",
+                        f"addpath(genpath('{path_to_add}')); myomatrix_binary"], check=True)
+        
+        print('Starting spike sorting of ' + config_kilosort['myo_sorted_dir'])
         scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
-        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
-                  path_to_add + '\'); Kilosort_run_myo_3"')
-
-        #myo_function(config_kilosort)
+        # os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
+        #           path_to_add + '\'); Kilosort_run_myo_3"')
+        subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r",
+                        f"addpath(genpath('{path_to_add}')); Kilosort_run_myo_3"], check=True)
+        # extract waveforms for Phy FeatureView
+        subprocess.run(["phy", "extract-waveforms", "params.py"],cwd=f"{config_kilosort['myo_sorted_dir']}", check=True)
 
 # Proceed with myo post-processing
 if myo_post:
@@ -304,19 +308,33 @@ if myo_post:
     for myomatrix in range(len(config['Session']['myo_chan_list'])):
         f = glob.glob(config_kilosort['myomatrix'] + '/Record*')
 
-        config_kilosort['myomatrix_folder'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
+        config_kilosort['myo_sorted_dir'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
         config_kilosort['myo_chan_map_file'] = os.path.join(config['script_dir'],'geometries',
                                                             config['Session']['myo_chan_map_file'][myomatrix])
         config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
 
         scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
-        shutil.rmtree(config_kilosort['myomatrix_folder'] + '/Plots', ignore_errors=True)
+        shutil.rmtree(config_kilosort['myo_sorted_dir'] + '/Plots', ignore_errors=True)
 
-        print('Starting resorting of ' + config_kilosort['myomatrix_folder'])
+        print('Starting resorting of ' + config_kilosort['myo_sorted_dir'])
         scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
-        os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
-                  path_to_add + '\')); myomatrix_call"')
+        # get intermediate merge folders
+        merge_folders = Path(f"{config_kilosort['myo_sorted_dir']}/custom_merges").glob("intermediate_merge*")
+        # os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
+        #           path_to_add + '\')); myomatrix_call"')
+        subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r",
+                        f"addpath(genpath('{path_to_add}')); myomatrix_call"], check=True)
+
+        # extract waveforms for Phy FeatureView
+        for iDir in merge_folders:
+            # create symlinks to processed data
+            Path(f"{iDir}/proc.dat").symlink_to(Path("../../proc.dat"))
+            # run Phy extract-waveforms on intermediate merges
+            subprocess.run(["phy", "extract-waveforms", "params.py"],cwd=iDir, check=True)
+        # run Phy extract-waveforms on final merge
+        Path(f"{config_kilosort['myo_sorted_dir']}/custom_merges/final_merge/proc.dat").symlink_to(Path("../../proc.dat"))
+        subprocess.run(["phy", "extract-waveforms", "params.py"],cwd=f"{config_kilosort['myo_sorted_dir']}/custom_merges/final_merge", check=True)
 
 # Proceed with LFP extraction
 if lfp_extract:

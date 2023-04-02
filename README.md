@@ -50,12 +50,13 @@ We can also create a conda environment to run the file as opposed to a virtual e
 #### Final Installation Steps
 If you are processing Myomatrix data, open matlab and confirm that all mex files compile by running
     
-    cd('/path_to_toolbox/sorting/Kilosort-3.0/CUDA')
-    mexGPUall.m
+    matlab -nodesktop
+    cd PixelProcessingPipeline/sorting/Kilosort-3.0/CUDA/
+    mexGPUall
 
 Compile codes necessary for drift estimation and install supplementary packages
 
-    cd registration/spikes_localization_registration
+    cd PixelProcessingPipeline/registration/spikes_localization_registration
     python3 setup.py build_ext --inplace
     pip install -e .
 
@@ -96,15 +97,15 @@ If the config.yaml is correct, you can run the pipeline with all steps, for exam
 Alternatively, you can call any combination of
 
     -registration
-    -neuro_sorting
+    -neuro_sort
     -neuro_post
-    -myo_sorting
+    -myo_sort
     -myo_post
     -lfp_extract
 
 to perform only those steps. For example, if you are processing Myomatrix data, run
 
-    python3 pipeline.py -f /path_to_experiment_folder -myo_sorting -myo_post
+    python3 pipeline.py -f /path_to_experiment_folder -myo_sort -myo_post
 
 To edit the configuration file for the processing Myomatrix data, run
 
