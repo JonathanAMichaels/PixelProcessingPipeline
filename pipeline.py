@@ -202,6 +202,7 @@ if not os.path.isdir(f"{config['script_dir']}/tmp"):
 if neuro_config:
     if os.name == 'posix': # detect Unix
         subprocess.run(f"nano {config['script_dir']}/sorting/Kilosort_run.m", shell=True, check=True)
+        subprocess.run(f"nano {config['script_dir']}/sorting/resorter/neuropixel_call.m", shell=True, check=True)
         print('Configuration for "-neuro_sort" done.')
     elif os.name == 'nt': # detect Windows
         subprocess.run(f"notepad {config['script_dir']}/sorting/Kilosort_run.m", shell=True, check=True)
@@ -255,6 +256,7 @@ if neuro_post:
 if myo_config:
     if os.name == 'posix': # detect Unix
         subprocess.run(f"nano {config['script_dir']}/sorting/Kilosort_run_myo_3.m", shell=True, check=True)
+        subprocess.run(f"nano {config['script_dir']}/sorting/resorter/myomatrix_call.m", shell=True, check=True)
         print('Configuration for "-myo_sort" done.')
     elif os.name == 'nt': # detect Windows
         subprocess.run(f"notepad {config['script_dir']}/sorting/Kilosort_run_myo_3.m", shell=True, check=True)

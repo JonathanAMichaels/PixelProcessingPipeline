@@ -350,8 +350,14 @@ function resorter(params)
                 if ~exist([params.kiloDir '/Plots'], 'dir')
                     mkdir([params.kiloDir '/Plots'])
                 end
-                print([params.kiloDir '/Plots/' num2str(j) '.png'], '-dpng')
-                print([params.kiloDir '/Plots/' num2str(j) '.svg'], '-dsvg')
+                if ~exist([params.kiloDir '/Plots/svg/'], 'dir')
+                    mkdir([params.kiloDir '/Plots/svg/'])
+                end
+                if ~exist([params.kiloDir '/Plots/png/'], 'dir')
+                    mkdir([params.kiloDir '/Plots/png/'])
+                end
+                print([params.kiloDir '/Plots/png/' num2str(j) '.png'], '-dpng')
+                print([params.kiloDir '/Plots/svg/' num2str(j) '.svg'], '-dsvg')
             end
         end
 
@@ -391,8 +397,14 @@ function resorter(params)
                 if ~exist([params.kiloDir '/Plots'], 'dir')
                     mkdir([params.kiloDir '/Plots'])
                 end
-                print([params.kiloDir '/Plots/' num2str(j) '-wavecomp.png'], '-dpng')
-                print([params.kiloDir '/Plots/' num2str(j) '-wavecomp.svg'], '-dsvg')
+                if ~exist([params.kiloDir '/Plots/svg/'], 'dir')
+                    mkdir([params.kiloDir '/Plots/svg/'])
+                end
+                if ~exist([params.kiloDir '/Plots/png/'], 'dir')
+                    mkdir([params.kiloDir '/Plots/png/'])
+                end
+                print([params.kiloDir '/Plots/png/' num2str(j) '-wavecomp.png'], '-dpng')
+                print([params.kiloDir '/Plots/svg/' num2str(j) '-wavecomp.svg'], '-dsvg')
             end
         end
 
@@ -412,7 +424,10 @@ function resorter(params)
             if ~exist([params.kiloDir '/Plots'], 'dir')
                 mkdir([params.kiloDir '/Plots'])
             end
-            print([params.kiloDir '/Plots/histogram.png'], '-dpng')
+            if ~exist([params.kiloDir '/Plots/png/'], 'dir')
+                mkdir([params.kiloDir '/Plots/png/'])
+            end
+            print([params.kiloDir '/Plots/png//histogram.png'], '-dpng')
         end
     end
 end
