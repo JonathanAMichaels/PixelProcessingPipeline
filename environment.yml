@@ -167,9 +167,9 @@ dependencies:
       - ghp-import
       - globus-sdk
       - h5py
-      - git+https://github.com/int-brain-lab/ibllib.git
-      - git+https://github.com/int-brain-lab/iblutil.git
-      - git+https://github.com/int-brain-lab/ibl-neuropixel.git
+      - ibl-neuropixel==0.4.1
+      - ibllib==2.20.0
+      - iblutil==1.5.0
       - importlib-metadata
       - importlib-resources
       - iniconfig
@@ -215,8 +215,8 @@ dependencies:
       - pandas
       - param
       - parmap
-      - git+https://github.com/cortex-lab/phy.git
-      - git+https://github.com/cortex-lab/phylib.git
+      - phy==2.0b5
+      - phylib==2.4.3
       - pims
       - pkgutil-resolve-name
       - platformdirs

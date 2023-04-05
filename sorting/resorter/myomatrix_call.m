@@ -1,6 +1,5 @@
 script_dir = pwd; % get directory where repo exists
 load(fullfile(script_dir, '/tmp/config.mat'))
-load(fullfile(script_dir, '/tmp/ops.mat'))
 load(myo_chan_map_file)
 
 % resorting parameters
