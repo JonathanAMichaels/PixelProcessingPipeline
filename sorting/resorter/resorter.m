@@ -111,11 +111,12 @@ function resorter(params)
     I = readNPY([params.kiloDir '/../spike_clusters.npy']);
     Wrot = readNPY([params.kiloDir '/../whitening_mat_inv.npy']);
     Wrot = 1;
-    load([params.kiloDir '/../brokenChan']);
-    params.brokenChan = brokenChan;
-
-    %TMP = readNPY([params.kiloDir '/templates.npy']);
-    %TMP_ind = readNPY([params.kiloDir '/templates_ind.npy']);
+    if isfile([params.kiloDir '/../brokenChan'])
+        load([params.kiloDir '/../brokenChan']);
+        params.brokenChan = brokenChan;
+    else
+        params.brokenChan = [];
+    end
 
     if params.userSorted
         clusterGroup = tdfread([params.kiloDir '/../cluster_group.tsv']);
