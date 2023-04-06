@@ -246,7 +246,7 @@ if neuro_post:
     neuro_folders = glob.glob(config['neuropixel'] + '/*_g*')
     path_to_add = script_folder + '/sorting/'
     for pixel in range(config['num_neuropixels']):
-        config_kilosort['neuropixel_folder'] = neuro_folders[pixel] + '/sorted'
+        config_kilosort['neuropixel_folder'] = neuro_folders[pixel] + '/kilosort2/sorter_output'
         scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
         # os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(genpath(\'' +
         #           path_to_add + '\')); neuropixel_call"')

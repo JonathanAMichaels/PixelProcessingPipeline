@@ -5,7 +5,7 @@ load([script_dir '/geometries/neuropixPhase3B1_kilosortChanMap'])
 % resorting parameters
 params.chanMap = cat(2, xcoords, ycoords);
 params.kiloDir = neuropixel_folder;
-params.binaryFile = [neuropixel_folder '/proc.dat'];
+params.binaryFile = [neuropixel_folder '/recording.dat'];
 params.userSorted = false;
 params.doPlots = false;
 params.savePlots = false;
