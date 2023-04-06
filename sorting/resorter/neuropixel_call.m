@@ -12,11 +12,9 @@ params.savePlots = false;
 params.waveCount = 600;
 params.backSp = 35;
 params.forwardSp = 35;
-params.corrRange = 10;
+params.corrRange = 20;
 params.corrThresh = 0.9;
-params.consistencyThresh = 0;
-params.SNRThresh = 2;
-params.multiSNRThresh = 2;
+params.consistencyThresh = 0.6;
 params.skipFilter = true;
 
 resorter(params)
