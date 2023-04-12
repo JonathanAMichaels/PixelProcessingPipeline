@@ -350,10 +350,10 @@ if myo_plot:
     # create default values for spike validation plot arguments, if not provided
     if len(args) == 1:
         arg1 = int(1) # default to plot chunk 1
-        arg2 = True # default to a flag for all clusters
+        arg2 = 'true' # default to logical true to show all clusters
     elif len(args) == 2:
         arg1 = int(args[1])
-        arg2 = int(1) # default to a flag for all clusters
+        arg2 = 'true' # default to logical true to show all clusters
     elif len(args) == 3:
         import json
         arg_as_list = json.loads(args[2])

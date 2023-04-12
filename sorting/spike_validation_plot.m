@@ -14,7 +14,7 @@ function spike_validation_plot(chunk, clusters)
     dbstop if error
 
     chunk_index_range = get_data_amount(chunk);
-    disp(['Plotting spike validation plot for Chunk 1, with range of indices: ' num2str(chunk_index_range(1)) ' to ' num2str(chunk_index_range(end))])
+    disp(['Plotting spike validation plot for Chunk ' num2str(chunk) ', with range of indices: ' num2str(chunk_index_range(1)) ' to ' num2str(chunk_index_range(end))])
 
     processed_ephys_data_path = [myo_sorted_dir '/proc.dat'];
     final_sort_path = [myo_sorted_dir '/custom_merges/final_merge/custom_merge.mat'];
@@ -28,7 +28,7 @@ function spike_validation_plot(chunk, clusters)
     spike_times = T;
     cluster_ID = I;
     mdata_full = mdata;
-    if clusters == 1
+    if isa(clusters, 'logical') && clusters == true
         disp("Showing all clusters.")
     else
         C = intersect(C, clusters+1);
@@ -51,8 +51,8 @@ function spike_validation_plot(chunk, clusters)
     %     title('Spike Counts for Each Template ID')
     %     xlabel('Template ID')
     %     ylabel('Spike Counts')
-
-    figure(2); hold on
+    
+    figure('CloseRequestFcn',@my_closereq); hold on
     data_mins = min(data(chunk_index_range,:));
     data_maxs = max(data(chunk_index_range,:));
     data_ranges = data_maxs - data_mins;
@@ -103,13 +103,9 @@ function spike_validation_plot(chunk, clusters)
     title('Template Matches for Each Channel')
     xlabel('Time (s)')
     ylabel('Neural Activity (a.u.)')
-    set(gca,'color',[0 0 0])
-    set(gca, 'YTick', []);
-    set(gca, 'XTick', chunk_index_range(1)/30000:10:chunk_index_range(end)/30000);
     ax = gca;
-    ax.XAxis.Exponent = 0;
-    % enable fullscreen
-    set(gcf, 'WindowState', 'fullscreen');
+    % ax.XAxis.Exponent = 0;
+    set(gcf, 'WindowState', 'fullscreen'); % set fullscreen
     outerpos = ax.OuterPosition;
     ti = ax.TightInset; 
     left = outerpos(1) + ti(1);
@@ -117,10 +113,21 @@ function spike_validation_plot(chunk, clusters)
     ax_width = outerpos(3) - ti(1) - ti(3);
     ax_height = outerpos(4) - ti(2) - ti(4);
     ax.Position = [left bottom ax_width ax_height];
-    disp('done.')
+    set(ax,'color',[0 0 0])
+    set(ax, 'YTick', []);
+    set(ax, 'XTick', chunk_index_range(1):30000:chunk_index_range(end));
+    set(ax, 'XTickLabel', chunk_index_range(1)/30000:1:chunk_index_range(end)/30000);
 end
 
 % get 10 second chunks of data
 function data_amount = get_data_amount(chunk)
     data_amount = (chunk-1)*300000+1:chunk*300000;
+end
+
+function my_closereq(src,event)
+    % Close request function 
+    % to quit MATLAB when plot is closed
+    disp('Plot closed. Quitting MATLAB.')
+    delete(gcf)
+    quit
 end
