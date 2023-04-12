@@ -127,7 +127,7 @@ Wrot = get_whitening_matrix_faster(rez); % outputs a rotation matrix (Nchan by N
 
 
 cmdLog('Loading raw data and applying filters...', toc(t00));
-if true
+if false
 % open for reading raw data
 fid = fopen(ops.fbinary, 'r');
 if fid<3

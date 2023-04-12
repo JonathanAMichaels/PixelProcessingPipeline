@@ -17,7 +17,7 @@ ops.nblocks = 3; % non-rigid only really relevant for mmmany channels or probe l
 
 % flag to round [data]shifts to nearest electrode spacing integer
 % - ALWAYS use integerShifts
-ops.integerShifts = 1;
+ops.integerShifts = 0;
 
 % preselect target batch for drift alignment
 % - if  <1, will be batch nearest targBatch% of total batches
@@ -127,8 +127,8 @@ ops.whiteningRange = 32; % use all chanels available
 % - BUT relevant uprobe 'channel' units are very different from nanopixel spacing
 %       nChannels==3 will include lateral & longitudinally adjacent channels of stereo probe
 %       nChannels==5 will include adjacent stereopairs (**but b/c spacing asymmetry of channel indices, this can include channel up to 300 microns away...:-/ )
-ops.loc_range   = [5, 4];   % def=[5, 4]
-ops.long_range  = [30, 6];  % def=[30, 6]
+ops.loc_range   = [5, 16];   % def=[5, 4]
+ops.long_range  = [30, 32];  % def=[30, 6]
 
 
 %% "datashift" params
