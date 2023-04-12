@@ -23,6 +23,7 @@ ops.fbinary = fullfile(neuropixel);
 ops.fproc = fullfile(rootH, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = 385;
+ops.saveDir = rootH;
 
 disp(['Using ' ops.fbinary])
 

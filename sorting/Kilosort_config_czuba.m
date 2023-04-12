@@ -13,7 +13,7 @@ ops.fig = 1; % 1==standard plots, 2=extra debug plots (more verbose, but margina
 %   U-Probe recommendation:  ops.nblocks = 1;  ops.integerShifts = 1;
 %
 % [.nblocks] type of data shifting (0 = none, 1 = rigid, 2 = nonrigid)
-ops.nblocks = 0; % non-rigid only really relevant for mmmany channels or probe length is long relative to brain (i.e. rodents)
+ops.nblocks = 3; % non-rigid only really relevant for mmmany channels or probe length is long relative to brain (i.e. rodents)
 
 % flag to round [data]shifts to nearest electrode spacing integer
 % - ALWAYS use integerShifts
