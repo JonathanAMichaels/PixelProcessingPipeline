@@ -232,7 +232,7 @@ if neuro_sort:
         # os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
         #           path_to_add + '\'); Kilosort_run"')
         subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r",
-                        f"addpath(genpath('{path_to_add}')); Kilosort_run"], check=True)
+                        f"addpath(genpath('{path_to_add}')); Kilosort_run_czuba"], check=True)
 
         print('Starting alf post-processing of ' + config_kilosort['neuropixel'])
         alf_dir = Path(config_kilosort['neuropixel_folder'] + '/sorted/alf')
