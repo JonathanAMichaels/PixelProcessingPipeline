@@ -1,8 +1,6 @@
 script_dir = pwd; % get directory where repo exists
 load(fullfile(script_dir, '/tmp/config.mat'))
 
-dbstop if error
-
 try
     restoredefaultpath
 end
@@ -24,6 +22,8 @@ ops.fproc = fullfile(rootH, 'proc.dat');
 ops.chanMap = fullfile(chanMapFile);
 ops.NchanTOT = 385;
 ops.saveDir = rootH;
+
+figDir = rootH;
 
 disp(['Using ' ops.fbinary])
 
@@ -55,7 +55,7 @@ rez = find_merges(rez, 1);
 rez = splitAllClusters(rez, 0);
 
 % decide on cutoff
-rez = set_cutoff(rez);
+rez = set_cutoff(rez, 1);
 
 [rez.good, ~] = get_good_units(rez);
 
