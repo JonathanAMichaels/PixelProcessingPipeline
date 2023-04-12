@@ -1,6 +1,6 @@
 
 ops = [];
-
+ops.fs = 30000;
 
 %% Custom fields or flags
 % Parallel memmap raw data for whitening/loading
