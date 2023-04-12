@@ -13,8 +13,8 @@ myomatrix:
 concatenate_myo_data: False
 # set bandpass filter settings for myomatrix data
 myo_data_passband:
-  - 250
-  - 5000
+    - 250
+    - 5000
 # set bandpass filter settings for myomatrix data
 myo_data_sampling_rate: 30000
 # path to .kinarm files
@@ -36,6 +36,13 @@ Session:
     myo_chan_list:
         - [1, 16]
         - [17, 32]
+    # Remove bad channels from myomatrix data
+    # This can be a sequence of booleans or a sequence of lists:
+    # True for automatic bad channel removal, False to include all channels.
+    # Provide an integer list of channels to remove those channels for that session, e.g., [1,2,3,4]
+    remove_bad_myo_chans:
+        - True
+        - True
     myo_analog_chan: 33
     myo_muscle_list:
         - Bicep
