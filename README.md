@@ -96,9 +96,12 @@ If the config.yaml is correct, you can run the pipeline with all steps, for exam
 
 Alternatively, you can call any combination of
 
+    -config
     -registration
+    -neuro_config
     -neuro_sort
     -neuro_post
+    -myo_config
     -myo_sort
     -myo_post
     -lfp_extract

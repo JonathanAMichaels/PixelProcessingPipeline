@@ -9,8 +9,8 @@ channelRemap = [23:-1:8 24:31 0:7] + 1;
 %     17, 18; 19, 20; 21, 22; 23, 24];
 
 chanList = chans(1):chans(2);
-disp(chanList)
-chanMapFile = myo_chan_map_file
+disp(['Starting with these channels: ' num2str(chanList)])
+chanMapFile = myo_chan_map_file;
 disp(['Using this channel map: ' chanMapFile])
 
 dataChan = chanList;
@@ -123,11 +123,40 @@ print([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.png'], '-dpng')
 S
 
 if length(chanList) == 16
-    brokenChan = find(S(:, 2) > bipolarThresh | S(:, 1) < lowThresh);
+    brokenChan = int64(find(S(:, 2) > bipolarThresh | S(:, 1) < lowThresh));
 else
-    brokenChan = find(S(:, 2) > unipolarThresh | S(:, 1) < lowThresh);
+    brokenChan = int64(find(S(:, 2) > unipolarThresh | S(:, 1) < lowThresh));
 end
-disp(['Broken/inactive channels are: ' num2str(brokenChan')])
+disp(['Automatically detected broken/inactive channels are: ' num2str(brokenChan')])
+
+% now actually remove the detected broken channels if True
+% if a list of broken channels is provided, use that instead
+% if false, just continue
+if isa(remove_bad_myo_chans(1), 'logical')
+    if remove_bad_myo_chans(1) == false
+        if length(brokenChan) > 0
+            disp('Broken/inactive channels detected, but not removing them, because remove_bad_myo_chans is false')
+        elseif length(brokenChan) == 0        
+            disp('No broken/inactive channels detected, not removing any, because remove_bad_myo_chans is false')
+        end
+        disp(['Keeping channel list: ' num2str(chanList)])
+    elseif remove_bad_myo_chans(1) == true
+        disp('Removing automatically detected broken/inactive channels')
+        data(:, brokenChan) = [];
+        chanList(brokenChan) = [];
+        disp(['New channel list is: ' num2str(chanList)])
+    end
+elseif isa(remove_bad_myo_chans, 'integer')
+    brokenChan = remove_bad_myo_chans;
+    disp(['Removing manually provided broken/inactive channels: ' num2str(brokenChan)])
+    data(:, brokenChan) = [];
+    chanList(brokenChan) = [];
+    disp(['New channel list is: ' num2str(chanList)])
+else
+    error('remove_bad_myo_chans must be a boolean or an integer list of broken channels')
+end
+
+save([myomatrix '/sorted' num2str(myomatrix_num) '/chanList.mat'], 'chanList')
 save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
 clear data_filt data_norm
 
@@ -151,7 +180,7 @@ if true
         fdata = fdata - median(fdata, 2);
         fdata = filtfilt(b, a, fdata);
         fdata = fdata(preBuff + 1:end - postBuff - 1, :);
-        fdata(:, brokenChan) = randn(size(fdata(:, brokenChan))) * 5;
+        % fdata(:, brokenChan) = randn(size(fdata(:, brokenChan))) * 5;
         fwrite(fileID, int16(fdata'), 'int16');
     end
 else
