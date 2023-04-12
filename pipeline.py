@@ -31,6 +31,7 @@ config = False
 myo_config = False
 myo_sort = False
 myo_post = False
+myo_plot = False
 neuro_config = False
 neuro_sort = False
 neuro_post = False
@@ -49,6 +50,8 @@ if "-myo_sort" in opts:
     myo_sort = True
 if "-myo_post" in opts:
     myo_post = True
+if "-myo_plot" in opts:
+    myo_plot = True
 if "-neuro_config" in opts:
     neuro_config = True
 if "-neuro_sort" in opts:
@@ -146,6 +149,8 @@ if not "myo_data_passband" in config:
     config['myo_data_passband'] = [250, 5000]
 if not "myo_data_sampling_rate" in config:
     config['myo_data_sampling_rate'] = 30000
+if not "remove_bad_myo_chans" in config:
+    config['remove_bad_myo_chans'] = False
     
 # find MATLAB installation
 if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
@@ -284,6 +289,7 @@ if myo_sort:
         config_kilosort['myo_chan_map_file'] = os.path.join(config['script_dir'],'geometries',
                                                             config['Session']['myo_chan_map_file'][myomatrix])
         config_kilosort['chans'] = np.array(config['Session']['myo_chan_list'][myomatrix])
+        config_kilosort['remove_bad_myo_chans'] = np.array(config['Session']['remove_bad_myo_chans'][myomatrix])
         config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
 
@@ -313,6 +319,7 @@ if myo_post:
         config_kilosort['myo_sorted_dir'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
         config_kilosort['myo_chan_map_file'] = os.path.join(config['script_dir'],'geometries',
                                                             config['Session']['myo_chan_map_file'][myomatrix])
+        config_kilosort['remove_bad_myo_chans'] = np.array(config['Session']['remove_bad_myo_chans'][myomatrix])
         config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
 
@@ -337,6 +344,23 @@ if myo_post:
         # run Phy extract-waveforms on final merge
         Path(f"{config_kilosort['myo_sorted_dir']}/custom_merges/final_merge/proc.dat").symlink_to(Path("../../proc.dat"))
         subprocess.run(["phy", "extract-waveforms", "params.py"],cwd=f"{config_kilosort['myo_sorted_dir']}/custom_merges/final_merge", check=True)
+
+if myo_plot:
+    path_to_add = script_folder + '/sorting/'
+    # create default values for spike validation plot arguments, if not provided
+    if len(args) == 1:
+        arg1 = int(1) # default to plot chunk 1
+        arg2 = 'true' # default to logical true to show all clusters
+    elif len(args) == 2:
+        arg1 = int(args[1])
+        arg2 = 'true' # default to logical true to show all clusters
+    elif len(args) == 3:
+        import json
+        arg_as_list = json.loads(args[2])
+        arg1 = int(args[1])
+        arg2 = np.array(arg_as_list).astype(int)
+    subprocess.run(["matlab", "-nodesktop", "-nosplash", "-r", 
+                     f"addpath(genpath('{path_to_add}')); spike_validation_plot({arg1},{arg2})"], check=True)
 
 # Proceed with LFP extraction
 if lfp_extract:

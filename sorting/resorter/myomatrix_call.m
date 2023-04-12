@@ -1,6 +1,13 @@
 script_dir = pwd; % get directory where repo exists
 load(fullfile(script_dir, '/tmp/config.mat'))
-load(myo_chan_map_file)
+load(fullfile(myo_sorted_dir, 'brokenChan.mat'))
+
+% load channel map with broken channels removed if chosen by user
+if length(brokenChan) > 0 && remove_bad_myo_chans(1) ~= false
+    load(fullfile(myo_sorted_dir, 'chanMap_minus_brokenChans.mat'))
+else
+    load(myo_chan_map_file)
+end
 
 % resorting parameters
 params.chanMap = cat(2, xcoords, ycoords);
