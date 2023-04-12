@@ -88,11 +88,11 @@ ops.procBatchStarts = procBatchStarts;
 % ------------------------------------------------------------------------------------
 
 %% Load chanMap
-%[chanMap, xc, yc, kcoords, NchanMapTOT] = loadChanMap(ops.chanMap); % function to load channel map file
-chanMap = ops.chanMap.chanMap; xc = ops.chanMap.xcoords;
-yc = ops.chanMap.ycoords; kcoords = ops.chanMap.kcoords;
-NchanMapTOT = length(chanMap);
-%ops.NchanTOT = getOr(ops, 'NchanTOT', NchanMapTOT); % if .NchanTOT was left empty, then overwrite with n channels in file
+[chanMap, xc, yc, kcoords, NchanMapTOT] = loadChanMap(ops.chanMap); % function to load channel map file
+%chanMap = ops.chanMap.chanMap; xc = ops.chanMap.xcoords;
+%yc = ops.chanMap.ycoords; kcoords = ops.chanMap.kcoords;
+%NchanMapTOT = length(chanMap);
+ops.NchanTOT = getOr(ops, 'NchanTOT', NchanMapTOT); % if .NchanTOT was left empty, then overwrite with n channels in file
 
 ops.igood = true(size(chanMap));
 

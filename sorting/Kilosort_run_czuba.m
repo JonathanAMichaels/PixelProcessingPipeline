@@ -32,7 +32,7 @@ else
     ops.trange = trange;
 end
 
-
+ops.chanMap
 rez = preprocessDataSub(ops);
 
 rez = datashift2(rez, 1);

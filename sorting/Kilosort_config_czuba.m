@@ -59,7 +59,7 @@ ops.splitClustersBy = 0;    % 0 recommended for full assessment of what sorting 
 ops.applyCutoff = 0;
 
 % Git repo status & diff
-ops.useGit = 1;
+ops.useGit = 0;
 % add kilosort_utils repo to git version tracking
 % - moved into ks25 ./configFiles dir
 % - retained here for example on how to add other repos to git tracking functionality
@@ -152,7 +152,7 @@ ops.nTEMP = 12;
 % - during learning, new templates start at first value (def=80, very maleable), and progress to second value (def=800, very stable)
 % - during extraction, parameter is fixed at second value (affects degree of temporal dynamics)
 % - this param interacts with batch duration (ideally it wouldn't), for batches ~6-10 sec long, [80 800] is pretty good
-ops.momentum = [80 800];
+ops.momentum = [60 600];
 
 ops.nfilt_factor        = 4; % (def=4) max number of clusters per ['good'] channel (even temporary ones)
 
