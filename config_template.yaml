@@ -25,6 +25,7 @@ script_dir:
 Registration:
 # Sorting parameters
 Sorting:
+    do_KS_param_gridsearch: False
 # Session-specific parameters
 Session:
     trange:

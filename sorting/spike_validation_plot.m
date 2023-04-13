@@ -127,7 +127,7 @@ end
 function my_closereq(src,event)
     % Close request function 
     % to quit MATLAB when plot is closed
-    disp('Plot closed. Quitting MATLAB.')
-    delete(gcf)
-    quit
+    disp('Closing figure and quitting MATLAB.')
+    delete(gcf);
+    quit;
 end

@@ -10,12 +10,11 @@ channelRemap = [23:-1:8 24:31 0:7] + 1;
 
 chanList = chans(1):chans(2);
 disp(['Starting with these channels: ' num2str(chanList)])
-chanMapFile = myo_chan_map_file;
-disp(['Using this channel map: ' chanMapFile])
+disp(['Using this channel map: ' myo_chan_map_file])
 
 dataChan = chanList;
-if not(isfolder([myomatrix '/sorted' num2str(myomatrix_num) '/']))
-    mkdir([myomatrix '/sorted' num2str(myomatrix_num) '/']);
+if not(isfolder([myo_sorted_dir '/']))
+    mkdir([myo_sorted_dir '/']);
 end
 
 % Check if we're dealing with .dat or .continuous
@@ -119,7 +118,7 @@ for q = 1:2
     set(gca, 'YTick', (1:size(data, 2)) * 1600, 'YTickLabels', 1:size(data, 2))
     axis([1 size(data_filt, 1) 0 (size(data, 2) + 1) * 1600])
 end
-print([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.png'], '-dpng')
+print([myo_sorted_dir '/brokenChan.png'], '-dpng')
 S
 
 if length(chanList) == 16
@@ -156,11 +155,25 @@ else
     error('remove_bad_myo_chans must be a boolean or an integer list of broken channels')
 end
 
-save([myomatrix '/sorted' num2str(myomatrix_num) '/chanList.mat'], 'chanList')
-save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
+save([myo_sorted_dir '/chanList.mat'], 'chanList')
+save([myo_sorted_dir '/brokenChan.mat'], 'brokenChan');
+
+% load and modify channel map variables to remove broken channel elements, if desired
+if length(brokenChan) > 0 && remove_bad_myo_chans(1) ~= false
+    load(myo_chan_map_file)
+    chanMap(end-length(brokenChan)+1:end) = []; % take off end to save indexing
+    chanMap0ind(end-length(brokenChan)+1:end) = []; % take off end to save indexing
+    connected(brokenChan) = [];
+    kcoords(brokenChan) = [];
+    xcoords(brokenChan) = [];
+    ycoords(brokenChan) = [];
+    disp('Broken channels were just removed from that channel map')
+    save(fullfile(myo_sorted_dir, 'chanMap_minus_brokenChans.mat'), 'chanMap', 'connected', 'xcoords', 'ycoords', 'kcoords', 'chanMap0ind', 'fs', 'name')
+end
+
 clear data_filt data_norm
 
-fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
+fileID = fopen([myo_sorted_dir '/data.bin'], 'w');
 if true
     disp("Filtering raw data with passband:")
     disp(strcat(string(myo_data_passband(1)), "-", string(myo_data_passband(2)), " Hz"))
@@ -202,7 +215,7 @@ if false
     else
         bEMG = int16(mean(data(:, notBroken), 2));
     end
-    save([myomatrix '/sorted' num2str(myomatrix_num) '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
+    save([myo_sorted_dir '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
     clear bEMG
     disp('Saved generated bulk EMG')
 end

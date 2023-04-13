@@ -5,12 +5,15 @@ import glob
 import scipy.io
 from ruamel import yaml
 from pathlib import Path
+import itertools
 import datetime
 import numpy as np
 import shutil
 from ibllib.ephys.spikes import ks2_to_alf
 from pipeline_utils import find, create_config, extract_sync, extract_LFP
+from sorting.Kilosort_gridsearch_config import get_KS_params_grid
 from registration.registration import registration as registration_function
+from pdb import set_trace
 
 script_folder = os.path.dirname(os.path.realpath(__file__))
 opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
@@ -149,8 +152,6 @@ if not "myo_data_passband" in config:
     config['myo_data_passband'] = [250, 5000]
 if not "myo_data_sampling_rate" in config:
     config['myo_data_sampling_rate'] = 30000
-if not "remove_bad_myo_chans" in config:
-    config['remove_bad_myo_chans'] = False
     
 # find MATLAB installation
 if os.path.isfile('/usr/local/MATLAB/R2021a/bin/matlab'):
@@ -285,7 +286,6 @@ if myo_sort:
             print(f"Using data from: {f[0]}")
         config_kilosort['myo_sorted_dir'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
         config_kilosort['myomatrix_num'] = myomatrix
-        # set_trace()
         config_kilosort['myo_chan_map_file'] = os.path.join(config['script_dir'],'geometries',
                                                             config['Session']['myo_chan_map_file'][myomatrix])
         config_kilosort['chans'] = np.array(config['Session']['myo_chan_list'][myomatrix])
@@ -304,10 +304,48 @@ if myo_sort:
         scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
         # os.system(matlab_root + ' -nodisplay -nosplash -nodesktop -r "addpath(\'' +
         #           path_to_add + '\'); Kilosort_run_myo_3"')
-        subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r",
-                        f"addpath(genpath('{path_to_add}')); Kilosort_run_myo_3"], check=True)
-        # extract waveforms for Phy FeatureView
-        subprocess.run(["phy", "extract-waveforms", "params.py"],cwd=f"{config_kilosort['myo_sorted_dir']}", check=True)
+        
+        # check if user wants to do grid search of KS params
+        if config['Sorting']['do_KS_param_gridsearch'] == 1:
+            iParams = iter(get_KS_params_grid()) # get iterator of all possible param combinations
+        else:
+            iParams = iter([[]]) # just pass empty list to run once with default params
+        while True:
+            # while no exhaustion of iterator
+            try:
+                these_params = next(iParams)
+                if len(these_params) > 0:
+                    print(f"Using these KS params from Kilosort_gridsearch_config.py")
+                    print(these_params)
+                    param_keys = list(these_params.keys())
+                    param_keys_str = [f"\'{k}\'" for k in param_keys]
+                    param_vals = list(these_params.values())
+                    zipped_params = zip(param_keys_str, param_vals)
+                    flattened_params = itertools.chain.from_iterable(zipped_params)
+                    # this is a comma-separated string of key-value pairs
+                    passable_params = ','.join(str(p) for p in flattened_params)
+                else:
+                    print(f"Will use KS params from Kilosort_run_myo_3.m")
+                    passable_params = these_params # this is an empty list
+                    
+                subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r",
+                                f"addpath(genpath('{path_to_add}')); Kilosort_run_myo_3_gridsearch(struct({passable_params}))"],
+                               check=True)
+                # extract waveforms for Phy FeatureView
+                subprocess.run(["phy", "extract-waveforms", "params.py"],cwd=f"{config_kilosort['myo_sorted_dir']}", check=True)
+                # copy this entire folder into a timestamped copy of the folder,
+                # to keep each run, rather than overwriting sorted0 each time
+                shutil.copytree(
+                    config_kilosort['myo_sorted_dir'],
+                    os.path.join(config_kilosort['myo_sorted_dir'],'..',
+                                 f"sorted{str(myomatrix)}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{passable_params}")
+                    )
+            except StopIteration:
+                print('Grid search complete.')
+                break
+            except:
+                print('Error in grid search.')
+                raise # re-raise the exception
 
 # Proceed with myo post-processing
 if myo_post:
@@ -343,7 +381,8 @@ if myo_post:
             subprocess.run(["phy", "extract-waveforms", "params.py"],cwd=iDir, check=True)
         # run Phy extract-waveforms on final merge
         Path(f"{config_kilosort['myo_sorted_dir']}/custom_merges/final_merge/proc.dat").symlink_to(Path("../../proc.dat"))
-        subprocess.run(["phy", "extract-waveforms", "params.py"],cwd=f"{config_kilosort['myo_sorted_dir']}/custom_merges/final_merge", check=True)
+        subprocess.run(["phy", "extract-waveforms", "params.py"],
+                       cwd=f"{config_kilosort['myo_sorted_dir']}/custom_merges/final_merge",check=True)
 
 if myo_plot:
     path_to_add = script_folder + '/sorting/'

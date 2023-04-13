@@ -1,23 +1,14 @@
 script_dir = pwd; % get directory where repo exists
 load(fullfile(script_dir, '/tmp/config.mat'))
 load(fullfile(myo_sorted_dir, 'brokenChan.mat'))
-chanMapFile = myo_chan_map_file
-disp(['Using this channel map: ' chanMapFile])
 
 % load and modify channel map variables to remove broken channel elements, if desired
 if length(brokenChan) > 0 && remove_bad_myo_chans(1) ~= false
-    load(chanMapFile)
-    disp('Broken channels were just removed from that channel map')
-    load(myo_chan_map_file)
-    chanMap(end-length(brokenChan)+1:end) = []; % take off end to save indexing
-    chanMap0ind(end-length(brokenChan)+1:end) = []; % take off end to save indexing
-    connected(brokenChan) = [];
-    kcoords(brokenChan) = [];
-    xcoords(brokenChan) = [];
-    ycoords(brokenChan) = [];
-    save(fullfile(myo_sorted_dir, 'chanMap_minus_brokenChans.mat'), 'chanMap', 'connected', 'xcoords', 'ycoords', 'kcoords', 'chanMap0ind', 'fs', 'name')
     chanMapFile = fullfile(myo_sorted_dir, 'chanMap_minus_brokenChans.mat');
+else
+    chanMapFile = myo_chan_map_file;
 end
+disp(['Using this channel map: ' chanMapFile])
 
 try
     restoredefaultpath
@@ -66,6 +57,9 @@ fprintf('Saving results to Phy  \n')
 rezToPhy2(rez, myo_sorted_dir);
 save(fullfile(myo_sorted_dir, '/ops.mat'), 'ops')
 
-% delete(ops.fproc);
+%%% create timestamped backup folder for each run, so that these results in sorted0 don't get overwritten later
+% split_sorted_folder_name = split(myo_sorted_dir, filesep);
+% sorted_folder_suffix = split_sorted_folder_name{end};
+% copyfile(myo_sorted_dir, fullfile(myo_sorted_dir, '..', [sorted_folder_suffix '_' datestr(now, 'yyyy-mm-dd_HH:MM:SS')]))
 
 quit;
