@@ -52,4 +52,8 @@ ops.scaleproc           = 200;   % int16 scaling of whitened data
 ops.nPCs                = 3; % how many PCs to project the spikes into
 ops.useRAM              = 0; % not yet available
 
+%% additional settings 
+ops.CAR = 1; % whether to perform CAR
+ops.loc_range = [5 4]; % area to detect peaks; plus/minus for both time and channel
+ops.long_range = [30 6]; % range to detect isolated peaks: [timepoints channels]
 %%
