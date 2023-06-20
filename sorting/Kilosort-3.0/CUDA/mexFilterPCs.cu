@@ -19,7 +19,7 @@ using namespace std;
 const int  Nthreads = 1024, NrankMax = 3;
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	Conv1D(const double *Params, const float *data, const float *W, float *conv_sig){    
-  volatile __shared__ float  sW[201*NrankMax], sdata[(Nthreads+201)*NrankMax];
+  volatile __shared__ float  sW[101*NrankMax], sdata[(Nthreads+101)*NrankMax];
   float x, y;
   int tid, tid0, bid, i, nid, Nrank, NT, nt0;
 

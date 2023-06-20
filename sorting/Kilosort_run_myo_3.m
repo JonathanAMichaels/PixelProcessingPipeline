@@ -1,4 +1,4 @@
-function Kilosort_run_myo_3(ops_input_params)
+function rez = Kilosort_run_myo_3(ops_input_params)
     dbstop if error
     script_dir = pwd; % get directory where repo exists
     load(fullfile(script_dir, '/tmp/config.mat'))
@@ -24,23 +24,24 @@ function Kilosort_run_myo_3(ops_input_params)
     ops.brokenChan = fullfile(myo_sorted_dir, 'brokenChan.mat');
     ops.chanMap = fullfile(chanMapFile);
     ops.NchanTOT = double(num_chans - length(brokenChan));
-    ops.nt0 = 201;
-    ops.ntbuff = ops.nt0 + 3;
-    ops.NT = 2048 * 32 + ops.ntbuff;
+    ops.nt0 = 101;
+    ops.ntbuff = 256;
+    ops.NT = 2^14 * 32 + ops.ntbuff;
     ops.sigmaMask = Inf; % we don't want a distance-dependant decay
-    ops.Th = [9 8];
-    ops.nfilt_factor = 4;
+    ops.Th = [9 4]; % threshold crossings for pre-clustering (in PCA projection space)
+    ops.spkTh = -6; % spike threshold in standard deviations (-6 default) (only used in isolated_peaks_new)
+    ops.nfilt_factor = 6; % max number of clusters per good channel (even temporary ones)
     ops.nblocks = 0;
-    ops.nt0min = ceil(ops.nt0 / 2);
-    ops.nPCs = 6;
+    ops.nt0min = ceil(ops.nt0 / 2); % peak of template match will be this many points away from beginning
+    ops.nPCs = 6; % how many PCs to project the spikes into (also used as number of template prototypes)
+    ops.nskip = 10; % how many batches to skip for determining spike PCs
+    ops.nSkipCov = 2; % compute whitening matrix and prototype templates using every N-th batch
     ops.nEig = 3;
     ops.lam = 10; % amplitude penalty (0 means not used, 10 is average, 50 is a lot)
-    ops.ThPre = 8; % threshold crossings for pre-clustering (in PCA projection space)
     ops.CAR = 0; % whether to perform CAR
-    ops.loc_range = [5 4]; % area to detect peaks; plus/minus for both time and channel
-    ops.long_range = [30 6]; % range to detect isolated peaks: [timepoints channels]
-    ops.fig = 0; % whether to plot figures
-    ops.nSkipCov = 25; % compute whitening matrix and prototype templates using every N-th batch
+    ops.loc_range = [5 1]; % area to detect peaks; plus/minus for both time and channel
+    ops.long_range = [ops.nt0min 6]; % range to detect isolated peaks: [timepoints channels]
+    ops.fig = 1; % whether to plot figures
 
     %% gridsearch section
     % only try to use gridsearch values if ops_input_params is a struct and fields are present
@@ -53,7 +54,7 @@ function Kilosort_run_myo_3(ops_input_params)
         % ops.NT = ops.nt0 * 32 + ops.ntbuff; % 2*87040 % 1024*(32+ops.ntbuff);
     end
     %% end gridsearch section
-    
+
     if trange(2) == 0
         ops.trange = [0 Inf];
     else
@@ -65,8 +66,40 @@ function Kilosort_run_myo_3(ops_input_params)
     rez = preprocessDataSub(ops);
     rez = datashift2(rez, 1);
     [rez, st3, tF] = extract_spikes(rez);
-    rez = template_learning(rez, tF, st3);
+    figure(5);
+    plot(st3(:, 1), '.')
+    title('Spike times versus spike ID')
+    figure(6);
+    plot(st3(:, 2), '.')
+    title('Upsampled grid location of best template match spike ID')
+    figure(7);
+    plot(st3(:, 3), '.')
+    title('Amplitude of template match for each spike ID')
+    figure(8); hold on;
+    plot(st3(:, 4), 'g.')
+    for kSpatialDecay = 1:6
+        less_than_idx = find(st3(:, 4) < 6 * kSpatialDecay);
+        more_than_idx = find(st3(:, 4) >= 6 * (kSpatialDecay - 1));
+        idx = intersect(less_than_idx, more_than_idx);
+        bit_idx = bitand(st3(:, 4) < 6 * kSpatialDecay, st3(:, 4) >= 6 * (kSpatialDecay - 1));
+        plot(idx, st3(bit_idx, 4), '.')
+    end
+    title('Prototype templates for each spatial decay value (1:6:30) resulting in each best match spike ID')
+    figure(9);
+    % plot(st3(:, 5), '.')
+    % title('Amplitude of template match for each spike ID (Duplicate of st3(:,3))')
+    % figure(10);
+    plot(st3(:, 6), '.')
+    title('Batch ID versus spike ID')
+    figure(11);
+    for iTemp = 1:size(tF, 2)
+        subplot(size(tF, 2), 1, iTemp)
+        plot(squeeze(tF(:, iTemp, :)), '.')
+    end
+    % error('stop here')/home/smoconn/git/PixelProcessingPipeline/sorting
+    [rez, ~]  = template_learning(rez, tF, st3);
     [rez, st3, tF] = trackAndSort(rez);
+    plot_templates_on_raw_data_fast(rez, st3);
     rez = final_clustering(rez, tF, st3);
     rez = find_merges(rez, 1);
 
@@ -80,5 +113,5 @@ function Kilosort_run_myo_3(ops_input_params)
     % copyfile(myo_sorted_dir,
     % fullfile(myo_sorted_dir, '..', [sorted_folder_suffix '_' datestr(now, 'yyyy-mm-dd_HH:MM:SS')]))
 
-    quit;
+    %     quit;
 end

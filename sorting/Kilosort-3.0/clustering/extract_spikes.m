@@ -1,5 +1,6 @@
 function [rez, st3, tF] = extract_spikes(rez)
 
+% get the electrode position boundaries
 ymin = min(rez.yc);
 ymax = max(rez.yc);
 xmin = min(rez.xc);
@@ -33,10 +34,10 @@ xmax = max(rez.xc);
 ops = rez.ops;
 
 spkTh = ops.Th(1);
-sig = 10;
+sig = 20; % set microns as hardcoded BASE gaussian kernel radius for the nearest channels
 dNearActiveSite = median(diff(unique(rez.yc)));
 
-[ycup, xcup] = meshgrid(ops.yup, ops.xup);
+[ycup, xcup] = meshgrid(ops.yup, ops.xup); % define the 2x upsampled grid
 
 NrankPC = ops.nPCs; %!!
 [wTEMP, wPCA]    = extractTemplatesfromSnippets(rez, NrankPC);
@@ -107,11 +108,11 @@ for k = 1:ops.Nbatch
     tF(:, :, nsp + [1:ns]) = gather(feat);
     nsp = nsp + ns;
     
-    if rem(k,100)==1 || k==ops.Nbatch
+    if rem(k,round(ops.Nbatch/10))==1 %|| k==ops.Nbatch
         fprintf('%2.2f sec, %d batches, %d spikes \n', toc, k, nsp)
     end
 end
-tF = tF(:, :, 1:nsp);
+tF = tF(:, :, 1:nsp); % remove excess preallocated space
 st3 = st3(1:nsp, :);
 
 rez.iC = iC;

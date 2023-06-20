@@ -32,7 +32,7 @@ for ibatch = 1:nskip:Nbatch
 
 
     % find isolated spikes from each batch
-    [row, col, mu] = isolated_peaks_new(dataRAW, ops);
+    [row, col, mu] = isolated_peaks_new(-abs(dataRAW), ops);
 
     % for each peak, get the voltage snippet from that channel
     clips = get_SpikeSample(dataRAW, row, col, ops, 0);
@@ -92,7 +92,8 @@ if ops.fig == 1
     for i = 1:nPCs
         plot(U(:,i)+i*1);
     end
-    title('Top 6 PCs');
+    title(strcat("Top ", num2str(nPCs), " PCs"));
 end
 wPCA = gpuArray(single(U(:, 1:nPCs))); % take as many as needed
-wPCA(:,1) = - wPCA(:,1) * sign(wPCA(ops.nt0min,1)); % adjust the arbitrary sign of the first PC so its negativity is downward
+% adjust the arbitrary sign of the first PC so its peak is downward
+wPCA(:,1) = - wPCA(:,1) * sign(wPCA(ops.nt0min,1));
