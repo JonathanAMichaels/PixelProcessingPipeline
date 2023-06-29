@@ -26,21 +26,21 @@ function rez = Kilosort_run_myo_3(ops_input_params)
     ops.NchanTOT = double(num_chans - length(brokenChan));
     ops.nt0 = 101;
     ops.ntbuff = 256;
-    ops.NT = 2^14 * 32 + ops.ntbuff;
+    ops.NT = 2048 * 32 + ops.ntbuff;
     ops.sigmaMask = Inf; % we don't want a distance-dependant decay
-    ops.Th = [9 4]; % threshold crossings for pre-clustering (in PCA projection space)
-    ops.spkTh = -6; % spike threshold in standard deviations (-6 default) (only used in isolated_peaks_new)
-    ops.nfilt_factor = 6; % max number of clusters per good channel (even temporary ones)
+    ops.Th = [10 4]; % threshold crossings for pre-clustering (in PCA projection space)
+    ops.spkTh = -2; % spike threshold in standard deviations (-6 default) (only used in isolated_peaks_new)
+    ops.nfilt_factor = 4; % max number of clusters per good channel (even temporary ones)
     ops.nblocks = 0;
     ops.nt0min = ceil(ops.nt0 / 2); % peak of template match will be this many points away from beginning
     ops.nPCs = 6; % how many PCs to project the spikes into (also used as number of template prototypes)
-    ops.nskip = 10; % how many batches to skip for determining spike PCs
+    ops.nskip = 2; % how many batches to skip for determining spike PCs
     ops.nSkipCov = 2; % compute whitening matrix and prototype templates using every N-th batch
     ops.nEig = 3;
     ops.lam = 10; % amplitude penalty (0 means not used, 10 is average, 50 is a lot)
     ops.CAR = 0; % whether to perform CAR
     ops.loc_range = [5 1]; % area to detect peaks; plus/minus for both time and channel
-    ops.long_range = [ops.nt0min 6]; % range to detect isolated peaks: [timepoints channels]
+    ops.long_range = [ops.nt0min 1]; % range to detect isolated peaks: [timepoints channels]
     ops.fig = 1; % whether to plot figures
 
     %% gridsearch section
@@ -99,7 +99,7 @@ function rez = Kilosort_run_myo_3(ops_input_params)
     % error('stop here')/home/smoconn/git/PixelProcessingPipeline/sorting
     [rez, ~]  = template_learning(rez, tF, st3);
     [rez, st3, tF] = trackAndSort(rez);
-    plot_templates_on_raw_data_fast(rez, st3);
+    % plot_templates_on_raw_data_fast(rez, st3);
     rez = final_clustering(rez, tF, st3);
     rez = find_merges(rez, 1);
 

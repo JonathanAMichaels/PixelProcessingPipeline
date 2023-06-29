@@ -34,14 +34,16 @@ xmax = max(rez.xc);
 ops = rez.ops;
 
 spkTh = ops.Th(1);
-sig = 20; % set microns as hardcoded BASE gaussian kernel radius for the nearest channels
+sig = 100; % set microns as hardcoded BASE gaussian kernel radius for the nearest channels
 dNearActiveSite = median(diff(unique(rez.yc)));
 
 [ycup, xcup] = meshgrid(ops.yup, ops.xup); % define the 2x upsampled grid
 
 NrankPC = ops.nPCs; %!!
-[wTEMP, wPCA]    = extractTemplatesfromSnippets(rez, NrankPC);
-
+dbstop in extractTemplatesfromSnippets at 45
+% [wTEMP, wPCA]    = extractTemplatesfromSnippets(rez, NrankPC);
+wTEMP = rez.wTEMP;
+wPCA = rez.wPCA;
 NchanNear = min(ops.Nchan, 16); %% CHANGED: was 8
 [iC, dist] = getClosestChannels2(ycup, xcup, rez.yc, rez.xc, NchanNear);
 

@@ -9,7 +9,7 @@ function plot_templates_on_raw_data_fast(rez, st3)
     nt0 = ops.nt0;
     Nchan = ops.Nchan;
     RGBA_colors = [rand(Nfilt, 3) 0.7*ones(Nfilt, 1)];
-    for ibatch = 2:2:16
+    for ibatch = 2:2:4
         offset = 2 * ops.Nchan * batchstart(ibatch);
         fseek(fid, offset, 'bof');
         dat = fread(fid, [ops.Nchan NT], '*int16');

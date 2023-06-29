@@ -133,6 +133,7 @@ disp(['Automatically detected broken/inactive channels are: ' num2str(brokenChan
 % if false, just continue
 if isa(remove_bad_myo_chans(1), 'logical')
     if remove_bad_myo_chans(1) == false
+        brokenChan = [];
         if length(brokenChan) > 0
             disp('Broken/inactive channels detected, but not removing them, because remove_bad_myo_chans is false')
         elseif length(brokenChan) == 0        
