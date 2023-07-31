@@ -40,7 +40,7 @@ dNearActiveSite = median(diff(unique(rez.yc)));
 [ycup, xcup] = meshgrid(ops.yup, ops.xup); % define the 2x upsampled grid
 
 NrankPC = ops.nPCs; %!!
-dbstop in extractTemplatesfromSnippets at 45
+
 % [wTEMP, wPCA]    = extractTemplatesfromSnippets(rez, NrankPC);
 wTEMP = rez.wTEMP;
 wPCA = rez.wPCA;

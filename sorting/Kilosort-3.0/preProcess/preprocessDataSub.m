@@ -12,7 +12,6 @@ function rez = preprocessDataSub(ops)
 if getOr(ops, 'useGit', 1)
     ops = gitStatus(ops);
 end
-
 tic;
 ops.nt0 	  = getOr(ops, {'nt0'}, 61); % number of time samples for the templates (has to be <=81 due to GPU shared memory)
 ops.nt0min  = getOr(ops, 'nt0min', ceil(20 * ops.nt0/61)); % time sample where the negative peak should be aligned
@@ -67,7 +66,7 @@ rez.ops.chanMap = chanMap;
 rez.ops.kcoords = kcoords;
 
 
-NTbuff      = NT + 3*ops.ntbuff; % we need buffers on both sides for filtering
+NTbuff = NT + 3*ops.ntbuff; % we need buffers on both sides for filtering
 
 rez.ops.Nbatch = Nbatch;
 rez.ops.NTbuff = NTbuff;
@@ -139,14 +138,80 @@ for ibatch = 1:Nbatch
     datcpu  = gather(int16(datr')); % convert to int16, and gather on the CPU side
     count = fwrite(fidW, datcpu, 'int16'); % write this batch to binary file
     if count~=numel(datcpu)
-        error('Error writing batch %g to %s. Check available disk space.',ibatch,ops.fproc);
+        error('Error writing batch %g to %s. Check available disk space.', ibatch, ops.fproc);
     end
 end
 fclose(fidW); % close the files
 fclose(fid);
 
+
+script_dir = pwd; % get directory where repo exists
+load(fullfile(script_dir, '/tmp/config.mat'));    
+if remove_channel_delays
+    channel_delays = get_channel_delays(rez);
+    figure(222); hold on;
+    % remove channel delays from proc.dat by seeking through the batches
+    % with ibatch*NT+max(channel_delays) and shifting each delayed channel backwards
+    % by the appropriate amount found in channel_delays
+    % this will effectively move some throwaway data to the end of all batches
+    % but now the spikes will be aligned in time across channels
+    fidOff = fopen(ops.fproc, 'r+');
+    if fidOff<3
+        error('Could not open %s for reading.',ops.fbinary);
+    end
+    data = fread(fidOff, [NchanTOT inf], '*int16'); % read and reshape. Assumes int16 data
+    % circularly shift each channel by the appropriate amount
+    plot(data')
+    for i = 1:length(channel_delays)
+        data(i,:) = circshift(data(i,:), channel_delays(i));
+    end
+    plot(data'+max(abs(data(:))))
+    fseek(fidOff, 0, 'bof'); % fseek to start in raw file, to overwrite
+    fwrite(fidOff, data, 'int16');
+    % for ibatch = 1:Nbatch
+    %     % get number of bytes to offset from beginning of file
+    %     offset = max(0, ops.twind + 2*NchanTOT*(NT * (ibatch-1) - max(channel_delays)));
+    %     fseek(fidOff, offset, 'bof'); % fseek to batch start in raw file
+    %     buff = fread(fidOff, [NchanTOT NT+max(channel_delays)], '*int16'); % read and reshape. Assumes int16 data
+    %     if isempty(buff)
+    %         disp('Empty batch')
+    %         break; % this shouldn't really happen, unless we counted data batches wrong
+    %     end
+    %     nsampcurr = size(buff,2); % how many time samples the current batch has
+    %     if nsampcurr < (NT + max(channel_delays))
+    %         disp('Last Batch, Padding with zeros')
+    %         % pad with zeros, if this is the last batch
+    %         buff(:, nsampcurr+1:NT + max(channel_delays)) = repmat(buff(:,nsampcurr), 1, NT + max(channel_delays)-nsampcurr);
+    %     end
+    %     if ibatch == 20 || ibatch == 22
+    %         disp('Plotting before shifting')
+    %         disp(ibatch)
+    %         plot(buff' + (ibatch)*max(abs(buff(:)))) % plot before
+    %     end
+    %     % shift each channel by the appropriate amount
+    %     for ichan = 1:NchanTOT
+    %         buff(ichan, :) = circshift(buff(ichan, :), -channel_delays(ichan));
+    %     end
+    %     if ibatch == 20 || ibatch ==22
+    %         disp('Plotting after shifting')
+    %         disp(ibatch)
+    %         plot(buff' + (ibatch+1)*max(abs(buff(:)))) % plot after shifting
+    %     end
+    %     % now write the shifted batch back to the file
+    %     count = fwrite(fidOff, buff, 'int16'); % write this batch to binary file
+    %     if count~=numel(buff)
+    %         error('Error writing batch %g to %s. Check available disk space.',ibatch,ops.fproc);
+    %     end
+    % end
+    fclose(fidOff);
+    disp('Removed channel delays from proc.dat, which were:')
+    disp(channel_delays)
+    save(fullfile(myo_sorted_dir, 'channel_delays.mat'), 'channel_delays')
+    disp('Saved delay information to channel_delays.mat')
+end
 rez.Wrot    = gather(Wrot); % gather the whitening matrix as a CPU variable
 
 fprintf('Time %3.0fs. Finished preprocessing %d batches. \n', toc, Nbatch);
 
 rez.temp.Nbatch = Nbatch;
+end

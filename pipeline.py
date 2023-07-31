@@ -175,6 +175,10 @@ if not "myo_data_passband" in config:
     config["myo_data_passband"] = [250, 5000]
 if not "myo_data_sampling_rate" in config:
     config["myo_data_sampling_rate"] = 30000
+if not "remove_bad_myo_chans" in config["Session"]:
+    config["Session"]["remove_bad_myo_chans"] = [False]*len(config["Session"]["myo_chan_list"])
+if not "remove_channel_delays" in config["Session"]:
+    config["Session"]["remove_channel_delays"] = [False]*len(config["Session"]["myo_chan_list"])
 
 # find MATLAB installation
 if os.path.isfile("/usr/local/MATLAB/R2021a/bin/matlab"):
@@ -202,6 +206,7 @@ elif len(concatDataPath) < 1 & config["concatenate_myo_data"]:
         + f'\'); concatenate_myo_data(\'{config["myomatrix"]}\')"'
     )
     concatDataPath = find("concatenated_data", config["myomatrix"])
+    
 
 temp = glob.glob(folder + "/*.kinarm")
 if len(temp) == 0:
@@ -353,6 +358,14 @@ if myo_sort:
         if len(concatDataPath) == 1:
             config_kilosort["myomatrix_data"] = concatDataPath
             print(f"Using concatenated data from: {concatDataPath[0]}")
+            # if config["Session"]["remove_channel_delays"]:
+            #     print("Removing channel delays")
+            #     os.system(
+            #         matlab_root
+            #         + " -nodisplay -nosplash -nodesktop -r \"addpath('"
+            #         + path_to_add
+            #         + f'\'); remove_channel_delays(\'{concatDataPath[0]}\')"'
+            #     )
         else:
             f = glob.glob(config_kilosort["myomatrix"] + "/Record*")
             config_kilosort["myomatrix_data"] = f[0]
@@ -370,6 +383,9 @@ if myo_sort:
         config_kilosort["remove_bad_myo_chans"] = np.array(
             config["Session"]["remove_bad_myo_chans"][myomatrix]
         )
+        config_kilosort["remove_channel_delays"] = np.array(
+            config["Session"]["remove_channel_delays"][myomatrix]
+            )
         config_kilosort["num_chans"] = (
             config["Session"]["myo_chan_list"][myomatrix][1]
             - config["Session"]["myo_chan_list"][myomatrix][0]
@@ -491,6 +507,9 @@ if myo_post:
         config_kilosort["remove_bad_myo_chans"] = np.array(
             config["Session"]["remove_bad_myo_chans"][myomatrix]
         )
+        config_kilosort["remove_channel_delays"] = np.array(
+            config["Session"]["remove_channel_delays"][myomatrix]
+            )
         config_kilosort["num_chans"] = (
             config["Session"]["myo_chan_list"][myomatrix][1]
             - config["Session"]["myo_chan_list"][myomatrix][0]

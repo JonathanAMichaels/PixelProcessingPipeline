@@ -19,25 +19,26 @@ function rez = Kilosort_run_myo_3(ops_input_params)
     addpath(genpath([script_dir '/sorting/npy-matlab']))
 
     run([script_dir '/sorting/Kilosort_config_3.m']);
+
     ops.fbinary = fullfile(myo_sorted_dir, 'data.bin');
     ops.fproc = fullfile(myo_sorted_dir, 'proc.dat');
     ops.brokenChan = fullfile(myo_sorted_dir, 'brokenChan.mat');
     ops.chanMap = fullfile(chanMapFile);
     ops.NchanTOT = double(num_chans - length(brokenChan));
-    ops.nt0 = 101;
-    ops.ntbuff = 256;
-    ops.NT = 2048 * 32 + ops.ntbuff;
+    ops.nt0 = 81;
+    ops.ntbuff = 512; % defined as 64;
+    ops.NT = 2048 * 32 + ops.ntbuff; % convert to 32 count increments of samples % defined as 2048 * 32 + ops.ntbuff;
     ops.sigmaMask = Inf; % we don't want a distance-dependant decay
-    ops.Th = [10 4]; % threshold crossings for pre-clustering (in PCA projection space)
+    ops.Th = [9 8]; % threshold crossings for pre-clustering (in PCA projection space)
     ops.spkTh = -2; % spike threshold in standard deviations (-6 default) (only used in isolated_peaks_new)
-    ops.nfilt_factor = 4; % max number of clusters per good channel (even temporary ones)
+    ops.nfilt_factor = 12; % max number of clusters per good channel (even temporary ones)
     ops.nblocks = 0;
     ops.nt0min = ceil(ops.nt0 / 2); % peak of template match will be this many points away from beginning
     ops.nPCs = 6; % how many PCs to project the spikes into (also used as number of template prototypes)
-    ops.nskip = 2; % how many batches to skip for determining spike PCs
-    ops.nSkipCov = 2; % compute whitening matrix and prototype templates using every N-th batch
+    ops.nskip = 1; % how many batches to skip for determining spike PCs
+    ops.nSkipCov = 1; % compute whitening matrix and prototype templates using every N-th batch
     ops.nEig = 3;
-    ops.lam = 10; % amplitude penalty (0 means not used, 10 is average, 50 is a lot)
+    ops.lam = 15; % amplitude penalty (0 means not used, 10 is average, 50 is a lot)
     ops.CAR = 0; % whether to perform CAR
     ops.loc_range = [5 1]; % area to detect peaks; plus/minus for both time and channel
     ops.long_range = [ops.nt0min 1]; % range to detect isolated peaks: [timepoints channels]
