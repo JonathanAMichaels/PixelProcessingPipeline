@@ -121,7 +121,7 @@ sum(clust_good)
 rez.W = zeros(ops.nt0,   0, ops.nEig, 'single');
 rez.U = zeros(ops.Nchan, 0, ops.nEig, 'single');
 rez.mu = zeros(1,0, 'single');
-for  t = 1:n0
+for  t = 1:n0 % for each cluster
     dWU = wPCA * gpuArray(Wpca(:,:,t));
     [w,s,u] = svdecon(dWU);
     wsign = -sign(w(ops.nt0min+1, 1));

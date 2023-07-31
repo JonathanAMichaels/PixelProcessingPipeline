@@ -17,9 +17,9 @@ useStableMode = rez.ops.useStableMode;
 ops = rez.ops;
 
 % revert to the saved templates
-W = gpuArray(rez.W);
-U = gpuArray(rez.U);
-mu = gpuArray(rez.mu);
+W = gpuArray(rez.W); % temporal components of the templates (transformation matrix out of SVD space)
+U = gpuArray(rez.U); % spatial components of the templates (transformation matrix into SVD space)
+mu = gpuArray(rez.mu); % norm of the spatial components, used for scaling the templates
 
 Nfilt 	= size(W,2);
 nt0 = ops.nt0;
@@ -28,8 +28,7 @@ Nchan 	= ops.Nchan;
 dWU = gpuArray.zeros(nt0, Nchan, Nfilt, 'double');
 for j = 1:Nfilt
     dWU(:,:,j) = mu(j) * squeeze(W(:, j, :)) * squeeze(U(:, j, :))';
-end
-
+end % dWU has shape nt0 by Nchan by Nfilt
 
 ops.fig = getOr(ops, 'fig', 1); % whether to show plots every N batches
 
@@ -54,7 +53,7 @@ Nnearest    = min(ops.Nchan, 32);
 sigmaMask  = ops.sigmaMask;
 
 % spike threshold for finding missed spikes in residuals
-ops.spkTh = -6; % why am I overwriting this here?
+% ops.spkTh = -6; % why am I overwriting this here?
 
 batchstart = 0:NT:NT*nBatches;
 
@@ -88,7 +87,7 @@ Params(13) = 2; % this is a flag to output features (PC and template features)
 % different threshold on last pass?
 Params(3) = ops.Th(end); % usually the threshold is much lower on the last pass
 
-% kernels for subsample alignment
+% kernels for subsample alignment, unused
 [Ka, Kb] = getKernels(ops, 10, 1);
 
 p1 = .95; % decay of nsp estimate in each batch
@@ -114,10 +113,10 @@ fWpc = zeros(NchanNear, 2*Nrank, 1e7, 'single'); % NchanNear is the number of ne
 
 
 dWU1 = dWU;
-
+% get covariance matrix of the spatial components, whether templates were shared across channels
 [UtU, maskU] = getMeUtU(iW, iC, mask, Nnearest, Nchan); % this needs to change (but I don't know why!)
     
-for ibatch = 1:niter    
+for ibatch = 1:niter % loop over batches, in order determined by drift correction (stored in ibatch)    
     k = iorder(ibatch); % k is the index of the batch in absolute terms
     
     % loading a single batch (same as everywhere)
@@ -169,7 +168,6 @@ for ibatch = 1:niter
     % since some clusters have different number of spikes, we need to apply the
     % exp(pm) factor several times, and fexp is the resulting update factor
     % for each template
-
     dWU1 = dWU1  + dWU0;
     nsp = nsp + nsp0;
     
@@ -208,10 +206,10 @@ for ibatch = 1:niter
     ntot = ntot + numel(x0); % keeps track of total number of spikes so far
     
     
-    if (rem(ibatch, 100)==1)
+    if (rem(ibatch, round(niter/10))==1) % every 10% of the batches
         % this is some of the relevant diagnostic information to be printed during training
-        fprintf('%2.2f sec, %d / %d batches, %d units, nspks: %d, mu: %2.4f, nst0: %d \n', ...
-            toc, ibatch, niter, Nfilt, ntot, median(mu), numel(st0))
+        % fprintf('%2.2f sec, %d / %d batches, %d units, nspks: %d, mu: %2.4f, nst0: %d \n', ...
+        %     toc, ibatch, niter, Nfilt, ntot, median(mu), numel(st0))
         
         % these diagnostic figures should be mostly self-explanatory
         if ops.fig

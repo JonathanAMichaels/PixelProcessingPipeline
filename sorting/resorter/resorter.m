@@ -503,7 +503,7 @@ function [mdata, data, consistency] = extractWaveforms(params, T, I, C, Wrot, un
         elseif nChan == 16
             grabChannels = 8;
         else
-            grabChannels = 8;
+            grabChannels = nChan;
         end
 
         tempm = squeeze(nanmean(tempdata, 3));

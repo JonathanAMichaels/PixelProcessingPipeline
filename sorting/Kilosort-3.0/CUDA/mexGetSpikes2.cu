@@ -58,7 +58,7 @@ __global__ void  sumChannels(const double *Params, const float *data,
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	Conv1D(const double *Params, const float *data, const float *W, float *conv_sig){
-    volatile __shared__ float  sW[201*NrankMax], sdata[(Nthreads+201)];
+    volatile __shared__ float  sW[81*NrankMax], sdata[(Nthreads+81)];
     float y;
     int tid, tid0, bid, i, nid, Nrank, NT, nt0,  Nchan;
 
@@ -127,7 +127,7 @@ __global__ void	cleanup_spikes(const double *Params, const float *err,
 	const int *ftype, float *x, int *st, int *id, int *counter){
     
   int lockout, indx, tid, bid, NT, tid0,  j, t0;
-  volatile __shared__ float sdata[Nthreads+2*201+1];
+  volatile __shared__ float sdata[Nthreads+2*81+1];
   bool flag=0;
   float err0, Th;
   

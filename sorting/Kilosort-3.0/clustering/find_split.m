@@ -1,5 +1,5 @@
 function [r, scmax, p, m0, mu1, mu2, sig] = find_split(x)
-
+% scmax is the score of the split
 x = gather(x);
 qbar = [.001, .999];
 nbins = 1001;

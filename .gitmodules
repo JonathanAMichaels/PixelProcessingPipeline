@@ -1,0 +1,3 @@
+[submodule "sorting/Kilosort"]
+	path = sorting/Kilosort
+	url = git@github.com:smarkoco/Kilosort.git

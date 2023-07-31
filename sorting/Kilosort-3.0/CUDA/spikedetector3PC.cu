@@ -17,12 +17,12 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024,  NrankMax = 6, maxFR = 10000, nt0max=201, NchanMax = 17, nsizes = 5;
+const int  Nthreads = 1024,  NrankMax = 6, maxFR = 10000, nt0max=81, NchanMax = 17, nsizes = 5;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	Conv1D(const double *Params, const float *data, const float *W, float *conv_sig){
-    volatile __shared__ float  sW[201*NrankMax], sdata[(Nthreads+201)];
+    volatile __shared__ float  sW[81*NrankMax], sdata[(Nthreads+81)];
     float y;
     int tid, tid0, bid, i, nid, Nrank, NT, nt0,  Nchan;
 
@@ -98,6 +98,10 @@ __global__ void  sumChannels(const double *Params, const float *data,
           for(j=0; j<Nsum; j++){
               iChan = iC[j + NchanNear * bidy];              
               for(k=0; k<nsizes; k++)
+                  // below is the sum across channels, weighted by distance (for each sigma)
+                  // this allows getting sum values for each electode, AND in between electrodes
+                  // sA is the distance weight matrix
+                  // data is the convolution of the data with the 1D prototype templates
                   a[k]  += sA[k + nsizes * j] * 
                         data[tid0 + NT * iChan + t * NT * Nchan];
           }
@@ -110,7 +114,7 @@ __global__ void  sumChannels(const double *Params, const float *data,
           }
       }
       datasum[tid0 + NT * bidy] = Cmax;
-      kkmax[tid0 + NT * bidy]   = kmax;          
+      kkmax[tid0 + NT * bidy]   = kmax;
 
       tid0 += blockDim.x * gridDim.x;
   }
@@ -149,7 +153,7 @@ __global__ void  spikePC(const double *Params, const float *data,
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	max1D(const double *Params, const float *data, float *conv_sig){
     
-    volatile __shared__ float  sdata[Nthreads+201];
+    volatile __shared__ float  sdata[Nthreads+81];
     float y, spkTh;
     int tid, tid0, bid, i, NT, nt0, nt0min;
     
