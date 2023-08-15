@@ -65,16 +65,23 @@ disp('Saved sync data')
 disp(['Total recording time: ' num2str(size(data, 1) / myo_data_sampling_rate / 60) ' minutes'])
 
 clf
-S = zeros(size(data, 2), 2);
+S = zeros(size(data, 2), 3);
 bipolarThresh = 90;
 unipolarThresh = 120;
 lowThresh = 0.1;
 bipolar = length(chanList) == 16;
-for q = 1:2
+% when q is 1, we will compute count the number of spikes in the channel and compare to a threshold
+% when q is 2, we will compute the std of the low freq noise in the channel
+% when q is 3, we will compute the SNR of the channel
+for q = 1:4
     if q == 1
         [b, a] = butter(2, [250 4400] / (myo_data_sampling_rate / 2), 'bandpass');
     elseif q == 2
-        [b, a] = butter(2, [5 70] / (myo_data_sampling_rate / 2), 'bandpass');
+        [b, a] = butter(2, [5 100] / (myo_data_sampling_rate / 2), 'bandpass');
+    elseif q == 3
+        [b, a] = butter(2, 10000 / (myo_data_sampling_rate / 2), 'high');
+    elseif q == 4
+        [b, a] = butter(2, [300 1000] / (myo_data_sampling_rate / 2), 'bandpass');
     end
     useSeconds = 600;
     if size(data, 1) < useSeconds * 2 * myo_data_sampling_rate
@@ -87,44 +94,63 @@ for q = 1:2
         data_filt(:, i) = single(filtfilt(b, a, double(data(tRange, i))));
     end
 
-    if q == 2
-        S(:, q) = std(data_filt, [], 1);
-    else
+    if q == 1
         data_norm = data_filt ./ repmat(std(data_filt, [], 1), [size(data_filt, 1) 1]);
-        spk = sum(data_norm < -7, 1);
+        spk = sum(data_norm < -7, 1); % check for spikes crossing 6 std below mean
         S(:, q) = spk / size(data_norm, 1) * myo_data_sampling_rate;
+    elseif q == 2
+        S(:, q) = std(data_filt, [], 1); % get the std of the low freq noise
+        low_band_power = rms(data_filt, 1).^2;
+    elseif q == 3
+        S(:, q) = std(data_filt, [], 1); % get the std of the high freq noise
+        high_band_power = rms(data_filt, 1).^2;
+    elseif q == 4
+        spike_band_power = rms(data_filt, 1).^2;
+        SNR = spike_band_power ./ (low_band_power + high_band_power);
+        % reject channels if the SNR lies beyond 1 std of the mean SNR
+        mean_SNR = mean(SNR);
+        std_SNR = std(SNR);
+        SNR_reject_chans = chanList(SNR < mean_SNR - std_SNR);
+
+        % [~, idx] = sort(SNR, 'ascend');
+        % idx = idx(1:floor(length(idx) / 2));
+        % bitmask = zeros(length(chanList), 1);
+        % bitmask(idx) = 1;
+        % SNR_reject_chans = chanList(bitmask == 1);
+        disp("SNRs: " + num2str(SNR))
+        disp("Mean SNR: " + num2str(mean_SNR) + " +/- " + num2str(std_SNR))
+        disp("Rejecting channels with outlier SNRs: " + num2str(SNR_reject_chans))
     end
 
-    subplot(1, 2, q)
-    if q == 1
-        title('Filtered Signal Snippet (250-4400Hz)')
-    else
-        title('Filtered Noise Snippet (5-70Hz)')
-    end
-    hold on
-    for i = 1:size(data, 2)
-        cmap = [0 0 0];
-        if q == 1
-            if S(i, 1) < lowThresh
-                cmap = [1 0.2 0.2];
-            end
-        else
-            if (bipolar && S(i, 2) > bipolarThresh) || (~bipolar && S(i, 2) > unipolarThresh)
-                cmap = [1 0.2 0.2];
-            end
-        end
-        plot(data_filt(:, i) + i * 1600, 'Color', cmap)
-    end
-    set(gca, 'YTick', (1:size(data, 2)) * 1600, 'YTickLabels', 1:size(data, 2))
-    axis([1 size(data_filt, 1) 0 (size(data, 2) + 1) * 1600])
+    % subplot(1, 4, q)
+    % if q == 1
+    %     title('Filtered Signal Snippet (250-4400Hz)')
+    % elseif q == 2
+    %     title('Filtered Noise Snippet (5-70Hz)')
+    % end
+    % hold on
+    % for i = 1:size(data, 2)
+    %     cmap = [0 0 0];
+    %     if q == 1
+    %         if S(i, 1) < lowThresh
+    %             cmap = [1 0.2 0.2];
+    %         end
+    %     elseif q == 2
+    %         if (bipolar && S(i, 2) > bipolarThresh) || (~bipolar && S(i, 2) > unipolarThresh)
+    %             cmap = [1 0.2 0.2];
+    %         end
+    %     end
+    %     plot(data_filt(:, i) + i * 1600, 'Color', cmap)
+    % end
+    % set(gca, 'YTick', (1:size(data, 2)) * 1600, 'YTickLabels', 1:size(data, 2))
+    % axis([1 size(data_filt, 1) 0 (size(data, 2) + 1) * 1600])
 end
 print([myo_sorted_dir '/brokenChan.png'], '-dpng')
-S
 
 if length(chanList) == 16
-    brokenChan = int64(find(S(:, 2) > bipolarThresh | S(:, 1) < lowThresh));
+    brokenChan = int64(union(find(S(:, 2) > bipolarThresh | S(:, 1) < lowThresh), SNR_reject_chans));%S(:, 3) > bipolarThresh 
 else
-    brokenChan = int64(find(S(:, 2) > unipolarThresh | S(:, 1) < lowThresh));
+    brokenChan = int64(union(find(S(:, 2) > unipolarThresh | S(:, 1) < lowThresh), SNR_reject_chans));%S(:, 3) > unipolarThresh
 end
 disp(['Automatically detected broken/inactive channels are: ' num2str(brokenChan')])
 
@@ -134,9 +160,9 @@ disp(['Automatically detected broken/inactive channels are: ' num2str(brokenChan
 if isa(remove_bad_myo_chans(1), 'logical')
     if remove_bad_myo_chans(1) == false
         brokenChan = [];
-        if length(brokenChan) > 0
+        if ~isempty(brokenChan)
             disp('Broken/inactive channels detected, but not removing them, because remove_bad_myo_chans is false')
-        elseif length(brokenChan) == 0        
+        elseif isempty(brokenChan)
             disp('No broken/inactive channels detected, not removing any, because remove_bad_myo_chans is false')
         end
         disp(['Keeping channel list: ' num2str(chanList)])
@@ -160,7 +186,7 @@ save([myo_sorted_dir '/chanList.mat'], 'chanList')
 save([myo_sorted_dir '/brokenChan.mat'], 'brokenChan');
 
 % load and modify channel map variables to remove broken channel elements, if desired
-if length(brokenChan) > 0 && remove_bad_myo_chans(1) ~= false
+if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
     load(myo_chan_map_file)
     chanMap(end-length(brokenChan)+1:end) = []; % take off end to save indexing
     chanMap0ind(end-length(brokenChan)+1:end) = []; % take off end to save indexing

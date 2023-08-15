@@ -25,7 +25,7 @@ function rez = Kilosort_run_myo_3(ops_input_params)
     ops.brokenChan = fullfile(myo_sorted_dir, 'brokenChan.mat');
     ops.chanMap = fullfile(chanMapFile);
     ops.NchanTOT = double(num_chans - length(brokenChan));
-    ops.nt0 = 81;
+    ops.nt0 = 61;
     ops.ntbuff = 512; % defined as 64;
     ops.NT = 2048 * 32 + ops.ntbuff; % convert to 32 count increments of samples % defined as 2048 * 32 + ops.ntbuff;
     ops.sigmaMask = Inf; % we don't want a distance-dependant decay
@@ -43,6 +43,7 @@ function rez = Kilosort_run_myo_3(ops_input_params)
     ops.loc_range = [5 1]; % area to detect peaks; plus/minus for both time and channel
     ops.long_range = [ops.nt0min 1]; % range to detect isolated peaks: [timepoints channels]
     ops.fig = 1; % whether to plot figures
+    ops.recordings = recordings;
 
     %% gridsearch section
     % only try to use gridsearch values if ops_input_params is a struct and fields are present
@@ -67,52 +68,48 @@ function rez = Kilosort_run_myo_3(ops_input_params)
     rez = preprocessDataSub(ops);
     rez = datashift2(rez, 1);
     [rez, st3, tF] = extract_spikes(rez);
-    figure(5);
-    plot(st3(:, 1), '.')
-    title('Spike times versus spike ID')
-    figure(6);
-    plot(st3(:, 2), '.')
-    title('Upsampled grid location of best template match spike ID')
-    figure(7);
-    plot(st3(:, 3), '.')
-    title('Amplitude of template match for each spike ID')
-    figure(8); hold on;
-    plot(st3(:, 4), 'g.')
-    for kSpatialDecay = 1:6
-        less_than_idx = find(st3(:, 4) < 6 * kSpatialDecay);
-        more_than_idx = find(st3(:, 4) >= 6 * (kSpatialDecay - 1));
-        idx = intersect(less_than_idx, more_than_idx);
-        bit_idx = bitand(st3(:, 4) < 6 * kSpatialDecay, st3(:, 4) >= 6 * (kSpatialDecay - 1));
-        plot(idx, st3(bit_idx, 4), '.')
-    end
-    title('Prototype templates for each spatial decay value (1:6:30) resulting in each best match spike ID')
-    figure(9);
+    %%% plots
+    % figure(5);
+    % plot(st3(:, 1), '.')
+    % title('Spike times versus spike ID')
+    % figure(6);
+    % plot(st3(:, 2), '.')
+    % title('Upsampled grid location of best template match spike ID')
+    % figure(7);
+    % plot(st3(:, 3), '.')
+    % title('Amplitude of template match for each spike ID')
+    % figure(8); hold on;
+    % plot(st3(:, 4), 'g.')
+    % for kSpatialDecay = 1:6
+    %     less_than_idx = find(st3(:, 4) < 6 * kSpatialDecay);
+    %     more_than_idx = find(st3(:, 4) >= 6 * (kSpatialDecay - 1));
+    %     idx = intersect(less_than_idx, more_than_idx);
+    %     bit_idx = bitand(st3(:, 4) < 6 * kSpatialDecay, st3(:, 4) >= 6 * (kSpatialDecay - 1));
+    %     plot(idx, st3(bit_idx, 4), '.')
+    % end
+    % title('Prototype templates for each spatial decay value (1:6:30) resulting in each best match spike ID')
+    % figure(9);
     % plot(st3(:, 5), '.')
     % title('Amplitude of template match for each spike ID (Duplicate of st3(:,3))')
     % figure(10);
-    plot(st3(:, 6), '.')
-    title('Batch ID versus spike ID')
-    figure(11);
-    for iTemp = 1:size(tF, 2)
-        subplot(size(tF, 2), 1, iTemp)
-        plot(squeeze(tF(:, iTemp, :)), '.')
-    end
-    % error('stop here')/home/smoconn/git/PixelProcessingPipeline/sorting
+    % plot(st3(:, 6), '.')
+    % title('Batch ID versus spike ID')
+    % figure(11);
+    % for iTemp = 1:size(tF, 2)
+    %     subplot(size(tF, 2), 1, iTemp)
+    %     plot(squeeze(tF(:, iTemp, :)), '.')
+    % end
+    %%% end plots
     [rez, ~]  = template_learning(rez, tF, st3);
     [rez, st3, tF] = trackAndSort(rez);
     % plot_templates_on_raw_data_fast(rez, st3);
     rez = final_clustering(rez, tF, st3);
     rez = find_merges(rez, 1);
-
+    
     % write to Phy
     fprintf('Saving results to Phy  \n')
     rezToPhy2(rez, myo_sorted_dir);
     save(fullfile(myo_sorted_dir, '/ops.mat'), 'ops')
-    % create timestamped backup folder for this run
-    % split_sorted_folder_name = split(myo_sorted_dir, filesep);
-    % sorted_folder_suffix = split_sorted_folder_name{end};
-    % copyfile(myo_sorted_dir,
-    % fullfile(myo_sorted_dir, '..', [sorted_folder_suffix '_' datestr(now, 'yyyy-mm-dd_HH:MM:SS')]))
 
-    %     quit;
+    % quit;
 end

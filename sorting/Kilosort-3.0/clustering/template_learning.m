@@ -109,20 +109,20 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
     spike_times_for_kid = spike_times_for_kid(1:n0);
     % plot mean PC similarities for each channel and cluster
     if ops.fig
-        ichc = gather(ich);
-        nPCs = size(Wpca, 1);
-        figure(12)
-        for k=1:n0; for ichcs=1:numel(ichc); for iPC=1:nPCs; scatter(ichcs*ones('like',Wpca(:,ichcs,k)), Wpca(:,ichcs,k)+40*k); end; end; end
-        % plot top 3 PC similarities for all channels in each cluster
-        figure(13)
-        for k=1:n0
-            scatter3(Wpca(1,1,k), Wpca(2,1,k), Wpca(3,1,k), 20, [1-k/n0,k/n0,k/n0]);
-            hold on;
-        end
-        xlabel('PC1');
-        ylabel('PC2');
-        zlabel('PC3');
-        set(gca,'DataAspectRatio',[1 1 1]);
+        % ichc = gather(ich);
+        % nPCs = size(Wpca, 1);
+        % figure(12)
+        % for k=1:n0; for ichcs=1:numel(ichc); for iPC=1:nPCs; scatter(ichcs*ones('like',Wpca(:,ichcs,k)), Wpca(:,ichcs,k)+40*k); end; end; end
+        % % plot top 3 PC similarities for all channels in each cluster
+        % figure(13)
+        % for k=1:n0
+        %     scatter3(Wpca(1,1,k), Wpca(2,1,k), Wpca(3,1,k), 20, [1-k/n0,k/n0,k/n0]);
+        %     hold on;
+        % end
+        % xlabel('PC1');
+        % ylabel('PC2');
+        % zlabel('PC3');
+        % set(gca,'DataAspectRatio',[1 1 1]);
     end
     toc
     %%

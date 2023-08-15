@@ -14,8 +14,6 @@ from pipeline_utils import find, create_config, extract_sync, extract_LFP
 from sorting.Kilosort_gridsearch_config import get_KS_params_grid
 from registration.registration import registration as registration_function
 
-# from pdb import set_trace
-
 # calculate time taken to run each pipeline call
 start_time = datetime.datetime.now()
 
@@ -32,7 +30,9 @@ opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
 args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
 
 if "-f" in opts:
-    folder = args[0]
+    myomatrix_folder = args[0]
+    folder_obj = Path(myomatrix_folder)
+    folder = folder_obj.parent.absolute().as_posix()
     if os.path.isdir(folder):
         print("Using working folder " + folder)
     else:
@@ -158,17 +158,20 @@ if config["neuropixel"] != "":
     )
 else:
     config["num_neuropixels"] = 0
-temp_folder = glob.glob(folder + "/*_myo")
-if len(temp_folder) > 1:
-    SystemExit("There shouldn't be more than one Myomatrix folder")
-elif len(temp_folder) == 0:
-    print("No Myomatrix data in this recording session")
-    config["myomatrix"] = ""
-else:
-    if os.path.isdir(temp_folder[0]):
-        config["myomatrix"] = temp_folder[0]
+config["myomatrix"] = myomatrix_folder # just have user provide session path directly
+# temp_folder = glob.glob(folder + "/*_myo")
+# if len(temp_folder) > 1:
+#     SystemExit("There shouldn't be more than one Myomatrix folder")
+# elif len(temp_folder) == 0:
+#     print("No Myomatrix data in this recording session")
+#     config["myomatrix"] = ""
+# else:
+#     if os.path.isdir(temp_folder[0]):
+#         config["myomatrix"] = temp_folder[0]
 if config["myomatrix"] != "":
     print("Using myomatrix folder " + config["myomatrix"])
+if not "recordings" in config:
+    config["recordings"] = [1]
 if not "concatenate_myo_data" in config:
     config["concatenate_myo_data"] = False
 if not "myo_data_passband" in config:
@@ -189,24 +192,34 @@ else:
     matlab_path = glob.glob("/usr/local/MATLAB/R*")
     matlab_root = matlab_path[0] + "/bin/matlab"
 
-# Search myomatrix folder for existing concatenated_data folder, if it exists, it will be used
+# Search myomatrix folder for existing concatenated_data folder, if it exists and
+# concatenate_myo_data is set to true, check subfolder names to see if they match
+# the recording numbers in the config file. If they don't, create a new subfolder
+# and concatenate the data into that folder. If they do, save the path to that
 concatDataPath = find("concatenated_data", config["myomatrix"])
+recordings_str = ','.join([str(i) for i in config["recordings"]])
 if len(concatDataPath) > 1:
     raise SystemExit(
         "There shouldn't be more than one concatenated_data folder in the myomatrix data folder"
     )
-elif len(concatDataPath) < 1 & config["concatenate_myo_data"]:
-    # no concatenated data folder was found
-    print("No concatenated files found, concatenating data from data in recording folders")
+# if concatenating data and (no concatenated data folder found or
+# folder found but doesn't contain the recordings specified in config file)
+elif config["concatenate_myo_data"] and (
+    len(concatDataPath) < 1 or recordings_str not in os.listdir(concatDataPath[0])
+    ):
+    # concatenated data folder was not found
+    print("Concatenated files not found, concatenating data from data in chosen recording folders")
     path_to_add = script_folder + "/sorting/myomatrix/"
     os.system(
         matlab_root
         + " -nodisplay -nosplash -nodesktop -r \"addpath('"
         + path_to_add
-        + f'\'); concatenate_myo_data(\'{config["myomatrix"]}\')"'
+        + f'\'); concatenate_myo_data(\'{config["myomatrix"]}\', {{{config["recordings"]}}})"'
     )
-    concatDataPath = find("concatenated_data", config["myomatrix"])
-    
+    print(f"Using newly concatenated data at {concatDataPath[0]+'/'+recordings_str}")
+else:
+    print(f"Using existing concatenated data at {concatDataPath[0]+'/'+recordings_str}")
+concatDataPath = concatDataPath[0]+'/'+recordings_str
 
 temp = glob.glob(folder + "/*.kinarm")
 if len(temp) == 0:
@@ -348,6 +361,8 @@ if myo_sort:
     config_kilosort = {
         "myomatrix": config["myomatrix"],
         "script_dir": config["script_dir"],
+        "recordings": np.array(config["recordings"], dtype=int) if 
+            type(config["recordings"][0] == int) else config["recordings"],
         "myo_data_passband": np.array(config["myo_data_passband"], dtype=float),
         "myo_data_sampling_rate": float(config["myo_data_sampling_rate"]),
         "trange": np.array(config["Session"]["trange"]),
@@ -355,17 +370,8 @@ if myo_sort:
     }
     path_to_add = script_folder + "/sorting/"
     for myomatrix in range(len(config["Session"]["myo_chan_list"])):
-        if len(concatDataPath) == 1:
+        if config["concatenate_myo_data"]:
             config_kilosort["myomatrix_data"] = concatDataPath
-            print(f"Using concatenated data from: {concatDataPath[0]}")
-            # if config["Session"]["remove_channel_delays"]:
-            #     print("Removing channel delays")
-            #     os.system(
-            #         matlab_root
-            #         + " -nodisplay -nosplash -nodesktop -r \"addpath('"
-            #         + path_to_add
-            #         + f'\'); remove_channel_delays(\'{concatDataPath[0]}\')"'
-            #     )
         else:
             f = glob.glob(config_kilosort["myomatrix"] + "/Record*")
             config_kilosort["myomatrix_data"] = f[0]
@@ -391,7 +397,6 @@ if myo_sort:
             - config["Session"]["myo_chan_list"][myomatrix][0]
             + 1
         )
-
         scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
         shutil.rmtree(config_kilosort["myo_sorted_dir"], ignore_errors=True)
         subprocess.run(
@@ -413,7 +418,7 @@ if myo_sort:
         if config["Sorting"]["do_KS_param_gridsearch"] == 1:
             iParams = iter(get_KS_params_grid())  # get iterator of all possible param combinations
         else:
-            iParams = iter(['default'])  # just pass a string to run once with default params
+            iParams = iter([''])  # just pass an empty string to run once with chosen params
         while True:
             # while no exhaustion of iterator
             try:
@@ -463,6 +468,7 @@ if myo_sort:
                     "'", ""
                 )
                 # copy sorted0 folder tree to a new folder with timestamp to label results by params
+                # this serves as a backup of the sorted0 data, so it can be loaded into Phy later
                 shutil.copytree(
                     config_kilosort["myo_sorted_dir"],
                     os.path.join(
@@ -471,6 +477,7 @@ if myo_sort:
                         (
                             f"sorted{str(myomatrix)}"
                             f"_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                            f"_rec-{recordings_str}"
                             f"_{filename_friendly_params}"
                         ),
                     ),
