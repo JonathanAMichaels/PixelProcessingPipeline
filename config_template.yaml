@@ -1,6 +1,8 @@
 ---
 # Configuration file
 # Auto-generated parameters
+# GPU to use for kilosort
+GPU_to_use: 1
 # path of working directory (must be provided in command line)
 folder:
 # path to neuropixel directory

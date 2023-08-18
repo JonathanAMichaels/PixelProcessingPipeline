@@ -284,7 +284,8 @@ __global__ void reNormalize(const double *Params, const double *A, const double 
 void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
-  int maxbytes = 166912; // 163 KiB
+//   int maxbytes = 166912; // 163 KiB
+    int maxbytes = 101376; // 99 KiB
   cudaFuncSetAttribute(getW, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
 
   /* Initialize the MathWorks GPU API. */

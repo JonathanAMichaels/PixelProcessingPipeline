@@ -126,8 +126,8 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
     end
     toc
     %%
-    rez.W = zeros(ops.nt0, 0, 3, 'single');
-    rez.U = zeros(ops.Nchan, 0, 3, 'single');
+    rez.W = zeros(ops.nt0, 0, ops.nEig, 'single');
+    rez.U = zeros(ops.Nchan, 0, ops.nEig, 'single');
     rez.mu = zeros(1, 0, 'single');
     figure(14); hold on;
     RGB_colors = rand(n0,3);
@@ -135,10 +135,10 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
         dWU = wPCA * gpuArray(Wpca(:, :, t)); % multiply PC components by mean PC similarities
         [w, s, u] = svdecon(dWU); % compute SVD of that product
         wsign = -sign(w(ops.nt0min, 1)); % flip sign of waveform if necessary, for consistency
-        % vvv save first 3 components of W, containing final rotation matrix
-        rez.W(:, t, :) = gather(wsign * w(:, 1:3));
-        % vvv save first 3 components of U, containing initial rotation and scaling matrix
-        rez.U(:, t, :) = gather(wsign * u(:, 1:3) * s(1:3, 1:3)); 
+        % vvv save first ops.nEig components of W, containing final rotation matrix
+        rez.W(:, t, :) = gather(wsign * w(:, 1:ops.nEig));
+        % vvv save first ops.nEig components of U, containing initial rotation and scaling matrix
+        rez.U(:, t, :) = gather(wsign * u(:, 1:ops.nEig) * s(1:ops.nEig, 1:ops.nEig)); 
         rez.mu(t) = gather(sum(sum(rez.U(:, t, :) .^ 2)) ^ .5); % get norm of U
         rez.U(:, t, :) = rez.U(:, t, :) / rez.mu(t); % normalize U
         if ops.fig

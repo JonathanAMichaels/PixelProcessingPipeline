@@ -170,6 +170,8 @@ config["myomatrix"] = myomatrix_folder # just have user provide session path dir
 #         config["myomatrix"] = temp_folder[0]
 if config["myomatrix"] != "":
     print("Using myomatrix folder " + config["myomatrix"])
+if not "GPU_to_use" in config:
+    config["GPU_to_use"] = 1
 if not "recordings" in config:
     config["recordings"] = [1]
 if not "concatenate_myo_data" in config:
@@ -361,6 +363,7 @@ if myo_sort:
     config_kilosort = {
         "myomatrix": config["myomatrix"],
         "script_dir": config["script_dir"],
+        "GPU_to_use": config["GPU_to_use"],
         "recordings": np.array(config["recordings"], dtype=int) if 
             type(config["recordings"][0] == int) else config["recordings"],
         "myo_data_passband": np.array(config["myo_data_passband"], dtype=float),
@@ -498,6 +501,7 @@ if myo_post:
     config_kilosort = {
         "script_dir": config["script_dir"],
         "myomatrix": config["myomatrix"],
+        "GPU_to_use": config["GPU_to_use"],
     }
     path_to_add = script_folder + "/sorting/"
     for myomatrix in range(len(config["Session"]["myo_chan_list"])):

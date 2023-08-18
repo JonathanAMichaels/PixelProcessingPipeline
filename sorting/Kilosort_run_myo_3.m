@@ -4,7 +4,11 @@ function rez = Kilosort_run_myo_3(ops_input_params)
     load(fullfile(script_dir, '/tmp/config.mat'))
     load(fullfile(myo_sorted_dir, 'brokenChan.mat'))
 
-    if length(brokenChan) > 0 && remove_bad_myo_chans(1) ~= false
+    % set GPU to use
+    disp(strcat("Setting GPU device to use: ", num2str(GPU_to_use)))
+    gpuDevice(GPU_to_use);
+
+    if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
         chanMapFile = fullfile(myo_sorted_dir, 'chanMap_minus_brokenChans.mat');
     else
         chanMapFile = myo_chan_map_file;
@@ -35,8 +39,8 @@ function rez = Kilosort_run_myo_3(ops_input_params)
     ops.nblocks = 0;
     ops.nt0min = ceil(ops.nt0 / 2); % peak of template match will be this many points away from beginning
     ops.nPCs = 6; % how many PCs to project the spikes into (also used as number of template prototypes)
-    ops.nskip = 1; % how many batches to skip for determining spike PCs
-    ops.nSkipCov = 1; % compute whitening matrix and prototype templates using every N-th batch
+    ops.nskip = 2; % how many batches to skip for determining spike PCs
+    ops.nSkipCov = 2; % compute whitening matrix and prototype templates using every N-th batch
     ops.nEig = 3;
     ops.lam = 15; % amplitude penalty (0 means not used, 10 is average, 50 is a lot)
     ops.CAR = 0; % whether to perform CAR
