@@ -1,4 +1,4 @@
-function kid = run_pursuit(data, nlow, rmin, n0, wroll, ss, use_CCG)
+function kid = run_pursuit(data, nlow, rmin, n0, wroll, ss, use_CCG, nPCs)
 
     Xd = gpuArray(data(:, :));
     amps = sum(Xd .^ 2, 2) .^ .5; % get amplitudes by square root of sum of squares
@@ -9,7 +9,7 @@ function kid = run_pursuit(data, nlow, rmin, n0, wroll, ss, use_CCG)
     for j = 1:1000
         ind = find(kid == 0); % these are the spikes inds not assigned to a cluster yet
         %     fprintf('cluster %d\n', n0+j)
-        [ix, xold, xnew] = break_a_cluster(Xd(ind, :), wroll, ss(ind), nlow, rmin, use_CCG);
+        [ix, xold, xnew] = break_a_cluster(Xd(ind, :), wroll, ss(ind), nlow, rmin, use_CCG, nPCs);
 
         aj(j) = gather(mean(amps(ind(ix))));
         %     fprintf('amps = %2.2f \n\n', aj(j));
@@ -25,7 +25,7 @@ function kid = run_pursuit(data, nlow, rmin, n0, wroll, ss, use_CCG)
 end
 
 % this function breaks a cluster into two clusters if it found to be bimodal
-function [ix, xold, x] = break_a_cluster(data, wroll, ss, nlow, rmin, use_CCG)
+function [ix, xold, x] = break_a_cluster(data, wroll, ss, nlow, rmin, use_CCG, nPCs)
     ix = 1:size(data, 1);
 
     xold = [];
@@ -38,7 +38,7 @@ function [ix, xold, x] = break_a_cluster(data, wroll, ss, nlow, rmin, use_CCG)
             break;
         end
 
-        [x, iclust, flag] = bimodal_pursuit(dd, wroll, ss(ix), rmin, nlow, 1, use_CCG);
+        [x, iclust, flag] = bimodal_pursuit(dd, wroll, ss(ix), rmin, nlow, 1, use_CCG, nPCs);
 
         if flag == 0
             %        disp('done with this cluster')

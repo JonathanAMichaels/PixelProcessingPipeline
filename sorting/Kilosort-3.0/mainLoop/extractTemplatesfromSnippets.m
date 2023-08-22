@@ -128,13 +128,14 @@ if use_kmeans
     number_of_spikes_to_use = nan(nPCs,1);
     for K=1:nPCs
         % use 90th percentile best examples from each cluster
-        number_of_close_spikes = round(sum(cluster_id==K)*0.9);
+        number_of_close_spikes = floor(sum(cluster_id==K)*0.9);
         [~,min_dist_idxs] = mink(Dist_from_K(:,K),number_of_close_spikes);
         spikes_to_use = dd(:,cluster_id==K & ismember(1:length(cluster_id),min_dist_idxs)');
         number_of_spikes_to_use(K) = size(spikes_to_use,2);
         % choose closest spikes to the cluster center
         spikes(:,sum(number_of_spikes_to_use(1:K-1))+1:sum(number_of_spikes_to_use,'omitnan')) = spikes_to_use;
     end
+    % drop nan values
     spikes = spikes(:,~isnan(spikes(1,:)));
     % dbstop in extractTemplatesfromSnippets.m at 140
     total_num_spikes_used = sum(number_of_spikes_to_use);
@@ -234,11 +235,11 @@ for iBoundary = 1:length(wave_choice_left_bounds)
     plot([1,1]*wave_choice_left_bounds(iBoundary)*ops.nt0, ylim, 'Color', color, 'LineWidth', 2)
     plot([1,1]*wave_choice_right_bounds(iBoundary)*ops.nt0, ylim, 'Color', color, 'LineWidth', 2)
 end
-if ~use_kmeans
+if use_kmeans
+    wTEMP = spikes(:,wave_choice_left_bounds); % initialize with a smooth range of amplitudes
+else
     plot((1:length(peaks))*ops.nt0, peaks, 'm', 'LineWidth', 3);
     wTEMP = dd(:,idx(wave_choice_left_bounds)); % initialize with a smooth range of amplitudes
-else
-    wTEMP = spikes(:,wave_choice_left_bounds); % initialize with a smooth range of amplitudes
 end
 largest_CC_idx = 1;
 N_tries_for_largest_CC_idx_so_far = 0;
@@ -274,14 +275,14 @@ while iter < 2
     %     disp(CC)
     % else
     % replace with next largest wave to check correlation, with each wave index relating to a amplitude-sorted chunk of the wave_choice_left_bounds
-    if ~use_kmeans
-        wTEMP(:,largest_CC_idx) = dd(:,idx(wave_choice_left_bounds(largest_CC_idx) + N_tries_for_largest_CC_idx_so_far));
-    else
+    if use_kmeans
         wTEMP(:,largest_CC_idx) = spikes(:,wave_choice_left_bounds(largest_CC_idx) + N_tries_for_largest_CC_idx_so_far);
+    else
+        wTEMP(:,largest_CC_idx) = dd(:,idx(wave_choice_left_bounds(largest_CC_idx) + N_tries_for_largest_CC_idx_so_far));
     end
     % multiply waveforms by a Gaussian with the sigma value
     % this is to make the correlation more sensitive to the central shape of the waveform
-    wTEMP_for_corr = wTEMP .* repmat(gausswin(size(wTEMP,1), (size(wTEMP,1)-1)/(2*sigma)), 1, size(wTEMP,2));
+    wTEMP_for_corr = wTEMP .* gausswin(size(wTEMP,1), (size(wTEMP,1)-1)/(2*sigma));
     CC = corr(wTEMP_for_corr);
     
     %% section to compute terms of the cost function
@@ -403,16 +404,24 @@ end
 % end
 % spikes = spikes(:,~isnan(spikes(1,:)));
 if use_kmeans
-    wTEMP = dd(:,randperm(size(dd,2), nPCs));
+    wTEMP = dd(:,randperm(size(dd,2), nPCs)); % removing this line will cause KS to not find spikes sometimes... ???
     wTEMP(:,1:6) = spikes(:,best_CC_idxs(1:6));
+    spikes_gauss_windowed = spikes .* gausswin(size(spikes,1), (size(spikes,1)-1)/(2*sigma));
     wTEMP = wTEMP ./ sum(wTEMP.^2,1).^.5; % standardize the new clusters
-    for i = 1:10
+    for i = 1:5
         % at each iteration, assign the waveform to its most correlated cluster
-        CC = wTEMP' * spikes;
+        CC = wTEMP' * spikes_gauss_windowed;
         [amax, imax] = max(CC,[],1); % find the best cluster for each waveform
-            for j = 1:nPCs
-                wTEMP(:,j)  = spikes(:,imax==j) * amax(imax==j)'; % weighted average to get new cluster means
+        for j = 1:nPCs
+            wTEMP(:,j)  = spikes(:,imax==j) * amax(imax==j)'; % weighted average to get new cluster means
+            % if a template had no matches and therefore has NaN's,
+            % use the mean of top 10th percentil in that k-means cluster instead
+            if sum(abs(wTEMP(:,j)))==0
+                [~,min_dist_idxs] = mink(Dist_from_K(:,j),ceil(sum(cluster_id==j)/10));
+                spikes_to_use = dd(:,cluster_id==j & ismember(1:length(cluster_id),min_dist_idxs)');
+                wTEMP(:,j) = mean(spikes_to_use,2);
             end
+        end
         wTEMP = wTEMP ./ sum(wTEMP.^2,1).^.5; % standardize the new clusters
     end
 else
@@ -435,16 +444,5 @@ if ops.fig == 1
     end
     title('prototype templates');
 end
-% dbstop in extractTemplatesfromSnippets.m at 433
-% disp('stop')
-% disp('stop')
-% disp('stop')
-% disp('stop')
-% disp('stop')
-% disp('stop')
-% disp('stop')
-% disp('stop')
-% disp('stop')
-% disp('stop')
-% disp('stop')
+% dbstop in extractTemplatesfromSnippets.m at 448
 % disp('stop')
