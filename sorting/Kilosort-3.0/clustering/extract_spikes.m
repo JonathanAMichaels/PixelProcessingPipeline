@@ -110,8 +110,8 @@ for k = 1:ops.Nbatch
     tF(:, :, nsp + [1:ns]) = gather(feat);
     nsp = nsp + ns;
     
-    if rem(k,round(ops.Nbatch/10))==1 %|| k==ops.Nbatch
-        fprintf('%2.2f sec, %d batches, %d spikes \n', toc, k, nsp)
+    if rem(k,round(ops.Nbatch/10))==0 % print progress 10 times
+        fprintf('%2.2f sec, %d batches, %d spikes \n', toc, k, nsp) 
     end
 end
 tF = tF(:, :, 1:nsp); % remove excess preallocated space
@@ -122,3 +122,4 @@ tF = permute(tF, [3, 1, 2]);
 
 rez.ycup = ycup;
 rez.xcup = xcup;
+end

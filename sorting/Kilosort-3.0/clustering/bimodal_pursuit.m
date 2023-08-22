@@ -1,4 +1,4 @@
-function [x, iclust, flag] = bimodal_pursuit(Xd, wroll, ss, rmin, nlow, retry, use_CCG)
+function [x, iclust, flag] = bimodal_pursuit(Xd, wroll, ss, rmin, nlow, retry, use_CCG, nPCs)
 
     dt = 1/1000;
     clp = Xd;
@@ -19,7 +19,7 @@ function [x, iclust, flag] = bimodal_pursuit(Xd, wroll, ss, rmin, nlow, retry, u
     [nsamp, nk] = size(clp);
 
     % split direction
-    w = nonrandom_projection(clp);
+    w = nonrandom_projection(clp, nPCs);
     x = clp * w;
     [r, scmax, p, m0, mu1, mu2, sig] = find_split(x);
 
@@ -127,7 +127,7 @@ function [x, iclust, flag] = bimodal_pursuit(Xd, wroll, ss, rmin, nlow, retry, u
         w = w / sum(w .^ 2) .^ .5;
         clp = Xd - (Xd * w') * w;
         %     disp('one more try')
-        [x, iclust, flag] = bimodal_pursuit(clp, wroll, ss, rmin, nlow, retry - 1, use_CCG);
+        [x, iclust, flag] = bimodal_pursuit(clp, wroll, ss, rmin, nlow, retry - 1, use_CCG, nPCs);
     end
 
     % sd = sum(mu_clp.^2)^.5;
@@ -135,8 +135,8 @@ function [x, iclust, flag] = bimodal_pursuit(Xd, wroll, ss, rmin, nlow, retry, u
 end
 
 % this function checks all combinations of projection vectors for optimal bimodality of split
-function u = nonrandom_projection(clp)
-    npow = 6; % this is the combinatory power of the projection
+function u = nonrandom_projection(clp, nPCs)
+    npow = nPCs; % this is the combinatory power of the projection
     nbase = 2; % this is the base for the combinatoric problem
     u = make_rproj(npow, nbase);
     u = u - .5; %mean(u(:)); % center the projection vectors

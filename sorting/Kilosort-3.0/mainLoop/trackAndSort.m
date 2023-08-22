@@ -109,7 +109,7 @@ ntot = 0;
 
 % these ones store features per spike
 fW  = zeros(Nnearest, 1e7, 'single'); % Nnearest is the number of nearest templates to store features for
-fWpc = zeros(NchanNear, 2*Nrank, 1e7, 'single'); % NchanNear is the number of nearest channels to take PC features from
+fWpc = zeros(NchanNear, ops.nPCs, 1e7, 'single'); % NchanNear is the number of nearest channels to take PC features from
 
 
 dWU1 = dWU;

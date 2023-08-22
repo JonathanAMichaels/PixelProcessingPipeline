@@ -46,7 +46,7 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
 
     tic
     for j = 1:numel(ycenter) % process spikes found for each y grid location
-        if mod(j, round(numel(ycenter) / 10)) == 1 % print progress 10 times
+        if rem(j, round(numel(ycenter) / 10)) == 0 % print progress 10 times
             fprintf('time %2.2f, grid loc. grp. %d/%d, units %d \n', toc, j, numel(ycenter), n0)
         end
 
@@ -91,7 +91,7 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
             dd(ix, :, ib) = data(ix, :, ia);
         end
         
-        kid = run_pursuit(dd, nlow, rmin, n0, wroll, ss(tin), use_CCG);
+        kid = run_pursuit(dd, nlow, rmin, n0, wroll, ss(tin), use_CCG, ops.nPCs);
 
         [~, ~, kid] = unique(kid); % make cluster ids consecutive
         nmax = max(kid); % number of clusters found
@@ -107,27 +107,27 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
     end
     Wpca = Wpca(:, :, 1:n0);
     spike_times_for_kid = spike_times_for_kid(1:n0);
-    % plot mean PC similarities for each channel and cluster
-    if ops.fig
-        ichc = gather(ich);
-        nPCs = size(Wpca, 1);
-        figure(12)
-        for k=1:n0; for ichcs=1:numel(ichc); for iPC=1:nPCs; scatter(ichcs*ones('like',Wpca(:,ichcs,k)), Wpca(:,ichcs,k)+40*k); end; end; end
-        % plot top 3 PC similarities for all channels in each cluster
-        figure(13)
-        for k=1:n0
-            scatter3(Wpca(1,1,k), Wpca(2,1,k), Wpca(3,1,k), 20, [1-k/n0,k/n0,k/n0]);
-            hold on;
-        end
-        xlabel('PC1');
-        ylabel('PC2');
-        zlabel('PC3');
-        set(gca,'DataAspectRatio',[1 1 1]);
-    end
+    % plot mean PC similarities for each channel and cluster (not that useful)
+    % if ops.fig
+    %     ichc = gather(ich);
+    %     nPCs = size(Wpca, 1);
+    %     figure(12)
+    %     for k=1:n0; for ichcs=1:numel(ichc); for iPC=1:nPCs; scatter(ichcs*ones('like',Wpca(:,ichcs,k)), Wpca(:,ichcs,k)+40*k); end; end; end
+    %     % plot top 3 PC similarities for all channels in each cluster
+    %     figure(13)
+    %     for k=1:n0
+    %         scatter3(Wpca(1,1,k), Wpca(2,1,k), Wpca(3,1,k), 20, [1-k/n0,k/n0,k/n0]);
+    %         hold on;
+    %     end
+    %     xlabel('PC1');
+    %     ylabel('PC2');
+    %     zlabel('PC3');
+    %     set(gca,'DataAspectRatio',[1 1 1]);
+    % end
     toc
     %%
-    rez.W = zeros(ops.nt0, 0, 3, 'single');
-    rez.U = zeros(ops.Nchan, 0, 3, 'single');
+    rez.W = zeros(ops.nt0, 0, ops.nEig, 'single');
+    rez.U = zeros(ops.Nchan, 0, ops.nEig, 'single');
     rez.mu = zeros(1, 0, 'single');
     figure(14); hold on;
     RGB_colors = rand(n0,3);
@@ -135,10 +135,10 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
         dWU = wPCA * gpuArray(Wpca(:, :, t)); % multiply PC components by mean PC similarities
         [w, s, u] = svdecon(dWU); % compute SVD of that product
         wsign = -sign(w(ops.nt0min, 1)); % flip sign of waveform if necessary, for consistency
-        % vvv save first 3 components of W, containing final rotation matrix
-        rez.W(:, t, :) = gather(wsign * w(:, 1:3));
-        % vvv save first 3 components of U, containing initial rotation and scaling matrix
-        rez.U(:, t, :) = gather(wsign * u(:, 1:3) * s(1:3, 1:3)); 
+        % vvv save first ops.nEig components of W, containing final rotation matrix
+        rez.W(:, t, :) = gather(wsign * w(:, 1:ops.nEig));
+        % vvv save first ops.nEig components of U, containing initial rotation and scaling matrix
+        rez.U(:, t, :) = gather(wsign * u(:, 1:ops.nEig) * s(1:ops.nEig, 1:ops.nEig)); 
         rez.mu(t) = gather(sum(sum(rez.U(:, t, :) .^ 2)) ^ .5); % get norm of U
         rez.U(:, t, :) = rez.U(:, t, :) / rez.mu(t); % normalize U
         if ops.fig
@@ -155,4 +155,5 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
     end
     %%
     rez.ops.wPCA = wPCA;
+end
     

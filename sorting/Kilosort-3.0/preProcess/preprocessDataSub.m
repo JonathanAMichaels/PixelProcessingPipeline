@@ -100,7 +100,7 @@ if fidW<3
 end
 
 % weights to combine batches at the edge
-w_edge = linspace(0, 1, ops.ntbuff)';
+% w_edge = linspace(0, 1, ops.ntbuff)';
 ntb = ops.ntbuff;
 datr_prev = gpuArray.zeros(ntb, ops.Nchan, 'single');
 
@@ -126,9 +126,9 @@ for ibatch = 1:Nbatch
     
     datr    = gpufilter(buff, ops, chanMap); % apply filters and median subtraction
     
-%     datr(ntb + [1:ntb], :) = datr_prev;
-    datr(ntb + [1:ntb], :) = w_edge .* datr(ntb + [1:ntb], :) +...
-        (1 - w_edge) .* datr_prev;
+    datr(ntb + [1:ntb], :) = datr_prev;
+%     datr(ntb + [1:ntb], :) = w_edge .* datr(ntb + [1:ntb], :) +...
+%         (1 - w_edge) .* datr_prev;
    
     datr_prev = datr(ntb +NT + [1:ops.ntbuff], :);
     datr    = datr(ntb + (1:NT),:); % remove timepoints used as buffers
