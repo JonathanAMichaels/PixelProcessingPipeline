@@ -408,7 +408,7 @@ if use_kmeans
     wTEMP(:,1:6) = spikes(:,best_CC_idxs(1:6));
     spikes_gauss_windowed = spikes .* gausswin(size(spikes,1), (size(spikes,1)-1)/(2*sigma));
     wTEMP = wTEMP ./ sum(wTEMP.^2,1).^.5; % standardize the new clusters
-    for i = 1:5
+    for i = 1:10
         % at each iteration, assign the waveform to its most correlated cluster
         CC = wTEMP' * spikes_gauss_windowed;
         [amax, imax] = max(CC,[],1); % find the best cluster for each waveform
@@ -416,7 +416,7 @@ if use_kmeans
             wTEMP(:,j)  = spikes(:,imax==j) * amax(imax==j)'; % weighted average to get new cluster means
             % if a template had no matches and therefore has NaN's,
             % use the mean of top 10th percentil in that k-means cluster instead
-            if sum(abs(wTEMP(:,j)))==0
+            if sum(abs(wTEMP(:,j)))==0 % make sure the template is not all zeros after the weighted average
                 [~,min_dist_idxs] = mink(Dist_from_K(:,j),ceil(sum(cluster_id==j)/10));
                 spikes_to_use = dd(:,cluster_id==j & ismember(1:length(cluster_id),min_dist_idxs)');
                 wTEMP(:,j) = mean(spikes_to_use,2);
