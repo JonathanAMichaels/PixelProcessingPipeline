@@ -149,7 +149,7 @@ script_dir = pwd; % get directory where repo exists
 load(fullfile(script_dir, '/tmp/config.mat'));    
 if remove_channel_delays
     channel_delays = get_channel_delays(rez);
-    figure(222); hold on;
+    % figure(222); hold on;
     % remove channel delays from proc.dat by seeking through the batches
     % with ibatch*NT+max(channel_delays) and shifting each delayed channel backwards
     % by the appropriate amount found in channel_delays
@@ -161,7 +161,7 @@ if remove_channel_delays
     end
     data = fread(fidOff, [NchanTOT inf], '*int16'); % read and reshape. Assumes int16 data
     % circularly shift each channel by the appropriate amount
-    plot(data')
+    % plot(data')
     for i = 1:length(channel_delays)
         data(i,:) = circshift(data(i,:), channel_delays(i));
     end

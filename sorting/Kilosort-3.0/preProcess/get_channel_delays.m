@@ -45,24 +45,37 @@ last_maxes = zeros(1,Nchan);
 [chan_corr_peak_maxes, chan_corr_peak_locs] = max(chan_CC, [], 1);
 for iChan = 1:Nchan
     these_maxes = chan_corr_peak_maxes(Nchan*(iChan-1)+1:Nchan*iChan);
-    this_chan_corr_peak_locs = chan_corr_peak_locs(Nchan*(iChan-1)+1:Nchan*iChan);
+    if all(isnan(these_maxes))
+        continue; % skip this channel if all correlations are NaN, i.e. zeroed out data
+    elseif any(isnan(these_maxes))
+        this_chan_corr_peak_locs = chan_corr_peak_locs(Nchan*(iChan-1)+1:Nchan*iChan);
+        this_chan_corr_peak_locs(isnan(these_maxes)) = maxlag+1; % set NaN locations to maxlag+1
+        these_maxes(isnan(these_maxes)) = 0; % set NaNs to zero
+    else       
+        this_chan_corr_peak_locs = chan_corr_peak_locs(Nchan*(iChan-1)+1:Nchan*iChan);
+    end
     % these_delays = this_chan_corr_peak_locs - maxlag - 1;
     if sum(these_maxes) > sum(last_maxes) % if these delays produce higher correlation
         best_peak_locs = this_chan_corr_peak_locs;
         last_maxes = these_maxes;
     end
 end
+% remove nan values for display
+chan_corr_peak_maxes(isnan(chan_corr_peak_maxes)) = 0;
 % use the earliest channel as a reference to compute delays
 channel_delays = gather(best_peak_locs - maxlag - 1); % -1 because of zero-lag
 disp("Channel delays computed: ")
 disp(reshape(chan_corr_peak_locs, Nchan, Nchan)-maxlag-1)
+disp("Channel delays using best reference channel: ")
+disp(channel_delays)
+
 disp("Correlation values trying each reference channel: ")
 disp(reshape(chan_corr_peak_maxes, Nchan, Nchan))
 disp(" + ___________________________________________________________")
 disp(sum(reshape(chan_corr_peak_maxes, Nchan, Nchan)))
+
 disp("Using best reference channel, with maximal correlation: ")
 disp(sum(last_maxes))
-disp("Channel delays using best reference channel: ")
-disp(channel_delays)
+
 end
 

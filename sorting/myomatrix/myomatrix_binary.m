@@ -119,7 +119,7 @@ for q = 1:4
         % SNR_reject_chans = chanList(bitmask == 1);
         disp("SNRs: " + num2str(SNR))
         disp("Mean SNR: " + num2str(mean_SNR) + " +/- " + num2str(std_SNR))
-        disp("Rejecting channels with outlier SNRs: " + num2str(SNR_reject_chans))
+        disp("Channels with outlier SNRs: " + num2str(SNR_reject_chans))
     end
 
     % subplot(1, 4, q)
@@ -154,46 +154,60 @@ else
 end
 disp(['Automatically detected broken/inactive channels are: ' num2str(brokenChan')])
 
+if isa(remove_bad_myo_chans(1), 'logical')
+    NchanTOT = length(chanList)-length(brokenChan);
+elseif isa(remove_bad_myo_chans, 'integer')
+    brokenChan = remove_bad_myo_chans; % overwrite brokenChan with manually provided list
+    NchanTOT = length(chanList)-length(remove_bad_myo_chans);
+else
+    error('remove_bad_myo_chans must be a boolean or an integer list of broken channels')
+end
+% ensure that NchanTOT is not less than 9, by adding dummy channels (zeros)
+if NchanTOT < 9
+    num_dummy_chans = 9 - NchanTOT;
+    disp('Dummy channels will be added to ensure that NchanTOT is not less than 9 (number of SVD components)')
+    disp(['Dummy channel list is: ' num2str(chanList(end-num_dummy_chans+1:end))])
+    brokenChan_dummy = brokenChan(1:num_dummy_chans);
+    brokenChan_remove = brokenChan(num_dummy_chans+1:end);
+else
+    brokenChan_dummy = [];
+end
+
 % now actually remove the detected broken channels if True
 % if a list of broken channels is provided, use that instead
 % if false, just continue
 if isa(remove_bad_myo_chans(1), 'logical')
     if remove_bad_myo_chans(1) == false
         brokenChan = [];
-        if ~isempty(brokenChan)
-            disp('Broken/inactive channels detected, but not removing them, because remove_bad_myo_chans is false')
-        elseif isempty(brokenChan)
-            disp('No broken/inactive channels detected, not removing any, because remove_bad_myo_chans is false')
-        end
+        disp('Not removing any broken/inactive channels, because remove_bad_myo_chans is false')
         disp(['Keeping channel list: ' num2str(chanList)])
     elseif remove_bad_myo_chans(1) == true
         disp('Removing automatically detected broken/inactive channels')
-        data(:, brokenChan) = [];
-        chanList(brokenChan) = [];
+        data(:, brokenChan_dummy) = 0;
+        data(:, brokenChan_remove) = [];
+        chanList(brokenChan_remove) = [];
         disp(['New channel list is: ' num2str(chanList)])
     end
 elseif isa(remove_bad_myo_chans, 'integer')
-    brokenChan = remove_bad_myo_chans;
     disp(['Removing manually provided broken/inactive channels: ' num2str(brokenChan)])
-    data(:, brokenChan) = [];
-    chanList(brokenChan) = [];
+    data(:, brokenChan_dummy) = 0;
+    data(:, brokenChan_remove) = [];
+    chanList(brokenChan_remove) = [];
     disp(['New channel list is: ' num2str(chanList)])
-else
-    error('remove_bad_myo_chans must be a boolean or an integer list of broken channels')
 end
 
 save([myo_sorted_dir '/chanList.mat'], 'chanList')
 save([myo_sorted_dir '/brokenChan.mat'], 'brokenChan');
 
 % load and modify channel map variables to remove broken channel elements, if desired
-if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
+if ~isempty(brokenChan_remove) && remove_bad_myo_chans(1) ~= false
     load(myo_chan_map_file)
-    chanMap(end-length(brokenChan)+1:end) = []; % take off end to save indexing
-    chanMap0ind(end-length(brokenChan)+1:end) = []; % take off end to save indexing
-    connected(brokenChan) = [];
-    kcoords(brokenChan) = [];
-    xcoords(brokenChan) = [];
-    ycoords(brokenChan) = [];
+    chanMap(end-length(brokenChan_remove)+1:end) = []; % take off end to save indexing
+    chanMap0ind(end-length(brokenChan_remove)+1:end) = []; % take off end to save indexing
+    connected(brokenChan_remove) = [];
+    kcoords(brokenChan_remove) = [];
+    xcoords(brokenChan_remove) = [];
+    ycoords(brokenChan_remove) = [];
     disp('Broken channels were just removed from that channel map')
     save(fullfile(myo_sorted_dir, 'chanMap_minus_brokenChans.mat'), 'chanMap', 'connected', 'xcoords', 'ycoords', 'kcoords', 'chanMap0ind', 'fs', 'name')
 end
