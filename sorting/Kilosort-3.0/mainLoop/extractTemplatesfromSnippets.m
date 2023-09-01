@@ -32,7 +32,7 @@ for ibatch = 1:nskip:Nbatch
 
 
     % find isolated spikes from each batch
-    [row, col, mu] = isolated_peaks_new(-abs(dataRAW), ops);
+    [row, col] = isolated_peaks_buffered(-abs(dataRAW), ops);
 
     % for each peak, get the voltage snippet from that channel
     clips = get_SpikeSample(dataRAW, row, col, ops, 0);

@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024,  NrankMax = 9, maxFR = 10000, nt0max=61, NchanMax = 17, nsizes = 5;
+const int  Nthreads = 1024,  NrankMax = 12, maxFR = 10000, nt0max=61, NchanMax = 17, nsizes = 5;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

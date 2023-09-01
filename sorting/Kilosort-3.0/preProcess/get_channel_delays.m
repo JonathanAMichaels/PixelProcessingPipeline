@@ -1,4 +1,4 @@
-function [channel_delays] = get_channel_delays(rez)
+function [channelDelays] = get_channel_delays(rez)
 % based on a subset of the data, compute a channel whitening matrix
 % this requires temporal filtering first (gpufilter)
 
@@ -12,7 +12,7 @@ Nchan = rez.ops.Nchan;
 
 fprintf('Getting channel delays... \n');
 fid = fopen(ops.fbinary, 'r');
-maxlag = ops.fs/500; % 2 ms lag
+maxlag = ops.fs/1000; % 1 ms max delay
 
 % we'll estimate the cross correlation across channels from data batches
 ibatch = 1;
@@ -50,6 +50,7 @@ for iChan = 1:Nchan
     elseif any(isnan(these_maxes))
         this_chan_corr_peak_locs = chan_corr_peak_locs(Nchan*(iChan-1)+1:Nchan*iChan);
         this_chan_corr_peak_locs(isnan(these_maxes)) = maxlag+1; % set NaN locations to maxlag+1
+        chan_corr_peak_locs(Nchan*(iChan-1)+1:Nchan*iChan) = this_chan_corr_peak_locs;
         these_maxes(isnan(these_maxes)) = 0; % set NaNs to zero
     else       
         this_chan_corr_peak_locs = chan_corr_peak_locs(Nchan*(iChan-1)+1:Nchan*iChan);
@@ -63,11 +64,11 @@ end
 % remove nan values for display
 chan_corr_peak_maxes(isnan(chan_corr_peak_maxes)) = 0;
 % use the earliest channel as a reference to compute delays
-channel_delays = gather(best_peak_locs - maxlag - 1); % -1 because of zero-lag
-disp("Channel delays computed: ")
+channelDelays = gather(best_peak_locs - maxlag - 1); % -1 because of zero-lag
+disp("Channel delays with best correlation computed for all channel combinations: ")
 disp(reshape(chan_corr_peak_locs, Nchan, Nchan)-maxlag-1)
-disp("Channel delays using best reference channel: ")
-disp(channel_delays)
+disp("Using channel delays with best reference channel: ")
+disp(channelDelays)
 
 disp("Correlation values trying each reference channel: ")
 disp(reshape(chan_corr_peak_maxes, Nchan, Nchan))

@@ -2,7 +2,7 @@ from sklearn.model_selection import ParameterGrid
 # Define the parameter grid to be searched over using ops variables from Kilosort_config_3.m
 def get_KS_params_grid():
     grid = dict(
-        Th=[[10,4],[9,4],[8,4],[7,4],[6,4],[5,4]],# , [7,5], [5,3]],
+        Th=[[7,3],[7,2]], #, [10,4], [9,4]],
         # lam=[10],
         # nfilt_factor=[4],#[1,4,16],
         # ntbuff=[64],#[512, 256, 128, 64],

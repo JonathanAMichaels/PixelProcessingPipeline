@@ -1,18 +1,20 @@
-import sys
-import os
-import subprocess
-import glob
-import scipy.io
-from ruamel import yaml
-from pathlib import Path
-import itertools
 import datetime
-import numpy as np
+import glob
+import itertools
+import os
 import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+import numpy as np
+import scipy.io
 from ibllib.ephys.spikes import ks2_to_alf
-from pipeline_utils import find, create_config, extract_sync, extract_LFP
-from sorting.Kilosort_gridsearch_config import get_KS_params_grid
+from ruamel import yaml
+
+from pipeline_utils import create_config, extract_LFP, extract_sync, find
 from registration.registration import registration as registration_function
+from sorting.Kilosort_gridsearch_config import get_KS_params_grid
 
 # calculate time taken to run each pipeline call
 start_time = datetime.datetime.now()
@@ -158,7 +160,7 @@ if config["neuropixel"] != "":
     )
 else:
     config["num_neuropixels"] = 0
-config["myomatrix"] = myomatrix_folder # just have user provide session path directly
+config["myomatrix"] = myomatrix_folder  # just have user provide session path directly
 # temp_folder = glob.glob(folder + "/*_myo")
 # if len(temp_folder) > 1:
 #     SystemExit("There shouldn't be more than one Myomatrix folder")
@@ -181,9 +183,9 @@ if not "myo_data_passband" in config:
 if not "myo_data_sampling_rate" in config:
     config["myo_data_sampling_rate"] = 30000
 if not "remove_bad_myo_chans" in config["Session"]:
-    config["Session"]["remove_bad_myo_chans"] = [False]*len(config["Session"]["myo_chan_list"])
+    config["Session"]["remove_bad_myo_chans"] = [False] * len(config["Session"]["myo_chan_list"])
 if not "remove_channel_delays" in config["Session"]:
-    config["Session"]["remove_channel_delays"] = [False]*len(config["Session"]["myo_chan_list"])
+    config["Session"]["remove_channel_delays"] = [False] * len(config["Session"]["myo_chan_list"])
 
 # find MATLAB installation
 if os.path.isfile("/usr/local/MATLAB/R2021a/bin/matlab"):
@@ -199,7 +201,7 @@ else:
 # the recording numbers in the config file. If they don't, create a new subfolder
 # and concatenate the data into that folder. If they do, save the path to that
 concatDataPath = find("concatenated_data", config["myomatrix"])
-recordings_str = ','.join([str(i) for i in config["recordings"]])
+recordings_str = ",".join([str(i) for i in config["recordings"]])
 if len(concatDataPath) > 1:
     raise SystemExit(
         "There shouldn't be more than one concatenated_data folder in the myomatrix data folder"
@@ -208,7 +210,7 @@ if len(concatDataPath) > 1:
 # folder found but doesn't contain the recordings specified in config file)
 elif config["concatenate_myo_data"] and (
     len(concatDataPath) < 1 or recordings_str not in os.listdir(concatDataPath[0])
-    ):
+):
     # concatenated data folder was not found
     print("Concatenated files not found, concatenating data from data in chosen recording folders")
     path_to_add = script_folder + "/sorting/myomatrix/"
@@ -221,7 +223,7 @@ elif config["concatenate_myo_data"] and (
     print(f"Using newly concatenated data at {concatDataPath[0]+'/'+recordings_str}")
 else:
     print(f"Using existing concatenated data at {concatDataPath[0]+'/'+recordings_str}")
-concatDataPath = concatDataPath[0]+'/'+recordings_str
+concatDataPath = concatDataPath[0] + "/" + recordings_str
 
 temp = glob.glob(folder + "/*.kinarm")
 if len(temp) == 0:
@@ -364,8 +366,9 @@ if myo_sort:
         "myomatrix": config["myomatrix"],
         "script_dir": config["script_dir"],
         "GPU_to_use": config["GPU_to_use"],
-        "recordings": np.array(config["recordings"], dtype=int) if 
-            type(config["recordings"][0] == int) else config["recordings"],
+        "recordings": np.array(config["recordings"], dtype=int)
+        if type(config["recordings"][0] == int)
+        else config["recordings"],
         "myo_data_passband": np.array(config["myo_data_passband"], dtype=float),
         "myo_data_sampling_rate": float(config["myo_data_sampling_rate"]),
         "trange": np.array(config["Session"]["trange"]),
@@ -394,7 +397,7 @@ if myo_sort:
         )
         config_kilosort["remove_channel_delays"] = np.array(
             config["Session"]["remove_channel_delays"][myomatrix]
-            )
+        )
         config_kilosort["num_chans"] = (
             config["Session"]["myo_chan_list"][myomatrix][1]
             - config["Session"]["myo_chan_list"][myomatrix][0]
@@ -421,7 +424,7 @@ if myo_sort:
         if config["Sorting"]["do_KS_param_gridsearch"] == 1:
             iParams = iter(get_KS_params_grid())  # get iterator of all possible param combinations
         else:
-            iParams = iter([''])  # just pass an empty string to run once with chosen params
+            iParams = iter([""])  # just pass an empty string to run once with chosen params
         while True:
             # while no exhaustion of iterator
             try:
@@ -453,7 +456,9 @@ if myo_sort:
                         (
                             f"addpath(genpath('{path_to_add}'));"
                             f"Kilosort_run_myo_3(struct({passable_params}))"
-                        ) if config["Sorting"]["do_KS_param_gridsearch"] == 1 else (
+                        )
+                        if config["Sorting"]["do_KS_param_gridsearch"] == 1
+                        else (
                             f"addpath(genpath('{path_to_add}'));"
                             f"Kilosort_run_myo_3('{passable_params}')"
                         ),
@@ -466,10 +471,8 @@ if myo_sort:
                     cwd=f"{config_kilosort['myo_sorted_dir']}",
                     check=True,
                 )
-                # remove single quoutes from passable_params string
-                filename_friendly_params = passable_params.replace(
-                    "'", ""
-                )
+                # remove spaces and single quoutes from passable_params string
+                filename_friendly_params = passable_params.replace("'", "").replace(" ", "")
                 # copy sorted0 folder tree to a new folder with timestamp to label results by params
                 # this serves as a backup of the sorted0 data, so it can be loaded into Phy later
                 shutil.copytree(
@@ -520,7 +523,7 @@ if myo_post:
         )
         config_kilosort["remove_channel_delays"] = np.array(
             config["Session"]["remove_channel_delays"][myomatrix]
-            )
+        )
         config_kilosort["num_chans"] = (
             config["Session"]["myo_chan_list"][myomatrix][1]
             - config["Session"]["myo_chan_list"][myomatrix][0]
