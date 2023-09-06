@@ -288,10 +288,7 @@ if myo_sort:
         config_kilosort['myo_chan_map_file'] = os.path.join(config['script_dir'],'geometries',
                                                             config['Session']['myo_chan_map_file'][myomatrix])
         config_kilosort['chans'] = np.array(config['Session']['myo_chan_list'][myomatrix])
-        #if config['Session']['remove_bad_myo_chans']:
-        #    config_kilosort['remove_bad_myo_chans'] = np.array(config['Session']['remove_bad_myo_chans'][myomatrix])
-        #else:
-        config_kilosort['remove_bad_myo_chans'] = True
+        config_kilosort['remove_bad_myo_chans'] = np.array(config['Session']['remove_bad_myo_chans'][myomatrix])
         config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
 

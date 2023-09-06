@@ -161,7 +161,7 @@ save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan
 clear data_filt data_norm
 
 fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
-if false
+if true
     disp("Filtering raw data with passband:")
     disp(strcat(string(myo_data_passband(1)), "-", string(myo_data_passband(2)), " Hz"))
     mean_data = mean(data, 1);
