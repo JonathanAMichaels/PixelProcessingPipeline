@@ -122,7 +122,7 @@ if use_kmeans
     rng('default'); rng(1); % initializing random number generator for reproducibility
     % stream = RandStream('mlfg6331_64');  % Random number stream
     % options = statset('UseParallel', 1,'UseSubstreams', 1,'Streams', stream);
-    [cluster_id, ~, ~, Dist_from_K] = kmeans(dd_pca', nPCs, 'MaxIter', 10000, 'Replicates', 32, 'Display', 'final'); %, 'Options', options);
+    [cluster_id, ~, ~, Dist_from_K] = kmeans(dd_pca', nPCs, 'MaxIter', 10000, 'Replicates', 32, 'Display', 'final');%, 'Options', options);
     % disp("replacing with K-means NOW")
     spikes = gpuArray(nan(size(dd)));
     number_of_spikes_to_use = nan(nPCs,1);

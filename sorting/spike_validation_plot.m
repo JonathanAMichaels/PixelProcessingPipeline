@@ -5,7 +5,7 @@ function spike_validation_plot(chunk, clusters)
     disp(['Using this channel map: ' myo_chan_map_file])
     % load channel map with broken channels removed if chosen by user
     if length(brokenChan) > 0 && remove_bad_myo_chans(1) ~= false
-        load(fullfile(myo_sorted_dir, 'chanMap_minus_brokenChans.mat'))
+        load(fullfile(myo_sorted_dir, 'chanMapAdjusted.mat'))
     else
         load(myo_chan_map_file)
     end

@@ -151,6 +151,7 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
             end
         end
     end
+    % dbstop in template_learning at 155
     if ops.fig
         title('First Multi-Channel Templates (Color Coded by Cluster)');
         xlabel('Time');

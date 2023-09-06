@@ -110,7 +110,8 @@ for q = 1:4
         % reject channels if the SNR lies beyond 1 std of the mean SNR
         mean_SNR = mean(SNR);
         std_SNR = std(SNR);
-        SNR_reject_chans = chanList(SNR < mean_SNR - std_SNR);
+        % reject channels with SNR < mean - std/2
+        SNR_reject_chans = chanList(SNR < mean_SNR - std_SNR/2);
 
         % [~, idx] = sort(SNR, 'ascend');
         % idx = idx(1:floor(length(idx) / 2));
@@ -161,17 +162,19 @@ if isa(remove_bad_myo_chans(1), 'logical')
     if remove_bad_myo_chans(1) == false
         brokenChan = [];
         disp('Not removing any broken/inactive channels, because remove_bad_myo_chans is false')
-        disp(['Keeping channel list: ' num2str(chanList)])
+        % disp(['Keeping channel list: ' num2str(chanList)])
     elseif remove_bad_myo_chans(1) == true
-        data(:, brokenChan) = 0;
-        disp('Zeroed out automatically detected broken/inactive channels')
-        % disp(['New channel list is: ' num2str(chanList)])
+        data(:, brokenChan) = [];
+        chanList(brokenChan) = [];
+        disp('Just removed automatically detected broken/inactive channels')
+        disp(['New channel list is: ' num2str(chanList)])
     end
 elseif isa(remove_bad_myo_chans, 'integer')
     brokenChan = remove_bad_myo_chans; % overwrite brokenChan with manually provided list
-    data(:, brokenChan) = 0;
-    disp(['Zeroed out manually provided broken/inactive channels: ' num2str(brokenChan)])
-    % disp(['New channel list is: ' num2str(chanList)])
+    data(:, brokenChan) = [];
+    chanList(brokenChan) = [];
+    disp(['Just removed manually provided broken/inactive channels: ' num2str(brokenChan)])
+    disp(['New channel list is: ' num2str(chanList)])
 else
     error('remove_bad_myo_chans must be a boolean or an integer list of broken channels')
 end
@@ -182,15 +185,30 @@ save([myo_sorted_dir '/brokenChan.mat'], 'brokenChan');
 % load and modify channel map variables to remove broken channel elements, if desired
 if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
     load(myo_chan_map_file)
-    % chanMap(brokenChan_remove) = []; % take off end to save indexing
-    % chanMap0ind(brokenChan_remove) = []; % take off end to save indexing
-    % connected(brokenChan_remove) = [];
-    % kcoords(brokenChan_remove) = [];
-    % xcoords(brokenChan_remove) = [];
-    % ycoords(brokenChan_remove) = [];
-    % disp('Broken channels were just removed from that channel map')
-    % save(fullfile(myo_sorted_dir, 'chanMap_minus_brokenChans.mat'), 'chanMap', 'connected', 'xcoords', 'ycoords', 'kcoords', 'chanMap0ind', 'fs', 'name')
+    % if size(data, 2) >= num_KS_components
+    %     chanMap(brokenChan) = []; % take off end to save indexing
+    %     chanMap0ind(brokenChan) = []; % take off end to save indexing
+    %     connected(brokenChan) = [];
+    %     kcoords(brokenChan) = [];
+    %     xcoords(brokenChan) = [];
+    %     ycoords(brokenChan) = [];
+    % else
+    numDummy = max(0,num_KS_components - size(data, 2)); % make sure it's not negative
+    dummyData = zeros(size(data, 1), numDummy, 'int16');
+    data = [data dummyData]; % add dummy channels to make size larger than num_KS_components
+    chanMap = 1:size(data, 2);
+    chanMap0ind = chanMap - 1;
+    connected = true(size(data, 2), 1);
+    kcoords = ones(size(data, 2), 1);
+    xcoords = zeros(size(data, 2), 1);
+    ycoords = size(data, 2):-1:1;
+    % end
+    disp('Broken channels were just removed from that channel map')
+    save(fullfile(myo_sorted_dir, 'chanMapAdjusted.mat'), 'chanMap', 'connected', 'xcoords', ...
+        'ycoords', 'kcoords', 'chanMap0ind', 'fs', 'name', 'numDummy')
+% else
 end
+
 
 clear data_filt data_norm
 

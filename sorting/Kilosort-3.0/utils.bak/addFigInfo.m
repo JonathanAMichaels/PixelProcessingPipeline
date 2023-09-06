@@ -7,15 +7,9 @@ end
 try
     figure(H);
     fsz = 10; % info font size
-    % date of Kilosort processing
-    if isfield(ops, 'datenumSorted') && ~isempty(ops.datenumSorted)
-        dateVer = sprintf('Sorted on: %s',datestr(ops.datenumSorted));
-    else
-        dateVer = sprintf('Sorted on: %s',datestr(now));
-    end
-    
+    dateVer = sprintf('Sorted on: %s',datestr(now));
     try
-        % append kilosort git repo information
+        % kilosort git source
         gitstat = strsplit(ops.git.kilosort.status, '\n');
         dateVer = [dateVer, sprintf('        Kilosort git: %s,  commit %s', gitstat{1}, ops.git.kilosort.revision(1:7))];
     end

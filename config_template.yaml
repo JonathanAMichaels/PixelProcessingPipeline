@@ -29,6 +29,7 @@ script_dir:
 Registration:
 # Sorting parameters
 Sorting:
+    num_KS_components: 9
     do_KS_param_gridsearch: False
 # Session-specific parameters
 Session:

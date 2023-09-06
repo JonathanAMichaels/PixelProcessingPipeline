@@ -9,7 +9,11 @@ function rez = Kilosort_run_czuba_myo(ops_input_params)
     gpuDevice(GPU_to_use);
 
     % get and set channel map
-    chanMapFile = myo_chan_map_file;
+    if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
+        chanMapFile = fullfile(myo_sorted_dir, 'chanMapAdjusted.mat');
+    else
+        chanMapFile = myo_chan_map_file;
+    end
     disp(['Using this channel map: ' chanMapFile])
 
     % set paths
@@ -30,21 +34,23 @@ function rez = Kilosort_run_czuba_myo(ops_input_params)
     % ops.chanMap = fullfile(chanMapFile);
     % ops.NchanTOT = 385;
     % ops.saveDir = rootH;
-    ops.fbinary = fullfile(myo_sorted_dir, 'data.bin');
-    ops.fproc = fullfile(myo_sorted_dir, 'proc.dat');
-    ops.brokenChan = fullfile(myo_sorted_dir, 'brokenChan.mat');
+    ops.saveDir = myo_sorted_dir; % set directory for writes
+    ops.fbinary = fullfile(ops.saveDir, 'data.bin');
+    ops.fproc = fullfile(ops.saveDir, 'proc.dat');
+    ops.brokenChan = fullfile(ops.saveDir, 'brokenChan.mat');
     ops.chanMap = fullfile(chanMapFile);
-    ops.NchanTOT = double(num_chans); %double(max(num_chans - length(brokenChan), 9));
-    ops.saveDir = myo_sorted_dir;
-
+    ops.nt0 = 61;
+    ops.ntbuff = 512; %ceil(bufferSec * ops.fs / 64) * 64; %  ceil(batchSec/4*ops.fs/64)*64; % (def=64)
+    ops.NT = 2048 * 32 + ops.ntbuff; %ceil(batchSec * ops.fs / 32) * 32; % convert to 32 count increments of samples
     ops.sigmaMask = Inf; % we don't want a distance-dependant decay
-    ops.nPCs = 9; % how many PCs to project the spikes into (also used as number of template prototypes)
+    ops.nPCs = double(num_KS_components); % how many PCs to project the spikes into (also used as number of template prototypes)
+    ops.nTEMP = ops.nPCs; % number of templates to use for spike detection
     ops.nEig = ops.nPCs; % rank of svd for templates, % keep same as nPCs to avoid error
-    ops.Th = [6 2]; % threshold crossings for pre-clustering (in PCA projection space)
+    ops.NchanTOT = double(max(num_chans - length(brokenChan), ops.nEig));
+    ops.Th = [5 2]; % threshold crossings for pre-clustering (in PCA projection space)
     ops.spkTh = -2; % spike threshold in standard deviations (-6 default) (only used in isolated_peaks_new)
     ops.nfilt_factor = 12; % max number of clusters per good channel (even temporary ones)
     ops.nblocks = 0;
-    ops.nt0 = 61;
     ops.nt0min = ceil(ops.nt0 / 2); % peak of template match will be this many points away from beginning
     ops.nskip = 1; % how many batches to skip for determining spike PCs
     ops.nSkipCov = 1; % compute whitening matrix and prototype templates using every N-th batch
@@ -54,16 +60,15 @@ function rez = Kilosort_run_czuba_myo(ops_input_params)
     ops.long_range = [ops.nt0min 1]; % [timepoints channels], range within to use only the largest peak
     ops.fig = 1; % whether to plot figures
     ops.recordings = recordings;
-    ops.momentum = [60 600];
-    batchSec = 10; % number of seconds in each batch     (TBC: 8:10 seems good for 1-2 hr files and/or 32 channels)
-    bufferSec = 2; % define number of seconds of data for buffer
-    ops.ntbuff = ceil(bufferSec * ops.fs / 64) * 64; %  ceil(batchSec/4*ops.fs/64)*64; % (def=64)
-    % buffer size in samples
-    ops.NT = ceil(batchSec * ops.fs / 32) * 32; % convert to 32 count increments of samples
+    ops.momentum = [20 400];
+    ops.clipMin = 100; % clip template updating to a minimum number of contributing spikes
+    ops.clipMinFit = .8;
+    %batchSec = 10; % number of seconds in each batch     (TBC: 8:10 seems good for 1-2 hr files and/or 32 channels)
+    %bufferSec = 2; % define number of seconds of data for buffer
     % sample from batches more sparsely (in certain circumstances/analyses)
-    batchSkips = ceil(60 / batchSec); % do high-level assessments at least once every minute of data
+    % batchSkips = ceil(60 / batchSec); % do high-level assessments at least once every minute of data
     ops.nskip = 1; %batchSkips; % 1; % how many batches to skip for determining spike PCs
-    ops.nSkipCov = batchSkips; %batchSkips; % 1; % compute whitening matrix from every N-th batch
+    ops.nSkipCov = 1; % batchSkips; %batchSkips; % 1; % compute whitening matrix from every N-th batch
 
     %% gridsearch section
     % only try to use gridsearch values if ops_input_params is a struct and fields are present
@@ -157,8 +162,10 @@ function rez = Kilosort_run_czuba_myo(ops_input_params)
 
     % write to Phy
     fprintf('Saving results to Phy  \n')
-    rezToPhy2(rez, myo_sorted_dir);
-    save(fullfile(myo_sorted_dir, '/ops.mat'), '-struct', 'ops');
-    disp(ops)
-    quit;
+    rezToPhy2(rez, ops.saveDir);
+    save(fullfile(ops.saveDir, '/ops.mat'), '-struct', 'ops');
+    
+    ops
+
+    % quit;
 end

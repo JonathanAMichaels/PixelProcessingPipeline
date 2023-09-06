@@ -8,11 +8,12 @@ function rez = Kilosort_run_myo_3(ops_input_params)
     disp(strcat("Setting GPU device to use: ", num2str(GPU_to_use)))
     gpuDevice(GPU_to_use);
 
-    % if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
-    %     chanMapFile = fullfile(myo_sorted_dir, 'chanMap_minus_brokenChans.mat');
-    % else
-    chanMapFile = myo_chan_map_file;
-    % end
+    % get and set channel map
+    if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
+        chanMapFile = fullfile(myo_sorted_dir, 'chanMapAdjusted.mat');
+    else
+        chanMapFile = myo_chan_map_file;
+    end
     disp(['Using this channel map: ' chanMapFile])
 
     try
@@ -67,8 +68,6 @@ function rez = Kilosort_run_myo_3(ops_input_params)
         ops.trange = trange;
     end
 
-    ops
-
     rez = preprocessDataSub(ops);
     ops.channelDelays = rez.ops.channelDelays;
     rez = datashift2(rez, 1);
@@ -115,6 +114,8 @@ function rez = Kilosort_run_myo_3(ops_input_params)
     fprintf('Saving results to Phy  \n')
     rezToPhy2(rez, myo_sorted_dir);
     save(fullfile(myo_sorted_dir, '/ops.mat'), '-struct', 'ops');
+
+    ops
 
     quit;
 end

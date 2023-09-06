@@ -186,6 +186,10 @@ if not "remove_bad_myo_chans" in config["Session"]:
     config["Session"]["remove_bad_myo_chans"] = [False] * len(config["Session"]["myo_chan_list"])
 if not "remove_channel_delays" in config["Session"]:
     config["Session"]["remove_channel_delays"] = [False] * len(config["Session"]["myo_chan_list"])
+if not "num_KS_components" in config["Sorting"]:
+    config["Sorting"]["num_KS_components"] = 6
+if not "do_KS_param_gridsearch" in config["Sorting"]:
+    config["Sorting"]["do_KS_param_gridsearch"] = False
 
 # find MATLAB installation
 if os.path.isfile("/usr/local/MATLAB/R2021a/bin/matlab"):
@@ -363,14 +367,15 @@ if myo_config:
 # Proceed with myo processing and spike sorting
 if myo_sort:
     config_kilosort = {
+        "GPU_to_use": config["GPU_to_use"],
         "myomatrix": config["myomatrix"],
         "script_dir": config["script_dir"],
-        "GPU_to_use": config["GPU_to_use"],
         "recordings": np.array(config["recordings"], dtype=int)
         if type(config["recordings"][0] == int)
         else config["recordings"],
         "myo_data_passband": np.array(config["myo_data_passband"], dtype=float),
         "myo_data_sampling_rate": float(config["myo_data_sampling_rate"]),
+        "num_KS_components": np.array(config["Sorting"]["num_KS_components"], dtype=int),
         "trange": np.array(config["Session"]["trange"]),
         "sync_chan": int(config["Session"]["myo_analog_chan"]),
     }
@@ -460,7 +465,7 @@ if myo_sort:
                         if config["Sorting"]["do_KS_param_gridsearch"] == 1
                         else (
                             f"addpath(genpath('{path_to_add}'));"
-                            f"Kilosort_run_myo_3('{passable_params}')"
+                            f"Kilosort_run_myo_3_czuba('{passable_params}');"
                         ),
                     ],
                     check=True,
