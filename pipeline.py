@@ -285,11 +285,13 @@ if myo_sort:
             print(f"Using data from: {f[0]}")
         config_kilosort['myo_sorted_dir'] = config_kilosort['myomatrix'] + '/sorted' + str(myomatrix)
         config_kilosort['myomatrix_num'] = myomatrix
-        # set_trace()
         config_kilosort['myo_chan_map_file'] = os.path.join(config['script_dir'],'geometries',
                                                             config['Session']['myo_chan_map_file'][myomatrix])
         config_kilosort['chans'] = np.array(config['Session']['myo_chan_list'][myomatrix])
-        config_kilosort['remove_bad_myo_chans'] = np.array(config['Session']['remove_bad_myo_chans'][myomatrix])
+        if config['Session']['remove_bad_myo_chans']:
+            config_kilosort['remove_bad_myo_chans'] = np.array(config['Session']['remove_bad_myo_chans'][myomatrix])
+        else:
+            config_kilosort['remove_bad_myo_chans'] = True
         config_kilosort['num_chans'] = config['Session']['myo_chan_list'][myomatrix][1] - \
                                        config['Session']['myo_chan_list'][myomatrix][0] + 1
 
