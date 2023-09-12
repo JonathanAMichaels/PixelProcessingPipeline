@@ -10,12 +10,11 @@ channelRemap = [23:-1:8 24:31 0:7] + 1;
 
 chanList = chans(1):chans(2);
 disp(['Starting with these channels: ' num2str(chanList)])
-chanMapFile = myo_chan_map_file;
-disp(['Using this channel map: ' chanMapFile])
+disp(['Using this channel map: ' myo_chan_map_file])
 
 dataChan = chanList;
-if not(isfolder([myomatrix '/sorted' num2str(myomatrix_num) '/']))
-    mkdir([myomatrix '/sorted' num2str(myomatrix_num) '/']);
+if not(isfolder([myo_sorted_dir '/']))
+    mkdir([myo_sorted_dir '/']);
 end
 
 % Check if we're dealing with .dat or .continuous
@@ -66,16 +65,23 @@ disp('Saved sync data')
 disp(['Total recording time: ' num2str(size(data, 1) / myo_data_sampling_rate / 60) ' minutes'])
 
 clf
-S = zeros(size(data, 2), 2);
+S = zeros(size(data, 2), 3);
 bipolarThresh = 90;
 unipolarThresh = 120;
 lowThresh = 0.1;
 bipolar = length(chanList) == 16;
-for q = 1:2
+% when q is 1, we will compute count the number of spikes in the channel and compare to a threshold
+% when q is 2, we will compute the std of the low freq noise in the channel
+% when q is 3, we will compute the SNR of the channel
+for q = 1:4
     if q == 1
         [b, a] = butter(2, [250 4400] / (myo_data_sampling_rate / 2), 'bandpass');
     elseif q == 2
-        [b, a] = butter(2, [5 70] / (myo_data_sampling_rate / 2), 'bandpass');
+        [b, a] = butter(2, [5 100] / (myo_data_sampling_rate / 2), 'bandpass');
+    elseif q == 3
+        [b, a] = butter(2, 10000 / (myo_data_sampling_rate / 2), 'high');
+    elseif q == 4
+        [b, a] = butter(2, [300 1000] / (myo_data_sampling_rate / 2), 'bandpass');
     end
     useSeconds = 600;
     if size(data, 1) < useSeconds * 2 * myo_data_sampling_rate
@@ -88,44 +94,68 @@ for q = 1:2
         data_filt(:, i) = single(filtfilt(b, a, double(data(tRange, i))));
     end
 
-    if q == 2
-        S(:, q) = std(data_filt, [], 1);
-    else
+    if q == 1
         data_norm = data_filt ./ repmat(std(data_filt, [], 1), [size(data_filt, 1) 1]);
-        spk = sum(data_norm < -7, 1);
+        spk = sum(data_norm < -7, 1); % check for spikes crossing 6 std below mean
         S(:, q) = spk / size(data_norm, 1) * myo_data_sampling_rate;
+    elseif q == 2
+        S(:, q) = std(data_filt, [], 1); % get the std of the low freq noise
+        low_band_power = rms(data_filt, 1) .^ 2;
+    elseif q == 3
+        S(:, q) = std(data_filt, [], 1); % get the std of the high freq noise
+        high_band_power = rms(data_filt, 1) .^ 2;
+    elseif q == 4
+        spike_band_power = rms(data_filt, 1) .^ 2;
+        SNR = spike_band_power ./ (low_band_power + high_band_power);
+        % reject channels if the SNR lies beyond 1 std of the mean SNR
+        % mean_SNR = mean(SNR);
+        median_SNR = median(SNR);
+        std_SNR = std(SNR);
+        % reject below median channels 
+        SNR_reject_chans = chanList(SNR < median_SNR);
+        % reject channels with SNR < mean - std/4
+        % SNR_reject_chans = chanList(SNR < mean_SNR - std_SNR);
+
+        % [~, idx] = sort(SNR, 'ascend');
+        % idx = idx(1:floor(length(idx) / 2));
+        % bitmask = zeros(length(chanList), 1);
+        % bitmask(idx) = 1;
+        % SNR_reject_chans = chanList(bitmask == 1);
+        disp("SNRs: " + num2str(SNR))
+        disp("Median SNR: " + num2str(median_SNR))
+        % disp("Mean SNR: " + num2str(mean_SNR) + " +/- " + num2str(std_SNR))
+        disp("Channels with SNRs below median are rejected: " + num2str(SNR_reject_chans))
     end
 
-    subplot(1, 2, q)
-    if q == 1
-        title('Filtered Signal Snippet (250-4400Hz)')
-    else
-        title('Filtered Noise Snippet (5-70Hz)')
-    end
-    hold on
-    for i = 1:size(data, 2)
-        cmap = [0 0 0];
-        if q == 1
-            if S(i, 1) < lowThresh
-                cmap = [1 0.2 0.2];
-            end
-        else
-            if (bipolar && S(i, 2) > bipolarThresh) || (~bipolar && S(i, 2) > unipolarThresh)
-                cmap = [1 0.2 0.2];
-            end
-        end
-        plot(data_filt(:, i) + i * 1600, 'Color', cmap)
-    end
-    set(gca, 'YTick', (1:size(data, 2)) * 1600, 'YTickLabels', 1:size(data, 2))
-    axis([1 size(data_filt, 1) 0 (size(data, 2) + 1) * 1600])
+    % subplot(1, 4, q)
+    % if q == 1
+    %     title('Filtered Signal Snippet (250-4400Hz)')
+    % elseif q == 2
+    %     title('Filtered Noise Snippet (5-70Hz)')
+    % end
+    % hold on
+    % for i = 1:size(data, 2)
+    %     cmap = [0 0 0];
+    %     if q == 1
+    %         if S(i, 1) < lowThresh
+    %             cmap = [1 0.2 0.2];
+    %         end
+    %     elseif q == 2
+    %         if (bipolar && S(i, 2) > bipolarThresh) || (~bipolar && S(i, 2) > unipolarThresh)
+    %             cmap = [1 0.2 0.2];
+    %         end
+    %     end
+    %     plot(data_filt(:, i) + i * 1600, 'Color', cmap)
+    % end
+    % set(gca, 'YTick', (1:size(data, 2)) * 1600, 'YTickLabels', 1:size(data, 2))
+    % axis([1 size(data_filt, 1) 0 (size(data, 2) + 1) * 1600])
 end
-print([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.png'], '-dpng')
-S
+print([myo_sorted_dir '/brokenChan.png'], '-dpng')
 
 if length(chanList) == 16
-    brokenChan = int64(find(S(:, 2) > bipolarThresh | S(:, 1) < lowThresh));
+    brokenChan = int64(union(find(S(:, 2) > bipolarThresh | S(:, 1) < lowThresh), SNR_reject_chans)); %S(:, 3) > bipolarThresh
 else
-    brokenChan = int64(find(S(:, 2) > unipolarThresh | S(:, 1) < lowThresh));
+    brokenChan = int64(union(find(S(:, 2) > unipolarThresh | S(:, 1) < lowThresh), SNR_reject_chans)); %S(:, 3) > unipolarThresh
 end
 disp(['Automatically detected broken/inactive channels are: ' num2str(brokenChan')])
 
@@ -134,77 +164,102 @@ disp(['Automatically detected broken/inactive channels are: ' num2str(brokenChan
 % if false, just continue
 if isa(remove_bad_myo_chans(1), 'logical')
     if remove_bad_myo_chans(1) == false
-        if length(brokenChan) > 0
-            disp('Broken/inactive channels detected, but not removing them, because remove_bad_myo_chans is false')
-        elseif length(brokenChan) == 0        
-            disp('No broken/inactive channels detected, not removing any, because remove_bad_myo_chans is false')
-        end
-        disp(['Keeping channel list: ' num2str(chanList)])
+        brokenChan = [];
+        disp('Not removing any broken/inactive channels, because remove_bad_myo_chans is false')
+        % disp(['Keeping channel list: ' num2str(chanList)])
     elseif remove_bad_myo_chans(1) == true
-        disp('Removing automatically detected broken/inactive channels')
         data(:, brokenChan) = [];
         chanList(brokenChan) = [];
+        disp('Just removed automatically detected broken/inactive channels')
         disp(['New channel list is: ' num2str(chanList)])
     end
 elseif isa(remove_bad_myo_chans, 'integer')
-    brokenChan = remove_bad_myo_chans;
-    disp(['Removing manually provided broken/inactive channels: ' num2str(brokenChan)])
+    brokenChan = remove_bad_myo_chans; % overwrite brokenChan with manually provided list
     data(:, brokenChan) = [];
     chanList(brokenChan) = [];
+    disp(['Just removed manually provided broken/inactive channels: ' num2str(brokenChan)])
     disp(['New channel list is: ' num2str(chanList)])
 else
     error('remove_bad_myo_chans must be a boolean or an integer list of broken channels')
 end
 
-save([myomatrix '/sorted' num2str(myomatrix_num) '/chanList.mat'], 'chanList')
-save([myomatrix '/sorted' num2str(myomatrix_num) '/brokenChan.mat'], 'brokenChan');
+save([myo_sorted_dir '/chanList.mat'], 'chanList')
+save([myo_sorted_dir '/brokenChan.mat'], 'brokenChan');
+
+% load and modify channel map variables to remove broken channel elements, if desired
+if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
+    load(myo_chan_map_file)
+    % if size(data, 2) >= num_KS_components
+    %     chanMap(brokenChan) = []; % take off end to save indexing
+    %     chanMap0ind(brokenChan) = []; % take off end to save indexing
+    %     connected(brokenChan) = [];
+    %     kcoords(brokenChan) = [];
+    %     xcoords(brokenChan) = [];
+    %     ycoords(brokenChan) = [];
+    % else
+    numDummy = max(0,num_KS_components - size(data, 2)); % make sure it's not negative
+    dummyData = zeros(size(data, 1), numDummy, 'int16');
+    data = [data dummyData]; % add dummy channels to make size larger than num_KS_components
+    chanMap = 1:size(data, 2);
+    chanMap0ind = chanMap - 1;
+    connected = true(size(data, 2), 1);
+    kcoords = ones(size(data, 2), 1);
+    xcoords = zeros(size(data, 2), 1);
+    ycoords = (size(data, 2):-1:1)';
+    % end
+    disp('Broken channels were just removed from that channel map')
+    save(fullfile(myo_sorted_dir, 'chanMapAdjusted.mat'), 'chanMap', 'connected', 'xcoords', ...
+        'ycoords', 'kcoords', 'chanMap0ind', 'fs', 'name', 'numDummy')
+% else
+end
+
+
 clear data_filt data_norm
 
-fileID = fopen([myomatrix '/sorted' num2str(myomatrix_num) '/data.bin'], 'w');
-if true
-    disp("Filtering raw data with passband:")
-    disp(strcat(string(myo_data_passband(1)), "-", string(myo_data_passband(2)), " Hz"))
-    mean_data = mean(data, 1);
-    [b, a] = butter(4, myo_data_passband / (myo_data_sampling_rate / 2), 'bandpass');
-    intervals = round(linspace(1, size(data, 1), round(size(data, 1) / (myo_data_sampling_rate * 5))));
-    buffer = 128;
-    for t = 1:length(intervals) - 1
-        preBuff = buffer; postBuff = buffer;
-        if t == 1
-            preBuff = 0;
-        elseif t == length(intervals) - 1
-            postBuff = 0;
-        end
-        tRange = intervals(t) - preBuff:intervals(t + 1) + postBuff;
-        fdata = double(data(tRange, :)) - mean_data;
-        fdata = fdata - median(fdata, 2);
-        fdata = filtfilt(b, a, fdata);
-        fdata = fdata(preBuff + 1:end - postBuff - 1, :);
-        % fdata(:, brokenChan) = randn(size(fdata(:, brokenChan))) * 5;
-        fwrite(fileID, int16(fdata'), 'int16');
+fileID = fopen([myo_sorted_dir '/data.bin'], 'w');
+% if true
+disp("Filtering raw data with passband:")
+disp(strcat(string(myo_data_passband(1)), "-", string(myo_data_passband(2)), " Hz"))
+mean_data = mean(data, 1);
+[b, a] = butter(4, myo_data_passband / (myo_data_sampling_rate / 2), 'bandpass');
+intervals = round(linspace(1, size(data, 1), round(size(data, 1) / (myo_data_sampling_rate * 5))));
+buffer = 128;
+for t = 1:length(intervals) - 1
+    preBuff = buffer; postBuff = buffer;
+    if t == 1
+        preBuff = 0;
+    elseif t == length(intervals) - 1
+        postBuff = 0;
     end
-else
-    data(:, brokenChan) = randn(size(data(:, brokenChan))) * 5;
-    fwrite(fileID, int16(data'), 'int16');
+    tRange = intervals(t) - preBuff:intervals(t + 1) + postBuff;
+    fdata = double(data(tRange, :)) - mean_data;
+    fdata = fdata - median(fdata, 2);
+    fdata = filtfilt(b, a, fdata);
+    fdata = fdata(preBuff + 1:end - postBuff - 1, :);
+    % fdata(:, brokenChan) = randn(size(fdata(:, brokenChan))) * 5;
+    fwrite(fileID, int16(fdata'), 'int16');
 end
+% else
+%     data(:, brokenChan) = randn(size(data(:, brokenChan))) * 5;
+%     fwrite(fileID, int16(data'), 'int16');
+% end
 fclose(fileID);
-
-if false
-    % Generate "Bulk EMG" dataset
-    notBroken = 1:size(data, 2);
-    notBroken(brokenChan) = [];
-    if length(dataChan) == 32
-        bottomHalf = [9:16 25:32];
-        topHalf = [1:8 17:24];
-        bottomHalf(ismember(bottomHalf, brokenChan)) = [];
-        topHalf(ismember(topHalf, brokenChan)) = [];
-        bEMG = int16(mean(data(:, bottomHalf), 2)) - int16(mean(data(:, topHalf), 2));
-    else
-        bEMG = int16(mean(data(:, notBroken), 2));
-    end
-    save([myomatrix '/sorted' num2str(myomatrix_num) '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
-    clear bEMG
-    disp('Saved generated bulk EMG')
-end
+% if false
+%     % Generate "Bulk EMG" dataset
+%     notBroken = 1:size(data, 2);
+%     notBroken(brokenChan) = [];
+%     if length(dataChan) == 32
+%         bottomHalf = [9:16 25:32];
+%         topHalf = [1:8 17:24];
+%         bottomHalf(ismember(bottomHalf, brokenChan)) = [];
+%         topHalf(ismember(topHalf, brokenChan)) = [];
+%         bEMG = int16(mean(data(:, bottomHalf), 2)) - int16(mean(data(:, topHalf), 2));
+%     else
+%         bEMG = int16(mean(data(:, notBroken), 2));
+%     end
+%     save([myo_sorted_dir '/bulkEMG'], 'bEMG', 'notBroken', 'dataChan')
+%     clear bEMG
+%     disp('Saved generated bulk EMG')
+% end
 disp('Saved myomatrix data binary')
 quit

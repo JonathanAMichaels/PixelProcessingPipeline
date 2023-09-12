@@ -1,6 +1,6 @@
 function rez = datashift2(rez, do_correction)
 
-NrankPC = 6;
+NrankPC = rez.ops.nPCs;
 [wTEMP, wPCA]    = extractTemplatesfromSnippets(rez, NrankPC);
 rez.wTEMP = gather(wTEMP);
 rez.wPCA  = gather(wPCA);
@@ -144,7 +144,7 @@ if do_correction
     % sigma for the Gaussian process smoothing
     sig = rez.ops.sig;
     % register the data batch by batch
-    dprev = gpuArray.zeros(ops.ntbuff,ops.Nchan, 'single');
+    dprev = gpuArray.zeros(ops.ntbuff, ops.Nchan, 'single');
     for ibatch = 1:Nbatches
         dprev = shift_batch_on_disk2(rez, ibatch, dshift(ibatch, :), yblk, sig, dprev);
     end

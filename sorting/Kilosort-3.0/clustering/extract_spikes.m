@@ -1,5 +1,6 @@
 function [rez, st3, tF] = extract_spikes(rez)
 
+% get the electrode position boundaries
 ymin = min(rez.yc);
 ymax = max(rez.yc);
 xmin = min(rez.xc);
@@ -33,14 +34,16 @@ xmax = max(rez.xc);
 ops = rez.ops;
 
 spkTh = ops.Th(1);
-sig = 10;
+sig = 100; % set microns as hardcoded BASE gaussian kernel radius for the nearest channels
 dNearActiveSite = median(diff(unique(rez.yc)));
 
-[ycup, xcup] = meshgrid(ops.yup, ops.xup);
+[ycup, xcup] = meshgrid(ops.yup, ops.xup); % define the 2x upsampled grid
 
 NrankPC = ops.nPCs; %!!
-[wTEMP, wPCA]    = extractTemplatesfromSnippets(rez, NrankPC);
 
+% [wTEMP, wPCA]    = extractTemplatesfromSnippets(rez, NrankPC);
+wTEMP = rez.wTEMP;
+wPCA = rez.wPCA;
 NchanNear = min(ops.Nchan, 16); %% CHANGED: was 8
 [iC, dist] = getClosestChannels2(ycup, xcup, rez.yc, rez.xc, NchanNear);
 
@@ -55,7 +58,7 @@ NchanNearUp =  min(numel(ycup), 10*NchanNear);
 [iC2, dist2] = getClosestChannels2(ycup, xcup, ycup, xcup, NchanNearUp);
 
 nsizes = 5;
-v2 = gpuArray.zeros(5, size(dist,2), 'single');
+v2 = gpuArray.zeros(nsizes, size(dist,2), 'single');
 for k = 1:nsizes
     v2(k, :) = sum(exp( - 2 * dist.^2 / (sig * k)^2), 1);
 end
@@ -107,11 +110,11 @@ for k = 1:ops.Nbatch
     tF(:, :, nsp + [1:ns]) = gather(feat);
     nsp = nsp + ns;
     
-    if rem(k,100)==1 || k==ops.Nbatch
-        fprintf('%2.2f sec, %d batches, %d spikes \n', toc, k, nsp)
+    if rem(k,round(ops.Nbatch/10))==0 % print progress 10 times
+        fprintf('%2.2f sec, %d batches, %d spikes \n', toc, k, nsp) 
     end
 end
-tF = tF(:, :, 1:nsp);
+tF = tF(:, :, 1:nsp); % remove excess preallocated space
 st3 = st3(1:nsp, :);
 
 rez.iC = iC;
@@ -119,3 +122,5 @@ tF = permute(tF, [3, 1, 2]);
 
 rez.ycup = ycup;
 rez.xcup = xcup;
+
+end

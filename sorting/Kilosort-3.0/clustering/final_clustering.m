@@ -66,7 +66,7 @@ xy = zeros(nst, 2);
 
 tic
 for j = 1:numel(ycenter)
-    if rem(j,5)==1
+    if rem(j,round(numel(ycenter/10)))==0 % print progress 10 times
         fprintf('time %2.2f, GROUP %d/%d, units %d \n', toc, j, numel(ycenter), n0)    
     end
     y0 = ycenter(j);
@@ -97,7 +97,7 @@ for j = 1:numel(ycenter)
     end
     xy(tin, :) =  spike_position(dd, wPCA, wTEMP, rez.xc(ich), rez.yc(ich));
 
-    kid = run_pursuit(dd, nlow, rmin, n0, wroll, ss(tin), use_CCG);
+    kid = run_pursuit(dd, nlow, rmin, n0, wroll, ss(tin), use_CCG, ops.nPCs);
     
     [~, ~, kid] = unique(kid);
     nmax = max(kid);
@@ -121,7 +121,7 @@ sum(clust_good)
 rez.W = zeros(ops.nt0,   0, ops.nEig, 'single');
 rez.U = zeros(ops.Nchan, 0, ops.nEig, 'single');
 rez.mu = zeros(1,0, 'single');
-for  t = 1:n0
+for  t = 1:n0 % for each cluster
     dWU = wPCA * gpuArray(Wpca(:,:,t));
     [w,s,u] = svdecon(dWU);
     wsign = -sign(w(ops.nt0min+1, 1));

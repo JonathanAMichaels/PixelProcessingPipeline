@@ -20,7 +20,7 @@ function ops = gitStatus(ops)
 % [REVIVAL EXAMPLE]
 % To revive a git repo to the source/state of Kilosort [rez] struct:
 % 
-%     % load a saved [rez] struct data file [.PDS]
+%     % load a saved [rez] struct data file
 %     thisFile = fullfile( myDataPath, 'rez.mat');
 %     load(thisFile);
 %     ops = rez.ops;

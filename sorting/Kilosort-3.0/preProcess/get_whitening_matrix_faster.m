@@ -8,10 +8,15 @@ twind = ops.twind;
 NchanTOT = ops.NchanTOT;
 NT = ops.NT;
 NTbuff = ops.NTbuff;
-chanMap = ops.chanMap;
+numDummy = rez.ops.numDummy;
+numChansToUse = NchanTOT-numDummy;
+origChanMap = ops.chanMap;
+chanMap = origChanMap(1:numChansToUse);
 Nchan = rez.ops.Nchan;
-xc = rez.xc;
-yc = rez.yc;
+origxc = rez.xc;
+origyc = rez.yc;
+xc = origxc(1:numChansToUse);
+yc = origyc(1:numChansToUse);
 
 % load data into patches, filter, compute covariance
 fprintf('Getting channel whitening matrix... \n');
@@ -44,8 +49,8 @@ if getOr(ops, 'useMemMapping',0)
         
         % Memory map the raw data file to m.Data.x of size [nChan, nSamples)
         mmfRaw = dir(ops.fbinary);
-        nsamp = mmfRaw.bytes/2/ops.NchanTOT;
-        mmfRaw = memmapfile(ops.fbinary, 'Format',{'int16', [ops.NchanTOT, nsamp], 'x'}); % ignore tstart here b/c we'll account for it on each mapped read (using .twind)
+        nsamp = mmfRaw.bytes/2/NchanTOT;
+        mmfRaw = memmapfile(ops.fbinary, 'Format',{'int16', [NchanTOT, nsamp], 'x'}); % ignore tstart here b/c we'll account for it on each mapped read (using .twind)
         %parmmf = parallel.pool.Constant(mmf);
         tic
         parfor i = 1:length(ibatch)
@@ -148,7 +153,7 @@ end
 
 if ops.whiteningRange<Inf
     % if there are too many channels, a finite whiteningRange is more robust to noise in the estimation of the covariance
-    ops.whiteningRange = min(ops.whiteningRange, Nchan);
+    ops.whiteningRange = min(ops.whiteningRange, numChansToUse);
     Wrot = whiteningLocal(gather(CC), yc, xc, ops.whiteningRange); % this function performs the same matrix inversions as below, just on subsets of channels around each channel
 else
     Wrot = whiteningFromCovariance(CC);

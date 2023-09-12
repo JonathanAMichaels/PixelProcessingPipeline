@@ -11,13 +11,13 @@ ops.fshigh = 250;
 ops.minfr_goodchannels = 0; % this does nothing in kilosort 3
 
 % threshold on projections (like in Kilosort1, can be different for last pass like [10 4])
-ops.Th = [9 8];
+ops.Th = [10 4];
 
 % how important is the amplitude penalty (like in Kilosort1, 0 means not used, 10 is average, 50 is a lot) 
 ops.lam = 10;  
 
 % splitting a cluster at the end requires at least this much isolation for each sub-cluster (max = 1)
-ops.AUCsplit = 0.9; 
+ops.AUCsplit = 0.9; % this measures area of the gaussian mixture component minus the area of overlap with other bimodal component
 
 % minimum spike rate (Hz), if a cluster falls below this for too long it gets removed
 ops.minFR = 1/50; 
@@ -28,12 +28,12 @@ ops.momentum = [20 400];
 % spatial constant in um for computing residual variance of spike
 ops.sigmaMask = 30; 
 
-% threshold crossings for pre-clustering (in PCA projection space)
-ops.ThPre = 8; 
+% threshold crossings for pre-clustering (in PCA projection space) (not used)
+% ops.ThPre = 8; 
 
 %% danger, changing these settings can lead to fatal errors
 % options for determining PCs
-ops.spkTh           = -6;      % spike threshold in standard deviations (-6)
+ops.spkTh           = -6;      % spike threshold in standard deviations (-6) (not used)
 ops.reorder         = 1;       % whether to reorder batches for drift correction. 
 ops.nskip           = 25;  % how many batches to skip for determining spike PCs
 
@@ -52,4 +52,8 @@ ops.scaleproc           = 200;   % int16 scaling of whitened data
 ops.nPCs                = 3; % how many PCs to project the spikes into
 ops.useRAM              = 0; % not yet available
 
+%% additional settings 
+ops.CAR = 1; % whether to perform CAR
+ops.loc_range = [5 4]; % area to detect peaks; plus/minus for both time and channel
+ops.long_range = [30 6]; % range to detect isolated peaks: [timepoints channels]
 %%
