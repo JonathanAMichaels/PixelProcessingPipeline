@@ -58,7 +58,7 @@ NchanNearUp =  min(numel(ycup), 10*NchanNear);
 [iC2, dist2] = getClosestChannels2(ycup, xcup, ycup, xcup, NchanNearUp);
 
 nsizes = 5;
-v2 = gpuArray.zeros(5, size(dist,2), 'single');
+v2 = gpuArray.zeros(nsizes, size(dist,2), 'single');
 for k = 1:nsizes
     v2(k, :) = sum(exp( - 2 * dist.^2 / (sig * k)^2), 1);
 end
@@ -122,4 +122,5 @@ tF = permute(tF, [3, 1, 2]);
 
 rez.ycup = ycup;
 rez.xcup = xcup;
+
 end

@@ -11,7 +11,7 @@ neuropixel:
 num_neuropixels:
 # path to myomatrix directory (should end in _myo)
 myomatrix:
-# specify recordings to process (can be ["all"] or a list of integers, e.g., "[1,2,5,6]")
+# specify recordings to process (can be [all] or a list of integers, e.g., [1,2,5,6])
 recordings: [1]
 # whether to concatenate myomatrix data
 concatenate_myo_data: False
@@ -29,6 +29,7 @@ script_dir:
 Registration:
 # Sorting parameters
 Sorting:
+    num_KS_components: 9
     do_KS_param_gridsearch: False
 # Session-specific parameters
 Session:

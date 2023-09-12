@@ -1,18 +1,20 @@
-import sys
-import os
-import subprocess
-import glob
-import scipy.io
-from ruamel import yaml
-from pathlib import Path
-import itertools
 import datetime
-import numpy as np
+import glob
+import itertools
+import os
 import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+import numpy as np
+import scipy.io
 from ibllib.ephys.spikes import ks2_to_alf
-from pipeline_utils import find, create_config, extract_sync, extract_LFP
-from sorting.Kilosort_gridsearch_config import get_KS_params_grid
+from ruamel import yaml
+
+from pipeline_utils import create_config, extract_LFP, extract_sync, find
 from registration.registration import registration as registration_function
+from sorting.Kilosort_gridsearch_config import get_KS_params_grid
 
 # calculate time taken to run each pipeline call
 start_time = datetime.datetime.now()
@@ -39,6 +41,31 @@ if "-f" in opts:
         raise SystemExit("Provided folder is not valid (you had one job...)")
 else:
     raise SystemExit(f"Usage: {sys.argv[0]} -f argument must be present")
+
+# use -d option to specify which sort folder to post-process
+if "-d" in opts:
+    date_str = args[1]
+    # make sure date_str is in the format YYYYMMDD_HHMMSS
+    assert (
+        (len(date_str) == 15)
+        & date_str[:8].isnumeric()
+        & date_str[9:].isnumeric()
+        & (date_str[8] == "_")
+    ), "Argument after '-d' must be a date string in format: YYYYMMDD_HHMMSS"
+    # check if date_str is present in any of the subfolders in the myomatrix_folder path
+    subfolder_list = os.listdir(myomatrix_folder)
+    previous_sort_folder_to_use = [iFolder for iFolder in subfolder_list if date_str in iFolder]
+    assert (
+        len(previous_sort_folder_to_use) > 0
+    ), f"No matching subfolder found in {myomatrix_folder} for the date string provided"
+    assert (
+        len(previous_sort_folder_to_use) < 2
+    ), f"Multiple matching subfolders found in {myomatrix_folder} for the date string provided"
+    previous_sort_folder_to_use = str(previous_sort_folder_to_use[0])
+else:
+    previous_sort_folder_to_use = str(
+        scipy.io.loadmat(f"{myomatrix_folder}/sorted0/ops.mat")["final_myo_sorted_dir"][0]
+    )
 
 registration = False
 registration_final = False
@@ -158,7 +185,7 @@ if config["neuropixel"] != "":
     )
 else:
     config["num_neuropixels"] = 0
-config["myomatrix"] = myomatrix_folder # just have user provide session path directly
+config["myomatrix"] = myomatrix_folder  # just have user provide session path directly
 # temp_folder = glob.glob(folder + "/*_myo")
 # if len(temp_folder) > 1:
 #     SystemExit("There shouldn't be more than one Myomatrix folder")
@@ -181,9 +208,13 @@ if not "myo_data_passband" in config:
 if not "myo_data_sampling_rate" in config:
     config["myo_data_sampling_rate"] = 30000
 if not "remove_bad_myo_chans" in config["Session"]:
-    config["Session"]["remove_bad_myo_chans"] = [False]*len(config["Session"]["myo_chan_list"])
+    config["Session"]["remove_bad_myo_chans"] = [False] * len(config["Session"]["myo_chan_list"])
 if not "remove_channel_delays" in config["Session"]:
-    config["Session"]["remove_channel_delays"] = [False]*len(config["Session"]["myo_chan_list"])
+    config["Session"]["remove_channel_delays"] = [False] * len(config["Session"]["myo_chan_list"])
+if not "num_KS_components" in config["Sorting"]:
+    config["Sorting"]["num_KS_components"] = 9
+if not "do_KS_param_gridsearch" in config["Sorting"]:
+    config["Sorting"]["do_KS_param_gridsearch"] = False
 
 # find MATLAB installation
 if os.path.isfile("/usr/local/MATLAB/R2021a/bin/matlab"):
@@ -199,7 +230,26 @@ else:
 # the recording numbers in the config file. If they don't, create a new subfolder
 # and concatenate the data into that folder. If they do, save the path to that
 concatDataPath = find("concatenated_data", config["myomatrix"])
-recordings_str = ','.join([str(i) for i in config["recordings"]])
+if config["recordings"][0] == "all":
+    Record_Node_dir_list = [iDir for iDir in os.listdir(myomatrix_folder) if "Record Node" in iDir]
+    assert len(Record_Node_dir_list) == 1, "Please remove all but one 'Record Node ###' folder"
+    Record_Node_dir = Record_Node_dir_list[0]
+    Experiment_dir_list = [
+        iDir
+        for iDir in os.listdir(os.path.join(myomatrix_folder, Record_Node_dir))
+        if iDir.startswith("experiment")
+    ]
+    assert len(Experiment_dir_list) == 1, "Please remove all but one 'experiment#' folder"
+    Experiment_dir = Experiment_dir_list[0]
+    recordings_dir_list = [
+        iDir
+        for iDir in os.listdir(os.path.join(myomatrix_folder, Record_Node_dir, Experiment_dir))
+        if iDir.startswith("recording")
+    ]
+    recordings_dir_list = [int(i[9:]) for i in recordings_dir_list if i.startswith("recording")]
+    config["recordings"] = recordings_dir_list
+recordings_str = ",".join([str(i) for i in config["recordings"]])
+
 if len(concatDataPath) > 1:
     raise SystemExit(
         "There shouldn't be more than one concatenated_data folder in the myomatrix data folder"
@@ -208,7 +258,7 @@ if len(concatDataPath) > 1:
 # folder found but doesn't contain the recordings specified in config file)
 elif config["concatenate_myo_data"] and (
     len(concatDataPath) < 1 or recordings_str not in os.listdir(concatDataPath[0])
-    ):
+):
     # concatenated data folder was not found
     print("Concatenated files not found, concatenating data from data in chosen recording folders")
     path_to_add = script_folder + "/sorting/myomatrix/"
@@ -221,7 +271,8 @@ elif config["concatenate_myo_data"] and (
     print(f"Using newly concatenated data at {concatDataPath[0]+'/'+recordings_str}")
 else:
     print(f"Using existing concatenated data at {concatDataPath[0]+'/'+recordings_str}")
-concatDataPath = concatDataPath[0]+'/'+recordings_str
+concatDataPath = concatDataPath[0] + "/" + recordings_str
+
 
 temp = glob.glob(folder + "/*.kinarm")
 if len(temp) == 0:
@@ -254,6 +305,7 @@ config_kilosort["channel_list"] = 1
 if not os.path.isdir(f"{config['script_dir']}/tmp"):
     os.mkdir(f"{config['script_dir']}/tmp")
 
+# Convenience function to edit neuro sorting config file
 if neuro_config:
     if os.name == "posix":  # detect Unix
         subprocess.run(
@@ -340,19 +392,20 @@ if neuro_post:
 if myo_config:
     if os.name == "posix":  # detect Unix
         subprocess.run(
-            f"nano {config['script_dir']}/sorting/Kilosort_run_myo_3.m",
-            shell=True,
-            check=True,
-        )
-        subprocess.run(
-            f"nano {config['script_dir']}/sorting/resorter/myomatrix_call.m",
+            f"nano {config['script_dir']}/sorting/Kilosort_run_myo_3_czuba.m",
             shell=True,
             check=True,
         )
         print('Configuration for "-myo_sort" done.')
+        # subprocess.run(
+        #     f"nano {config['script_dir']}/sorting/resorter/myomatrix_call.m",
+        #     shell=True,
+        #     check=True,
+        # )
+        # print('Configuration for "-myo_post" done.')
     elif os.name == "nt":  # detect Windows
         subprocess.run(
-            f"notepad {config['script_dir']}/sorting/Kilosort_run_myo_3.m",
+            f"notepad {config['script_dir']}/sorting/Kilosort_run_myo_3_czuba.m",
             shell=True,
             check=True,
         )
@@ -361,13 +414,15 @@ if myo_config:
 # Proceed with myo processing and spike sorting
 if myo_sort:
     config_kilosort = {
+        "GPU_to_use": config["GPU_to_use"],
         "myomatrix": config["myomatrix"],
         "script_dir": config["script_dir"],
-        "GPU_to_use": config["GPU_to_use"],
-        "recordings": np.array(config["recordings"], dtype=int) if 
-            type(config["recordings"][0] == int) else config["recordings"],
+        "recordings": np.array(config["recordings"], dtype=int)
+        if type(config["recordings"][0]) != str
+        else config["recordings"],
         "myo_data_passband": np.array(config["myo_data_passband"], dtype=float),
         "myo_data_sampling_rate": float(config["myo_data_sampling_rate"]),
+        "num_KS_components": np.array(config["Sorting"]["num_KS_components"], dtype=int),
         "trange": np.array(config["Session"]["trange"]),
         "sync_chan": int(config["Session"]["myo_analog_chan"]),
     }
@@ -394,7 +449,7 @@ if myo_sort:
         )
         config_kilosort["remove_channel_delays"] = np.array(
             config["Session"]["remove_channel_delays"][myomatrix]
-            )
+        )
         config_kilosort["num_chans"] = (
             config["Session"]["myo_chan_list"][myomatrix][1]
             - config["Session"]["myo_chan_list"][myomatrix][0]
@@ -421,7 +476,7 @@ if myo_sort:
         if config["Sorting"]["do_KS_param_gridsearch"] == 1:
             iParams = iter(get_KS_params_grid())  # get iterator of all possible param combinations
         else:
-            iParams = iter([''])  # just pass an empty string to run once with chosen params
+            iParams = iter([""])  # just pass an empty string to run once with chosen params
         while True:
             # while no exhaustion of iterator
             try:
@@ -453,9 +508,11 @@ if myo_sort:
                         (
                             f"addpath(genpath('{path_to_add}'));"
                             f"Kilosort_run_myo_3(struct({passable_params}))"
-                        ) if config["Sorting"]["do_KS_param_gridsearch"] == 1 else (
+                        )
+                        if config["Sorting"]["do_KS_param_gridsearch"] == 1
+                        else (
                             f"addpath(genpath('{path_to_add}'));"
-                            f"Kilosort_run_myo_3('{passable_params}')"
+                            f"Kilosort_run_myo_3_czuba('{passable_params}');"
                         ),
                     ],
                     check=True,
@@ -466,25 +523,30 @@ if myo_sort:
                     cwd=f"{config_kilosort['myo_sorted_dir']}",
                     check=True,
                 )
-                # remove single quoutes from passable_params string
-                filename_friendly_params = passable_params.replace(
-                    "'", ""
+                # remove spaces and single quoutes from passable_params string
+                filename_friendly_params = passable_params.replace("'", "").replace(" ", "")
+                final_filename = (
+                    f"sorted{str(myomatrix)}"
+                    f"_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                    f"_rec-{recordings_str}"
+                    f"_{filename_friendly_params}"
                 )
+                # remove trailing underscore if present
+                final_filename = (
+                    final_filename[:-1] if final_filename.endswith("_") else final_filename
+                )
+                # stored final_filename in a new ops.mat field in the sorted0 folder
+                ops = scipy.io.loadmat(f"{config_kilosort['myo_sorted_dir']}/ops.mat")
+                ops.update({"final_myo_sorted_dir": final_filename})
+                scipy.io.savemat(f"{config_kilosort['myo_sorted_dir']}/ops.mat", ops)
+
                 # copy sorted0 folder tree to a new folder with timestamp to label results by params
                 # this serves as a backup of the sorted0 data, so it can be loaded into Phy later
                 shutil.copytree(
                     config_kilosort["myo_sorted_dir"],
-                    os.path.join(
-                        config_kilosort["myo_sorted_dir"],
-                        "..",
-                        (
-                            f"sorted{str(myomatrix)}"
-                            f"_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                            f"_rec-{recordings_str}"
-                            f"_{filename_friendly_params}"
-                        ),
-                    ),
+                    Path(config_kilosort["myo_sorted_dir"]).parent.joinpath(final_filename),
                 )
+
             except StopIteration:
                 if config["Sorting"]["do_KS_param_gridsearch"] == 1:
                     print("Grid search complete.")
@@ -508,7 +570,9 @@ if myo_post:
         f = glob.glob(config_kilosort["myomatrix"] + "/Record*")
 
         config_kilosort["myo_sorted_dir"] = (
-            config_kilosort["myomatrix"] + "/sorted" + str(myomatrix)
+            (config_kilosort["myomatrix"] + "/sorted" + str(myomatrix))
+            if "-d" not in opts
+            else (config_kilosort["myomatrix"] + "/" + previous_sort_folder_to_use)
         )
         config_kilosort["myo_chan_map_file"] = os.path.join(
             config["script_dir"],
@@ -520,7 +584,7 @@ if myo_post:
         )
         config_kilosort["remove_channel_delays"] = np.array(
             config["Session"]["remove_channel_delays"][myomatrix]
-            )
+        )
         config_kilosort["num_chans"] = (
             config["Session"]["myo_chan_list"][myomatrix][1]
             - config["Session"]["myo_chan_list"][myomatrix][0]
@@ -532,10 +596,10 @@ if myo_post:
 
         print("Starting resorting of " + config_kilosort["myo_sorted_dir"])
         scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
-        # get intermediate merge folders
-        merge_folders = Path(f"{config_kilosort['myo_sorted_dir']}/custom_merges").glob(
-            "intermediate_merge*"
-        )
+        ## get intermediate merge folders -- (2023-09-11) not doing intermediate merges anymore
+        # merge_folders = Path(f"{config_kilosort['myo_sorted_dir']}/custom_merges").glob(
+        #     "intermediate_merge*"
+        # )
         subprocess.run(
             [
                 "matlab",
@@ -548,12 +612,12 @@ if myo_post:
             check=True,
         )
 
-        # extract waveforms for Phy FeatureView
-        for iDir in merge_folders:
-            # create symlinks to processed data
-            Path(f"{iDir}/proc.dat").symlink_to(Path("../../proc.dat"))
-            # run Phy extract-waveforms on intermediate merges
-            subprocess.run(["phy", "extract-waveforms", "params.py"], cwd=iDir, check=True)
+        # # extract waveforms for Phy FeatureView
+        # for iDir in merge_folders:
+        #     # create symlinks to processed data
+        #     Path(f"{iDir}/proc.dat").symlink_to(Path("../../proc.dat"))
+        #     # run Phy extract-waveforms on intermediate merges
+        #     subprocess.run(["phy", "extract-waveforms", "params.py"], cwd=iDir, check=True)
         # create symlinks to processed data
         Path(f"{config_kilosort['myo_sorted_dir']}/custom_merges/final_merge/proc.dat").symlink_to(
             Path("../../proc.dat")
@@ -565,8 +629,26 @@ if myo_post:
             check=True,
         )
 
+        # copy sorted0 folder tree into same folder as for -myo_sort
+        try:
+            merge_path = "custom_merges/final_merge"
+            shutil.copytree(
+                Path(config_kilosort["myo_sorted_dir"]).joinpath(merge_path),
+                Path(config_kilosort["myo_sorted_dir"])
+                .parent.joinpath(previous_sort_folder_to_use)
+                .joinpath(merge_path),
+            )
+        except FileExistsError:
+            print(f"Final merge already exists in {previous_sort_folder_to_use}")
+        except:
+            raise
+
+# plot to show spikes overlaid on electrophysiology data, for validation purposes
 if myo_plot:
     path_to_add = script_folder + "/sorting/"
+    if "-d" in opts:
+        sorted_folder_to_plot = previous_sort_folder_to_use
+        args = args[1:]  # remove the -d flag related argument
     # create default values for validation plot arguments, if not provided
     if len(args) == 1:
         arg1 = int(1)  # default to plot chunk 1

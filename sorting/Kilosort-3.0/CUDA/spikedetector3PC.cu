@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024,  NrankMax = 9, maxFR = 10000, nt0max=61, NchanMax = 17, nsizes = 5;
+const int  Nthreads = 1024,  NrankMax = 12, maxFR = 10000, nt0max=81, NchanMax = 17, nsizes = 5;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -232,11 +232,11 @@ __global__ void  maxChannels(const double *Params, const float *dataraw, const f
                   // this is a hit, atomicAdd and return spikes
                   indx = atomicAdd(&counter[0], 1);
                   if (indx<maxFR){
-                      st[0+4*indx] = tid0;
-                      st[1+4*indx] = i;
-                      st[2+4*indx] = sqrt(d);
-                      st[3+4*indx] = kkmax[tid0 + NT*i];
-                      cF[indx] = sqrt(d);                      
+                      st[0+4*indx] = tid0; // time
+                      st[1+4*indx] = i; // best channel
+                      st[2+4*indx] = sqrt(d); // amplitude
+                      st[3+4*indx] = kkmax[tid0 + NT*i]; // template
+                      cF[indx] = sqrt(d); // amplitude again
                   }
               }
           }

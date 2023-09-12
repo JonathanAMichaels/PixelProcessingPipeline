@@ -11,8 +11,8 @@ function kid = run_pursuit(data, nlow, rmin, n0, wroll, ss, use_CCG, nPCs)
         %     fprintf('cluster %d\n', n0+j)
         [ix, xold, xnew] = break_a_cluster(Xd(ind, :), wroll, ss(ind), nlow, rmin, use_CCG, nPCs);
 
-        aj(j) = gather(mean(amps(ind(ix))));
-        %     fprintf('amps = %2.2f \n\n', aj(j));
+        aj(j) = gather(mean(amps(ind(ix)))); % mean amplitude of this cluster
+        % fprintf('amps = %2.2f \n\n', aj(j));
         kid(ind(ix)) = j; % assign these spikes to this cluster
 
         if length(ix) == length(ind)
@@ -31,7 +31,7 @@ function [ix, xold, x] = break_a_cluster(data, wroll, ss, nlow, rmin, use_CCG, n
     xold = [];
     dt = 1/1000;
     for j = 1:10
-        dd = data(ix, :); % dd is the data for this cluster, (#spikes, 6 PC components, #channels)
+        dd = data(ix, :); % dd is the data for this cluster, (#spikes, #PC components, #channels)
         if length(ix) < 2 * nlow
             x = [];
             %         disp('done with this cluster (too small)')
