@@ -271,7 +271,7 @@ function resorter(params)
         % Remove clusters that don't meet inclusion criteria
         mdata_orig = mdata;
         if keepGoing % save intermediate merges
-            save_dir_for_merges = ['/intermediate_merge' num2str(loopCount)];
+            % save_dir_for_merges = ['/intermediate_merge' num2str(loopCount)];
             [T, ascending_idxs] = sort(T); % sort to make times monotonic
             I = I(ascending_idxs);
             C = sort(unique(I));
@@ -294,31 +294,37 @@ function resorter(params)
             consistency.wave = consistency.wave(:, :, :, saveUnits);
             consistency.channel = consistency.channel(:, saveUnits);
         end
-        if not(isfolder([params.kiloDir save_dir_for_merges]))
-            mkdir([params.kiloDir save_dir_for_merges])
-        end
 
         templates = permute(mdata_orig, [3 1 2]); % now it's nTemplates x nSamples x nChannels
         templatesInds = repmat([0:size(templates, 3) - 1], size(templates, 1), 1); % we include all channels so this is trivial
 
-        disp(['Number of clusters: ' num2str(length(C))])
-        disp(['Number of spikes: ' num2str(length(I))])
-        disp(['Saving custom-merged data for Phy to: ' params.kiloDir save_dir_for_merges])
+        if keepGoing
+            % count the number of intermediate merges
+            loopCount = loopCount + 1;
+        else
+            if isfolder([params.kiloDir save_dir_for_merges])
+                rmdir([params.kiloDir save_dir_for_merges], 's')
+                mkdir([params.kiloDir save_dir_for_merges])
+            else
+                mkdir([params.kiloDir save_dir_for_merges])
+            end
 
-        % write all files to save_dir_for_merges
-        save([params.kiloDir save_dir_for_merges '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'consistency');
-        writeNPY(uint64(T), [params.kiloDir save_dir_for_merges '/spike_times.npy']);
-        writeNPY(uint32(I - 1), [params.kiloDir save_dir_for_merges '/spike_templates.npy']); % -1 for zero indexing
-        writeNPY(single(templates), [params.kiloDir save_dir_for_merges '/templates.npy']);
-        writeNPY(double(templatesInds), [params.kiloDir save_dir_for_merges '/templates_ind.npy']);
-        copyfile([params.kiloDir '/../whitening_mat.npy'], [params.kiloDir save_dir_for_merges '/whitening_mat.npy'])
-        copyfile([params.kiloDir '/../whitening_mat_inv.npy'], [params.kiloDir save_dir_for_merges '/whitening_mat_inv.npy'])
-        copyfile([params.kiloDir '/../channel_map.npy'], [params.kiloDir save_dir_for_merges '/channel_map.npy'])
-        copyfile([params.kiloDir '/../channel_positions.npy'], [params.kiloDir save_dir_for_merges '/channel_positions.npy'])
-        copyfile([params.kiloDir '/../params.py'], [params.kiloDir save_dir_for_merges '/params.py'])
+            disp(['Number of clusters: ' num2str(length(C))])
+            disp(['Number of spikes: ' num2str(length(I))])
+            disp(['Saving custom-merged data for Phy to: ' params.kiloDir save_dir_for_merges])
 
-        % count the number of intermediate merges
-        loopCount = loopCount + 1;
+            % write all files to save_dir_for_merges
+            save([params.kiloDir save_dir_for_merges '/custom_merge.mat'], 'T', 'I', 'C', 'mdata', 'SNR', 'consistency');
+            writeNPY(uint64(T), [params.kiloDir save_dir_for_merges '/spike_times.npy']);
+            writeNPY(uint32(I - 1), [params.kiloDir save_dir_for_merges '/spike_templates.npy']); % -1 for zero indexing
+            writeNPY(single(templates), [params.kiloDir save_dir_for_merges '/templates.npy']);
+            writeNPY(double(templatesInds), [params.kiloDir save_dir_for_merges '/templates_ind.npy']);
+            copyfile([params.kiloDir '/../whitening_mat.npy'], [params.kiloDir save_dir_for_merges '/whitening_mat.npy'])
+            copyfile([params.kiloDir '/../whitening_mat_inv.npy'], [params.kiloDir save_dir_for_merges '/whitening_mat_inv.npy'])
+            copyfile([params.kiloDir '/../channel_map.npy'], [params.kiloDir save_dir_for_merges '/channel_map.npy'])
+            copyfile([params.kiloDir '/../channel_positions.npy'], [params.kiloDir save_dir_for_merges '/channel_positions.npy'])
+            copyfile([params.kiloDir '/../params.py'], [params.kiloDir save_dir_for_merges '/params.py'])
+        end
     end
 
     disp('Finished merging clusters')
@@ -348,13 +354,22 @@ function resorter(params)
             set(gca, 'YLim', [min(ycoords) * yScale - inc max(ycoords) * yScale + inc])
 
             if params.savePlots
-                if ~exist([params.kiloDir '/Plots'], 'dir')
+                if exist([params.kiloDir '/Plots'], 'dir')
+                    rmdir([params.kiloDir '/Plots'], 's')
+                    mkdir([params.kiloDir '/Plots'])
+                else
                     mkdir([params.kiloDir '/Plots'])
                 end
-                if ~exist([params.kiloDir '/Plots/svg/'], 'dir')
+                if exist([params.kiloDir '/Plots/svg/'], 'dir')
+                    rmdir([params.kiloDir '/Plots/svg/'])
+                    mkdir([params.kiloDir '/Plots/svg/'])
+                else
                     mkdir([params.kiloDir '/Plots/svg/'])
                 end
-                if ~exist([params.kiloDir '/Plots/png/'], 'dir')
+                if exist([params.kiloDir '/Plots/png/'], 'dir')
+                    rmdir([params.kiloDir '/Plots/png/'])
+                    mkdir([params.kiloDir '/Plots/png/'])
+                else
                     mkdir([params.kiloDir '/Plots/png/'])
                 end
                 print([params.kiloDir '/Plots/png/' num2str(j) '.png'], '-dpng')

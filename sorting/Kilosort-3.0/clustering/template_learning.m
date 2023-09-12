@@ -46,7 +46,7 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
 
     tic
     for j = 1:numel(ycenter) % process spikes found for each y grid location
-        if rem(j, round(numel(ycenter) / 10)) == 0 % print progress 10 times
+        if rem(j, round(numel(ycenter) / 10)) == 0 % print progress at most 10 times
             fprintf('time %2.2f, grid loc. grp. %d/%d, units %d \n', toc, j, numel(ycenter), n0)
         end
 
@@ -151,7 +151,7 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
             end
         end
     end
-    % dbstop in template_learning at 155
+    
     if ops.fig
         title('First Multi-Channel Templates (Color Coded by Cluster)');
         xlabel('Time');

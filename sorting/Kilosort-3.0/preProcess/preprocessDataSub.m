@@ -26,7 +26,8 @@ function rez = preprocessDataSub(ops)
 %                  - accomodates non-zero tstart w/o sacrificing temporal correl w/ raw data file
 % 2021-06-24  TBC  if [ops.CAR] value >1, will use as sliding window for median outlier (spike)
 %                  when computing median (prevents high responsivity from skewing adjacent channels)
-% 
+% 2023-09-07  SMO  Added option to remove channel delays, saving channel delays, and handle dummy
+%                  channels in channel delay and whitening matrix calculations
 
 %% Parse ops input & setup defaults
 % record date & time of Kilosort execution
@@ -124,6 +125,7 @@ cmdLog('Computing whitening matrix...', toc(t00));
 
 % Compute whitening matrix
 % this requires removing bad channels first
+% broken and dummy channels are handled in myomatrix_binary.m, result is stored in chanMapAdjusted.mat
 Wrot = get_whitening_matrix_faster(rez); % outputs a rotation matrix (Nchan by Nchan) which whitens the zero-timelag covariance of the data
 if numDummy>0
     WrotDummy = eye(NchanTOT, NchanTOT);
@@ -315,14 +317,14 @@ if remove_channel_delays
     for i = 1:length(channelDelays)
         data(i, :) = circshift(data(i, :), channelDelays(i));
     end
-    plot(data' + max(abs(data(:))))
+    % plot(data' + max(abs(data(:)))) % plot shifted data
     fseek(fidOff, 0, 'bof'); % fseek to start in raw file, to overwrite
     fwrite(fidOff, data, 'int16');
     fclose(fidOff);
     disp('Removed channel delays from proc.dat, which were:')
     disp(channelDelays)
-    save(fullfile(myo_sorted_dir, 'channelDelays.mat'), 'channelDelays')
-    disp('Saved delay information to channelDelays.mat')
+    % save(fullfile(myo_sorted_dir, 'channelDelays.mat'), 'channelDelays')
+    disp('Delay information will be saved in ops.mat')
 end
 rez.Wrot    = gather(Wrot); % gather the whitening matrix as a CPU variable
 

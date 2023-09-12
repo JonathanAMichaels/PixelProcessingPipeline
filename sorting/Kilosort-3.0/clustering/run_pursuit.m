@@ -11,8 +11,8 @@ function kid = run_pursuit(data, nlow, rmin, n0, wroll, ss, use_CCG, nPCs)
         %     fprintf('cluster %d\n', n0+j)
         [ix, xold, xnew] = break_a_cluster(Xd(ind, :), wroll, ss(ind), nlow, rmin, use_CCG, nPCs);
 
-        aj(j) = gather(mean(amps(ind(ix))));
-        %     fprintf('amps = %2.2f \n\n', aj(j));
+        aj(j) = gather(mean(amps(ind(ix)))); % mean amplitude of this cluster
+        % fprintf('amps = %2.2f \n\n', aj(j));
         kid(ind(ix)) = j; % assign these spikes to this cluster
 
         if length(ix) == length(ind)

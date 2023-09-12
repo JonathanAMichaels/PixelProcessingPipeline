@@ -149,10 +149,9 @@ for ibatch = 1:niter % loop over batches, in order determined by drift correctio
     % and probably a few more things I forget about
     
     [st0, id0, x0, featW, dWU0, drez, nsp0, featPC, vexp, errmsg] = ...
-        mexMPnu8_pcTight(Params, dataRAW, single(U), single(W), single(mu), iC-1, iW-1, UtU, iList-1, ...
+        mexMPnu8_pcTight_czuba(Params, dataRAW, single(U), single(W), single(mu), iC-1, iW-1, UtU, iList-1, ...
         wPCA);
-    % dbstop in trackAndSort at 155
-    % disp('stop here')
+
     % \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     % \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     

@@ -1,9 +1,19 @@
 /*
- * Example of how to use the mxGPUArray API in a MEX file.  This example shows
- * how to write a MEX function that takes a gpuArray input and returns a
- * gpuArray output, e.g. B=mexFunction(A).
+ * mexMPnu8_pcTight_czuba.cu
+ * Hacked version of core Kilosort spike extraction function mexMPnu8.cu
+ * - tightened up window of feature PC calc more closely to waveform center
+ %   - PCA & feat calcs used for outputs occur in [computePCfeatures]
+ *   - dummy version assumes 61 point waveform length [nt0], aligned to sample 20 [nt0min]
+ *   - compute wPCA & featPC on timepoints [6:nt0-15] == [6:45], len=40;
+ * - Seemed to work really well at improving usability of template features during
+ *   manual curation
+ * - Testing expansion to template evaluation by adding same tweaks to [timeFilter] & [timeFilterUpdate]
+ %   - this is distinct from changing range of nt0, because its still important for spike subtraction
+ *     to include the tails of each waveform...we just want the projections computed on a tighter,
+ *     more meaningful range of timepoints w/in the waveform
  *
- * Copyright 2012 The MathWorks, Inc.
+ * Compile individually with:
+ *      mexcuda -largeArrayDims -dynamic -DENABLE_STABLEMODE mexMPnu8_pcTight_czuba.cu
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,8 +31,8 @@ using namespace std;
     //for sorting according to timestamps
     #include "mexNvidia_quicksort.cu"
 #endif
-            
-const int  Nthreads = 1024, maxFR = 100000, NrankMax = 3, nmaxiter = 500, NchanMax = 32;
+
+const int  Nthreads = 512, maxFR = 100000, NrankMax = 12, nmaxiter = 500, NchanMax = 32;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	spaceFilter(const double *Params, const float *data, const float *U,
@@ -127,7 +137,7 @@ __global__ void	spaceFilterUpdate(const double *Params, const float *data, const
                         x += *pSU++ * (float)(data[t + NT * iU[i]]);
                     dprod[t + NT*(bid + k*Nfilt)] = x;
                 }
-            }            
+            }
         }
     }
 }
@@ -140,7 +150,7 @@ __global__ void	spaceFilterUpdate_v2(const double *Params, const double *data, c
     volatile __shared__ int iU[32];
     float x;
     int tid, bid, ind, nt0, i, t, k, Nrank, NT, Nfilt, NchanU, Nchan;
-    
+
     tid 	  = threadIdx.x;
     bid 	  = blockIdx.x;
     NT        = (int) Params[0];
@@ -149,24 +159,24 @@ __global__ void	spaceFilterUpdate_v2(const double *Params, const double *data, c
     NchanU    = (int) Params[10];
     nt0       = (int) Params[4];
     Nchan     = (int) Params[9];
-    
+
     //<<<Nfilt, 2*nt0-1>>>
     // just need to do this for all filters that have overlap with id[bid] and st[id]
     // as in spaceFilter, tid = threadIdx.x is first used to index over channels and pcs
     // then used to loop over time, now just from -nt0 to nt0 about the input spike time
     // tidx represents time, from -nt0 to nt0
     // tidy loops through all filters that have overlap
-    
+
     if (tid<NchanU)
         iU[tid] = iC[tid + NchanU * iW[bid]];
     __syncthreads();
-    
+
     if (tid<NchanU) {
         for (k=0;k<Nrank;k++)
             sU[tid + k * NchanU] = U[iU[tid] + Nchan*(bid + Nfilt * k)];
     }
     __syncthreads();
-    
+
     //each block corresponds to a filter
     //loop over all new spikes checking for matches to current filter (bid)
     //dprod = NT x Nfilt x Nrank
@@ -189,7 +199,7 @@ __global__ void	spaceFilterUpdate_v2(const double *Params, const double *data, c
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	timeFilter(const double *Params, const float *data, const float *W,float *conv_sig){
-  volatile __shared__ float  sW2[61*NrankMax], sW[61*NrankMax], sdata[(Nthreads+61)*NrankMax];
+  volatile __shared__ float  sW2[81*NrankMax], sW[81*NrankMax], sdata[(Nthreads+81)*NrankMax];
   float x;
   int tid, tid0, bid, i, nid, Nrank, NT, Nfilt, nt0, irank;
 
@@ -233,7 +243,7 @@ __global__ void	timeFilter(const double *Params, const float *data, const float 
             volatile float *pSW = &sW[nid*nt0];
             volatile float *pSD = &sdata[tid + nid*(Nthreads+nt0)];
  		    #pragma unroll 4
-            for(i=0;i<nt0;i++)
+            for(i=6;i<nt0-15;i++)
                 x += *pSW++ * *pSD++;
 	    }
         conv_sig[tid0  + tid + NT*bid] = x;
@@ -247,7 +257,7 @@ __global__ void	timeFilter(const double *Params, const float *data, const float 
 __global__ void	timeFilterUpdate(const double *Params, const float *data, const float *W,
         const bool *UtU, float *conv_sig, const int *st, const int *id, const int *counter){
 
-  volatile __shared__ float  sW[61*NrankMax], sW2[61*NrankMax];
+  volatile __shared__ float  sW[81*NrankMax], sW2[81*NrankMax];
   float x;
   int tid, tid0, bid, t, k,ind, Nrank, NT, Nfilt, nt0;
 
@@ -275,7 +285,7 @@ __global__ void	timeFilterUpdate(const double *Params, const float *data, const 
             if (tid0>=0 && tid0<NT-nt0){
                 x = 0.0f;
                 for (k=0;k<Nrank;k++){
-                    for (t=0;t<nt0;t++)
+                    for (t=6;t<nt0-15;t++)
                         x += sW[t + k*nt0] * data[t + tid0 + NT*(bid + Nfilt*k)];
                 }
                 conv_sig[tid0 + NT*bid] = x;
@@ -285,7 +295,6 @@ __global__ void	timeFilterUpdate(const double *Params, const float *data, const 
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// description: compute the error for each filter to determine which one is best
 __global__ void  bestFilter(const double *Params, const float *data,
 	const float *mu, float *err, float *eloss, int *ftype){
 
@@ -311,11 +320,11 @@ __global__ void  bestFilter(const double *Params, const float *data,
           a = 1+ lam;
           b = max(0.0f, data[tid0 + NT * i]) + lam * mu[i];
           Cf =  b*b/a - lam * mu[i]*mu[i];
-          
+
           //a = lam * lam + mu[i] * mu[i];
           //b = max(0.0f, data[tid0 + NT * i]);
           //Cf = -mu[i]*mu[i] + 2 * mu[i] * b + mu[i]*mu[i] * (b - mu[i])*(b - mu[i]) / a;
-          
+
           if (Cf > Cbest + 1e-6){
               Cnextbest = Cbest;
               Cbest 	= Cf;
@@ -346,10 +355,10 @@ __global__ void  bestFilterUpdate(const double *Params, const float *data,
   Nfilt 	= (int) Params[1];
   lam 	    = (float) Params[7];
   nt0       = (int) Params[4];
-  
+
   // we only need to compute this at updated locations
   ind = counter[1] + blockIdx.x;
-  
+
   if (ind<counter[0]){
       t = st[ind]-nt0 + tid;
       if (t>=0 && t<NT){
@@ -358,11 +367,11 @@ __global__ void  bestFilterUpdate(const double *Params, const float *data,
               a = 1+ lam;
               b = max(0.0f, data[t + NT * i]) + lam * mu[i];
               Cf =  b*b/a - lam * mu[i]*mu[i];
-              
+
               //a = lam * lam + mu[i] * mu[i];
-              //b = max(0.0f, data[t + NT * i]);              
+              //b = max(0.0f, data[t + NT * i]);
               //Cf = -mu[i]*mu[i] + 2 * mu[i] * b + mu[i]*mu[i] * (b - mu[i])*(b - mu[i]) / a;
-              
+
               if (Cf > Cbest + 1e-6){
                   Cnextbest = Cbest;
                   Cbest 	= Cf;
@@ -383,7 +392,7 @@ __global__ void	cleanup_spikes(const double *Params, const float *data,
         const float *mu, const float *err, const float *eloss, const int *ftype, int *st,
         int *id, float *x, float *y,  float *z, int *counter){
 
-  volatile __shared__ float sdata[Nthreads+2*61+1];
+  volatile __shared__ float sdata[Nthreads+2*81+1];
   float err0, Th;
   int lockout, indx, tid, bid, NT, tid0,  j, id0, t0;
   bool flag=0;
@@ -475,11 +484,11 @@ __global__ void	extractFEAT(const double *Params, const int *st, const int *id,
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// subtract_spikes version using single precision arithemtic and atomic operations to 
-// avoid thread interference when threading over spikes. This calculation is not 
+// subtract_spikes version using single precision arithemtic and atomic operations to
+// avoid thread interference when threading over spikes. This calculation is not
 // deterministic, due to the order dependence of operations in single precision.
-__global__ void	subtract_spikes(const double *Params,  const int *st, 
-        const int *id, const float *x, const int *counter, float *dataraw, 
+__global__ void	subtract_spikes(const double *Params,  const int *st,
+        const int *id, const float *x, const int *counter, float *dataraw,
         const float *W, const float *U){
   int nt0, tidx, tidy, k, NT, ind, Nchan, Nfilt, Nrank;
   float X;
@@ -499,11 +508,11 @@ __global__ void	subtract_spikes(const double *Params,  const int *st,
       while (tidy<Nchan){
           X = 0.0f;
           for (k=0;k<Nrank;k++)
-              X += W[tidx + id[ind]* nt0 + nt0*Nfilt*k] * 
-                      U[tidy + id[ind] * Nchan + Nchan*Nfilt*k];                        
-          
+              X += W[tidx + id[ind]* nt0 + nt0*Nfilt*k] *
+                      U[tidy + id[ind] * Nchan + Nchan*Nfilt*k];
+
           X = -x[ind]*X;
-          atomicAdd(&dataraw[tidx + st[ind] + NT * tidy], X);          
+          atomicAdd(&dataraw[tidx + st[ind] + NT * tidy], X);
           tidy += blockDim.y;
       }
       ind += gridDim.x;
@@ -512,41 +521,41 @@ __global__ void	subtract_spikes(const double *Params,  const int *st,
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //subtractions from array of doubles
-__global__ void	subtract_spikes_v4(const double *Params,  const int *st, 
-        const int *id, const float *x, const int *counter, double *dataraw, 
+__global__ void	subtract_spikes_v4(const double *Params,  const int *st,
+        const int *id, const float *x, const int *counter, double *dataraw,
         const float *W, const float *U){
-  
+
   double X;
   int nt0, tidx, tidy, k, NT, ind, Nchan, Nfilt, Nrank;
 
   unsigned long long int* address_as_ull;
-  unsigned long long int old, assumed;                              
+  unsigned long long int old, assumed;
 
   NT        = (int) Params[0];
   nt0       = (int) Params[4];
   Nchan     = (int) Params[9];
   Nfilt    	= (int) Params[1];
   Nrank     = (int) Params[6];
-  
+
   tidx 		= threadIdx.x;
   ind       = counter[1]+blockIdx.x;
-  
+
   while(ind<counter[0]){
       tidy = threadIdx.y;
-      
+
       while (tidy<Nchan){
-          X = 0.0;     
+          X = 0.0;
           for (k=0;k<Nrank;k++)
-              X += (double)((W[tidx + id[ind]* nt0 + nt0*Nfilt*k])) * 
-                      (double)((U[tidy + id[ind] * Nchan + Nchan*Nfilt*k])); 
+              X += (double)((W[tidx + id[ind]* nt0 + nt0*Nfilt*k])) *
+                      (double)((U[tidy + id[ind] * Nchan + Nchan*Nfilt*k]));
           X = -(double)(x[ind]) * X;
-           
+
           address_as_ull = (unsigned long long int*)(&dataraw[tidx + st[ind] + NT * tidy]);
           old = *address_as_ull;
           do {
                 assumed = old;
                 old = atomicCAS(address_as_ull, assumed,
-                        __double_as_longlong(X + __longlong_as_double(assumed)));                              
+                        __double_as_longlong(X + __longlong_as_double(assumed)));
                // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
           } while (assumed != old);
 
@@ -561,14 +570,14 @@ __global__ void	subtract_spikes_v4(const double *Params,  const int *st,
 //Tested with converting from 1 to 1000 values per thread. Found converting
 //one value per thread is fastest.
 //Tested running with 1 to 100 blocks; speed plateaus between 10 and 100 blocks
-__global__ void	convToDouble(const double *Params, const float *singleData, 
+__global__ void	convToDouble(const double *Params, const float *singleData,
         double *doubleData ) {
-            
+
   int Nelem  = (int)Params[0] * (int)Params[9];  // NT * Nchan
   int start  = threadIdx.x + blockIdx.x * blockDim.x;
   int stride = blockDim.x * gridDim.x;
 
-  while (start < Nelem) {     
+  while (start < Nelem) {
       doubleData[start] = singleData[start];
       start += stride;
   }
@@ -577,14 +586,14 @@ __global__ void	convToDouble(const double *Params, const float *singleData,
 //////////////////////////////////////////////////////////////////////////////////////////
 //convert data back to single
 //see performance notes in comments for convToDouble
-__global__ void	convToSingle(const double *Params, const double *doubleData, 
+__global__ void	convToSingle(const double *Params, const double *doubleData,
         float *singleData ) {
-            
+
   int Nelem  = (int)Params[0] * (int)Params[9];  // NT * Nchan
   int start  = threadIdx.x + blockIdx.x * blockDim.x;
   int stride = blockDim.x * gridDim.x;
-  
-  while (start < Nelem) {     
+
+  while (start < Nelem) {
       singleData[start] = __double2float_rz(doubleData[start]);
       start += stride;
   }
@@ -593,7 +602,7 @@ __global__ void	convToSingle(const double *Params, const double *doubleData,
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /// JIC threaded only over channels to avoid collisions at specific time points
-/// NChan/16 blocks, 16 threads. If the order of spikes is fixed (by sorting before 
+/// NChan/16 blocks, 16 threads. If the order of spikes is fixed (by sorting before
 /// subtraction) this routine is engineered for deterministic calculations.
 /// However, it is almost 2X slower than the standard "usually deterministic"
 /// calculation using unordered spikes but double precision arithemetic
@@ -718,7 +727,7 @@ __global__ void	computePCfeatures(const double *Params, const int *counter,
         const float *W, const float *U, const float *mu, const int *iW, const int *iC,
         const float *wPCA, float *featPC){
 
-  volatile __shared__ float  sPCA[3*61 * NrankMax], sW[61 * NrankMax], sU[NchanMax * NrankMax];
+  volatile __shared__ float  sPCA[81 * NrankMax], sW[81 * NrankMax], sU[NchanMax * NrankMax];
   volatile __shared__ int iU[NchanMax];
 
   float X = 0.0f, Y = 0.0f;
@@ -739,14 +748,12 @@ __global__ void	computePCfeatures(const double *Params, const int *counter,
       iU[tidx] = iC[tidx + NchanU * iW[bid]];
   __syncthreads();
 
-  if (tidy<Nrank)
-    sU[tidx + tidy*NchanU]= U[iU[tidx] + Nchan * bid + Nchan * Nfilt * tidy];
+  sU[tidx + tidy*NchanU]= U[iU[tidx] + Nchan * bid + Nchan * Nfilt * tidy];
 
   while (tidx<nt0){
-     if (tidy<Nrank)
-        sW[tidx + tidy*nt0]  = W[tidx + bid*nt0 + Nfilt * nt0 * tidy];
-     sPCA[tidx + tidy*nt0]  = wPCA[tidx + nt0 * tidy];
-     tidx += blockDim.x;
+     sW[tidx + tidy*nt0]  = W[tidx + bid*nt0 + Nfilt * nt0 * tidy];
+      sPCA[tidx + tidy*nt0]  = wPCA[tidx + nt0 * tidy];
+      tidx += blockDim.x;
   }
 
   tidx 		= threadIdx.x;
@@ -756,7 +763,7 @@ __global__ void	computePCfeatures(const double *Params, const int *counter,
   Y = 0.0f;
   for (k =0; k<Nrank; k++){
       X = 0.0f;
-      for (t=0;t<nt0;t++)
+      for (t=6;t<nt0-15;t++)
           X += sW[t + k*nt0] * sPCA[t + tidy * nt0];
       Y += X * sU[tidx + k*NchanU];
   }
@@ -765,16 +772,16 @@ __global__ void	computePCfeatures(const double *Params, const int *counter,
   for(ind=0; ind<counter[0];ind++)
       if (id[ind]==bid){
           X = Y * x[ind]; // - mu[bid]);
-          for (t=0;t<nt0; t++)
+          for (t=6;t<nt0-15; t++)
               X  += dataraw[st[ind] + t + NT * iU[tidx]] * sPCA[t + nt0*tidy];
-          featPC[tidx + tidy*NchanU + 3 * ind * NchanU*Nrank] = X;
+          featPC[tidx + tidy*NchanU + ind * NchanU*Nrank] = X;
       }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// This function is not called. 
-__global__ void	addback_spikes(const double *Params,  const int *st, 
-        const int *id, const float *x, const int *count, float *dataraw, 
+// This function is not called.
+__global__ void	addback_spikes(const double *Params,  const int *st,
+        const int *id, const float *x, const int *count, float *dataraw,
         const float *W, const float *U, const int iter, const float *spkscore){
 
   float X, ThS;
@@ -801,7 +808,7 @@ __global__ void	addback_spikes(const double *Params,  const int *st,
                   X += W[tidx + id[ind]* nt0 + nt0*Nfilt*k] *
                           U[tidy + id[ind] * Nchan + Nchan*Nfilt*k];
               X = x[ind]*X;
-              atomicAdd(&dataraw[tidx + st[ind] + NT * tidy], X);      
+              atomicAdd(&dataraw[tidx + st[ind] + NT * tidy], X);
               tidy += blockDim.y;
           }
       }
@@ -842,7 +849,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   NchanU        = (unsigned int) Params[10];
   Nchan         = (unsigned int) Params[9];
   useStableMode = (unsigned int) Params[16];
-  
+
   // Make a local pointer to Params, which can be passed to kernels
   cudaMalloc(&d_Params,      sizeof(double)*mxGetNumberOfElements(prhs[0]));
   cudaMemcpy(d_Params,Params,sizeof(double)*mxGetNumberOfElements(prhs[0]),cudaMemcpyHostToDevice);
@@ -900,7 +907,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   cudaMalloc(&d_counter,   2*sizeof(int));
   cudaMalloc(&d_count,   nmaxiter*sizeof(int));
   cudaMalloc(&d_feat,     maxFR * Nnearest * sizeof(float));
-  cudaMalloc(&d_featPC,     3*maxFR * NchanU*Nrank * sizeof(float));
+  cudaMalloc(&d_featPC,     maxFR * NchanU*Nrank * sizeof(float));
 
   cudaMemset(d_nsp,    0, Nfilt * sizeof(int));
   cudaMemset(d_dWU,    0, Nfilt * nt0 * Nchan* sizeof(double));
@@ -914,7 +921,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   cudaMemset(d_y,       0, maxFR *    sizeof(float));
   cudaMemset(d_z,       0, maxFR *    sizeof(float));
   cudaMemset(d_feat,    0, maxFR * Nnearest *   sizeof(float));
-  cudaMemset(d_featPC,    0, 3*maxFR * NchanU*Nrank *   sizeof(float));
+  cudaMemset(d_featPC,    0, maxFR * NchanU*Nrank *   sizeof(float));
 
   int *counter;
   counter = (int*) calloc(1,2 * sizeof(int));
@@ -936,8 +943,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   cudaMemset(d_stSort, 0,  maxFR * sizeof(int));
 
 
-  //dim3 tpB(8, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 16), tpW(Nnearest, Nrank), tpPC(NchanU, 2*Nrank);
-  dim3 tpB(3, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 5), tpW(Nnearest, Nrank), tpPC(NchanU, 3*Nrank);
+  dim3 tpB(8, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 16), tpW(Nnearest, Nrank), tpPC(NchanU, Nrank);
 
   // filter the data with the spatial templates
   spaceFilter<<<Nfilt, Nthreads>>>(d_Params, d_draw, d_U, d_iC, d_iW, d_data);
@@ -949,14 +955,14 @@ void mexFunction(int nlhs, mxArray *plhs[],
   bestFilter<<<NT/Nthreads,Nthreads>>>(d_Params, d_dout, d_mu, d_err, d_eloss, d_ftype);
 
   // loop to find and subtract spikes
-  
-  double *d_draw64;    
+
+  double *d_draw64;
 #ifndef ENSURE_DETERM
   if (useStableMode) {
       // create copy of the dataraw, d_dout, d_data as doubles for arithmetic
-      // number of consecutive points to convert = Params(17) (Params(18) in matlab)         
+      // number of consecutive points to convert = Params(17) (Params(18) in matlab)
       cudaMalloc(&d_draw64, NT*Nchan * sizeof(double));
-      convToDouble<<<100,Nthreads>>>(d_Params, d_draw, d_draw64);  
+      convToDouble<<<100,Nthreads>>>(d_Params, d_draw, d_draw64);
   }
 #endif
 
@@ -981,18 +987,18 @@ void mexFunction(int nlhs, mxArray *plhs[],
       if (Params[12]>1)
          extractFEAT<<<64, tpF>>>(d_Params, d_st, d_id, d_counter, d_dout, d_iList, d_mu, d_feat);
       // subtract spikes from raw data. If compile switch "ENSURE_DETERM" is on,
-      // use subtract_spikes_v2, which threads only over 
+      // use subtract_spikes_v2, which threads only over
       // spikes subratcted = counter[1] up to counter[0].
       // for this calculation to be reproducible, need to sort the spikes first
-        
+
 
 #ifdef ENSURE_DETERM
       // create set of indicies from 0 to counter[0] - counter[1] - 1
       // if useStableMode = 0, this will be passed to subtract_spikes_v2 unaltered
       // and spikes will be subtracted off in the order found
       // NOTE: deterministic calculations are dependent on ENABLE_STABLEMODE!
-      set_idx<<< 1, 1 >>>(d_idx, counter[0] - counter[1]);   
-      #ifdef ENABLE_STABLEMODE  
+      set_idx<<< 1, 1 >>>(d_idx, counter[0] - counter[1]);
+      #ifdef ENABLE_STABLEMODE
           if (useStableMode) {
               //make a copy of the timestamp array to sort
               cudaMemcpy( d_stSort, d_st+counter[1], (counter[0] - counter[1])*sizeof(int), cudaMemcpyDeviceToDevice );
@@ -1000,7 +1006,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
               int right = counter[0] - counter[1] - 1;
               cdp_simple_quicksort<<< 1, 1 >>>(d_stSort, d_idx, left, right, 0);
           }
-      #endif    
+      #endif
       if (Nchan < Nthreads) {
           subtract_spikes_v2<<<1, Nchan>>>(d_Params, d_st, d_idx, d_id, d_y, d_counter, d_draw, d_W, d_U);
       }
@@ -1031,7 +1037,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
       }
 #endif
 
-      
+
        // filter the data with the temporal templates, checking only times where
        // identified spikes were subtracted
        timeFilterUpdate<<<Nfilt, 2*nt0-1>>>(d_Params, d_data, d_W, d_UtU, d_dout,
@@ -1113,7 +1119,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   plhs[5] 	= mxGPUCreateMxArrayOnGPU(draw);
   plhs[6] 	= mxGPUCreateMxArrayOnGPU(nsp);
 
-  const mwSize dimsfPC[] 	= {NchanU, 3*Nrank, minSize};
+  const mwSize dimsfPC[] 	= {NchanU, Nrank, minSize};
   plhs[7] = mxCreateNumericArray(3, dimsfPC, mxSINGLE_CLASS, mxREAL);
   featPC =  (float*) mxGetData(plhs[7]);
 
@@ -1121,8 +1127,8 @@ void mexFunction(int nlhs, mxArray *plhs[],
   cudaMemcpy(id, d_id, minSize * sizeof(int),   cudaMemcpyDeviceToHost);
   cudaMemcpy(x,    d_y, minSize * sizeof(float), cudaMemcpyDeviceToHost);
   cudaMemcpy(vexp, d_x, minSize * sizeof(float), cudaMemcpyDeviceToHost);
-  cudaMemcpy(feat,     d_feat,  minSize * Nnearest*sizeof(float), cudaMemcpyDeviceToHost);
-  cudaMemcpy(featPC,   d_featPC, 3*minSize * NchanU*Nrank*sizeof(float), cudaMemcpyDeviceToHost);
+  cudaMemcpy(feat, d_feat, minSize * Nnearest*sizeof(float), cudaMemcpyDeviceToHost);
+  cudaMemcpy(featPC,   d_featPC, minSize * NchanU*Nrank*sizeof(float), cudaMemcpyDeviceToHost);
 
   // send back an error message if useStableMode was selected but couldn't be used
 
@@ -1170,9 +1176,9 @@ void mexFunction(int nlhs, mxArray *plhs[],
   cudaFree(d_idx);
   cudaFree(d_stSort);
 
-  
 
-  mxGPUDestroyGPUArray(draw);  
+
+  mxGPUDestroyGPUArray(draw);
   mxGPUDestroyGPUArray(wPCA);
   mxGPUDestroyGPUArray(dWU);
   mxGPUDestroyGPUArray(U);

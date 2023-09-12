@@ -108,10 +108,13 @@ for q = 1:4
         spike_band_power = rms(data_filt, 1) .^ 2;
         SNR = spike_band_power ./ (low_band_power + high_band_power);
         % reject channels if the SNR lies beyond 1 std of the mean SNR
-        mean_SNR = mean(SNR);
+        % mean_SNR = mean(SNR);
+        median_SNR = median(SNR);
         std_SNR = std(SNR);
-        % reject channels with SNR < mean - std/2
-        SNR_reject_chans = chanList(SNR < mean_SNR - std_SNR/2);
+        % reject below median channels 
+        SNR_reject_chans = chanList(SNR < median_SNR);
+        % reject channels with SNR < mean - std/4
+        % SNR_reject_chans = chanList(SNR < mean_SNR - std_SNR);
 
         % [~, idx] = sort(SNR, 'ascend');
         % idx = idx(1:floor(length(idx) / 2));
@@ -119,8 +122,9 @@ for q = 1:4
         % bitmask(idx) = 1;
         % SNR_reject_chans = chanList(bitmask == 1);
         disp("SNRs: " + num2str(SNR))
-        disp("Mean SNR: " + num2str(mean_SNR) + " +/- " + num2str(std_SNR))
-        disp("Channels with outlier SNRs: " + num2str(SNR_reject_chans))
+        disp("Median SNR: " + num2str(median_SNR))
+        % disp("Mean SNR: " + num2str(mean_SNR) + " +/- " + num2str(std_SNR))
+        disp("Channels with SNRs below median are rejected: " + num2str(SNR_reject_chans))
     end
 
     % subplot(1, 4, q)
@@ -201,7 +205,7 @@ if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
     connected = true(size(data, 2), 1);
     kcoords = ones(size(data, 2), 1);
     xcoords = zeros(size(data, 2), 1);
-    ycoords = size(data, 2):-1:1;
+    ycoords = (size(data, 2):-1:1)';
     % end
     disp('Broken channels were just removed from that channel map')
     save(fullfile(myo_sorted_dir, 'chanMapAdjusted.mat'), 'chanMap', 'connected', 'xcoords', ...

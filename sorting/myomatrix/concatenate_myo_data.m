@@ -40,7 +40,7 @@ function concatenate_myo_data(myomatrix_folder, recordings_to_concatenate)
             % Determine recording folders
             if class(recordings_to_concatenate{1}) == "char" && recordings_to_concatenate{1} == "all"
                 for iRec = 1:length(subdir)
-                    if subdir(iRec)==strcat('recording', iRec) && ~contains(subdir(iRec), '99')
+                    if subdir(iRec)==strcat('recording', iRec)
                         recordingFolders = [recordingFolders, subdir(iRec)];
                     end
                 end
@@ -48,7 +48,7 @@ function concatenate_myo_data(myomatrix_folder, recordings_to_concatenate)
                 rep_str=repmat('recording',length(recordings_to_concatenate),1);
                 recording_str_array = string(cellstr(strcat(rep_str, num2str(recordings_to_concatenate{1}'))));
                 for iRec = 1:length(subdir)
-                    if ismember(subdir(iRec),recording_str_array) && ~contains(subdir(iRec), '99')
+                    if ismember(subdir(iRec),recording_str_array)
                         recordingFolders = [recordingFolders, subdir(iRec)];
                     end
                 end

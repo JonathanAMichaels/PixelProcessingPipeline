@@ -23,8 +23,8 @@ params.skipFilter = false;
 params.SNRThresh = 2.0;
 params.corrThresh = 0.9; % minimum correlation to be considered as originating from one cluster
 params.consistencyThresh = 0.6; % minimum consistency to be considered as originating from one cluster
-params.spikeCountLim = 10; % minimum spike count to be included in output
-params.refractoryLim = 1; % spikes below this refractory time limit will be considered duplicates
+params.spikeCountLim = 100; % minimum spike count to be included in output
+params.refractoryLim = 0.5; % spikes below this refractory time limit will be considered duplicates
 
 % make sure a sorting exists
 if isfile([myo_sorted_dir '/spike_times.npy'])
