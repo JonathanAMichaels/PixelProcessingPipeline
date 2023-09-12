@@ -31,41 +31,15 @@ script_folder = os.path.dirname(os.path.realpath(__file__))
 opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
 args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
 
+# use -f option to specify working folder for this session
 if "-f" in opts:
-    myomatrix_folder = args[0]
-    folder_obj = Path(myomatrix_folder)
-    folder = folder_obj.parent.absolute().as_posix()
+    folder = args[0]
     if os.path.isdir(folder):
         print("Using working folder " + folder)
     else:
         raise SystemExit("Provided folder is not valid (you had one job...)")
 else:
     raise SystemExit(f"Usage: {sys.argv[0]} -f argument must be present")
-
-# use -d option to specify which sort folder to post-process
-if "-d" in opts:
-    date_str = args[1]
-    # make sure date_str is in the format YYYYMMDD_HHMMSS
-    assert (
-        (len(date_str) == 15)
-        & date_str[:8].isnumeric()
-        & date_str[9:].isnumeric()
-        & (date_str[8] == "_")
-    ), "Argument after '-d' must be a date string in format: YYYYMMDD_HHMMSS"
-    # check if date_str is present in any of the subfolders in the myomatrix_folder path
-    subfolder_list = os.listdir(myomatrix_folder)
-    previous_sort_folder_to_use = [iFolder for iFolder in subfolder_list if date_str in iFolder]
-    assert (
-        len(previous_sort_folder_to_use) > 0
-    ), f"No matching subfolder found in {myomatrix_folder} for the date string provided"
-    assert (
-        len(previous_sort_folder_to_use) < 2
-    ), f"Multiple matching subfolders found in {myomatrix_folder} for the date string provided"
-    previous_sort_folder_to_use = str(previous_sort_folder_to_use[0])
-else:
-    previous_sort_folder_to_use = str(
-        scipy.io.loadmat(f"{myomatrix_folder}/sorted0/ops.mat")["final_myo_sorted_dir"][0]
-    )
 
 registration = False
 registration_final = False
@@ -185,16 +159,42 @@ if config["neuropixel"] != "":
     )
 else:
     config["num_neuropixels"] = 0
-config["myomatrix"] = myomatrix_folder  # just have user provide session path directly
-# temp_folder = glob.glob(folder + "/*_myo")
-# if len(temp_folder) > 1:
-#     SystemExit("There shouldn't be more than one Myomatrix folder")
-# elif len(temp_folder) == 0:
-#     print("No Myomatrix data in this recording session")
-#     config["myomatrix"] = ""
-# else:
-#     if os.path.isdir(temp_folder[0]):
-#         config["myomatrix"] = temp_folder[0]
+
+temp_folder = glob.glob(folder + "/*_myo")
+if len(temp_folder) > 1:
+    SystemExit("There shouldn't be more than one Myomatrix folder")
+elif len(temp_folder) == 0:
+    print("No Myomatrix data in this recording session")
+    config["myomatrix"] = ""
+else:
+    if os.path.isdir(temp_folder[0]):
+        config["myomatrix"] = temp_folder[0]
+
+# use -d option to specify which sort folder to post-process
+if "-d" in opts:
+    date_str = args[1]
+    # make sure date_str is in the format YYYYMMDD_HHMMSS
+    assert (
+        (len(date_str) == 15)
+        & date_str[:8].isnumeric()
+        & date_str[9:].isnumeric()
+        & (date_str[8] == "_")
+    ), "Argument after '-d' must be a date string in format: YYYYMMDD_HHMMSS"
+    # check if date_str is present in any of the subfolders in the config["myomatrix"] path
+    subfolder_list = os.listdir(config["myomatrix"])
+    previous_sort_folder_to_use = [iFolder for iFolder in subfolder_list if date_str in iFolder]
+    assert (
+        len(previous_sort_folder_to_use) > 0
+    ), f'No matching subfolder found in {config["myomatrix"]} for the date string provided'
+    assert (
+        len(previous_sort_folder_to_use) < 2
+    ), f'Multiple matching subfolders found in {config["myomatrix"]} for the date string provided'
+    previous_sort_folder_to_use = str(previous_sort_folder_to_use[0])
+else:
+    previous_sort_folder_to_use = str(
+        scipy.io.loadmat(f'{config["myomatrix"]}/sorted0/ops.mat')["final_myo_sorted_dir"][0]
+    )
+
 if config["myomatrix"] != "":
     print("Using myomatrix folder " + config["myomatrix"])
 if not "GPU_to_use" in config:
