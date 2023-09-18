@@ -321,6 +321,9 @@ function rez = preprocessDataSub(ops)
         disp(channelDelays)
         % save(fullfile(myo_sorted_dir, 'channelDelays.mat'), 'channelDelays')
         disp('Delay information will be saved in ops.mat')
+    else
+        channelDelays = zeros(ops.NchanTOT, 1);
+        rez.ops.channelDelays = channelDelays; % save channel delays to rez
     end
     rez.Wrot = gather(Wrot); % gather the whitening matrix as a CPU variable
 

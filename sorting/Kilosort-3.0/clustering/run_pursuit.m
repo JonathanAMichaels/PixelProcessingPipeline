@@ -31,7 +31,7 @@ function [ix, xold, x] = break_a_cluster(data, wroll, ss, nlow, rmin, use_CCG, n
     xold = [];
     dt = 1/1000;
     for j = 1:10
-        dd = data(ix, :); % dd is the data for this cluster, (#spikes, #PC components, #channels)
+        dd = data(ix, :);
         if length(ix) < 2 * nlow
             x = [];
             %         disp('done with this cluster (too small)')

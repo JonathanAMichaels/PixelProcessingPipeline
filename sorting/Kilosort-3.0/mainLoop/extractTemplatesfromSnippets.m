@@ -281,32 +281,36 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
     end
 
     if use_kmeans
+        wTEMP = dd(:, randperm(size(dd, 2), nPCs)); % removing this line will cause KS to not find spikes sometimes... ???
         wTEMP(:, 1:nPCs) = spikes(:, best_CC_idxs(1:nPCs));
     else
         wTEMP(:, 1:nPCs) = dd(:, idx(best_CC_idxs(1:nPCs)));
     end
 
-    wTEMP = wTEMP ./ sum(wTEMP .^ 2, 1) .^ .5; % normalize them
+    wTEMP = wTEMP ./ sum(wTEMP .^ 2, 1) .^ .5; % normalize the templates
     if ops.fig == 1 % PLOTTING
         % wTEMP_for_CC_final = wTEMP .* repmat(gausswin(size(wTEMP,1), (size(wTEMP,1)-1)/(2*sigma)), 1, size(wTEMP,2));
+        % specify colormap to be 'cool'
+        cmap = colormap(cool(nPCs));
         figure(2); hold on;
+        scale = 0.75;
         for i = 1:nPCs
-            plot(wTEMP(:, i) + i * 1);
+            plot(wTEMP(:, i) + i*scale,'LineWidth', 2, 'Color', cmap(i, :));
             % plot standardized Gaussian multiplied waveforms for comparison
-            plot(wTEMP(:, i) ./ sum(wTEMP(:, i) .^ 2, 1) .^ .5 + i, 'r');
-            % plot the gaussian
-            plot(i + gausswin(size(wTEMP, 1), (size(wTEMP, 1) - 1) / (2 * sigma)), 'k');
+            plot(wTEMP(:, i) ./ sum(wTEMP(:, i) .^ 2, 1) .^ .5 + i*scale, 'r');
+            if i == nPCs
+                % plot the gaussian
+                plot(i*scale + 0.5*gausswin(size(wTEMP, 1), (size(wTEMP, 1) - 1) / (2 * sigma)), 'k');
+            end
         end
         title('initial templates');
+        pbaspect([1 2 1])
     end
 
     % use k-means isolated spikes for correlation calculation and averaging to ignore outlier spikes
     if use_kmeans
-        wTEMP = dd(:, randperm(size(dd, 2), nPCs)); % removing this line will cause KS to not find spikes sometimes... ???
-        wTEMP(:, 1:6) = spikes(:, best_CC_idxs(1:6));
         % use gaussian windowing to focus on the central part of the waveforms for correlation calculation
         spikes_gauss_windowed = spikes .* gausswin(size(spikes, 1), (size(spikes, 1) - 1) / (2 * sigma));
-        wTEMP = wTEMP ./ sum(wTEMP .^ 2, 1) .^ .5; % standardize the new clusters
         for i = 1:10
             % at each iteration, assign the waveform to its most correlated cluster
             CC = wTEMP' * spikes_gauss_windowed;
@@ -339,9 +343,11 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
     if ops.fig == 1 % PLOTTING
         figure(3); hold on;
         for i = 1:nPCs
-            plot(wTEMP(:, i) + i);
+            plot(wTEMP(:, i) + i*scale, 'LineWidth', 2, 'Color', cmap(i, :));
         end
+        % set aspect ratio to 3, 1
         title('prototype templates');
+        pbaspect([1 2 1])
     end
     % dbstop in extractTemplatesfromSnippets.m at 448
     % disp('stop')
