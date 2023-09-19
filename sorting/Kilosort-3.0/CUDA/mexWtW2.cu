@@ -84,9 +84,14 @@ __global__ void	crossFilter(const double *Params, const float *W1, const float *
 void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
-//   int maxbytes = 166912; // 163 KiB
-//   int maxbytes = 101376; // 99 KiB
-  int maxbytes = 65536; // 64 KiB
+// only increase Shared Memory Size if needed, and the highest choice
+// should be according to the Compute Capability of your GPU
+//   int maxbytes = 232448; // 227 KiB, Compute Capability 9.0
+//   int maxbytes = 166912; // 163 KiB, Compute Capability 8.0, 8.7
+//   int maxbytes = 101376; // 99 KiB, Compute Capability 8.6, 8.9
+//   int maxbytes = 65536; // 64 KiB, Compute Capability 7.5
+//   int maxbytes = 98304; // 96 KiB, Compute Capability 7.0, 7.2
+int maxbytes = 49152; // 48 KiB, Compute Capability 5.0-6.2
   cudaFuncSetAttribute(crossFilter, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
 
     /* Declare input variables*/
