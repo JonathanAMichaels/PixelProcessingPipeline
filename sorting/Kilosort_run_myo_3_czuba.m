@@ -88,33 +88,11 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
         ops.trange = trange;
     end
 
-    % disp(ops)
-    % rez = preprocessDataSub(ops);
-
-    % rez = datashift2(rez, 1);
-
-    % rez.W = []; rez.U = [];, rez.mu = [];
-    % rez = learnAndSolve8b(rez, now);
-
-    % % OPTIONAL: remove double-counted spikes - solves issue in which individual spikes are assigned to multiple templates.
-    % % See issue 29: https://github.com/MouseLand/Kilosort2/issues/29
-    % %rez = remove_ks2_duplicate_spikes(rez);
-
-    % % final merges
-    % rez = find_merges(rez, 1);
-
-    % % final splits by SVD
-    % %rez = splitAllClusters(rez, 1);
-
-    % % final splits by amplitudes
-    % rez = splitAllClusters(rez, 0);
-
-    % % decide on cutoff
-    % rez = set_cutoff(rez, 1);
-
-    % [rez.good, ~] = get_good_units(rez);
-
-    % fprintf('found %d good units \n', sum(rez.good > 0))
+    % create parallel pool for all downstream parallel processing
+    num_cpus = feature('numcores');
+    if isempty(gcp('nocreate'))
+        poolobj = parpool(num_cpus);
+    end
 
     rez = preprocessDataSub(ops);
     ops.channelDelays = rez.ops.channelDelays;
@@ -169,7 +147,9 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
     rezToPhy2(rez, ops.saveDir);
     save(fullfile(ops.saveDir, '/ops.mat'), '-struct', 'ops');
 
-    ops
+    ops % show final ops struct in command window
+
+    delete(poolobj); % ensure pool is shutdown before quit (otherwise can throw error)
 
     quit;
 end

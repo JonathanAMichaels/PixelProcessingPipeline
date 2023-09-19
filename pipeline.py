@@ -201,6 +201,14 @@ else:
             "         If post-processing, try using the '-d' option to specify a sort folder to post-process,\n"
             "         or run a new sort to create a new ops.mat file"
         )
+    except KeyError:
+        print(
+            "WARNING: No 'final_myo_sorted_dir' field found in ops.mat file, not able to detect previous sort folder.\n"
+            "         If post-processing, try using the '-d' option to specify a sort folder to post-process,\n"
+            "         or run a new sort to create a new ops.mat file"
+        )
+    except:
+        raise
 
 # ensure global fields are present in config
 if config["myomatrix"] != "":

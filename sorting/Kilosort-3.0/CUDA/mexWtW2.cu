@@ -85,7 +85,8 @@ void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
 //   int maxbytes = 166912; // 163 KiB
-  int maxbytes = 101376; // 99 KiB
+//   int maxbytes = 101376; // 99 KiB
+  int maxbytes = 65536; // 64 KiB
   cudaFuncSetAttribute(crossFilter, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
 
     /* Declare input variables*/

@@ -76,8 +76,9 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         % compute k-means clustering of the waveforms
         rng('default'); rng(1); % initializing random number generator for reproducibility
         % stream = RandStream('mlfg6331_64');  % Random number stream
+        num_cpus = feature('numcores');
         options = statset('UseParallel', 1); %'UseSubstreams', 1,'Streams', stream);
-        [cluster_id, ~, ~, Dist_from_K] = kmeans(dd_pca', nPCs, 'MaxIter', 10000, 'Replicates', 32, 'Display', 'final', 'Options', options);
+        [cluster_id, ~, ~, Dist_from_K] = kmeans(dd_pca', nPCs, 'MaxIter', 10000, 'Replicates', num_cpus, 'Display', 'final', 'Options', options);
         % disp("replacing with K-means NOW")
         spikes = gpuArray(nan(size(dd)));
         number_of_spikes_to_use = nan(nPCs, 1);
@@ -211,8 +212,10 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         % replace with next wave in chunk to check correlation,
         % each wave index withing the chunk starting at the wave_choice_left_bounds
         if use_kmeans
+            descriptor = 'k-means cluster';
             wTEMP(:, largest_CC_idx) = spikes(:, wave_choice_left_bounds(largest_CC_idx) + N_tries_for_largest_CC_idx_so_far);
         else
+            descriptor = 'chunk';
             wTEMP(:, largest_CC_idx) = dd(:, idx(wave_choice_left_bounds(largest_CC_idx) + N_tries_for_largest_CC_idx_so_far));
         end
         % multiply waveforms by a Gaussian with the sigma value
@@ -248,7 +251,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         % compute the total cost for this wave choice, cheapest waveform will be chosen
         total_cost_for_wave = corr_sum_with_other_template_choices + 12 * nPCs * wTEMP_gaussian_residual + 12 * nPCs * highest_template_similarity_penalty;
 
-        % choose the best wave for this chunk
+        % choose the best wave for this chunk/cluster
         % check the cost, and ensure that the wave has not already been chosen before in a previous chunk
         if (total_cost_for_wave < lowest_total_cost_for_each_chunk(largest_CC_idx)) && ~ismember(wave_choice_left_bounds(largest_CC_idx) + N_tries_for_largest_CC_idx_so_far, best_CC_idxs)
             lowest_total_cost_for_each_chunk(largest_CC_idx) = total_cost_for_wave;
@@ -257,13 +260,12 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         N_tries_for_largest_CC_idx_so_far = N_tries_for_largest_CC_idx_so_far + 1;
         % terminate if we have tried all waves in the amplitude-sorted chunk
         if N_tries_for_largest_CC_idx_so_far >= N_waves_between_choices(largest_CC_idx) || N_tries_for_largest_CC_idx_so_far >= total_num_spikes_used
-            % wrap disp lines to avoid going over 100 characters
-            disp(strcat("Tried all waves in amplitude-sorted chunk ", num2str(largest_CC_idx), ", using wave idx with best CC: ", num2str(best_CC_idxs(largest_CC_idx))))
+            disp(strcat("Tried all waves in "+descriptor + " ", num2str(largest_CC_idx), ", using wave idx with best CC: ", num2str(best_CC_idxs(largest_CC_idx))))
             % sorted_CC = sort(CC(largest_CC_idx,:), 'descend');
-            disp(strcat("Total cross-channel correlation for this chunk ", num2str(sum(abs(CC(largest_CC_idx, :))))))
-            disp("Residual cost for this chunk was " + num2str(wTEMP_gaussian_residual))
-            disp("Highest template similarity penalty for this chunk was " + num2str(highest_template_similarity_penalty))
-            disp("Final cost for this chunk was (including cumulative cost): " + num2str(lowest_total_cost_for_each_chunk(largest_CC_idx)))
+            disp(strcat("Total cross-channel correlation for this cluster ", num2str(sum(abs(CC(largest_CC_idx, :))))))
+            disp("Residual cost for this "+descriptor + " was " + num2str(wTEMP_gaussian_residual))
+            disp("Highest template similarity penalty for this "+descriptor + " was " + num2str(highest_template_similarity_penalty))
+            disp("Final cost for this "+descriptor + " was (including cumulative cost): " + num2str(lowest_total_cost_for_each_chunk(largest_CC_idx)))
             % disp(sorted_CC)
             disp(CC)
             largest_CC_idx = largest_CC_idx + 1;
@@ -295,12 +297,12 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         figure(2); hold on;
         scale = 0.75;
         for i = 1:nPCs
-            plot(wTEMP(:, i) + i*scale,'LineWidth', 2, 'Color', cmap(i, :));
+            plot(wTEMP(:, i) + i * scale, 'LineWidth', 2, 'Color', cmap(i, :));
             % plot standardized Gaussian multiplied waveforms for comparison
-            plot(wTEMP(:, i) ./ sum(wTEMP(:, i) .^ 2, 1) .^ .5 + i*scale, 'r');
+            plot(wTEMP(:, i) ./ sum(wTEMP(:, i) .^ 2, 1) .^ .5 + i * scale, 'r');
             if i == nPCs
                 % plot the gaussian
-                plot(i*scale + 0.5*gausswin(size(wTEMP, 1), (size(wTEMP, 1) - 1) / (2 * sigma)), 'k');
+                plot(i * scale + 0.5 * gausswin(size(wTEMP, 1), (size(wTEMP, 1) - 1) / (2 * sigma)), 'k');
             end
         end
         title('initial templates');
@@ -343,7 +345,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
     if ops.fig == 1 % PLOTTING
         figure(3); hold on;
         for i = 1:nPCs
-            plot(wTEMP(:, i) + i*scale, 'LineWidth', 2, 'Color', cmap(i, :));
+            plot(wTEMP(:, i) + i * scale, 'LineWidth', 2, 'Color', cmap(i, :));
         end
         % set aspect ratio to 3, 1
         title('prototype templates');
