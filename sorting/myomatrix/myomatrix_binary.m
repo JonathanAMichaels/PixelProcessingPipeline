@@ -89,32 +89,49 @@ for q = 1:4
     end
     tRange = size(data, 1) - round(size(data, 1) / 2) - round(myo_data_sampling_rate * useSeconds / 2):size(data, 1) ...
         - round(size(data, 1) / 2) + round(myo_data_sampling_rate * useSeconds / 2);
+    data_norm = zeros(length(tRange), size(data, 2), 'single');
     data_filt = zeros(length(tRange), size(data, 2), 'single');
     for i = 1:size(data, 2)
-        data_filt(:, i) = single(filtfilt(b, a, double(data(tRange, i))));
+        % standardize this data channel before filtering
+        data_norm(:, i) = single(data(tRange, i)) ./ std(single(data(tRange, i)));
+        % filter this data channel
+        data_filt(:, i) = single(filtfilt(b, a, double(data_norm(:, i))));
     end
 
     if q == 1
-        data_norm = data_filt ./ repmat(std(data_filt, [], 1), [size(data_filt, 1) 1]);
-        spk = sum(data_norm < -7, 1); % check for spikes crossing 6 std below mean
-        S(:, q) = spk / size(data_norm, 1) * myo_data_sampling_rate;
+        % normalize channels by std
+        data_filt_norm = data_filt ./ repmat(std(data_filt, [], 1), [size(data_filt, 1) 1]);
+        spk = sum(data_filt_norm < -7, 1); % check for spikes crossing 7 std below mean
+        S(:, q) = spk / size(data_filt_norm, 1) * myo_data_sampling_rate;
     elseif q == 2
         S(:, q) = std(data_filt, [], 1); % get the std of the low freq noise
+        % data_filt_norm = data_filt ./ repmat(S(:, q)', [size(data_filt, 1) 1]); % standardize
         low_band_power = rms(data_filt, 1) .^ 2;
     elseif q == 3
         S(:, q) = std(data_filt, [], 1); % get the std of the high freq noise
+        % data_filt_norm = data_filt ./ repmat(S(:, q)', [size(data_filt, 1) 1]); % standardize
         high_band_power = rms(data_filt, 1) .^ 2;
     elseif q == 4
+        % data_filt_norm = data_filt ./ repmat(std(data_filt, [], 1), [size(data_filt, 1) 1]); % standardize
         spike_band_power = rms(data_filt, 1) .^ 2;
         SNR = spike_band_power ./ (low_band_power + high_band_power);
-        % reject channels if the SNR lies beyond 1 std of the mean SNR
-        % mean_SNR = mean(SNR);
-        median_SNR = median(SNR);
+        [~, idx] = sort(SNR, 'ascend');
+        mean_SNR = mean(SNR);
         std_SNR = std(SNR);
-        % reject below median channels 
-        SNR_reject_chans = chanList(SNR < median_SNR);
-        % reject channels with SNR < mean - std/4
-        % SNR_reject_chans = chanList(SNR < mean_SNR - std_SNR);
+        median_SNR = median(SNR);
+        
+        rejection_criteria = 'lowest';
+        if strcmp(rejection_criteria, 'median')
+            % reject channels with SNR < median
+            SNR_reject_chans = chanList(SNR < median_SNR);
+        elseif strcmp(rejection_criteria, 'mean')
+            % reject channels with SNR < mean - std/4
+            % SNR_reject_chans = chanList(SNR < mean_SNR - std_SNR);
+        elseif strcmp(rejection_criteria, 'lowest')
+            % reject N_reject lowest SNR channels
+            N_reject = 5;
+            SNR_reject_chans = chanList(idx(1:N_reject));
+        end
 
         % [~, idx] = sort(SNR, 'ascend');
         % idx = idx(1:floor(length(idx) / 2));
@@ -122,9 +139,9 @@ for q = 1:4
         % bitmask(idx) = 1;
         % SNR_reject_chans = chanList(bitmask == 1);
         disp("SNRs: " + num2str(SNR))
+        disp("Mean +/- Std. SNR: " + num2str(mean_SNR) + " +/- " + num2str(std_SNR))
         disp("Median SNR: " + num2str(median_SNR))
-        % disp("Mean SNR: " + num2str(mean_SNR) + " +/- " + num2str(std_SNR))
-        disp("Channels with SNRs below median are rejected: " + num2str(SNR_reject_chans))
+        disp("Channels with rejectable SNRs: " + num2str(SNR_reject_chans))
     end
 
     % subplot(1, 4, q)
@@ -153,11 +170,12 @@ end
 print([myo_sorted_dir '/brokenChan.png'], '-dpng')
 
 if length(chanList) == 16
+    % check for broken channels if meeting various criteria, including: high std, low spike rate, low SNR
     brokenChan = int64(union(find(S(:, 2) > bipolarThresh | S(:, 1) < lowThresh), SNR_reject_chans)); %S(:, 3) > bipolarThresh
 else
     brokenChan = int64(union(find(S(:, 2) > unipolarThresh | S(:, 1) < lowThresh), SNR_reject_chans)); %S(:, 3) > unipolarThresh
 end
-disp(['Automatically detected broken/inactive channels are: ' num2str(brokenChan')])
+disp(['Automatically detected rejectable channels are: ' num2str(brokenChan')])
 
 % now actually remove the detected broken channels if True
 % if a list of broken channels is provided, use that instead
@@ -165,19 +183,19 @@ disp(['Automatically detected broken/inactive channels are: ' num2str(brokenChan
 if isa(remove_bad_myo_chans(1), 'logical')
     if remove_bad_myo_chans(1) == false
         brokenChan = [];
-        disp('Not removing any broken/inactive channels, because remove_bad_myo_chans is false')
+        disp('Not removing any broken/noisy channels, because remove_bad_myo_chans is false')
         % disp(['Keeping channel list: ' num2str(chanList)])
     elseif remove_bad_myo_chans(1) == true
         data(:, brokenChan) = [];
         chanList(brokenChan) = [];
-        disp('Just removed automatically detected broken/inactive channels')
+        disp(['Just removed automatically detected broken/noisy channels: ' num2str(brokenChan')])
         disp(['New channel list is: ' num2str(chanList)])
     end
 elseif isa(remove_bad_myo_chans, 'integer')
     brokenChan = remove_bad_myo_chans; % overwrite brokenChan with manually provided list
     data(:, brokenChan) = [];
     chanList(brokenChan) = [];
-    disp(['Just removed manually provided broken/inactive channels: ' num2str(brokenChan)])
+    disp(['Just removed manually provided broken/noisy channels: ' num2str(brokenChan)])
     disp(['New channel list is: ' num2str(chanList)])
 else
     error('remove_bad_myo_chans must be a boolean or an integer list of broken channels')

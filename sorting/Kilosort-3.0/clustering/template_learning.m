@@ -1,6 +1,6 @@
 function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
 
-    wPCA = rez.wPCA;
+    wPCA = rez.wPCA; % shape is #PC components, #channels
     iC = rez.iC;
     ops = rez.ops;
 
@@ -85,19 +85,19 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
         nsp = size(data, 1);
         dd = zeros(nsp, ops.nPCs, numel(ich), 'single'); % #spikes, #PC components, #channels
         for k = 1:length(itemp) % for each template
-            ix = pid == itemp(k);
+            ix = pid == itemp(k); % ix is bitmask for spikes near this electrode
             % how to go from channels to different order, ib is indeces ordered like ich
             [~, ia, ib] = intersect(iC(:, itemp(k)), ich);
-            dd(ix, :, ib) = data(ix, :, ia);
+            dd(ix, :, ib) = data(ix, :, ia); % dd is just the PC convolutions ordered by distance from electrode
         end
-        
+
         kid = run_pursuit(dd, nlow, rmin, n0, wroll, ss(tin), use_CCG, ops.nPCs);
 
         [~, ~, kid] = unique(kid); % make cluster ids consecutive
         nmax = max(kid); % number of clusters found
         for t = 1:nmax % for each cluster
             %         Wpca(:, ch_min+1:ch_max, t + n0) = gather(sq(mean(dd(kid==t,:,:),1)));
-            % compute nPCs mean PC similarities across all spikes in cluster, for each channel
+            % compute mean PC coordinates for each cluster of spikes, there is a separate PC space for each channel
             Wpca(:, ich, t + n0) = gather(sq(mean(dd(kid == t, :, :), 1)));
             spike_times_for_kid{t + n0} = st3(tin(kid == t), 1); % get spike times for each cluster
         end
@@ -108,13 +108,13 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
     Wpca = Wpca(:, :, 1:n0);
     % Wpca = cat(2, Wpca, zeros(size(Wpca,1), ops.nEig-size(Wpca, 2), size(Wpca, 3), 'single'));
     spike_times_for_kid = spike_times_for_kid(1:n0);
-    % plot mean PC similarities for each channel and cluster (not that useful)
+    % plot mean PC coordinates for each cluster for each channel and cluster (not that useful)
     % if ops.fig
     %     ichc = gather(ich);
     %     nPCs = size(Wpca, 1);
     %     figure(12)
     %     for k=1:n0; for ichcs=1:numel(ichc); for iPC=1:nPCs; scatter(ichcs*ones('like',Wpca(:,ichcs,k)), Wpca(:,ichcs,k)+40*k); end; end; end
-    %     % plot top 3 PC similarities for all channels in each cluster
+    %     % plot top 3 PC coordinates for each cluster for all channels in each cluster
     %     figure(13)
     %     for k=1:n0
     %         scatter3(Wpca(1,1,k), Wpca(2,1,k), Wpca(3,1,k), 20, [1-k/n0,k/n0,k/n0]);
@@ -133,25 +133,25 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
     rez.U = zeros(ops.Nchan, 0, Ncomps, 'single');
     rez.mu = zeros(1, 0, 'single');
     figure(14); hold on;
-    RGB_colors = rand(n0,3);
+    RGB_colors = rand(n0, 3);
     for t = 1:n0 % for each cluster
-        dWU = wPCA * gpuArray(Wpca(:, :, t)); % multiply PC components by mean PC similarities
-        [w, s, u] = svdecon(dWU); % compute SVD of that product
+        dWU = wPCA * gpuArray(Wpca(:, :, t)); % multiply PC components by mean PC coordinates for each cluster
+        [w, s, u] = svdecon(dWU); % compute SVD of that product to deconstruct it into spatial and temporal components
         wsign = -sign(w(ops.nt0min, 1)); % flip sign of waveform if necessary, for consistency
         % vvv save first Ncomps components of W, containing final rotation matrix
         rez.W(:, t, :) = gather(wsign * w(:, 1:Ncomps));
         % vvv save first Ncomps components of U, containing initial rotation and scaling matrix
-        rez.U(:, t, :) = gather(wsign * u(:, 1:Ncomps) * s(1:Ncomps, 1:Ncomps)); 
+        rez.U(:, t, :) = gather(wsign * u(:, 1:Ncomps) * s(1:Ncomps, 1:Ncomps));
         rez.mu(t) = gather(sum(sum(rez.U(:, t, :) .^ 2)) ^ .5); % get norm of U
         rez.U(:, t, :) = rez.U(:, t, :) / rez.mu(t); % normalize U
         if ops.fig
             for iloc = 1:numel(ich) % for each channel
                 % plot PC component reconstructions for each channel, with color based on cluster
-                plot(dWU(:, iloc) - 10*iloc, 'color', RGB_colors(t, :));
+                plot(dWU(:, iloc) - 10 * iloc, 'color', RGB_colors(t, :));
             end
         end
     end
-    
+
     if ops.fig
         title('First Multi-Channel Templates (Color Coded by Cluster)');
         xlabel('Time');
@@ -162,4 +162,3 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
     % remove any NaNs from rez.W
     rez.W(isnan(rez.W)) = 0;
 end
-    

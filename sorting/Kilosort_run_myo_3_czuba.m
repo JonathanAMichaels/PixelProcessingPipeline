@@ -1,4 +1,4 @@
-function rez = Kilosort_run_czuba_myo(ops_input_params)
+function rez = Kilosort_run_myo_3_czuba(ops_input_params)
     dbstop if error
     script_dir = pwd; % get directory where repo exists
     load(fullfile(script_dir, '/tmp/config.mat'))
@@ -88,72 +88,56 @@ function rez = Kilosort_run_czuba_myo(ops_input_params)
         ops.trange = trange;
     end
 
-    % disp(ops)
-    % rez = preprocessDataSub(ops);
-
-    % rez = datashift2(rez, 1);
-
-    % rez.W = []; rez.U = [];, rez.mu = [];
-    % rez = learnAndSolve8b(rez, now);
-
-    % % OPTIONAL: remove double-counted spikes - solves issue in which individual spikes are assigned to multiple templates.
-    % % See issue 29: https://github.com/MouseLand/Kilosort2/issues/29
-    % %rez = remove_ks2_duplicate_spikes(rez);
-
-    % % final merges
-    % rez = find_merges(rez, 1);
-
-    % % final splits by SVD
-    % %rez = splitAllClusters(rez, 1);
-
-    % % final splits by amplitudes
-    % rez = splitAllClusters(rez, 0);
-
-    % % decide on cutoff
-    % rez = set_cutoff(rez, 1);
-
-    % [rez.good, ~] = get_good_units(rez);
-
-    % fprintf('found %d good units \n', sum(rez.good > 0))
+    % create parallel pool for all downstream parallel processing
+    num_cpus = feature('numcores');
+    if isempty(gcp('nocreate'))
+        poolobj = parpool(num_cpus);
+    end
 
     rez = preprocessDataSub(ops);
     ops.channelDelays = rez.ops.channelDelays;
     rez = datashift2(rez, 1);
     [rez, st3, tF] = extract_spikes(rez);
-    %%% plots
-    figure(5);
-    plot(st3(:, 1), '.')
-    title('Spike times versus spike ID')
-    figure(6);
-    plot(st3(:, 2), '.')
-    title('Upsampled grid location of best template match spike ID')
-    figure(7);
-    plot(st3(:, 3), '.')
-    title('Amplitude of template match for each spike ID')
-    figure(8); hold on;
-    plot(st3(:, 4), 'g.')
-    for kSpatialDecay = 1:6
-        less_than_idx = find(st3(:, 4) < 6 * kSpatialDecay);
-        more_than_idx = find(st3(:, 4) >= 6 * (kSpatialDecay - 1));
-        idx = intersect(less_than_idx, more_than_idx);
-        bit_idx = bitand(st3(:, 4) < 6 * kSpatialDecay, st3(:, 4) >= 6 * (kSpatialDecay - 1));
-        plot(idx, st3(bit_idx, 4), '.')
+    if ops.fig
+        %%% plots
+        figure(5);
+        plot(st3(:, 1), '.')
+        title('Spike times versus spike ID')
+        figure(6);
+        plot(st3(:, 2), '.')
+        title('Upsampled grid location of best template match spike ID')
+        figure(7);
+        plot(st3(:, 3), '.')
+        title('Amplitude of template match for each spike ID')
+        figure(8); hold on;
+        plot(st3(:, 4), 'g.')
+        for kSpatialDecay = 1:6
+            less_than_idx = find(st3(:, 4) < 6 * kSpatialDecay);
+            more_than_idx = find(st3(:, 4) >= 6 * (kSpatialDecay - 1));
+            idx = intersect(less_than_idx, more_than_idx);
+            bit_idx = bitand(st3(:, 4) < 6 * kSpatialDecay, st3(:, 4) >= 6 * (kSpatialDecay - 1));
+            plot(idx, st3(bit_idx, 4), '.')
+        end
+        title('Prototype templates for each spatial decay value (1:6:30) resulting in each best match spike ID')
+        figure(9);
+        plot(st3(:, 5), '.')
+        title('Amplitude of template match for each spike ID (Duplicate of st3(:,3))')
+        figure(10);
+        plot(st3(:, 6), '.')
+        title('Batch ID versus spike ID')
+        figure(11);
+        for iPC = 1:size(tF, 2)
+            subplot(size(tF, 2), 1, iPC)
+            plot(squeeze(tF(:, iPC, :)), '.')
+        end
+        title('PC Weights for each Spike Example, Colored by Channel')
+        xlabel('Spike Examples')
+        ylabel('Principal Component Weight')
+        %%% end plots
     end
-    title('Prototype templates for each spatial decay value (1:6:30) resulting in each best match spike ID')
-    figure(9);
-    plot(st3(:, 5), '.')
-    title('Amplitude of template match for each spike ID (Duplicate of st3(:,3))')
-    figure(10);
-    plot(st3(:, 6), '.')
-    title('Batch ID versus spike ID')
-    figure(11);
-    for iTemp = 1:size(tF, 2)
-        subplot(size(tF, 2), 1, iTemp)
-        plot(squeeze(tF(:, iTemp, :)), '.')
-    end
-    %%% end plots
     [rez, ~] = template_learning(rez, tF, st3);
     [rez, st3, tF] = trackAndSort(rez);
+    % keyboard
     % plot_templates_on_raw_data_fast(rez, st3);
     rez = final_clustering(rez, tF, st3);
     rez = find_merges(rez, 1);
@@ -162,8 +146,10 @@ function rez = Kilosort_run_czuba_myo(ops_input_params)
     fprintf('Saving results to Phy  \n')
     rezToPhy2(rez, ops.saveDir);
     save(fullfile(ops.saveDir, '/ops.mat'), '-struct', 'ops');
-    
-    ops
 
-    % quit;
+    ops % show final ops struct in command window
+
+    delete(poolobj); % ensure pool is shutdown before quit (otherwise can throw error)
+
+    quit;
 end

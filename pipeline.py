@@ -191,10 +191,26 @@ if "-d" in opts:
     ), f'Multiple matching subfolders found in {config["myomatrix"]} for the date string provided'
     previous_sort_folder_to_use = str(previous_sort_folder_to_use[0])
 else:
-    previous_sort_folder_to_use = str(
-        scipy.io.loadmat(f'{config["myomatrix"]}/sorted0/ops.mat')["final_myo_sorted_dir"][0]
-    )
+    try:
+        previous_sort_folder_to_use = str(
+            scipy.io.loadmat(f'{config["myomatrix"]}/sorted0/ops.mat')["final_myo_sorted_dir"][0]
+        )
+    except FileNotFoundError:
+        print(
+            "WARNING: No ops.mat file found in sorted0 folder, not able to detect previous sort folder.\n"
+            "         If post-processing, try using the '-d' option to specify a sort folder to post-process,\n"
+            "         or run a new sort to create a new ops.mat file"
+        )
+    except KeyError:
+        print(
+            "WARNING: No 'final_myo_sorted_dir' field found in ops.mat file, not able to detect previous sort folder.\n"
+            "         If post-processing, try using the '-d' option to specify a sort folder to post-process,\n"
+            "         or run a new sort to create a new ops.mat file"
+        )
+    except:
+        raise
 
+# ensure global fields are present in config
 if config["myomatrix"] != "":
     print("Using myomatrix folder " + config["myomatrix"])
 if not "GPU_to_use" in config:
@@ -207,14 +223,26 @@ if not "myo_data_passband" in config:
     config["myo_data_passband"] = [250, 5000]
 if not "myo_data_sampling_rate" in config:
     config["myo_data_sampling_rate"] = 30000
-if not "remove_bad_myo_chans" in config["Session"]:
-    config["Session"]["remove_bad_myo_chans"] = [False] * len(config["Session"]["myo_chan_list"])
-if not "remove_channel_delays" in config["Session"]:
-    config["Session"]["remove_channel_delays"] = [False] * len(config["Session"]["myo_chan_list"])
+# ensure Sorting fields are present in config
 if not "num_KS_components" in config["Sorting"]:
     config["Sorting"]["num_KS_components"] = 9
 if not "do_KS_param_gridsearch" in config["Sorting"]:
     config["Sorting"]["do_KS_param_gridsearch"] = False
+# ensure Session fields are present in config
+if not "myo_chan_map_file" in config["Session"]:
+    config["myo_chan_map_file"] = [["linear_16ch_RF400_kilosortChanMap_unitSpacing.mat"]]
+if not "myo_chan_list" in config["Session"]:
+    config["Session"]["myo_chan_list"] = [[1, 16]]
+if not "myo_analog_chan" in config["Session"]:
+    config["Session"]["myo_analog_chan"] = 17
+if not "myo_muscle_list" in config["Session"]:
+    config["Session"]["myo_muscle_list"] = [
+        ["Muscle" + str(i) for i in range(len(config["Session"]["myo_chan_list"]))]
+    ]
+if not "remove_bad_myo_chans" in config["Session"]:
+    config["Session"]["remove_bad_myo_chans"] = [False] * len(config["Session"]["myo_chan_list"])
+if not "remove_channel_delays" in config["Session"]:
+    config["Session"]["remove_channel_delays"] = [False] * len(config["Session"]["myo_chan_list"])
 
 # find MATLAB installation
 if os.path.isfile("/usr/local/MATLAB/R2021a/bin/matlab"):
@@ -231,19 +259,21 @@ else:
 # and concatenate the data into that folder. If they do, save the path to that
 concatDataPath = find("concatenated_data", config["myomatrix"])
 if config["recordings"][0] == "all":
-    Record_Node_dir_list = [iDir for iDir in os.listdir(myomatrix_folder) if "Record Node" in iDir]
+    Record_Node_dir_list = [
+        iDir for iDir in os.listdir(config["myomatrix"]) if "Record Node" in iDir
+    ]
     assert len(Record_Node_dir_list) == 1, "Please remove all but one 'Record Node ###' folder"
     Record_Node_dir = Record_Node_dir_list[0]
     Experiment_dir_list = [
         iDir
-        for iDir in os.listdir(os.path.join(myomatrix_folder, Record_Node_dir))
+        for iDir in os.listdir(os.path.join(config["myomatrix"], Record_Node_dir))
         if iDir.startswith("experiment")
     ]
     assert len(Experiment_dir_list) == 1, "Please remove all but one 'experiment#' folder"
     Experiment_dir = Experiment_dir_list[0]
     recordings_dir_list = [
         iDir
-        for iDir in os.listdir(os.path.join(myomatrix_folder, Record_Node_dir, Experiment_dir))
+        for iDir in os.listdir(os.path.join(config["myomatrix"], Record_Node_dir, Experiment_dir))
         if iDir.startswith("recording")
     ]
     recordings_dir_list = [int(i[9:]) for i in recordings_dir_list if i.startswith("recording")]
@@ -639,7 +669,9 @@ if myo_post:
                 .joinpath(merge_path),
             )
         except FileExistsError:
-            print(f"Final merge already exists in {previous_sort_folder_to_use}")
+            print(
+                f"WARNING: Final merge already exists in {previous_sort_folder_to_use}, files not updated"
+            )
         except:
             raise
 
