@@ -13,11 +13,14 @@ This toolbox will:
   - Perform spike sorting with a modified version of Kilosort 3.0 (wider templates)
   - Combine similar units, calculate motor unit statistics, export back to phy
 
+## Folder Tree Structure
+![Alt text](images/folder_tree_structure.png)
+
 ## Installation
 ### Requirements
 Many processing steps require a CUDA capable GPU.
   - For Neuropixel data, a GPU with at least 10GB of onboard RAM is recommended
-  - For Myomatrix data, currently only GPUs with compute capability 8.0, 8.7, or 9.0 are supported due to shared thread memory requirements
+  - For Myomatrix data, currently only GPUs with compute capability >=5.0 are supported due to shared thread memory requirements
 
 ### Instructions
 These installation instructions were tested on the Computational Brain Science Group Server 'CBS GPU 10GB' image, and the Compute Canada servers. They may need to be adjusted if running on another machine type.
@@ -26,9 +29,16 @@ Clone a copy of the repository on your local machine (for example, in the home d
 
     git clone https://github.com/JonathanAMichaels/PixelProcessingPipeline.git
     
-After cloning, you can either configure a virtualenv or conda environment to run the pipeline
+After cloning, you can either configure a virtualenv, conda, or micromamba environment to run the pipeline
 
-#### Virtual Environment
+#### Micromamba Environment (Option 1, recommended)
+To install micromamba and set up a micromamba environment, follow these steps:
+
+    "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
+    micromamba env create -f environment.yml
+    micromamba activate pipeline
+
+#### Virtual Environment (Option 2)
 To set up a virtualenv environment, follow these steps:
 
     virtualenv ~/pipeline
@@ -41,11 +51,15 @@ Install the cupy version that matches your version of nvcc. For example, if runn
 shows version 10.1, then run
 
     pip install cupy-cuda101
-    
-#### Conda Environment
-We can also create a conda environment to run the file as opposed to a virtual environment by following these steps:
 
+#### Conda Environment (Option 3, untested)
+To set up a conda environment, follow these steps:
+
+    wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+    bash Miniforge3-Linux-x86_64.sh
+    conda init
     conda env create -f environment.yml
+    conda activate pipeline
 
 #### Final Installation Steps
 If you are processing Myomatrix data, open matlab and confirm that all mex files compile by running
@@ -82,17 +96,17 @@ If a conda environment was used, activate it using
 #### Final Usage Steps
 The first time you process an experiment, call
 
-    python3 pipeline.py -f /path_to_experiment_folder
+    python pipeline.py -f /path_to_experiment_folder
 
 This will generate a config.yaml file in that directory with all the relevant parameters for that experiment generated automatically. Open that file with any text editor and add any session specific information to the Session parameter section. For example, if you collected Myomatrix data you must specify which channels belong to which electrode and which channel contains the sync information, since this information cannot be generated automatically.
 
 Editing the main configuration file can be done by running the command below:
     
-    python3 pipeline.py -f /path_to_experiment_folder -config
+    python pipeline.py -f /path_to_experiment_folder -config
 
 If the config.yaml is correct, you can run the pipeline with all steps, for example
 
-    python3 pipeline.py -f /path_to_experiment_folder -full
+    python pipeline.py -f /path_to_experiment_folder -full
 
 Alternatively, you can call any combination of
 
@@ -108,16 +122,16 @@ Alternatively, you can call any combination of
 
 to perform only those steps. For example, if you are processing Myomatrix data, run
 
-    python3 pipeline.py -f /path_to_experiment_folder -myo_sort -myo_post
+    python pipeline.py -f /path_to_experiment_folder -myo_sort -myo_post
 
 To edit the configuration file for the processing Myomatrix data, run
 
-    python3 pipeline.py -f /path_to_experiment_folder -myo_config
+    python pipeline.py -f /path_to_experiment_folder -myo_config
     
 To edit the configuration file for the processing Neuropixel data, run
 
-    python3 pipeline.py -f /path_to_experiment_folder -neuro_config
-    
+    python pipeline.py -f /path_to_experiment_folder -neuro_config
+
 ## Extensions
 
 This code does not currently process .kinarm files or combine behavioural information with synced neural data. This may be added at a later date.
