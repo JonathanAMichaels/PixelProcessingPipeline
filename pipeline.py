@@ -537,7 +537,7 @@ if myo_sort:
                         "-r",
                         (
                             f"addpath(genpath('{path_to_add}'));"
-                            f"Kilosort_run_myo_3(struct({passable_params}))"
+                            f"Kilosort_run_myo_3_czuba(struct({passable_params}))"
                         )
                         if config["Sorting"]["do_KS_param_gridsearch"] == 1
                         else (
