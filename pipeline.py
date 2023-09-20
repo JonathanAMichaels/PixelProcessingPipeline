@@ -292,12 +292,18 @@ elif config["concatenate_myo_data"] and (
     # concatenated data folder was not found
     print("Concatenated files not found, concatenating data from data in chosen recording folders")
     path_to_add = script_folder + "/sorting/myomatrix/"
-    os.system(
-        matlab_root
-        + " -nodisplay -nosplash -nodesktop -r \"addpath('"
-        + path_to_add
-        + f'\'); concatenate_myo_data(\'{config["myomatrix"]}\', {{{config["recordings"]}}})"'
+    subprocess.run(
+        [
+            "matlab",
+            "-nodisplay",
+            "-nosplash",
+            "-nodesktop",
+            "-r",
+            f"addpath(genpath('{path_to_add}')); concatenate_myo_data('{config['myomatrix']}', {{{config['recordings']}}})",
+        ],
+        check=True,
     )
+    concatDataPath = find("concatenated_data", config["myomatrix"]) 
     print(f"Using newly concatenated data at {concatDataPath[0]+'/'+recordings_str}")
 else:
     print(f"Using existing concatenated data at {concatDataPath[0]+'/'+recordings_str}")
@@ -343,12 +349,13 @@ if neuro_config:
             shell=True,
             check=True,
         )
+        print('Configuration for "-neuro_sort" done.')
         subprocess.run(
             f"nano {config['script_dir']}/sorting/resorter/neuropixel_call.m",
             shell=True,
             check=True,
         )
-        print('Configuration for "-neuro_sort" done.')
+        print('Configuration for "-neuro_post" done.')
     elif os.name == "nt":  # detect Windows
         subprocess.run(
             f"notepad {config['script_dir']}/sorting/Kilosort_run.m",
@@ -427,12 +434,12 @@ if myo_config:
             check=True,
         )
         print('Configuration for "-myo_sort" done.')
-        # subprocess.run(
-        #     f"nano {config['script_dir']}/sorting/resorter/myomatrix_call.m",
-        #     shell=True,
-        #     check=True,
-        # )
-        # print('Configuration for "-myo_post" done.')
+        subprocess.run(
+            f"nano {config['script_dir']}/sorting/resorter/myomatrix_call.m",
+            shell=True,
+            check=True,
+        )
+        print('Configuration for "-myo_post" done.')
     elif os.name == "nt":  # detect Windows
         subprocess.run(
             f"notepad {config['script_dir']}/sorting/Kilosort_run_myo_3_czuba.m",

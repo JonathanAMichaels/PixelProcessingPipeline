@@ -22,6 +22,11 @@ Many processing steps require a CUDA capable GPU.
   - For Neuropixel data, a GPU with at least 10GB of onboard RAM is recommended
   - For Myomatrix data, currently only GPUs with compute capability >=5.0 are supported due to shared thread memory requirements
 
+Required MATLAB Toolboxes:
+  - Parallel Computing Toolbox
+  - Signal Processing Toolbox
+  - Statistics and Machine Learning Toolbox
+
 ### Instructions
 These installation instructions were tested on the Computational Brain Science Group Server 'CBS GPU 10GB' image, and the Compute Canada servers. They may need to be adjusted if running on another machine type.
 
@@ -64,6 +69,8 @@ To set up a conda environment, follow these steps:
 #### Final Installation Steps
 If you are processing Myomatrix data, open matlab and confirm that all mex files compile by running
     
+    WARNING: make sure to activate the pipeline environment before running these commands
+
     matlab -nodesktop
     cd PixelProcessingPipeline/sorting/Kilosort-3.0/CUDA/
     mexGPUall
@@ -80,11 +87,17 @@ Compile codes necessary for drift estimation and install supplementary packages
 
 ## Usage
 Organize each experiment into one directory with a Neuropixel folder inside (e.g. 041422_g0), a Myomatrix folder (e.g. 2022-04-14_09-48-02_myo, which must have _myo at the end) and any .kinarm data files generated.
-The Myomatrix folder must be organized either as 'folder_myo/Record Node ###/continuous/' for binary open ephys data,
-or as 'folder_myo/Record Node ###/***.continuous' for open ephys format data.
+The Myomatrix folder must be organized either as 'folder_myo/Record Node ###/continuous/' for binary open ephys data, or as 'folder_myo/Record Node ###/***.continuous' for open ephys format data.
+
+Each time a sort is performed, a new folder will be created in the experiment directory with the date and time of the sort. Inside this folder will be the sorted data, the phy output files, and a copy of the ops used to sort the data. The original OpenEphys data will not be modified.
+
+#### Micromamba Activation
+Every time you open a new terminal, you must activate the environment. If micromamba was used, activate the environment using
+
+    micromamba activate pipeline
 
 #### VirtualEnv Activation
-Every time you open a new terminal, you must activate current source. If virtualenv was used, activate the source using
+If virtualenv was used, activate the source using
 
     source ~/pipeline/bin/activate
 
@@ -96,19 +109,31 @@ If a conda environment was used, activate it using
 #### Final Usage Steps
 The first time you process an experiment, call
 
-    python pipeline.py -f /path_to_experiment_folder
+    python pipeline.py -f "/path/to/sessionYYYYMMDD"
 
 This will generate a config.yaml file in that directory with all the relevant parameters for that experiment generated automatically. Open that file with any text editor and add any session specific information to the Session parameter section. For example, if you collected Myomatrix data you must specify which channels belong to which electrode and which channel contains the sync information, since this information cannot be generated automatically.
 
+For post processing of a previously saved myomatrix sort, call below with the corresponding datestring 
+
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -d YYYYMMDD_HHMMSS -myo_post
+
 Editing the main configuration file can be done by running the command below:
     
-    python pipeline.py -f /path_to_experiment_folder -config
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -config
+
+To edit the configuration file for the processing Myomatrix data, run
+
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -myo_config
+    
+To edit the configuration file for the processing Neuropixel data, run
+
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -neuro_config
 
 If the config.yaml is correct, you can run the pipeline with all steps, for example
 
-    python pipeline.py -f /path_to_experiment_folder -full
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -full
 
-Alternatively, you can call any combination of
+Alternatively, you can call any combination of:
 
     -config
     -registration
@@ -120,17 +145,14 @@ Alternatively, you can call any combination of
     -myo_post
     -lfp_extract
 
-to perform only those steps. For example, if you are processing Myomatrix data, run
+to perform only those steps. For example, if you are configuring and processing Myomatrix data, run
 
-    python pipeline.py -f /path_to_experiment_folder -myo_sort -myo_post
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -config -myo_config -myo_sort -myo_post
 
-To edit the configuration file for the processing Myomatrix data, run
+If you want to run a grid search over a range of KS parameters, edit the Kilosort_gridsearch_config.py
+file under the sorting folder to include all variable combinations you want to try. Be aware of the combinatorics so you don't generate more sorts than you expected. Then open the config file and set the gridsearch parameter to True, for example by running
 
-    python pipeline.py -f /path_to_experiment_folder -myo_config
-    
-To edit the configuration file for the processing Neuropixel data, run
-
-    python pipeline.py -f /path_to_experiment_folder -neuro_config
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -config -myo_sort
 
 ## Extensions
 
