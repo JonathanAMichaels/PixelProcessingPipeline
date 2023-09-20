@@ -69,7 +69,9 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
     % batchSkips = ceil(60 / batchSec); % do high-level assessments at least once every minute of data
 
     %% gridsearch section
-    % only try to use gridsearch values if ops_input_params is a struct and fields are present
+    %  will override the above ops struct values, if specified in Kilosort_gridsearch_config.py
+    
+    % make sure ops_input_params is a struct and fields are present
     if isa(ops_input_params, 'struct') && ~isempty(fieldnames(ops_input_params))
         % Combine input ops into the existing ops struct
         fields = fieldnames(ops_input_params);
@@ -91,7 +93,7 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
     % create parallel pool for all downstream parallel processing
     num_cpus = feature('numcores');
     if isempty(gcp('nocreate'))
-        poolobj = parpool(num_cpus);
+        poolobj = parpool(num_cpus); % create pool, one process per CPU core
     end
 
     rez = preprocessDataSub(ops);
