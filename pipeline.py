@@ -39,7 +39,9 @@ if "-f" in opts:
     else:
         raise SystemExit("Provided folder is not valid (you had one job...)")
 else:
-    raise SystemExit(f"Usage: {sys.argv[0]} -f argument must be present")
+    raise SystemExit(
+        f"Usage: {sys.argv[0]} -f argument must be present. Also, ensure environment is activated."
+    )
 
 registration = False
 registration_final = False
@@ -303,7 +305,7 @@ elif config["concatenate_myo_data"] and (
         ],
         check=True,
     )
-    concatDataPath = find("concatenated_data", config["myomatrix"]) 
+    concatDataPath = find("concatenated_data", config["myomatrix"])
     print(f"Using newly concatenated data at {concatDataPath[0]+'/'+recordings_str}")
 else:
     print(f"Using existing concatenated data at {concatDataPath[0]+'/'+recordings_str}")

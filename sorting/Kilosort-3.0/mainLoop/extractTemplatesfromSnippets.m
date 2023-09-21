@@ -16,7 +16,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
 
     k = 0;
     dd = gpuArray.zeros(ops.nt0, 5e4, 'single'); % preallocate matrix to hold 1D spike snippets
-    if ops.fig == 1 % PLOTTING
+    if ops.fig % PLOTTING
         figure(1); hold on;
     end
     for ibatch = 1:nskip:Nbatch
@@ -171,7 +171,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         disp('Number of spikes in each chunk: ')
         disp(N_waves_between_choices')
     end
-    if ops.fig == 1 % PLOTTING
+    if ops.fig % PLOTTING
         figure(22);
         plot((1:length(peak_amplitudes)) * ops.nt0, peak_amplitudes, 'm'); hold on;
         for iPeak = 1:length(peak_amplitudes)
@@ -185,13 +185,13 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
             end
         end
         title('peak amplitudes for each spike')
-    end
-    % plot vertical lines at the boundaries
-    for iBoundary = 1:length(wave_choice_left_bounds)
-        % different color for each chunk, from magenta to cyan
-        color = [1 - iBoundary / length(wave_choice_left_bounds), iBoundary / length(wave_choice_left_bounds), 1];
-        plot([1, 1] * wave_choice_left_bounds(iBoundary) * ops.nt0, ylim, 'Color', color, 'LineWidth', 2)
-        plot([1, 1] * wave_choice_right_bounds(iBoundary) * ops.nt0, ylim, 'Color', color, 'LineWidth', 2)
+        % plot vertical lines at the boundaries
+        for iBoundary = 1:length(wave_choice_left_bounds)
+            % different color for each chunk, from magenta to cyan
+            color = [1 - iBoundary / length(wave_choice_left_bounds), iBoundary / length(wave_choice_left_bounds), 1];
+            plot([1, 1] * wave_choice_left_bounds(iBoundary) * ops.nt0, ylim, 'Color', color, 'LineWidth', 2)
+            plot([1, 1] * wave_choice_right_bounds(iBoundary) * ops.nt0, ylim, 'Color', color, 'LineWidth', 2)
+        end
     end
     if use_kmeans
         wTEMP = spikes(:, wave_choice_left_bounds); % initialize with a smooth range of amplitudes
@@ -290,7 +290,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
     end
 
     wTEMP = wTEMP ./ sum(wTEMP .^ 2, 1) .^ .5; % normalize the templates
-    if ops.fig == 1 % PLOTTING
+    if ops.fig % PLOTTING
         % wTEMP_for_CC_final = wTEMP .* repmat(gausswin(size(wTEMP,1), (size(wTEMP,1)-1)/(2*sigma)), 1, size(wTEMP,2));
         % specify colormap to be 'cool'
         cmap = colormap(cool(nPCs));
@@ -342,7 +342,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         end
     end
 
-    if ops.fig == 1 % PLOTTING
+    if ops.fig % PLOTTING
         figure(3); hold on;
         for i = 1:nPCs
             plot(wTEMP(:, i) + i * scale, 'LineWidth', 2, 'Color', cmap(i, :));
