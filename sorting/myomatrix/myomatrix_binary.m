@@ -119,14 +119,22 @@ for q = 1:4
         mean_SNR = mean(SNR);
         std_SNR = std(SNR);
         median_SNR = median(SNR);
-        
+
         rejection_criteria = 'lowest';
-        if strcmp(rejection_criteria, 'median')
+        if strcmp(rejection_criteria, 'perc25')
+            % reject channels with SNR < 25th percentile
+            perc25_SNR = prctile(SNR, 25);
+            SNR_reject_chans = chanList(SNR < perc25_SNR);
+        elseif strcmp(rejection_criteria, 'median')
             % reject channels with SNR < median
             SNR_reject_chans = chanList(SNR < median_SNR);
+        elseif strcmp(rejection_criteria, 'perc75')
+            % reject channels with SNR < 75th percentile
+            perc75_SNR = prctile(SNR, 75);
+            SNR_reject_chans = chanList(SNR < perc75_SNR);
         elseif strcmp(rejection_criteria, 'mean')
-            % reject channels with SNR < mean - std/4
-            % SNR_reject_chans = chanList(SNR < mean_SNR - std_SNR);
+            % reject channels with SNR < mean - std
+            SNR_reject_chans = chanList(SNR < mean_SNR - std_SNR);
         elseif strcmp(rejection_criteria, 'lowest')
             % reject N_reject lowest SNR channels
             N_reject = 5;
@@ -215,7 +223,7 @@ if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
     %     xcoords(brokenChan) = [];
     %     ycoords(brokenChan) = [];
     % else
-    numDummy = max(0,num_KS_components - size(data, 2)); % make sure it's not negative
+    numDummy = max(0, num_KS_components - size(data, 2)); % make sure it's not negative
     dummyData = zeros(size(data, 1), numDummy, 'int16');
     data = [data dummyData]; % add dummy channels to make size larger than num_KS_components
     chanMap = 1:size(data, 2);
@@ -228,9 +236,8 @@ if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
     disp('Broken channels were just removed from that channel map')
     save(fullfile(myo_sorted_dir, 'chanMapAdjusted.mat'), 'chanMap', 'connected', 'xcoords', ...
         'ycoords', 'kcoords', 'chanMap0ind', 'fs', 'name', 'numDummy')
-% else
+    % else
 end
-
 
 clear data_filt data_norm
 
