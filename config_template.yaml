@@ -36,16 +36,18 @@ Session:
     trange:
         - 0
         - 0
-    myo_chan_map_file: 
+    myo_chan_map_file:
         - bipolar_test_kilosortChanMap.mat
         - bipolar_test_kilosortChanMap.mat
     myo_chan_list:
         - [1, 16]
         - [17, 32]
-    # Remove bad channels from myomatrix data
-    # This can be a sequence of booleans or a sequence of lists:
-    # True for automatic bad channel removal, False to include all channels.
-    # Provide an integer list of channels to remove those channels for that session, e.g., [1,2,3,4]
+    ## Remove bad channels from myomatrix data
+    # This can be a sequence of booleans, of strings, or of lists:
+    # Booleans: True for automatic bad channel removal (defaults to reject below median), False to include all channels.
+    # Strings: Provide 'median', 'mean', 'mean-1std', 'percentileXX', or 'lowestYY' (XX,YY are numeric, 0<XX<100, and 0<YY<Nchans)
+    #          to remove channels below the corresponding threshold.
+    # Lists: Provide an integer list of channels to remove those channels for that session, e.g., [1,2,3,4]
     remove_bad_myo_chans:
         - True
         - True

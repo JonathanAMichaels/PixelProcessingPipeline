@@ -154,13 +154,20 @@ For post processing of the latest neuropixel sort, run
 
     python pipeline.py -f "/path/to/sessionYYYYMMDD" -neuro_post
 
+##### Plotting with Phy Command
+For plotting the latest myomatrix sort with Phy GUI, run
 
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -myo_phy
+
+For plotting a previously saved myomatrix sort with Phy GUI, call below with the corresponding datestring 
+
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -d YYYYMMDD_HHMMSS -myo_phy
+
+##### Chaining Commands Together
 If the `config.yaml` is correct, you can run the pipeline with all steps, for example
 
     python pipeline.py -f "/path/to/sessionYYYYMMDD" -full
 
-
-##### Chaining Commands Together
 Alternatively, you can call any combination of:
 
     -config
@@ -171,6 +178,7 @@ Alternatively, you can call any combination of:
     -myo_config
     -myo_sort
     -myo_post
+    -myo_phy
     -lfp_extract
 
 to perform only those steps. For example, if you want to configure, immediately spike sort, and post process Myomatrix data, run

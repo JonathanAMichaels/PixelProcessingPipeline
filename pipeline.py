@@ -70,6 +70,8 @@ if "-myo_post" in opts:
     myo_post = True
 if "-myo_plot" in opts:
     myo_plot = True
+if "-myo_phy" in opts:
+    myo_phy = True
 if "-neuro_config" in opts:
     neuro_config = True
 if "-neuro_sort" in opts:
@@ -712,6 +714,23 @@ if myo_plot:
             f"addpath(genpath('{path_to_add}')); spike_validation_plot({arg1},{arg2})",
         ],
         check=True,
+    )
+
+if myo_phy:
+    path_to_add = script_folder + "/sorting/"
+    if "-d" in opts:
+        sorted_folder_to_plot = previous_sort_folder_to_use
+        args = args[1:]  # remove the -d flag related argument
+    else:
+        # default to sorted0 folder, may need to update to be flexible for sorted1, 2, etc.
+        sorted_folder_to_plot = "sorted0"
+    os.chdir(Path(config["myomatrix"]).joinpath(sorted_folder_to_plot))
+    subprocess.run(
+        [
+            "phy",
+            "template-gui",
+            "params.py",
+        ],
     )
 
 # Proceed with LFP extraction
