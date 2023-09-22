@@ -132,8 +132,10 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
     rez.W = zeros(ops.nt0, 0, Ncomps, 'single');
     rez.U = zeros(ops.Nchan, 0, Ncomps, 'single');
     rez.mu = zeros(1, 0, 'single');
-    figure(14); hold on;
-    RGB_colors = rand(n0, 3);
+    if ops.fig
+        figure(14); hold on;
+        RGB_colors = rand(n0, 3);
+    end
     for t = 1:n0 % for each cluster
         dWU = wPCA * gpuArray(Wpca(:, :, t)); % multiply PC components by mean PC coordinates for each cluster
         [w, s, u] = svdecon(dWU); % compute SVD of that product to deconstruct it into spatial and temporal components

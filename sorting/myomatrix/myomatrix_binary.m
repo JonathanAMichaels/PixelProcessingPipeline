@@ -119,17 +119,40 @@ for q = 1:4
         mean_SNR = mean(SNR);
         std_SNR = std(SNR);
         median_SNR = median(SNR);
+
+        if isa(remove_bad_myo_chans, "char")
+            rejection_criteria = remove_bad_myo_chans;
+        else
+            rejection_criteria = 'median';
+        end
+        disp("Using " + rejection_criteria + " threshold for SNR rejection criteria")
         
-        rejection_criteria = 'lowest';
+        % check by what criteria we should reject channels
         if strcmp(rejection_criteria, 'median')
             % reject channels with SNR < median
             SNR_reject_chans = chanList(SNR < median_SNR);
         elseif strcmp(rejection_criteria, 'mean')
-            % reject channels with SNR < mean - std/4
-            % SNR_reject_chans = chanList(SNR < mean_SNR - std_SNR);
-        elseif strcmp(rejection_criteria, 'lowest')
+            % reject channels with SNR < mean
+            SNR_reject_chans = chanList(SNR < mean_SNR);
+        elseif strcmp(rejection_criteria, 'mean-1std')
+            % reject channels with SNR < mean - std
+            SNR_reject_chans = chanList(SNR < mean_SNR - std_SNR);
+        elseif startsWith(rejection_criteria, 'percentile')
+            % ensure that the percentile is numeric and between 0 and 100
+            percentile = str2double(rejection_criteria(11:end));
+            if isnan(percentile) || percentile < 0 || percentile > 100
+                error("Error with 'remove_bad_myo_chans' setting in config.yaml. Numeric value after 'percentile' must be between 0 and 100")
+            end
+            % reject channels with SNR < Nth percentile
+            percentile_SNR = prctile(SNR, percentile);
+            SNR_reject_chans = chanList(SNR < percentile_SNR);
+        elseif startsWith(rejection_criteria, 'lowest')
+            % ensure that the number of channels to reject is numeric and less than the number of channels
+            N_reject = str2double(rejection_criteria(7:end));
+            if isnan(N_reject) || N_reject < 0 || N_reject > length(chanList)
+                error("Error with 'remove_bad_myo_chans' setting in config.yaml. Numeric value after 'lowest' must be between 0 and " + length(chanList))
+            end
             % reject N_reject lowest SNR channels
-            N_reject = 5;
             SNR_reject_chans = chanList(idx(1:N_reject));
         end
 
@@ -180,12 +203,12 @@ disp(['Automatically detected rejectable channels are: ' num2str(brokenChan')])
 % now actually remove the detected broken channels if True
 % if a list of broken channels is provided, use that instead
 % if false, just continue
-if isa(remove_bad_myo_chans(1), 'logical')
+if isa(remove_bad_myo_chans(1), 'logical') || isa(remove_bad_myo_chans, 'char')
     if remove_bad_myo_chans(1) == false
         brokenChan = [];
         disp('Not removing any broken/noisy channels, because remove_bad_myo_chans is false')
         % disp(['Keeping channel list: ' num2str(chanList)])
-    elseif remove_bad_myo_chans(1) == true
+    elseif remove_bad_myo_chans(1) == true || isa(remove_bad_myo_chans, 'char')
         data(:, brokenChan) = [];
         chanList(brokenChan) = [];
         disp(['Just removed automatically detected broken/noisy channels: ' num2str(brokenChan')])
@@ -198,7 +221,7 @@ elseif isa(remove_bad_myo_chans, 'integer')
     disp(['Just removed manually provided broken/noisy channels: ' num2str(brokenChan)])
     disp(['New channel list is: ' num2str(chanList)])
 else
-    error('remove_bad_myo_chans must be a boolean or an integer list of broken channels')
+    error('remove_bad_myo_chans must be a boolean, string with SNR rejection method, or an integer list of channels to remove')
 end
 
 save([myo_sorted_dir '/chanList.mat'], 'chanList')
@@ -215,7 +238,7 @@ if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
     %     xcoords(brokenChan) = [];
     %     ycoords(brokenChan) = [];
     % else
-    numDummy = max(0,num_KS_components - size(data, 2)); % make sure it's not negative
+    numDummy = max(0, num_KS_components - size(data, 2)); % make sure it's not negative
     dummyData = zeros(size(data, 1), numDummy, 'int16');
     data = [data dummyData]; % add dummy channels to make size larger than num_KS_components
     chanMap = 1:size(data, 2);
@@ -228,9 +251,8 @@ if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
     disp('Broken channels were just removed from that channel map')
     save(fullfile(myo_sorted_dir, 'chanMapAdjusted.mat'), 'chanMap', 'connected', 'xcoords', ...
         'ycoords', 'kcoords', 'chanMap0ind', 'fs', 'name', 'numDummy')
-% else
+    % else
 end
-
 
 clear data_filt data_norm
 

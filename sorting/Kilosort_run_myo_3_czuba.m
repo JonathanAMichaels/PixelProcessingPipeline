@@ -70,7 +70,7 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
 
     %% gridsearch section
     %  will override the above ops struct values, if specified in Kilosort_gridsearch_config.py
-    
+
     % make sure ops_input_params is a struct and fields are present
     if isa(ops_input_params, 'struct') && ~isempty(fieldnames(ops_input_params))
         % Combine input ops into the existing ops struct

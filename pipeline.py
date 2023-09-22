@@ -39,7 +39,9 @@ if "-f" in opts:
     else:
         raise SystemExit("Provided folder is not valid (you had one job...)")
 else:
-    raise SystemExit(f"Usage: {sys.argv[0]} -f argument must be present")
+    raise SystemExit(
+        f"Usage: {sys.argv[0]} -f argument must be present. Also, ensure environment is activated."
+    )
 
 registration = False
 registration_final = False
@@ -48,6 +50,7 @@ myo_config = False
 myo_sort = False
 myo_post = False
 myo_plot = False
+myo_phy = False
 neuro_config = False
 neuro_sort = False
 neuro_post = False
@@ -68,6 +71,8 @@ if "-myo_post" in opts:
     myo_post = True
 if "-myo_plot" in opts:
     myo_plot = True
+if "-myo_phy" in opts:
+    myo_phy = True
 if "-neuro_config" in opts:
     neuro_config = True
 if "-neuro_sort" in opts:
@@ -303,7 +308,7 @@ elif config["concatenate_myo_data"] and (
         ],
         check=True,
     )
-    concatDataPath = find("concatenated_data", config["myomatrix"]) 
+    concatDataPath = find("concatenated_data", config["myomatrix"])
     print(f"Using newly concatenated data at {concatDataPath[0]+'/'+recordings_str}")
 else:
     print(f"Using existing concatenated data at {concatDataPath[0]+'/'+recordings_str}")
@@ -710,6 +715,23 @@ if myo_plot:
             f"addpath(genpath('{path_to_add}')); spike_validation_plot({arg1},{arg2})",
         ],
         check=True,
+    )
+
+if myo_phy:
+    path_to_add = script_folder + "/sorting/"
+    if "-d" in opts:
+        sorted_folder_to_plot = previous_sort_folder_to_use
+        args = args[1:]  # remove the -d flag related argument
+    else:
+        # default to sorted0 folder, may need to update to be flexible for sorted1, 2, etc.
+        sorted_folder_to_plot = "sorted0"
+    os.chdir(Path(config["myomatrix"]).joinpath(sorted_folder_to_plot))
+    subprocess.run(
+        [
+            "phy",
+            "template-gui",
+            "params.py",
+        ],
     )
 
 # Proceed with LFP extraction

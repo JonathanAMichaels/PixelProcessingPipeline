@@ -12,7 +12,7 @@ Nchan = rez.ops.Nchan;
 
 fprintf('Getting channel delays... \n');
 fid = fopen(ops.fbinary, 'r');
-maxlag = ops.fs/1000; % 1 ms max delay
+maxlag = ops.fs/500; % 2 ms max time shift
 
 % we'll estimate the cross correlation across channels from data batches
 ibatch = 1;

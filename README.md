@@ -27,6 +27,13 @@ Required MATLAB Toolboxes:
   - Signal Processing Toolbox
   - Statistics and Machine Learning Toolbox
 
+Nvidia Driver:
+  - Linux:      >=450.80.02
+  - Windows:    >=452.39
+
+CUDA Toolkit (Automatically installed with micromamba/conda environment):
+  - 11.3
+
 ### Instructions
 These installation instructions were tested on the Computational Brain Science Group Server 'CBS GPU 10GB' image, and the Compute Canada servers. They may need to be adjusted if running on another machine type.
 
@@ -111,25 +118,53 @@ The first time you process an experiment, call
 
     python pipeline.py -f "/path/to/sessionYYYYMMDD"
 
-This will generate a config.yaml file in that directory with all the relevant parameters for that experiment generated automatically. Open that file with any text editor and add any session specific information to the Session parameter section. For example, if you collected Myomatrix data you must specify which channels belong to which electrode and which channel contains the sync information, since this information cannot be generated automatically.
+This will generate a `config.yaml` file in that directory with all the relevant parameters for that experiment generated automatically. Open that file with any text editor and add any session specific information to the Session parameter section. For example, if you collected Myomatrix data you must specify which channels belong to which electrode and which channel contains the sync information, since this information cannot be generated automatically.
 
-For post processing of a previously saved myomatrix sort, call below with the corresponding datestring 
-
-    python pipeline.py -f "/path/to/sessionYYYYMMDD" -d YYYYMMDD_HHMMSS -myo_post
-
+##### Configuration Commands
 Editing the main configuration file can be done by running the command below:
     
     python pipeline.py -f "/path/to/sessionYYYYMMDD" -config
 
 To edit the configuration file for the processing Myomatrix data, run
 
-    python pipeline.py -f "/path/to/sessionYYYYMMDD" -myo_config
-    
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -myo_config    
+
 To edit the configuration file for the processing Neuropixel data, run
 
     python pipeline.py -f "/path/to/sessionYYYYMMDD" -neuro_config
 
-If the config.yaml is correct, you can run the pipeline with all steps, for example
+##### Spike Sorting Commands
+To run a sort on the Myomatrix data, run
+
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -myo_sort
+
+To run a sort on the Neuropixel data, run
+    
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -neuro_sort
+##### Post Processing Commands
+For post processing of the latest myomatrix sort, run
+
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -myo_post
+
+For post processing of a previously saved myomatrix sort, call below with the corresponding datestring 
+
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -d YYYYMMDD_HHMMSS -myo_post
+
+For post processing of the latest neuropixel sort, run
+
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -neuro_post
+
+##### Plotting with Phy Command
+For plotting the latest myomatrix sort with Phy GUI, run
+
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -myo_phy
+
+For plotting a previously saved myomatrix sort with Phy GUI, call below with the corresponding datestring 
+
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -d YYYYMMDD_HHMMSS -myo_phy
+
+##### Chaining Commands Together
+If the `config.yaml` is correct, you can run the pipeline with all steps, for example
 
     python pipeline.py -f "/path/to/sessionYYYYMMDD" -full
 
@@ -143,13 +178,14 @@ Alternatively, you can call any combination of:
     -myo_config
     -myo_sort
     -myo_post
+    -myo_phy
     -lfp_extract
 
-to perform only those steps. For example, if you are configuring and processing Myomatrix data, run
+to perform only those steps. For example, if you want to configure, immediately spike sort, and post process Myomatrix data, run
 
     python pipeline.py -f "/path/to/sessionYYYYMMDD" -config -myo_config -myo_sort -myo_post
 
-If you want to run a grid search over a range of KS parameters, edit the Kilosort_gridsearch_config.py
+If you want to run a grid search over a range of KS parameters, edit the `Kilosort_gridsearch_config.py`
 file under the sorting folder to include all variable combinations you want to try. Be aware of the combinatorics so you don't generate more sorts than you expected. Then open the config file and set the gridsearch parameter to True, for example by running
 
     python pipeline.py -f "/path/to/sessionYYYYMMDD" -config -myo_sort
