@@ -50,6 +50,7 @@ myo_config = False
 myo_sort = False
 myo_post = False
 myo_plot = False
+myo_phy = False
 neuro_config = False
 neuro_sort = False
 neuro_post = False
