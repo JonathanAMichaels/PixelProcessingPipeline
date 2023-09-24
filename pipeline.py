@@ -293,7 +293,7 @@ if len(concatDataPath) > 1:
 # folder found but doesn't contain the recordings specified in config file)
 elif config["concatenate_myo_data"] and (
     len(concatDataPath) < 1 or recordings_str not in os.listdir(concatDataPath[0])
-):
+):  # second and third conditions mean concatenated files need to be created
     # concatenated data folder was not found
     print("Concatenated files not found, concatenating data from data in chosen recording folders")
     path_to_add = script_folder + "/sorting/myomatrix/"
@@ -310,9 +310,15 @@ elif config["concatenate_myo_data"] and (
     )
     concatDataPath = find("concatenated_data", config["myomatrix"])
     print(f"Using newly concatenated data at {concatDataPath[0]+'/'+recordings_str}")
-else:
+# elif setting is enabled and concatenated data was found with requested recordings present
+elif config["concatenate_myo_data"] and recordings_str in os.listdir(concatDataPath[0]):
     print(f"Using existing concatenated data at {concatDataPath[0]+'/'+recordings_str}")
-concatDataPath = concatDataPath[0] + "/" + recordings_str
+# below condition means concatenating data is disabled
+else:
+    print("Not concatenating data")
+
+if config["concatenate_myo_data"]:
+    concatDataPath = concatDataPath[0] + "/" + recordings_str
 
 
 temp = glob.glob(folder + "/*.kinarm")
