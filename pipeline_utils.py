@@ -79,8 +79,8 @@ def extract_LFP(config_kilosort):
         all_data[ind, :] = temp[0:len(ind), :] * params['gain']
     data.close()
 
-    #with open(config_kilosort['neuropixel_folder'] + '/LFP.npy', 'wb') as f:
-    #    np.save(f, all_data)
+    with open(config_kilosort['neuropixel_folder'] + '/LFP.npy', 'wb') as f:
+        np.save(f, all_data)
     registered_file = glob.glob(config_kilosort['neuropixel_folder'] +
                                 '/NeuropixelsRegistration2/' + 'subtraction_*.h5')
     with h5py.File(registered_file[0], "r") as f:
@@ -88,10 +88,11 @@ def extract_LFP(config_kilosort):
     #with open(config_kilosort['neuropixel_folder'] + '/LFP_params.npy', 'wb') as f:
     #    np.save(f, {'sample_shift': meta['sample_shift'], 'electrode_x_um': meta['x'],
     #                'electrode_y_um': meta['y'], 'params': params, 'displacement_map': disp_map})
-    savemat(config_kilosort['neuropixel_folder'] + '/LFP.mat',  {'sample_shift': meta['sample_shift'],
+
+    savemat(config_kilosort['neuropixel_folder'] + '/LFP_params.mat',  {'sample_shift': meta['sample_shift'],
                                                                  'electrode_x_um': meta['x'],
                                                                  'electrode_y_um': meta['y'], 'params': params,
-                                                                 'displacement_map': disp_map, 'LFP': all_data},
-            do_compression=True)
+                                                                 'displacement_map': disp_map},
+            do_compression=False)
 
 
