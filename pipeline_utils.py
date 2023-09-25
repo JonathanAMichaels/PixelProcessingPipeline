@@ -7,7 +7,7 @@ from sorting.readSGLX import readMeta, SampRate, makeMemMapRaw, ExtractDigital
 import spikeglx
 import scipy.io
 from scipy import signal
-import scipy.io.savemat as savemat
+from scipy.io import savemat as savemat
 import h5py
 import glob
 
