@@ -45,10 +45,10 @@ def extract_LFP(config_kilosort):
     data = spikeglx.Reader(Path(config_kilosort['neuropixel']))
     meta = data.geometry
     params = {'LFP_filter_type': 'scipy.signal.sosfiltfilt', 'bandpass_frequency': (0.5, 400), 'butterworth_order': 4,
-              'sampling_rate': 1000}
+              'sampling_rate': 1000, 'gain': 1e8}
     sos = signal.butter(params['butterworth_order'], params['bandpass_frequency'],
                         fs=int(data.fs), btype='bandpass', output='sos')
-    all_data = np.zeros((int(data.ns/30), data.nc-1), dtype=np.float32)
+    all_data = np.zeros((int(data.ns/30), data.nc-1), dtype=np.int16)
     all = list(range(data.ns))
     buffer_size = int(30000*4.2)
     intervals = all[0: int(data.ns) - buffer_size: 600000]
@@ -76,7 +76,7 @@ def extract_LFP(config_kilosort):
             temp = temp[buffer_size: -buffer_size, :]
             ind = list(range(int(intervals[i] / 30), int(intervals[i + 1] / 30)))
         temp = temp[::30, :]  # down-sample
-        all_data[ind, :] = temp[0:len(ind), :]
+        all_data[ind, :] = temp[0:len(ind), :] * params['gain']
     data.close()
 
     #with open(config_kilosort['neuropixel_folder'] + '/LFP.npy', 'wb') as f:
