@@ -47,8 +47,8 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
     ops.nTEMP = ops.nPCs; % number of templates to use for spike detection
     ops.nEig = ops.nPCs; % rank of svd for templates, % keep same as nPCs to avoid error
     ops.NchanTOT = double(max(num_chans - length(brokenChan), ops.nEig));
-    ops.Th = [6 2]; % threshold crossings for pre-clustering (in PCA projection space)
-    ops.spkTh = -6; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
+    ops.Th = [5 2]; % threshold crossings for pre-clustering (in PCA projection space)
+    ops.spkTh = -4; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
     ops.nfilt_factor = ops.nPCs; % max number of clusters per good channel in a batch (even temporary ones)
     ops.nblocks = 0;
     ops.nt0min = ceil(ops.nt0 / 2); % peak of template match will be this many points away from beginning
@@ -145,11 +145,21 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
     rez = find_merges(rez, 1);
 
     % write to Phy
-    fprintf('Saving results to Phy  \n')
+    disp(['Saving sorting results to Phy in', ops.saveDir])
     rezToPhy2(rez, ops.saveDir);
-    save(fullfile(ops.saveDir, '/ops.mat'), '-struct', 'ops');
 
+    disp(['Saving rez and ops structs to', ops.saveDir])
     ops % show final ops struct in command window
+    rez % show final rez struct in command window
+    
+    % save variables as full struct, for MATLAB
+    save(fullfile(ops.saveDir, '/ops_struct.mat'), 'ops');
+    save(fullfile(ops.saveDir, '/rez_struct.mat'), 'rez');
+
+    % save variables without struct, for python
+    save(fullfile(ops.saveDir, '/ops.mat'), '-struct', 'ops');
+    rez.ops = []; rez.temp = []; % remove substructs from rez struct before saving
+    save(fullfile(ops.saveDir, '/rez.mat'), '-struct', 'rez');
 
     delete(poolobj); % ensure pool is shutdown before quit (otherwise can throw error)
 
