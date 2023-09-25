@@ -7,6 +7,7 @@ from sorting.readSGLX import readMeta, SampRate, makeMemMapRaw, ExtractDigital
 import spikeglx
 import scipy.io
 from scipy import signal
+import scipy.io.savemat as savemat
 import h5py
 import glob
 
@@ -78,13 +79,19 @@ def extract_LFP(config_kilosort):
         all_data[ind, :] = temp[0:len(ind), :]
     data.close()
 
-    with open(config_kilosort['neuropixel_folder'] + '/LFP.npy', 'wb') as f:
-        np.save(f, all_data)
-    registered_file = glob.glob(config_kilosort['neuropixel_folder'] + '/NeuropixelsRegistration2/' + 'subtraction_*.h5')
+    #with open(config_kilosort['neuropixel_folder'] + '/LFP.npy', 'wb') as f:
+    #    np.save(f, all_data)
+    registered_file = glob.glob(config_kilosort['neuropixel_folder'] +
+                                '/NeuropixelsRegistration2/' + 'subtraction_*.h5')
     with h5py.File(registered_file[0], "r") as f:
         disp_map = f["dispmap"][:]
-    with open(config_kilosort['neuropixel_folder'] + '/LFP_params.npy', 'wb') as f:
-        np.save(f, {'sample_shift': meta['sample_shift'], 'electrode_x_um': meta['x'],
-                    'electrode_y_um': meta['y'], 'params': params, 'displacement_map': disp_map})
+    #with open(config_kilosort['neuropixel_folder'] + '/LFP_params.npy', 'wb') as f:
+    #    np.save(f, {'sample_shift': meta['sample_shift'], 'electrode_x_um': meta['x'],
+    #                'electrode_y_um': meta['y'], 'params': params, 'displacement_map': disp_map})
+    savemat(config_kilosort['neuropixel_folder'] + '/LFP.mat',  {'sample_shift': meta['sample_shift'],
+                                                                 'electrode_x_um': meta['x'],
+                                                                 'electrode_y_um': meta['y'], 'params': params,
+                                                                 'displacement_map': disp_map, 'LFP': all_data},
+            do_compression=True)
 
 
