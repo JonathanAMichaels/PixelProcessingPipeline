@@ -1,7 +1,5 @@
 import os
 import fnmatch
-import shutil
-from pathlib import Path
 import numpy as np
 from sorting.readSGLX import readMeta, SampRate, makeMemMapRaw, ExtractDigital
 import spikeglx
@@ -10,6 +8,9 @@ from scipy import signal
 from scipy.io import savemat as savemat
 import h5py
 import glob
+import spikeinterface.full as si
+import shutil
+from pathlib import Path
 
 
 def find(pattern, path):
@@ -41,7 +42,7 @@ def extract_sync(config_kilosort):
     scipy.io.savemat(config_kilosort['neuropixel_folder'] + '/sync.mat', sync_data, do_compression=True)
 
 
-def extract_LFP(config_kilosort):
+def extract_LFP_legacy(config_kilosort):
     data = spikeglx.Reader(Path(config_kilosort['neuropixel']))
     meta = data.geometry
     params = {'LFP_filter_type': 'scipy.signal.sosfiltfilt', 'bandpass_frequency': (0.5, 400), 'butterworth_order': 4,
@@ -96,3 +97,23 @@ def extract_LFP(config_kilosort):
             do_compression=False)
 
 
+def extract_LFP(config_kilosort):
+    spikeglx_folder = Path(config_kilosort['neuropixel'])
+    lfp_folder = spikeglx_folder / 'lfp'
+    shutil.rmtree(lfp_folder)
+
+    # global kwargs for parallel computing
+    job_kwargs = dict(
+        n_jobs=16,
+        chunk_duration='1s',
+        progress_bar=True,
+    )
+
+    stream_names, stream_ids = si.get_neo_streams('spikeglx', spikeglx_folder)
+    print(stream_names)
+    raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
+    rec_filtered = si.bandpass_filter(raw_rec, freq_min=1., freq_max=300.)
+    rec_shifted = si.phase_shift(rec_filtered)
+    rec_preprocessed = si.resample(rec_shifted, 1000)
+    rec_preprocessed = si.scale(rec_preprocessed, rec_preprocessed.get_channel_gains())
+    rec_preprocessed.save(folder=lfp_folder, dtype='int16', **job_kwargs)
