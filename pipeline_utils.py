@@ -111,8 +111,8 @@ def extract_LFP(config_kilosort):
                                                                  'electrode_y_um': meta['y'], 'params': params,
                                                                  'displacement_map': disp_map})
 
-    spikeglx_folder = Path(config_kilosort['neuropixel'])
-    lfp_folder = spikeglx_folder / 'lfp'
+    spikeglx_file = Path(config_kilosort['neuropixel'])
+    lfp_folder = Path(config_kilosort['neuropixel_folder']) / 'lfp'
     shutil.rmtree(lfp_folder)
 
     # global kwargs for parallel computing
@@ -122,9 +122,9 @@ def extract_LFP(config_kilosort):
         progress_bar=True,
     )
 
-    stream_names, stream_ids = si.get_neo_streams('spikeglx', spikeglx_folder)
+    stream_names, stream_ids = si.get_neo_streams('spikeglx', spikeglx_file)
     print(stream_names)
-    raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
+    raw_rec = si.read_spikeglx(spikeglx_file, stream_name=stream_names[0], load_sync_channel=False)
     rec_filtered = si.bandpass_filter(raw_rec, freq_min=1., freq_max=300.)
     rec_shifted = si.phase_shift(rec_filtered)
     rec_preprocessed = si.resample(rec_shifted, 1000)
