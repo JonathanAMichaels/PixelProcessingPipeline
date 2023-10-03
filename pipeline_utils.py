@@ -98,6 +98,19 @@ def extract_LFP_legacy(config_kilosort):
 
 
 def extract_LFP(config_kilosort):
+    registered_file = glob.glob(config_kilosort['neuropixel_folder'] +
+                                '/NeuropixelsRegistration2/' + 'subtraction_*.h5')
+    with h5py.File(registered_file[0], "r") as f:
+        disp_map = f["dispmap"][:]
+
+    data = spikeglx.Reader(Path(config_kilosort['neuropixel']))
+    meta = data.geometry
+    params = {'LFP_filter_type': 'scipy.signal.sosfiltfilt', 'bandpass_frequency': (1, 300), 'butterworth_order': 5,
+              'sampling_rate': 1000, 'gain': 1}
+    savemat(config_kilosort['neuropixel_folder'] + '/LFP_params.mat',  {'electrode_x_um': meta['x'],
+                                                                 'electrode_y_um': meta['y'], 'params': params,
+                                                                 'displacement_map': disp_map})
+
     spikeglx_folder = Path(config_kilosort['neuropixel'])
     lfp_folder = spikeglx_folder / 'lfp'
     shutil.rmtree(lfp_folder)
@@ -117,3 +130,4 @@ def extract_LFP(config_kilosort):
     rec_preprocessed = si.resample(rec_shifted, 1000)
     rec_preprocessed = si.scale(rec_preprocessed, rec_preprocessed.get_channel_gains())
     rec_preprocessed.save(folder=lfp_folder, dtype='int16', **job_kwargs)
+
