@@ -113,7 +113,8 @@ def extract_LFP(config_kilosort):
 
     spikeglx_file = Path(config_kilosort['neuropixel'])
     lfp_folder = Path(config_kilosort['neuropixel_folder']) / 'lfp'
-    shutil.rmtree(lfp_folder)
+    if os.path.isdir(lfp_folder):
+        shutil.rmtree(lfp_folder)
 
     # global kwargs for parallel computing
     job_kwargs = dict(
