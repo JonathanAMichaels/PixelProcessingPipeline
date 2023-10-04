@@ -4,9 +4,9 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
     load(fullfile(script_dir, '/tmp/config.mat'))
     load(fullfile(myo_sorted_dir, 'brokenChan.mat'))
 
-    % set GPU to use
-    disp(strcat("Setting GPU device to use: ", num2str(GPU_to_use)))
-    gpuDevice(GPU_to_use);
+    % set GPU to use <--- this is now set in the python pipeline.py script
+    % disp(strcat("Setting GPU device to use: ", num2str(GPU_to_use)))
+    % gpuDevice(GPU_to_use);
 
     % get and set channel map
     if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
@@ -47,8 +47,8 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
     ops.nTEMP = ops.nPCs; % number of templates to use for spike detection
     ops.nEig = ops.nPCs; % rank of svd for templates, % keep same as nPCs to avoid error
     ops.NchanTOT = double(max(num_chans - length(brokenChan), ops.nEig));
-    ops.Th = [5 2]; % threshold crossings for pre-clustering (in PCA projection space)
-    ops.spkTh = -4; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
+    ops.Th = [3 2]; % threshold crossings for pre-clustering (in PCA projection space)
+    ops.spkTh = -1; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
     ops.nfilt_factor = ops.nPCs; % max number of clusters per good channel in a batch (even temporary ones)
     ops.nblocks = 0;
     ops.nt0min = ceil(ops.nt0 / 2); % peak of template match will be this many points away from beginning
@@ -92,8 +92,9 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
 
     % create parallel pool for all downstream parallel processing
     num_cpus = feature('numcores');
+    num_jobs = min(64, num_cpus); % limit to 64 jobs, to avoid memory issues
     if isempty(gcp('nocreate'))
-        poolobj = parpool(num_cpus); % create pool, one process per CPU core
+        poolobj = parpool(num_jobs); % create pool, one process per CPU core
     end
 
     rez = preprocessDataSub(ops);

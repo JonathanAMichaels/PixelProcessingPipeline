@@ -219,7 +219,7 @@ else:
 if config["myomatrix"] != "":
     print("Using myomatrix folder " + config["myomatrix"])
 if not "GPU_to_use" in config:
-    config["GPU_to_use"] = 1
+    config["GPU_to_use"] = [0]
 if not "recordings" in config:
     config["recordings"] = [1]
 if not "concatenate_myo_data" in config:
@@ -258,68 +258,102 @@ else:
     matlab_path = glob.glob("/usr/local/MATLAB/R*")
     matlab_root = matlab_path[0] + "/bin/matlab"
 
-# Search myomatrix folder for existing concatenated_data folder, if it exists and
-# concatenate_myo_data is set to true, check subfolder names to see if they match
-# the recording numbers in the config file. If they don't, create a new subfolder
-# and concatenate the data into that folder. If they do, save the path to that
-concatDataPath = find("concatenated_data", config["myomatrix"])
-if config["recordings"][0] == "all":
-    Record_Node_dir_list = [
-        iDir for iDir in os.listdir(config["myomatrix"]) if "Record Node" in iDir
-    ]
-    assert len(Record_Node_dir_list) == 1, "Please remove all but one 'Record Node ###' folder"
-    Record_Node_dir = Record_Node_dir_list[0]
-    Experiment_dir_list = [
-        iDir
-        for iDir in os.listdir(os.path.join(config["myomatrix"], Record_Node_dir))
-        if iDir.startswith("experiment")
-    ]
-    assert len(Experiment_dir_list) == 1, "Please remove all but one 'experiment#' folder"
-    Experiment_dir = Experiment_dir_list[0]
-    recordings_dir_list = [
-        iDir
-        for iDir in os.listdir(os.path.join(config["myomatrix"], Record_Node_dir, Experiment_dir))
-        if iDir.startswith("recording")
-    ]
-    recordings_dir_list = [int(i[9:]) for i in recordings_dir_list if i.startswith("recording")]
-    config["recordings"] = recordings_dir_list
-recordings_str = ",".join([str(i) for i in config["recordings"]])
-
-if len(concatDataPath) > 1:
-    raise SystemExit(
-        "There shouldn't be more than one concatenated_data folder in the myomatrix data folder"
-    )
-# if concatenating data and (no concatenated data folder found or
-# folder found but doesn't contain the recordings specified in config file)
-elif config["concatenate_myo_data"] and (
-    len(concatDataPath) < 1 or recordings_str not in os.listdir(concatDataPath[0])
-):  # second and third conditions mean concatenated files need to be created
-    # concatenated data folder was not found
-    print("Concatenated files not found, concatenating data from data in chosen recording folders")
-    path_to_add = script_folder + "/sorting/myomatrix/"
-    subprocess.run(
-        [
-            "matlab",
-            "-nodisplay",
-            "-nosplash",
-            "-nodesktop",
-            "-r",
-            f"addpath(genpath('{path_to_add}')); concatenate_myo_data('{config['myomatrix']}', {{{config['recordings']}}})",
-        ],
-        check=True,
-    )
+if config["concatenate_myo_data"]:
+    # If concatenate_myo_data is set to true, search myomatrix folder for existing concatenated_data
+    # folder, if it exists, check subfolder names to see if they match the recording numbers
+    # specified in the config file. If they don't, create a new subfolder
+    # and concatenate the data into that folder. If they do, ensure that the continuous.dat file
+    # exists in the continuous/ folder for the matching recordings_str folder. If it doesn't,
+    # create a new subfolder and concatenate the data into that folder.
     concatDataPath = find("concatenated_data", config["myomatrix"])
-    print(f"Using newly concatenated data at {concatDataPath[0]+'/'+recordings_str}")
-# elif setting is enabled and concatenated data was found with requested recordings present
-elif config["concatenate_myo_data"] and recordings_str in os.listdir(concatDataPath[0]):
-    print(f"Using existing concatenated data at {concatDataPath[0]+'/'+recordings_str}")
-# below condition means concatenating data is disabled
+    if config["recordings"][0] == "all":
+        Record_Node_dir_list = [
+            iDir for iDir in os.listdir(config["myomatrix"]) if "Record Node" in iDir
+        ]
+        assert len(Record_Node_dir_list) == 1, "Please remove all but one 'Record Node ###' folder"
+        Record_Node_dir = Record_Node_dir_list[0]
+        Experiment_dir_list = [
+            iDir
+            for iDir in os.listdir(os.path.join(config["myomatrix"], Record_Node_dir))
+            if iDir.startswith("experiment")
+        ]
+        assert len(Experiment_dir_list) == 1, "Please remove all but one 'experiment#' folder"
+        Experiment_dir = Experiment_dir_list[0]
+        recordings_dir_list = [
+            iDir
+            for iDir in os.listdir(
+                os.path.join(config["myomatrix"], Record_Node_dir, Experiment_dir)
+            )
+            if iDir.startswith("recording")
+        ]
+        recordings_dir_list = [int(i[9:]) for i in recordings_dir_list if i.startswith("recording")]
+        config["recordings"] = recordings_dir_list
+    recordings_str = ",".join([str(i) for i in config["recordings"]])
+
+    exact_match_recording_folder = [
+        iFolder for iFolder in os.listdir(concatDataPath[0]) if recordings_str == iFolder
+    ]
+    if len(exact_match_recording_folder) == 1:
+        # now check in the continuous/ folder for the 'Acquisition_Board-100.Rhythm Data' or
+        # 'Rhythm_FPGA-100.0' folder, which should contain the concatenated data
+        continuous_folder = os.path.join(
+            concatDataPath[0], exact_match_recording_folder[0], "continuous"
+        )
+        rhythm_folder = [
+            iFolder for iFolder in os.listdir(continuous_folder) if "Rhythm" in iFolder
+        ]
+        if len(rhythm_folder) == 1:
+            continuous_dat_folder = os.path.join(continuous_folder, rhythm_folder[0])
+            # check if continuous.dat file exists in the continuous_dat_folder folder
+            if "continuous.dat" in os.listdir(continuous_dat_folder):
+                continuous_dat_is_present = True
+            else:
+                continuous_dat_is_present = False
+        else:
+            raise SystemExit(
+                f"There should be exactly one '*Rhythm*' folder in {continuous_folder} folder"
+                f"concatenated data, but found {len(rhythm_folder)}\n"
+                f"{rhythm_folder}"
+            )
+    else:
+        continuous_dat_is_present = False
+
+    if len(concatDataPath) > 1:
+        raise SystemExit(
+            "There shouldn't be more than one concatenated_data folder in the myomatrix data folder"
+        )
+    # elif concatenating data and no continuous.dat file found in the concatenated_data folder for the
+    # matching recordings_str folder
+    elif len(concatDataPath) < 1 or not continuous_dat_is_present:
+        print(
+            "Concatenated files not found, concatenating data from data in chosen recording folders"
+        )
+        path_to_add = script_folder + "/sorting/myomatrix/"
+        subprocess.run(
+            [
+                "matlab",
+                "-nodisplay",
+                "-nosplash",
+                "-nodesktop",
+                "-r",
+                "rehash toolboxcache; restoredefaultpath;",
+                f"addpath(genpath('{path_to_add}')); concatenate_myo_data('{config['myomatrix']}', {{{config['recordings']}}})",
+            ],
+            check=True,
+        )
+        concatDataPath = find("concatenated_data", config["myomatrix"])
+        print(f"Using newly concatenated data at {concatDataPath[0]+'/'+recordings_str}")
+    # elif setting is enabled and concatenated data was found with requested recordings present
+    elif recordings_str in os.listdir(concatDataPath[0]):
+        print(f"Using existing concatenated data at {concatDataPath[0]+'/'+recordings_str}")
+    concatDataPath = concatDataPath[0] + "/" + recordings_str
 else:
     print("Not concatenating data")
 
-if config["concatenate_myo_data"]:
-    concatDataPath = concatDataPath[0] + "/" + recordings_str
-
+# set chosen GPUs in environment variable
+GPU_str = ",".join([str(i) for i in config["GPU_to_use"]])
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = GPU_str
 
 temp = glob.glob(folder + "/*.kinarm")
 if len(temp) == 0:
@@ -462,7 +496,7 @@ if myo_config:
 # Proceed with myo processing and spike sorting
 if myo_sort:
     config_kilosort = {
-        "GPU_to_use": config["GPU_to_use"],
+        "GPU_to_use": np.array(config["GPU_to_use"], dtype=int),
         "myomatrix": config["myomatrix"],
         "script_dir": config["script_dir"],
         "recordings": np.array(config["recordings"], dtype=int)
@@ -512,7 +546,10 @@ if myo_sort:
                 "-nosplash",
                 "-nodesktop",
                 "-r",
-                f"addpath(genpath('{path_to_add}')); myomatrix_binary",
+                (
+                    "rehash toolboxcache; restoredefaultpath;"
+                    f"addpath(genpath('{path_to_add}')); myomatrix_binary"
+                ),
             ],
             check=True,
         )
@@ -554,11 +591,13 @@ if myo_sort:
                         "-nodesktop",
                         "-r",
                         (
+                            "rehash toolboxcache; restoredefaultpath;"
                             f"addpath(genpath('{path_to_add}'));"
-                            f"Kilosort_run_myo_3_czuba(struct({passable_params}))"
+                            f"Kilosort_run_myo_3_czuba(struct({passable_params}))",
                         )
                         if config["Sorting"]["do_KS_param_gridsearch"] == 1
                         else (
+                            "rehash toolboxcache; restoredefaultpath;"
                             f"addpath(genpath('{path_to_add}'));"
                             f"Kilosort_run_myo_3_czuba('{passable_params}');"
                         ),
@@ -655,7 +694,10 @@ if myo_post:
                 "-nosplash",
                 "-nodesktop",
                 "-r",
-                f"addpath(genpath('{path_to_add}')); myomatrix_call",
+                (
+                    "rehash toolboxcache; restoredefaultpath;"
+                    f"addpath(genpath('{path_to_add}')); myomatrix_call"
+                ),
             ],
             check=True,
         )
@@ -718,7 +760,10 @@ if myo_plot:
             "-nodesktop",
             "-nosplash",
             "-r",
-            f"addpath(genpath('{path_to_add}')); spike_validation_plot({arg1},{arg2})",
+            (
+                "rehash toolboxcache; restoredefaultpath;"
+                f"addpath(genpath('{path_to_add}')); spike_validation_plot({arg1},{arg2})"
+            ),
         ],
         check=True,
     )

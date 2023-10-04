@@ -1,4 +1,4 @@
-function [row, col, mu] = isolated_peaks_buffered(S1, ops)
+function [row, col, mu] = isolated_peaks_buffered_czuba(S1, ops)
 % takes a matrix of timepoints by channels S1
 % outputs threshold crossings that are relatively isolated from other peaks
 % outputs row, column and magnitude of the threshold crossing
