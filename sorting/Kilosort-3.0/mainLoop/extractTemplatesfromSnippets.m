@@ -55,8 +55,21 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
     end
     % discard empty samples
     dd = dd(:, 1:k);
+    % window definition
+    % window = tukeywin(size(wTEMP, 1), 0.9);
+    sigma_time = 0.125; % ms of the gaussian kernel to focus penalty on central region of waveforms
+    sigma = ops.fs * sigma_time / 1000; % samples
+    gaussian_window = gausswin(size(dd, 1), (size(dd, 1) - 1) / (2 * sigma));
+    zeros_for_tukey = zeros(size(dd, 1), 1);
+    percent_tukey_coverage = 80;
+    partial_tukey_window = tukeywin(ceil(size(dd, 1) * percent_tukey_coverage / 100), 0.5);
+    % put middle of partial tukey at the center of zeros_for_tukey
+    zeros_for_tukey(ceil(size(dd, 1) / 2) - ceil(size(partial_tukey_window, 1) / 2) + 1:ceil(size(dd, 1) / 2) + floor(size(partial_tukey_window, 1) / 2)) = partial_tukey_window;
+    tukey_window = zeros_for_tukey;
 
-    dd_cpu = double(gather(dd));
+    dd_windowed = dd .* tukey_window;
+    dd_cpu = double(gather(dd_windowed));
+    % PCA is computed on the windowed data
     [U, ~, ~] = svdecon(dd_cpu); % the PCs are just the left singular vectors of the waveforms
     % if ops.fig == 1 % PLOTTING
     %     figure(4); hold on;
@@ -76,25 +89,22 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         % compute k-means clustering of the waveforms
         rng('default'); rng(1); % initializing random number generator for reproducibility
         % stream = RandStream('mlfg6331_64');  % Random number stream
-        num_cpus = feature('numcores');
-        num_jobs = min(num_cpus, 64); % don't really need more than 32 jobs
-        options = statset('UseParallel', 1); %'UseSubstreams', 1,'Streams', stream);
+        p = gcp('nocreate'); % If no pool, do not create new one.
+        if isempty(p)
+            options = statset('UseParallel', 0);
+            num_jobs = 12;
+        else
+            options = statset('UseParallel', 1); %'UseSubstreams', 1,'Streams', stream);
+            num_jobs = p.NumWorkers;
+        end
         % try to use all available jobs, but if it fails, halve the number of jobs and
         % if it still fails, halve it again, until it doesn't fail
         % if all else fails, just run it sequentially
         try
-            while num_jobs > 0
-                try
-                    [cluster_id, ~, ~, Dist_from_K] = kmeans(dd_pca', nPCs, 'MaxIter', 10000, 'Replicates', num_jobs, 'Display', 'final', 'Options', options);
-                    break
-                catch
-                    disp(['k-means failed in parallel with ', num2str(num_jobs), ' jobs, trying again with ', num2str(floor(num_jobs / 2)), ' jobs'])
-                    num_jobs = floor(num_jobs / 2);
-                end
-            end
+            [cluster_id, ~, ~, Dist_from_K] = kmeans(dd_pca', nPCs, 'Distance', 'sqeuclidean', 'MaxIter', 10000, 'Replicates', num_jobs, 'Display', 'final', 'Options', options);
         catch
             disp('k-means failed in parallel, running sequentially instead')
-            [cluster_id, ~, ~, Dist_from_K] = kmeans(dd_pca', nPCs, 'MaxIter', 10000, 'Replicates', num_jobs, 'Display', 'final');
+            [cluster_id, ~, ~, Dist_from_K] = kmeans(dd_pca', nPCs, 'Distance', 'sqeuclidean', 'MaxIter', 10000, 'Replicates', num_jobs, 'Display', 'final');
         end
         spikes = gpuArray(nan(size(dd)));
         number_of_spikes_to_use = nan(nPCs, 1);
@@ -218,12 +228,9 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
     largest_CC_idx = 1;
     N_tries_for_largest_CC_idx_so_far = 0;
     best_CC_idxs = wave_choice_left_bounds;
-    sigma_time = 0.25; % ms of the gaussian kernel to focus penalty on central region of waveforms
-    sigma = ops.fs * sigma_time / 1000; % samples
     lowest_total_cost_for_each_chunk = 1e12 * ones(1, length(wave_choice_left_bounds));
     iter = 1;
 
-    %
     while iter < 2
         % replace with next wave in chunk to check correlation,
         % each wave index withing the chunk starting at the wave_choice_left_bounds
@@ -237,7 +244,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         % multiply waveforms by a Gaussian with the sigma value
         % this is to make the correlation more sensitive to the central shape of the waveform
         % wTEMP_for_corr = wTEMP .* gausswin(size(wTEMP, 1), (size(wTEMP, 1) - 1) / (2 * sigma));
-        wTEMP_for_corr = wTEMP .* tukeywin(size(wTEMP, 1), 0.5); % use tukey to preserve central shape of waveforms
+        wTEMP_for_corr = wTEMP .* tukey_window; % use window to focus on central region of waveforms
         CC = corr(wTEMP_for_corr);
 
         %% section to compute terms of the cost function
@@ -266,7 +273,10 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         end
 
         % compute the total cost for this wave choice, cheapest waveform will be chosen
-        total_cost_for_wave = corr_sum_with_other_template_choices + 12 * nPCs * wTEMP_gaussian_residual + 12 * nPCs * highest_template_similarity_penalty;
+        corr_sum_with_other_template_choices_term = corr_sum_with_other_template_choices;
+        wTEMP_gaussian_residual_term = 24 * nPCs * wTEMP_gaussian_residual;
+        highest_template_similarity_penalty_term = 12 * nPCs * highest_template_similarity_penalty;
+        total_cost_for_wave = corr_sum_with_other_template_choices_term + wTEMP_gaussian_residual_term + highest_template_similarity_penalty_term;
 
         % choose the best wave for this chunk/cluster
         % check the cost, and ensure that the wave has not already been chosen before in a previous chunk
@@ -282,7 +292,12 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
             disp(strcat("Total cross-channel correlation for this cluster ", num2str(sum(abs(CC(largest_CC_idx, :))))))
             disp("Residual cost for this "+descriptor + " was " + num2str(wTEMP_gaussian_residual))
             disp("Highest template similarity penalty for this "+descriptor + " was " + num2str(highest_template_similarity_penalty))
-            disp("Final cost for this "+descriptor + " was (including cumulative cost): " + num2str(lowest_total_cost_for_each_chunk(largest_CC_idx)))
+            disp("Percent of influence for each term: ")
+            corr_sum_with_other_template_choices_percent = corr_sum_with_other_template_choices_term / total_cost_for_wave * 100;
+            wTEMP_gaussian_residual_percent = wTEMP_gaussian_residual_term / total_cost_for_wave * 100;
+            highest_template_similarity_penalty_percent = highest_template_similarity_penalty_term / total_cost_for_wave * 100;
+            disp([corr_sum_with_other_template_choices_percent, wTEMP_gaussian_residual_percent, highest_template_similarity_penalty_percent])
+            disp("Final cost for this "+descriptor + " was: " + num2str(lowest_total_cost_for_each_chunk(largest_CC_idx)))
             % disp(sorted_CC)
             disp(CC)
             largest_CC_idx = largest_CC_idx + 1;
@@ -312,15 +327,15 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         % specify colormap to be 'cool'
         cmap = colormap(cool(nPCs));
         figure(2); hold on;
-        scale = 0.02;
+        scale = 0.8;
         for i = 1:nPCs
+            windowed_wTEMP = tukey_window .* wTEMP(:, i);
             plot(wTEMP(:, i) + i * scale, 'LineWidth', 2, 'Color', cmap(i, :));
             % plot standardized Gaussian multiplied waveforms for comparison
-            plot(wTEMP(:, i) ./ sum(wTEMP(:, i) .^ 2, 1) .^ .5 + i * scale, 'r');
+            plot(windowed_wTEMP + i * scale, 'r');
             if i == nPCs
-                % plot the gaussian
-                % plot(i * scale + 0.5 * gausswin(size(wTEMP, 1), (size(wTEMP, 1) - 1) / (2 * sigma)), 'k');
-                plot(i * scale + 0.5 * tukeywin(size(wTEMP, 1), 0.5), 'k');
+                % show gaussian window
+                plot(i * scale + 0.5 * tukey_window, 'g');
             end
         end
         title('initial templates');
@@ -329,19 +344,19 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
 
     % use k-means isolated spikes for correlation calculation and averaging to ignore outlier spikes
     if use_kmeans
-        % use gaussian windowing to focus on the central part of the waveforms for correlation calculation
-        % spikes_gauss_windowed = spikes .* gausswin(size(spikes, 1), (size(spikes, 1) - 1) / (2 * sigma));
-        spikes_gauss_windowed = spikes .* tukeywin(size(spikes, 1), 0.5);
+
         for i = 1:10
             % at each iteration, assign the waveform to its most correlated cluster
-            CC = wTEMP' * spikes_gauss_windowed;
+            CC = wTEMP' * (spikes .* tukey_window);
             [amax, imax] = max(CC, [], 1); % find the best cluster for each waveform
             for j = 1:nPCs % for each initial template cluster
                 wTEMP(:, j) = spikes(:, imax == j) * amax(imax == j)'; % weighted average to get new cluster means
                 % if a template had no matches and therefore has NaN's,
-                % use the mean of top 10th percentil in that k-means cluster instead
-                if sum(abs(wTEMP(:, j))) == 0 % make sure the template is not all zeros after the weighted average
-                    % if so, reinitalize it with the mean of closest 10% spikes of this k-means cluster
+                % use the mean of top 10th percentile in that k-means cluster instead
+                if sum(abs(wTEMP(:, j))) == 0
+                    % make sure the template is not all zeros after the weighted average, which
+                    % happens when there are no similar spikes in the k-means cluster
+                    % if so, reinitalize it with the mean of closest 1% spikes of this k-means cluster
                     [~, min_dist_idxs] = mink(Dist_from_K(:, j), ceil(sum(cluster_id == j) / 10));
                     spikes_to_use = dd(:, cluster_id == j & ismember(1:length(cluster_id), min_dist_idxs)');
                     wTEMP(:, j) = mean(spikes_to_use, 2);
@@ -361,14 +376,27 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         end
     end
 
+    % tukey it
+    wTEMP_tukeyed = wTEMP .* tukey_window;
     if ops.fig % PLOTTING
         figure(3); hold on;
         for i = 1:nPCs
             plot(wTEMP(:, i) + i * scale, 'LineWidth', 2, 'Color', cmap(i, :));
+            plot(wTEMP_tukeyed(:, i) + i * scale, 'r');
+            if i == nPCs
+                % show tukey
+                plot(i * scale + 0.5 * tukey_window, 'c');
+            end
         end
         % set aspect ratio to 3, 1
         title('prototype templates');
         pbaspect([1 2 1])
     end
-    % dbstop in extractTemplatesfromSnippets.m at 448
-    % disp('stop')
+    % wTEMP = wTEMP_tukeyed; % use the tukey windowed templates
+    % if k-means was used, use the k-means isolated spikes for the PCA space
+    if use_kmeans
+        % use windowing to focus on the central part of the waveforms for correlation calculation
+        spikes_windowed = spikes .* tukey_window;
+        [U, ~, ~] = svdecon(spikes_windowed);
+        wPCA = gpuArray(single(U(:, 1:nPCs))); % take as many as needed
+    end

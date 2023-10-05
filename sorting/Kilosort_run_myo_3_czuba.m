@@ -47,9 +47,9 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
     ops.nTEMP = ops.nPCs; % number of templates to use for spike detection
     ops.nEig = ops.nPCs; % rank of svd for templates, % keep same as nPCs to avoid error
     ops.NchanTOT = double(max(num_chans - length(brokenChan), ops.nEig));
-    ops.Th = [3 2]; % threshold crossings for pre-clustering (in PCA projection space)
+    ops.Th = [1 0.5]; % threshold crossings for pre-clustering (in PCA projection space)
     ops.spkTh = -1; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
-    ops.nfilt_factor = ops.nPCs; % max number of clusters per good channel in a batch (even temporary ones)
+    ops.nfilt_factor = 12; % max number of clusters per good channel in a batch (even temporary ones)
     ops.nblocks = 0;
     ops.nt0min = ceil(ops.nt0 / 2); % peak of template match will be this many points away from beginning
     ops.nskip = 1; % how many batches to skip for determining spike PCs
@@ -57,7 +57,7 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
     ops.lam = 10; % amplitude penalty (0 means not used, 10 is average, 50 is a lot)
     ops.CAR = 0; % whether to perform CAR
     ops.loc_range = [5 1]; % [timepoints channels], area to detect peaks; plus/minus for both time and channel. Doing abs() of data during peak isolation, so using 4 instead of default 5. Only 1 channel to avoid elimination of waves
-    ops.long_range = [ops.nt0min 1]; % [timepoints channels], range within to use only the largest peak
+    ops.long_range = [ops.nt0min-1 1]; % [timepoints channels], range within to use only the largest peak
     ops.fig = 1; % whether to plot figures
     ops.recordings = recordings;
     ops.momentum = [20 400];
@@ -91,10 +91,8 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
     end
 
     % create parallel pool for all downstream parallel processing
-    num_cpus = feature('numcores');
-    num_jobs = min(64, num_cpus); % limit to 64 jobs, to avoid memory issues
     if isempty(gcp('nocreate'))
-        poolobj = parpool(num_jobs); % create pool, one process per CPU core
+        poolobj = parpool(); % create pool, let matlab decide how many workers to use
     end
 
     rez = preprocessDataSub(ops);
@@ -164,5 +162,5 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
 
     delete(poolobj); % ensure pool is shutdown before quit (otherwise can throw error)
 
-    quit;
+    % quit;
 end
