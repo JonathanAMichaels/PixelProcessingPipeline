@@ -32,7 +32,12 @@ function rez1 = final_clustering(rez, tF, st3)
     Nfilt = size(rez.W, 2);
     dWU = gpuArray.zeros(ops.nt0, ops.Nchan, Nfilt, 'double');
     for j = 1:Nfilt
-        dWU(:, :, j) = rez.mu(j) * squeeze(rez.W(:, j, :)) * squeeze(rez.U(:, j, :))';
+        try
+            dWU(:, :, j) = rez.mu(j) * squeeze(rez.W(:, j, :)) * squeeze(rez.U(:, j, :))';
+        catch
+            % try again, sometimes fails due to GPU issues
+            dWU(:, :, j) = rez.mu(j) * squeeze(rez.W(:, j, :)) * squeeze(rez.U(:, j, :))';
+        end
     end
 
     ops = rez.ops;

@@ -69,7 +69,7 @@ S = zeros(size(data, 2), 3);
 bipolarThresh = 90;
 unipolarThresh = 120;
 lowThresh = 0.1;
-bipolar = length(chanList) == 16;
+% bipolar = length(chanList) == 16;
 % when q is 1, we will compute count the number of spikes in the channel and compare to a threshold
 % when q is 2, we will compute the std of the low freq noise in the channel
 % when q is 3, we will compute the SNR of the channel
@@ -92,8 +92,14 @@ for q = 1:4
     data_norm = zeros(length(tRange), size(data, 2), 'single');
     data_filt = zeros(length(tRange), size(data, 2), 'single');
     for i = 1:size(data, 2)
-        % standardize this data channel before filtering
-        data_norm(:, i) = single(data(tRange, i)) ./ std(single(data(tRange, i)));
+        % standardize this data channel before filtering, but make sure not to divide by zero
+        chan_std = std(single(data(tRange, i)));
+        if chan_std == 0
+            data_norm(:, i) = single(data(tRange, i));
+        else
+            data_norm(:, i) = single(data(tRange, i)) ./ chan_std;
+        end
+        % data_norm(:, i) = single(data(tRange, i)) ./ std(single(data(tRange, i)));
         % filter this data channel
         data_filt(:, i) = single(filtfilt(b, a, double(data_norm(:, i))));
     end
@@ -115,6 +121,8 @@ for q = 1:4
         % data_filt_norm = data_filt ./ repmat(std(data_filt, [], 1), [size(data_filt, 1) 1]); % standardize
         spike_band_power = rms(data_filt, 1) .^ 2;
         SNR = spike_band_power ./ (low_band_power + high_band_power);
+        % replace any NaNs with 0
+        SNR(isnan(SNR)) = 0;
         [~, idx] = sort(SNR, 'ascend');
         mean_SNR = mean(SNR);
         std_SNR = std(SNR);
@@ -126,7 +134,7 @@ for q = 1:4
             rejection_criteria = 'median';
         end
         disp("Using " + rejection_criteria + " threshold for SNR rejection criteria")
-        
+
         % check by what criteria we should reject channels
         if strcmp(rejection_criteria, 'median')
             % reject channels with SNR < median
@@ -193,7 +201,7 @@ end
 print([myo_sorted_dir '/brokenChan.png'], '-dpng')
 
 if length(chanList) == 16
-    % check for broken channels if meeting various criteria, including: high std, low spike rate, low SNR
+    % check for broken channels if meeting various criteria, including: high std, low spike rate, low SNR. Eliminate if any true
     brokenChan = int64(union(find(S(:, 2) > bipolarThresh | S(:, 1) < lowThresh), SNR_reject_chans)); %S(:, 3) > bipolarThresh
 else
     brokenChan = int64(union(find(S(:, 2) > unipolarThresh | S(:, 1) < lowThresh), SNR_reject_chans)); %S(:, 3) > unipolarThresh
