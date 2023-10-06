@@ -1,7 +1,7 @@
 ---
 # Configuration file
 # Auto-generated parameters
-# GPU to use for kilosort, (can be [all] or a list of integers, e.g., [1,2,5,6])
+# GPU to use for kilosort, (a list of integers, e.g., [1,2,5,6])
 GPU_to_use: [0]
 # path of working directory (must be provided in command line)
 folder:
