@@ -44,23 +44,35 @@ else
         ops.trange = trange * myo_data_sampling_rate + 1;
     end
     data = tempdata.Data.Data(1).mapped(dataChan, ops.trange(1):ops.trange(2))';
-    analogData = tempdata.Data.Data(1).mapped(sync_chan, ops.trange(1):ops.trange(2))';
-    analogData(analogData < 10000) = 0;
-    analogData(analogData >= 10000) = 1;
+    try
+        analogData = tempdata.Data.Data(1).mapped(sync_chan, ops.trange(1):ops.trange(2))';
+    catch ME % to avoid "Index in position 1 exceeds array bounds (must not exceed XX)."
+        if strcmp(ME.identifier, 'MATLAB:badsubscript')
+            disp("No sync channel found, cannot save sync data")
+            analogData = [];
+        else
+            rethrow(ME)
+        end
+    end
+    if ~isempty(analogData)
+        analogData(analogData < 10000) = 0;
+        analogData(analogData >= 10000) = 1;
+    end
     clear tempdata
 end
 
 if length(dataChan) == 32
     data = data(:, channelRemap);
 end
+if ~isempty(analogData)    
+    analogData(analogData > 5) = 5;
+    sync = logical(round(analogData / max(analogData)));
+    clear analogData
 
-analogData(analogData > 5) = 5;
-sync = logical(round(analogData / max(analogData)));
-clear analogData
-
-save([myomatrix '/sync'], 'sync')
-clear sync
-disp('Saved sync data')
+    save([myomatrix '/sync'], 'sync')
+    clear sync
+    disp('Saved sync data')
+end
 
 disp(['Total recording time: ' num2str(size(data, 1) / myo_data_sampling_rate / 60) ' minutes'])
 
@@ -127,7 +139,10 @@ for q = 1:4
         mean_SNR = mean(SNR);
         std_SNR = std(SNR);
         median_SNR = median(SNR);
-
+        % get a MAD value for each channel
+        MAD = median(abs(data_filt-mean(data_filt, 1)), 1);
+        Gaussian_STDs = MAD / 0.6745;
+        disp("Gaussian STDs: " + num2str(Gaussian_STDs))
         if isa(remove_bad_myo_chans, "char")
             rejection_criteria = remove_bad_myo_chans;
         else
@@ -258,8 +273,14 @@ if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
     % end
     disp('Broken channels were just removed from that channel map')
     save(fullfile(myo_sorted_dir, 'chanMapAdjusted.mat'), 'chanMap', 'connected', 'xcoords', ...
-        'ycoords', 'kcoords', 'chanMap0ind', 'fs', 'name', 'numDummy')
-    % else
+        'ycoords', 'kcoords', 'chanMap0ind', 'fs', 'name', 'numDummy', 'Gaussian_STDs')
+else
+    copyfile(myo_chan_map_file, fullfile(myo_sorted_dir, 'chanMapAdjusted.mat'))
+    % add numDummy to chanMapAdjusted.mat
+    load(fullfile(myo_sorted_dir, 'chanMapAdjusted.mat'))
+    numDummy = 0;
+    save(fullfile(myo_sorted_dir, 'chanMapAdjusted.mat'), 'chanMap', 'connected', 'xcoords', ...
+        'ycoords', 'kcoords', 'chanMap0ind', 'fs', 'name', 'numDummy', 'Gaussian_STDs')
 end
 
 clear data_filt data_norm

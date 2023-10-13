@@ -1,12 +1,12 @@
-function rez = Kilosort_run_myo_3_czuba(ops_input_params)
+function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
     dbstop if error
     script_dir = pwd; % get directory where repo exists
     load(fullfile(script_dir, '/tmp/config.mat'))
     load(fullfile(myo_sorted_dir, 'brokenChan.mat'))
 
-    % set GPU to use <--- this is now set in the python pipeline.py script
-    % disp(strcat("Setting GPU device to use: ", num2str(GPU_to_use)))
-    % gpuDevice(GPU_to_use);
+    if num_KS_jobs > 1
+        myo_sorted_dir = [myo_sorted_dir num2str(worker_id)];
+    end
 
     % get and set channel map
     if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
@@ -39,7 +39,7 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
     ops.fproc = fullfile(ops.saveDir, 'proc.dat');
     ops.brokenChan = fullfile(ops.saveDir, 'brokenChan.mat');
     ops.chanMap = fullfile(chanMapFile);
-    ops.nt0 = 61;
+    ops.nt0 = 201;
     ops.ntbuff = 1024; %ceil(bufferSec * ops.fs / 64) * 64; %  ceil(batchSec/4*ops.fs/64)*64; % (def=64)
     ops.NT = 2048 * 32 + ops.ntbuff; %ceil(batchSec * ops.fs / 32) * 32; % convert to 32 count increments of samples
     ops.sigmaMask = Inf; % we don't want a distance-dependant decay
@@ -47,8 +47,8 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params)
     ops.nTEMP = ops.nPCs; % number of templates to use for spike detection
     ops.nEig = ops.nPCs; % rank of svd for templates, % keep same as nPCs to avoid error
     ops.NchanTOT = double(max(num_chans - length(brokenChan), ops.nEig));
-    ops.Th = [1 0.5]; % threshold crossings for pre-clustering (in PCA projection space)
-    ops.spkTh = -1; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
+    ops.Th = [5 2]; % threshold crossings for pre-clustering (in PCA projection space)
+    ops.spkTh = -2; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
     ops.nfilt_factor = 12; % max number of clusters per good channel in a batch (even temporary ones)
     ops.nblocks = 0;
     ops.nt0min = ceil(ops.nt0 / 2); % peak of template match will be this many points away from beginning
