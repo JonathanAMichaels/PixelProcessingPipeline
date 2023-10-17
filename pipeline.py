@@ -336,11 +336,11 @@ if config["concatenate_myo_data"]:
         subprocess.run(
             [
                 "matlab",
+                "-nodesktop",
                 "-nodisplay",
                 "-nosplash",
-                "-nodesktop",
                 "-r",
-                "rehash toolboxcache; restoredefaultpath;",
+                "rehash toolboxcache; restoredefaultpath;"
                 f"addpath(genpath('{path_to_add}')); concatenate_myo_data('{config['myomatrix']}', {{{config['recordings']}}})",
             ],
             check=True,
