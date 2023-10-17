@@ -2,7 +2,7 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
     script_dir = pwd; % get directory where repo exists
     load(fullfile(script_dir, '/tmp/config.mat'))
     load(fullfile(myo_sorted_dir, 'brokenChan.mat'))
-    
+
     if num_KS_jobs > 1
         myo_sorted_dir = [myo_sorted_dir num2str(worker_id)];
     else
@@ -49,7 +49,7 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
     ops.nEig = ops.nPCs; % rank of svd for templates, % keep same as nPCs to avoid error
     ops.NchanTOT = double(max(num_chans - length(brokenChan), ops.nEig));
     ops.Th = [5 2]; % threshold crossings for pre-clustering (in PCA projection space)
-    ops.spkTh = [-4,-6,-8]; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
+    ops.spkTh = [-2, -4, -6, -8]; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
     ops.nfilt_factor = 12; % max number of clusters per good channel in a batch (even temporary ones)
     ops.nblocks = 0;
     ops.nt0min = ceil(ops.nt0 / 2); % peak of template match will be this many points away from beginning
@@ -58,7 +58,7 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
     ops.lam = 10; % amplitude penalty (0 means not used, 10 is average, 50 is a lot)
     ops.CAR = 0; % whether to perform CAR
     ops.loc_range = [5 1]; % [timepoints channels], area to detect peaks; plus/minus for both time and channel. Doing abs() of data during peak isolation, so using 4 instead of default 5. Only 1 channel to avoid elimination of waves
-    ops.long_range = [ops.nt0min-1 1]; % [timepoints channels], range within to use only the largest peak
+    ops.long_range = [ops.nt0min - 1 1]; % [timepoints channels], range within to use only the largest peak
     ops.fig = 1; % whether to plot figures
     ops.recordings = recordings;
     ops.momentum = [20 400];
@@ -95,6 +95,9 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
     if isempty(gcp('nocreate'))
         poolobj = parpool(); % create pool, let matlab decide how many workers to use
     end
+
+    % ensure all parallel workers queues are cleared in the event of an error
+    cleanup_worker_obj = onCleanup(@() cleanup_worker(poolobj));
 
     rez = preprocessDataSub(ops);
     ops.channelDelays = rez.ops.channelDelays;
@@ -151,7 +154,7 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
     disp(['Saving rez and ops structs to', ops.saveDir])
     ops % show final ops struct in command window
     rez % show final rez struct in command window
-    
+
     % save variables as full struct, for MATLAB
     save(fullfile(ops.saveDir, '/ops_struct.mat'), 'ops');
     save(fullfile(ops.saveDir, '/rez_struct.mat'), 'rez');
@@ -161,7 +164,17 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
     rez.ops = []; rez.temp = []; % remove substructs from rez struct before saving
     save(fullfile(ops.saveDir, '/rez.mat'), '-struct', 'rez');
 
-    delete(poolobj); % ensure pool is shutdown before quit (otherwise can throw error)
+    % clear parallel pool for this worker
+    delete(poolobj)
 
+    % exit matlab to return to python
     quit;
+end
+
+% cleanup function to ensure all parallel workers queues are cleared
+function cleanup_worker(poolobj)
+    % check if parallel pool processes exist
+    if ~isempty(poolobj)
+        delete(poolobj)
+    end
 end
