@@ -31,7 +31,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         dataRAW = dataRAW / ops.scaleproc;
 
         % find isolated spikes from each batch
-        [row, col] = isolated_peaks_buffered_czuba(-abs(dataRAW), ops);
+        [row, col] = isolated_peaks_buffered_czuba(-abs(dataRAW), ops, ibatch);
 
         % for each peak, get the voltage snippet from that channel
         clips = get_SpikeSample(dataRAW, row, col, ops, 0);
@@ -64,7 +64,8 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
     percent_tukey_coverage = 80;
     partial_tukey_window = tukeywin(ceil(size(dd, 1) * percent_tukey_coverage / 100), 0.5);
     % put middle of partial tukey at the center of zeros_for_tukey
-    zeros_for_tukey(ceil(size(dd, 1) / 2) - ceil(size(partial_tukey_window, 1) / 2) + 1:ceil(size(dd, 1) / 2) + floor(size(partial_tukey_window, 1) / 2)) = partial_tukey_window;
+    zeros_for_tukey(ceil(size(dd, 1) / 2) - ceil(size(partial_tukey_window, 1) / 2) + ...
+        1:ceil(size(dd, 1) / 2) + floor(size(partial_tukey_window, 1) / 2)) = partial_tukey_window;
     tukey_window = zeros_for_tukey;
 
     dd_windowed = dd .* tukey_window;
@@ -101,10 +102,12 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         % if it still fails, halve it again, until it doesn't fail
         % if all else fails, just run it sequentially
         try
-            [cluster_id, ~, ~, Dist_from_K] = kmeans(dd_pca', nPCs, 'Distance', 'sqeuclidean', 'MaxIter', 10000, 'Replicates', num_jobs, 'Display', 'final', 'Options', options);
+            [cluster_id, ~, ~, Dist_from_K] = kmeans(dd_pca', nPCs, 'Distance', 'sqeuclidean', ...
+                'MaxIter', 10000, 'Replicates', num_jobs, 'Display', 'final', 'Options', options);
         catch
             disp('k-means failed in parallel, running sequentially instead')
-            [cluster_id, ~, ~, Dist_from_K] = kmeans(dd_pca', nPCs, 'Distance', 'sqeuclidean', 'MaxIter', 10000, 'Replicates', num_jobs, 'Display', 'final');
+            [cluster_id, ~, ~, Dist_from_K] = kmeans(dd_pca', nPCs, 'Distance', 'sqeuclidean', ...
+                'MaxIter', 10000, 'Replicates', num_jobs, 'Display', 'final');
         end
         spikes = gpuArray(nan(size(dd)));
         number_of_spikes_to_use = nan(nPCs, 1);
@@ -115,7 +118,8 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
             spikes_to_use = dd(:, cluster_id == K & ismember(1:length(cluster_id), min_dist_idxs)');
             number_of_spikes_to_use(K) = size(spikes_to_use, 2);
             % choose closest spikes to the cluster center
-            spikes(:, sum(number_of_spikes_to_use(1:K - 1)) + 1:sum(number_of_spikes_to_use, 'omitnan')) = spikes_to_use;
+            spikes(:, sum(number_of_spikes_to_use(1:K - 1)) + ...
+                1:sum(number_of_spikes_to_use, 'omitnan')) = spikes_to_use;
         end
         % drop nan values
         spikes = spikes(:, ~isnan(spikes(1, :)));
@@ -164,15 +168,20 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         num_max_peak_boundaries = ceil(length(max_peaks) / length(peak_amplitudes) * nPCs);
         num_min_peak_boundaries = nPCs - num_max_peak_boundaries;
         if ~isempty(max_peaks) && ~isempty(min_peaks) % if there are both positive and negative peaks
-            max_peak_boundaries = linspace(max_peaks(min(fraction_of_N_peaks, length(max_peaks))), max_peaks(end), num_max_peak_boundaries);
-            min_peak_boundaries = linspace(min_peaks(1), min_peaks(end - min(fraction_of_N_peaks, length(min_peaks))), num_min_peak_boundaries);
+            max_peak_boundaries = linspace(max_peaks(min(fraction_of_N_peaks, length(max_peaks))), ...
+                max_peaks(end), num_max_peak_boundaries);
+            min_peak_boundaries = linspace(min_peaks(1), min_peaks(end - min(fraction_of_N_peaks, ...
+                length(min_peaks))), num_min_peak_boundaries);
             % combine the boundaries
-            peak_boundaries = [max_peaks(1), max_peak_boundaries, min_peak_boundaries(2:end), min_peaks(end)];
+            peak_boundaries = [max_peaks(1), max_peak_boundaries, min_peak_boundaries(2:end), ...
+                                   min_peaks(end)];
         elseif ~isempty(max_peaks) % if there are only positive peaks
-            max_peak_boundaries = linspace(max_peaks(min(fraction_of_N_peaks, length(max_peaks))), max_peaks(end), nPCs);
+            max_peak_boundaries = linspace(max_peaks(min(fraction_of_N_peaks, length(max_peaks))), ...
+                max_peaks(end), nPCs);
             peak_boundaries = [max_peaks(1), max_peak_boundaries, max_peaks(end)];
         elseif ~isempty(min_peaks) % if there are only negative peaks
-            min_peak_boundaries = linspace(min_peaks(1), min_peaks(end - min(fraction_of_N_peaks, length(min_peaks))), nPCs);
+            min_peak_boundaries = linspace(min_peaks(1), min_peaks(end - min(fraction_of_N_peaks, ...
+                length(min_peaks))), nPCs);
             peak_boundaries = [min_peaks(1), min_peak_boundaries, min_peaks(end)];
         else
             error('No spikes found in the data!')
@@ -190,10 +199,12 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         % define the boundaries, preventing negative values
         wave_choice_left_expand = max(wave_choice_boundaries - group_size_expansion, 1);
         wave_choice_left_bounds = wave_choice_left_expand(1:end - 1);
-        wave_choice_right_expand = min(wave_choice_boundaries + group_size_expansion, length(peak_amplitudes));
+        wave_choice_right_expand = min(wave_choice_boundaries + group_size_expansion, ...
+            length(peak_amplitudes));
         wave_choice_right_bounds = wave_choice_right_expand(2:end);
         N_waves_between_choices = wave_choice_right_bounds - wave_choice_left_bounds;
-        disp(['Chunks overlap by ', num2str(group_percent_expansion), '%, which is ', num2str(group_size_expansion), ' spikes'])
+        disp(['Chunks overlap by ', num2str(group_percent_expansion), '%, which is ', ...
+                  num2str(group_size_expansion), ' spikes'])
         disp('Number of spikes in each chunk: ')
         disp(N_waves_between_choices')
     end
@@ -204,9 +215,11 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
             if mod(iPeak, 2) == 0
                 color = 'k';
                 if use_kmeans
-                    plot((-ops.nt0min + 1:ops.nt0min - 1) + iPeak * ops.nt0, spikes(:, iPeak)', 'DisplayName', num2str(iPeak), 'Color', color)
+                    plot((-ops.nt0min + 1:ops.nt0min - 1) + iPeak * ops.nt0, spikes(:, iPeak)', ...
+                        'DisplayName', num2str(iPeak), 'Color', color)
                 else
-                    plot((-ops.nt0min + 1:ops.nt0min - 1) + iPeak * ops.nt0, dd(:, idx(iPeak))', 'DisplayName', num2str(iPeak), 'Color', color)
+                    plot((-ops.nt0min + 1:ops.nt0min - 1) + iPeak * ops.nt0, dd(:, idx(iPeak))', ...
+                        'DisplayName', num2str(iPeak), 'Color', color)
                 end
             end
         end
@@ -214,9 +227,12 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         % plot vertical lines at the boundaries
         for iBoundary = 1:length(wave_choice_left_bounds)
             % different color for each chunk, from magenta to cyan
-            color = [1 - iBoundary / length(wave_choice_left_bounds), iBoundary / length(wave_choice_left_bounds), 1];
-            plot([1, 1] * wave_choice_left_bounds(iBoundary) * ops.nt0, ylim, 'Color', color, 'LineWidth', 2)
-            plot([1, 1] * wave_choice_right_bounds(iBoundary) * ops.nt0, ylim, 'Color', color, 'LineWidth', 2)
+            color = [1 - iBoundary / length(wave_choice_left_bounds), iBoundary / ...
+                         length(wave_choice_left_bounds), 1];
+            plot([1, 1] * wave_choice_left_bounds(iBoundary) * ops.nt0, ylim, ...
+                'Color', color, 'LineWidth', 2)
+            plot([1, 1] * wave_choice_right_bounds(iBoundary) * ops.nt0, ylim, ...
+                'Color', color, 'LineWidth', 2)
         end
     end
     if use_kmeans
@@ -236,10 +252,12 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         % each wave index withing the chunk starting at the wave_choice_left_bounds
         if use_kmeans
             descriptor = 'k-means cluster';
-            wTEMP(:, largest_CC_idx) = spikes(:, wave_choice_left_bounds(largest_CC_idx) + N_tries_for_largest_CC_idx_so_far);
+            wTEMP(:, largest_CC_idx) = spikes(:, wave_choice_left_bounds(largest_CC_idx) + ...
+                N_tries_for_largest_CC_idx_so_far);
         else
             descriptor = 'chunk';
-            wTEMP(:, largest_CC_idx) = dd(:, idx(wave_choice_left_bounds(largest_CC_idx) + N_tries_for_largest_CC_idx_so_far));
+            wTEMP(:, largest_CC_idx) = dd(:, idx(wave_choice_left_bounds(largest_CC_idx) + ...
+                N_tries_for_largest_CC_idx_so_far));
         end
         % multiply waveforms by a Gaussian with the sigma value
         % this is to make the correlation more sensitive to the central shape of the waveform
@@ -251,7 +269,8 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         % get residual of the waveform for this row of the CC matrix
         % sum the absolute value of the residual, scale by the absolute value of wTEMP_for_corr
         % this is to avoid using the waves with non-central shapes, by using it as a cost function
-        wTEMP_gaussian_residual = sum(abs(wTEMP(:, largest_CC_idx) - wTEMP_for_corr(:, largest_CC_idx))) / sum(abs(wTEMP_for_corr(:, largest_CC_idx)));
+        wTEMP_gaussian_residual = sum(abs(wTEMP(:, largest_CC_idx) - ...
+            wTEMP_for_corr(:, largest_CC_idx))) / sum(abs(wTEMP_for_corr(:, largest_CC_idx)));
 
         % compute the penalty for the highest single correlation in the CC matrix for this template choice
         if largest_CC_idx == 1
@@ -276,27 +295,34 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         corr_sum_with_other_template_choices_term = corr_sum_with_other_template_choices;
         wTEMP_gaussian_residual_term = 24 * nPCs * wTEMP_gaussian_residual;
         highest_template_similarity_penalty_term = 12 * nPCs * highest_template_similarity_penalty;
-        total_cost_for_wave = corr_sum_with_other_template_choices_term + wTEMP_gaussian_residual_term + highest_template_similarity_penalty_term;
+        total_cost_for_wave = corr_sum_with_other_template_choices_term + ...
+            wTEMP_gaussian_residual_term + highest_template_similarity_penalty_term;
 
         % choose the best wave for this chunk/cluster
         % check the cost, and ensure that the wave has not already been chosen before in a previous chunk
-        if (total_cost_for_wave < lowest_total_cost_for_each_chunk(largest_CC_idx)) && ~ismember(wave_choice_left_bounds(largest_CC_idx) + N_tries_for_largest_CC_idx_so_far, best_CC_idxs)
+        if (total_cost_for_wave < lowest_total_cost_for_each_chunk(largest_CC_idx)) && ...
+                ~ismember(wave_choice_left_bounds(largest_CC_idx) + N_tries_for_largest_CC_idx_so_far, best_CC_idxs)
             lowest_total_cost_for_each_chunk(largest_CC_idx) = total_cost_for_wave;
             best_CC_idxs(largest_CC_idx) = wave_choice_left_bounds(largest_CC_idx) + N_tries_for_largest_CC_idx_so_far;
         end
         N_tries_for_largest_CC_idx_so_far = N_tries_for_largest_CC_idx_so_far + 1;
         % terminate if we have tried all waves in the amplitude-sorted chunk
-        if N_tries_for_largest_CC_idx_so_far >= N_waves_between_choices(largest_CC_idx) || N_tries_for_largest_CC_idx_so_far >= total_num_spikes_used
-            disp(strcat("Tried all waves in "+descriptor + " ", num2str(largest_CC_idx), ", using wave idx with best CC: ", num2str(best_CC_idxs(largest_CC_idx))))
+        if N_tries_for_largest_CC_idx_so_far >= N_waves_between_choices(largest_CC_idx) || ...
+                N_tries_for_largest_CC_idx_so_far >= total_num_spikes_used
+            disp(strcat("Tried all waves in "+descriptor + " ", num2str(largest_CC_idx), ...
+                ", using wave idx with best CC: ", num2str(best_CC_idxs(largest_CC_idx))))
             % sorted_CC = sort(CC(largest_CC_idx,:), 'descend');
             disp(strcat("Total cross-channel correlation for this cluster ", num2str(sum(abs(CC(largest_CC_idx, :))))))
             disp("Residual cost for this "+descriptor + " was " + num2str(wTEMP_gaussian_residual))
             disp("Highest template similarity penalty for this "+descriptor + " was " + num2str(highest_template_similarity_penalty))
             disp("Percent of influence for each term: ")
-            corr_sum_with_other_template_choices_percent = corr_sum_with_other_template_choices_term / total_cost_for_wave * 100;
+            corr_sum_with_other_template_choices_percent = ...
+                corr_sum_with_other_template_choices_term / total_cost_for_wave * 100;
             wTEMP_gaussian_residual_percent = wTEMP_gaussian_residual_term / total_cost_for_wave * 100;
-            highest_template_similarity_penalty_percent = highest_template_similarity_penalty_term / total_cost_for_wave * 100;
-            disp([corr_sum_with_other_template_choices_percent, wTEMP_gaussian_residual_percent, highest_template_similarity_penalty_percent])
+            highest_template_similarity_penalty_percent = ...
+                highest_template_similarity_penalty_term / total_cost_for_wave * 100;
+            disp([corr_sum_with_other_template_choices_percent, wTEMP_gaussian_residual_percent, ...
+                      highest_template_similarity_penalty_percent])
             disp("Final cost for this "+descriptor + " was: " + num2str(lowest_total_cost_for_each_chunk(largest_CC_idx)))
             % disp(sorted_CC)
             disp(CC)
@@ -315,7 +341,8 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
     end
 
     if use_kmeans
-        wTEMP = dd(:, randperm(size(dd, 2), nPCs)); % removing this line will cause KS to not find spikes sometimes... ???
+        wTEMP = dd(:, randperm(size(dd, 2), nPCs)); % removing this line will cause KS to not ...
+                                                    % find spikes sometimes... ???
         wTEMP(:, 1:nPCs) = spikes(:, best_CC_idxs(1:nPCs));
     else
         wTEMP(:, 1:nPCs) = dd(:, idx(best_CC_idxs(1:nPCs)));

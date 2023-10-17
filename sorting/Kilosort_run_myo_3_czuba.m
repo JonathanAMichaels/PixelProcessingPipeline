@@ -1,11 +1,12 @@
 function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
-    dbstop if error
     script_dir = pwd; % get directory where repo exists
     load(fullfile(script_dir, '/tmp/config.mat'))
     load(fullfile(myo_sorted_dir, 'brokenChan.mat'))
-
+    
     if num_KS_jobs > 1
         myo_sorted_dir = [myo_sorted_dir num2str(worker_id)];
+    else
+        dbstop if error % stop if error, if only one job
     end
 
     % get and set channel map
@@ -39,7 +40,7 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
     ops.fproc = fullfile(ops.saveDir, 'proc.dat');
     ops.brokenChan = fullfile(ops.saveDir, 'brokenChan.mat');
     ops.chanMap = fullfile(chanMapFile);
-    ops.nt0 = 201;
+    ops.nt0 = 61;
     ops.ntbuff = 1024; %ceil(bufferSec * ops.fs / 64) * 64; %  ceil(batchSec/4*ops.fs/64)*64; % (def=64)
     ops.NT = 2048 * 32 + ops.ntbuff; %ceil(batchSec * ops.fs / 32) * 32; % convert to 32 count increments of samples
     ops.sigmaMask = Inf; % we don't want a distance-dependant decay
@@ -48,7 +49,7 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
     ops.nEig = ops.nPCs; % rank of svd for templates, % keep same as nPCs to avoid error
     ops.NchanTOT = double(max(num_chans - length(brokenChan), ops.nEig));
     ops.Th = [5 2]; % threshold crossings for pre-clustering (in PCA projection space)
-    ops.spkTh = -2; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
+    ops.spkTh = [-4,-6,-8]; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
     ops.nfilt_factor = 12; % max number of clusters per good channel in a batch (even temporary ones)
     ops.nblocks = 0;
     ops.nt0min = ceil(ops.nt0 / 2); % peak of template match will be this many points away from beginning
@@ -162,5 +163,5 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
 
     delete(poolobj); % ensure pool is shutdown before quit (otherwise can throw error)
 
-    % quit;
+    quit;
 end
