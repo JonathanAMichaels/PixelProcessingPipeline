@@ -40,8 +40,8 @@ Session:
         - 0
         - 0
     myo_chan_map_file:
-        - bipolar_test_kilosortChanMap.mat
-        - bipolar_test_kilosortChanMap.mat
+        - linear_16ch_RF400_kilosortChanMap_unitSpacing.mat
+        - linear_16ch_RF400_kilosortChanMap_unitSpacing.mat
     myo_chan_list:
         - [1, 16]
         - [17, 32]

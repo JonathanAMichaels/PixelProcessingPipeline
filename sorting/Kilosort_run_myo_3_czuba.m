@@ -114,10 +114,10 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
         figure(8); hold on;
         plot(st3(:, 4), 'g.')
         for kSpatialDecay = 1:6
-            less_than_idx = find(st3(:, 4) < 6 * kSpatialDecay);
-            more_than_idx = find(st3(:, 4) >= 6 * (kSpatialDecay - 1));
+            less_than_idx = find(st3(:, 4) < ops.nPCs * kSpatialDecay);
+            more_than_idx = find(st3(:, 4) >= ops.nPCs * (kSpatialDecay - 1));
             idx = intersect(less_than_idx, more_than_idx);
-            bit_idx = bitand(st3(:, 4) < 6 * kSpatialDecay, st3(:, 4) >= 6 * (kSpatialDecay - 1));
+            bit_idx = bitand(st3(:, 4) < ops.nPCs * kSpatialDecay, st3(:, 4) >= ops.nPCs * (kSpatialDecay - 1));
             plot(idx, st3(bit_idx, 4), '.')
         end
         title('Prototype templates for each spatial decay value (1:6:30) resulting in each best match spike ID')

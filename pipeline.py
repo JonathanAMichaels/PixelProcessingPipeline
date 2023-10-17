@@ -657,7 +657,7 @@ if myo_sort:
                     rez = scipy.io.loadmat(f"{save_path}/rez.mat")
                     num_KS_clusters = str(len(rez["good"]))
                     # sum the 1's in the good field of ops.mat to get number of good units
-                    num_good_units = str(sum(rez["good"]))
+                    num_good_units = str(sum(rez["good"])[0])
 
                     # remove spaces and single quoutes from passable_params string
                     filename_friendly_params = passable_params.replace("'", "").replace(" ", "")
@@ -686,7 +686,7 @@ if myo_sort:
 
                 except StopIteration:
                     if config["Sorting"]["do_KS_param_gridsearch"] == 1:
-                        print("Grid search complete.")
+                        print(f"Grid search complete for worker {worker_id}")
                     break
                 except:
                     if config["Sorting"]["do_KS_param_gridsearch"] == 1:
