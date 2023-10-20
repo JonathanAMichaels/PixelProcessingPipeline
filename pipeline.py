@@ -6,6 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -573,6 +574,7 @@ if myo_sort:
             # just pass an empty string to run once with chosen params
             iParams = [""]
 
+        worker_ids = np.arange(config["num_KS_jobs"])
         # create new folders if running in parallel
         if config["num_KS_jobs"] > 1:
             # ensure proper configuration for parallel jobs
@@ -583,7 +585,6 @@ if myo_sort:
                 config["Sorting"]["do_KS_param_gridsearch"] == 1
             ), "Parallel jobs can only be used when do_KS_param_gridsearch is set to True"
             # create new folder for each parallel job to store results temporarily
-            worker_ids = np.arange(config["num_KS_jobs"])
             for i in worker_ids:
                 # create new folder for each parallel job
                 new_sorted_dir = config_kilosort["myo_sorted_dir"] + str(i)
@@ -592,8 +593,6 @@ if myo_sort:
                 shutil.copytree(config_kilosort["myo_sorted_dir"], new_sorted_dir)
             # split iParams according to number of parallel jobs
             iParams_split = np.array_split(iParams, config["num_KS_jobs"])
-        else:
-            worker_ids = np.array([0])
 
         def run_KS_sorting(iParams, worker_id):
             iParams = iter(iParams)
@@ -605,95 +604,100 @@ if myo_sort:
             )
             print(f"Starting spike sorting of {save_path} on GPU {config['GPU_to_use'][worker_id]}")
             worker_id = str(worker_id)
-            while True:
-                # while no exhaustion of iterator
-                try:
-                    these_params = next(iParams)
-                    if type(these_params) == dict:
-                        print(f"Using these KS params from Kilosort_gridsearch_config.py")
-                        print(these_params)
-                        param_keys = list(these_params.keys())
-                        param_keys_str = [f"'{k}'" for k in param_keys]
-                        param_vals = list(these_params.values())
-                        zipped_params = zip(param_keys_str, param_vals)
-                        flattened_params = itertools.chain.from_iterable(zipped_params)
-                        # this is a comma-separated string of key-value pairs
-                        passable_params = ",".join(str(p) for p in flattened_params)
-                    elif type(these_params) == str:
-                        print(f"Using KS params from Kilosort_run_myo_3.m")
-                        passable_params = these_params  # this is a string: 'default'
-                    else:
-                        print("ERROR: KS params must be a dictionary or a string.")
-                        raise TypeError
+            with tempfile.TemporaryDirectory(suffix=f"_worker{worker_id}") as worker_dir:
+                while True:
+                    # while no exhaustion of iterator
+                    try:
+                        these_params = next(iParams)
+                        if type(these_params) == dict:
+                            print(f"Using these KS params from Kilosort_gridsearch_config.py")
+                            print(these_params)
+                            param_keys = list(these_params.keys())
+                            param_keys_str = [f"'{k}'" for k in param_keys]
+                            param_vals = list(these_params.values())
+                            zipped_params = zip(param_keys_str, param_vals)
+                            flattened_params = itertools.chain.from_iterable(zipped_params)
+                            # this is a comma-separated string of key-value pairs
+                            passable_params = ",".join(str(p) for p in flattened_params)
+                        elif type(these_params) == str:
+                            print(f"Using KS params from Kilosort_run_myo_3.m")
+                            passable_params = these_params  # this is a string: 'default'
+                        else:
+                            print("ERROR: KS params must be a dictionary or a string.")
+                            raise TypeError
 
-                    subprocess.run(
-                        [
-                            "matlab",
-                            # "-nodisplay",
-                            "-nosplash",
-                            "-nodesktop",
-                            "-r",
-                            (
-                                "rehash toolboxcache; restoredefaultpath;"
-                                f"addpath(genpath('{path_to_add}'));"
-                                f"Kilosort_run_myo_3_czuba(struct({passable_params}),{worker_id});"
-                            )
-                            if config["Sorting"]["do_KS_param_gridsearch"] == 1
-                            else (
-                                "rehash toolboxcache; restoredefaultpath;"
-                                f"addpath(genpath('{path_to_add}'));"
-                                f"Kilosort_run_myo_3_czuba('{passable_params}');"
-                            ),
-                        ],
-                        check=True,
-                    )
-                    # extract waveforms for Phy FeatureView
-                    subprocess.run(
-                        ["phy", "extract-waveforms", "params.py"],
-                        cwd=save_path,
-                        check=True,
-                    )
-                    # get number of good units and total number of clusters from rez.mat
-                    rez = scipy.io.loadmat(f"{save_path}/rez.mat")
-                    num_KS_clusters = str(len(rez["good"]))
-                    # sum the 1's in the good field of ops.mat to get number of good units
-                    num_good_units = str(sum(rez["good"])[0])
+                        subprocess.run(
+                            [
+                                "matlab",
+                                # "-nodisplay",
+                                "-nosplash",
+                                "-nodesktop",
+                                "-r",
+                                (
+                                    "rehash toolboxcache; restoredefaultpath;"
+                                    f"addpath(genpath('{path_to_add}'));"
+                                    f"Kilosort_run_myo_3_czuba(struct({passable_params}),{worker_id},'{str(worker_dir)}');"
+                                )
+                                if config["Sorting"]["do_KS_param_gridsearch"] == 1
+                                else (
+                                    "rehash toolboxcache; restoredefaultpath;"
+                                    f"addpath(genpath('{path_to_add}'));"
+                                    f"Kilosort_run_myo_3_czuba('{passable_params}',{worker_id},'{str(worker_dir)}');"
+                                ),
+                            ],
+                            check=True,
+                        )
+                        # extract waveforms for Phy FeatureView
+                        subprocess.run(
+                            ["phy", "extract-waveforms", "params.py"],
+                            cwd=save_path,
+                            check=True,
+                        )
+                        # get number of good units and total number of clusters from rez.mat
+                        rez = scipy.io.loadmat(f"{save_path}/rez.mat")
+                        num_KS_clusters = str(len(rez["good"]))
+                        # sum the 1's in the good field of ops.mat to get number of good units
+                        num_good_units = str(sum(rez["good"])[0])
+                        brokenChan = scipy.io.loadmat(f"{save_path}/brokenChan.mat")["brokenChan"]
+                        goodChans = np.setdiff1d(np.arange(1, 17), brokenChan)
+                        goodChans_str = ",".join(str(i) for i in goodChans)
 
-                    # remove spaces and single quoutes from passable_params string
-                    filename_friendly_params = passable_params.replace("'", "").replace(" ", "")
-                    final_filename = (
-                        f"sorted{str(myomatrix)}"
-                        f"_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                        f"_rec-{recordings_str}"
-                        f"_{num_good_units}-good-of-{num_KS_clusters}-total"
-                        f"_{filename_friendly_params}"
-                    )
-                    # remove trailing underscore if present
-                    final_filename = (
-                        final_filename[:-1] if final_filename.endswith("_") else final_filename
-                    )
-                    # store final_filename in a new ops.mat field in the sorted0 folder
-                    ops = scipy.io.loadmat(f"{save_path}/ops.mat")
-                    ops.update({"final_myo_sorted_dir": final_filename})
-                    scipy.io.savemat(f"{save_path}/ops.mat", ops)
+                        # remove spaces and single quoutes from passable_params string
+                        filename_friendly_params = passable_params.replace("'", "").replace(" ", "")
+                        final_filename = (
+                            f"sorted{str(myomatrix)}"
+                            f"_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                            f"_rec-{recordings_str}"
+                            f"_chans-{goodChans_str}"
+                            f"_{num_good_units}-good-of-{num_KS_clusters}-total"
+                            f"_{filename_friendly_params}"
+                        )
+                        # remove trailing underscore if present
+                        final_filename = (
+                            final_filename[:-1] if final_filename.endswith("_") else final_filename
+                        )
+                        # store final_filename in a new ops.mat field in the sorted0 folder
+                        ops = scipy.io.loadmat(f"{save_path}/ops.mat")
+                        ops.update({"final_myo_sorted_dir": final_filename})
+                        scipy.io.savemat(f"{save_path}/ops.mat", ops)
 
-                    # copy sorted0 folder tree to a new folder with timestamp to label results by params
-                    # this serves as a backup of the sorted0 data, so it can be loaded into Phy later
-                    shutil.copytree(
-                        save_path,
-                        Path(save_path).parent.joinpath(final_filename),
-                    )
+                        # copy sorted0 folder tree to a new folder with timestamp to label results by params
+                        # this serves as a backup of the sorted0 data, so it can be loaded into Phy later
+                        shutil.copytree(
+                            save_path,
+                            Path(save_path).parent.joinpath(final_filename),
+                        )
 
-                except StopIteration:
-                    if config["Sorting"]["do_KS_param_gridsearch"] == 1:
-                        print(f"Grid search complete for worker {worker_id}")
-                    break
-                except:
-                    if config["Sorting"]["do_KS_param_gridsearch"] == 1:
-                        print("Error in grid search.")
-                    else:
-                        print("Error in sorting.")
-                    raise  # re-raise the exception
+                    except StopIteration:
+                        if config["Sorting"]["do_KS_param_gridsearch"] == 1:
+                            print(f"Grid search complete for worker {worker_id}")
+                        break
+                    except:
+                        if config["Sorting"]["do_KS_param_gridsearch"] == 1:
+                            print("Error in grid search.")
+                        else:
+                            print("Error in sorting.")
+                        raise  # re-raise the exception
 
         if config["num_KS_jobs"] > 1:
             # run parallel jobs

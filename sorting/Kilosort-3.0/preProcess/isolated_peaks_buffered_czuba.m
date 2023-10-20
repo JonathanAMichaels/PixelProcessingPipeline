@@ -19,6 +19,8 @@ function [row, col, mu] = isolated_peaks_buffered_czuba(S1, ops, ibatch)
     full_row_cell = cell(length(Th), 1);
     full_col_cell = cell(length(Th), 1);
     full_mu_cell = cell(length(Th), 1);
+    channel_offset = 20;
+    time_offset = (ibatch - 1) * size(S1, 1);
     for iTh = 1:length(Th)
         % finding the local minimum in a sliding window within plus/minus loc_range extent
         % across time and across channels
@@ -40,22 +42,15 @@ function [row, col, mu] = isolated_peaks_buffered_czuba(S1, ops, ibatch)
         full_col_cell{iTh} = col;
         full_mu_cell{iTh} = mu;
 
-        % plot but offset the time by batch width for each ibatch, make color of peak label match the threshold value
-        % if ops.fig
+        % % plot but offset the time by batch width for each ibatch, make color of peak label match the threshold value
+        % if ops.fig && (mod(ibatch, 20) == 0 || ibatch == ops.Nbatch-1)
         %     figure(999); hold on;
-        %     channel_offset = 20;
         %     for i = 1:size(S1, 2)
-        %         time_offset = (ibatch - 1) * size(S1, 1);
         %         time = (1:size(S1, 1)) + time_offset;
         %         plot(time, S1(:, i) + i * channel_offset, 'k');
         %     end
         %     % color cyan to magenta
         %     plot(row + time_offset, col * channel_offset - mu, '*', 'Color', [1 - iTh / length(Th), 0, iTh / length(Th)]);
-        %     % plot(S1); plot(row+ibatch*size(S1,1), col, 'r*'); drawnow;
-        % end
-        % % stop before at batch
-        % if ibatch == 2 % ops.Nbatch
-        %     keyboard
         % end
     end
     full_row = vertcat(full_row_cell{:});
@@ -68,8 +63,9 @@ function [row, col, mu] = isolated_peaks_buffered_czuba(S1, ops, ibatch)
         return;
     end
     % if any duplicate times exist, take from the channel with the largest amplitude, using argmax
-    [row_uniq, ~, ic] = unique(full_row, 'stable');
-    times_which_have_duplicates = row_uniq(histcounts(ic, 1:length(row_uniq)) > 1);
+    row_uniq = unique(full_row);
+    times_which_have_duplicates = row_uniq(histcounts(full_row, [row_uniq; row_uniq(end) + 1]) > 1);
+    dups_to_remove = [];
     for iDup = 1:length(times_which_have_duplicates)
         % find the indices of the duplicates
         dup_inds = find(full_row == times_which_have_duplicates(iDup));
@@ -77,10 +73,21 @@ function [row, col, mu] = isolated_peaks_buffered_czuba(S1, ops, ibatch)
         [~, max_ind] = max(full_mu(dup_inds));
         % remove all but the max amplitude
         dup_inds(max_ind) = [];
-        full_row(dup_inds) = [];
-        full_col(dup_inds) = [];
-        full_mu(dup_inds) = [];
+        dups_to_remove = [dups_to_remove; dup_inds];
     end
+    full_row(dups_to_remove) = [];
+    full_col(dups_to_remove) = [];
+    full_mu(dups_to_remove) = [];
+    if length(row_uniq) ~= length(full_row)
+        error('Duplicate removal failed, numbers of unique spikes and spikes left after removal do not match.');
+    end
+    % disp(['Removed ' num2str(length(dups_to_remove)) ' duplicate spikes, out of ' num2str(length(full_row)) ' total spikes.']);
+
+    % now plot the remaining spikes at each amplitude with red squares
+    % if ops.fig && (mod(ibatch, 20) == 0 || ibatch == ops.Nbatch)
+    %     figure(999); hold on;
+    %     plot(full_row + time_offset, full_col * channel_offset - full_mu, 'rs');
+    % end
     row = full_row;
     col = full_col;
     mu = full_mu;

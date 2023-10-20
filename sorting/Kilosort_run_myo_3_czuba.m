@@ -1,4 +1,4 @@
-function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
+function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id, worker_dir)
     script_dir = pwd; % get directory where repo exists
     load(fullfile(script_dir, '/tmp/config.mat'))
     load(fullfile(myo_sorted_dir, 'brokenChan.mat'))
@@ -49,7 +49,7 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
     ops.nEig = ops.nPCs; % rank of svd for templates, % keep same as nPCs to avoid error
     ops.NchanTOT = double(max(num_chans - length(brokenChan), ops.nEig));
     ops.Th = [5 2]; % threshold crossings for pre-clustering (in PCA projection space)
-    ops.spkTh = [-2, -4, -6, -8]; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
+    ops.spkTh = [-2, -6, -10]; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
     ops.nfilt_factor = 12; % max number of clusters per good channel in a batch (even temporary ones)
     ops.nblocks = 0;
     ops.nt0min = ceil(ops.nt0 / 2); % peak of template match will be this many points away from beginning
@@ -92,10 +92,12 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
     end
 
     % create parallel pool for all downstream parallel processing
-    if isempty(gcp('nocreate'))
-        poolobj = parpool(); % create pool, let matlab decide how many workers to use
-    end
-
+    pc = parcluster('local');
+    pc.JobStorageLocation = worker_dir;
+    % ensure the number of processes across all workers does not exceed number of CPU cores
+    % num_processes = 2*round(feature('numcores')/num_KS_jobs);
+    % poolobj = parpool(pc, num_processes);
+    poolobj = parpool(pc); % let matlab decide how many workers to use
     % ensure all parallel workers queues are cleared in the event of an error
     cleanup_worker_obj = onCleanup(@() cleanup_worker(poolobj));
 
@@ -163,12 +165,6 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id)
     save(fullfile(ops.saveDir, '/ops.mat'), '-struct', 'ops');
     rez.ops = []; rez.temp = []; % remove substructs from rez struct before saving
     save(fullfile(ops.saveDir, '/rez.mat'), '-struct', 'rez');
-
-    % clear parallel pool for this worker
-    delete(poolobj)
-
-    % exit matlab to return to python
-    quit;
 end
 
 % cleanup function to ensure all parallel workers queues are cleared
@@ -177,4 +173,5 @@ function cleanup_worker(poolobj)
     if ~isempty(poolobj)
         delete(poolobj)
     end
+    quit; % exit matlab to return to python
 end

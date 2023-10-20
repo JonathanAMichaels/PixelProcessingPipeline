@@ -292,7 +292,13 @@ disp(strcat(string(myo_data_passband(1)), "-", string(myo_data_passband(2)), " H
 mean_data = mean(data, 1);
 [b, a] = butter(4, myo_data_passband / (myo_data_sampling_rate / 2), 'bandpass');
 intervals = round(linspace(1, size(data, 1), round(size(data, 1) / (myo_data_sampling_rate * 5))));
+if numDummy > 0
+    chanIdxsToFilter = 1:num_KS_components-numDummy;
+else
+    chanIdxsToFilter = 1:size(data, 2);
+end
 buffer = 128;
+% now write the data to binary file in chunks of 5 seconds, but exclude dummy channels
 for t = 1:length(intervals) - 1
     preBuff = buffer; postBuff = buffer;
     if t == 1
@@ -302,7 +308,7 @@ for t = 1:length(intervals) - 1
     end
     tRange = intervals(t) - preBuff:intervals(t + 1) + postBuff;
     fdata = double(data(tRange, :)) - mean_data;
-    fdata = fdata - median(fdata, 2);
+    fdata(:, chanIdxsToFilter) = fdata(:, chanIdxsToFilter) - median(fdata(:, chanIdxsToFilter), 1);
     fdata = filtfilt(b, a, fdata);
     fdata = fdata(preBuff + 1:end - postBuff - 1, :);
     % fdata(:, brokenChan) = randn(size(fdata(:, brokenChan))) * 5;

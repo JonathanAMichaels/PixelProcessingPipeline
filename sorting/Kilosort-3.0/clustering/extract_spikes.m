@@ -34,7 +34,7 @@ function [rez, st3, tF] = extract_spikes(rez)
     ops = rez.ops;
 
     spkTh = ops.Th(1);
-    sig = 100; % set microns as hardcoded BASE gaussian kernel radius for the nearest channels
+    sig = 1000; % set microns as hardcoded BASE gaussian kernel radius for the nearest channels
     dNearActiveSite = median(diff(unique(rez.yc)));
 
     [ycup, xcup] = meshgrid(ops.yup, ops.xup); % define the 2x upsampled grid

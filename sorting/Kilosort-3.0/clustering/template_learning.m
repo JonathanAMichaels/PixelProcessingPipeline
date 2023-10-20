@@ -138,6 +138,11 @@ function [rez, spike_times_for_kid] = template_learning(rez, tF, st3)
     end
     for t = 1:n0 % for each cluster
         dWU = wPCA * gpuArray(Wpca(:, :, t)); % multiply PC components by mean PC coordinates for each cluster
+        % shape of dWU is nt0 x Nchan
+        % take absolute value, then sum across channels, then find a shift to  align max of abs(dWU) to nt0min
+        [~, dWU_shift] = max(sum(abs(dWU), 2), [], 1); % shape of dWU_shift is 1 x 1
+        dWU_shift = dWU_shift - ops.nt0min; % get shift needed to align max value for each channel to nt0min
+        dWU = circshift(dWU, -dWU_shift); % shift PC components by that amount
         [w, s, u] = svdecon(dWU); % compute SVD of that product to deconstruct it into spatial and temporal components
         wsign = -sign(w(ops.nt0min, 1)); % flip sign of waveform if necessary, for consistency
         % vvv save first Ncomps components of W, containing final rotation matrix

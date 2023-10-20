@@ -126,7 +126,12 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         % dbstop in extractTemplatesfromSnippets.m at 140
         total_num_spikes_used = sum(number_of_spikes_to_use);
         % take max of wave peaks
-        peak_amplitudes = max(spikes, [], 1);
+        [peak_amplitudes, ~] = max(spikes, [], 1);
+        [~, peak_indexes] = max(abs(spikes.*tukey_window), [], 1);
+        % align all max peaks to the center of the template (ops.nt0min)
+        spikes_shifts = peak_indexes - ops.nt0min;
+        spikes = circshift(spikes, -spikes_shifts);
+
         wave_choice_left_bounds = [1; cumsum(number_of_spikes_to_use)];
         wave_choice_right_bounds = wave_choice_left_bounds(2:end);
         wave_choice_left_bounds = wave_choice_left_bounds(1:end - 1);
@@ -262,7 +267,9 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         % multiply waveforms by a Gaussian with the sigma value
         % this is to make the correlation more sensitive to the central shape of the waveform
         % wTEMP_for_corr = wTEMP .* gausswin(size(wTEMP, 1), (size(wTEMP, 1) - 1) / (2 * sigma));
-        wTEMP_for_corr = wTEMP .* tukey_window; % use window to focus on central region of waveforms
+        % align largest peak of each template to ops.nt0min before checking correlation to avoid
+        % the correlation being sensitive to the alignment of the waveforms
+        wTEMP_for_corr = wTEMP .* gaussian_window; % use window to focus on central region of waveforms
         CC = corr(wTEMP_for_corr);
 
         %% section to compute terms of the cost function
@@ -293,8 +300,8 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
 
         % compute the total cost for this wave choice, cheapest waveform will be chosen
         corr_sum_with_other_template_choices_term = corr_sum_with_other_template_choices;
-        wTEMP_gaussian_residual_term = 24 * nPCs * wTEMP_gaussian_residual;
-        highest_template_similarity_penalty_term = 12 * nPCs * highest_template_similarity_penalty;
+        wTEMP_gaussian_residual_term = 2 * nPCs * wTEMP_gaussian_residual;
+        highest_template_similarity_penalty_term = nPCs * highest_template_similarity_penalty;
         total_cost_for_wave = corr_sum_with_other_template_choices_term + ...
             wTEMP_gaussian_residual_term + highest_template_similarity_penalty_term;
 
@@ -342,7 +349,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
 
     if use_kmeans
         wTEMP = dd(:, randperm(size(dd, 2), nPCs)); % removing this line will cause KS to not ...
-                                                    % find spikes sometimes... ???
+        % find spikes sometimes... ???
         wTEMP(:, 1:nPCs) = spikes(:, best_CC_idxs(1:nPCs));
     else
         wTEMP(:, 1:nPCs) = dd(:, idx(best_CC_idxs(1:nPCs)));
@@ -363,6 +370,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
             if i == nPCs
                 % show gaussian window
                 plot(i * scale + 0.5 * tukey_window, 'g');
+                plot(i * scale + 0.5 * gaussian_window, 'c');
             end
         end
         title('initial templates');
@@ -427,3 +435,4 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         [U, ~, ~] = svdecon(spikes_windowed);
         wPCA = gpuArray(single(U(:, 1:nPCs))); % take as many as needed
     end
+end
