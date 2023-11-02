@@ -31,7 +31,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         dataRAW = dataRAW / ops.scaleproc;
 
         % find isolated spikes from each batch
-        [row, col] = isolated_peaks_buffered_czuba(-abs(dataRAW), ops, ibatch);
+        [row, col] = isolated_peaks_multithreshold(-abs(dataRAW), ops, ibatch);
 
         % for each peak, get the voltage snippet from that channel
         clips = get_SpikeSample(dataRAW, row, col, ops, 0);
