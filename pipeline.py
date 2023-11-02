@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import scipy.io
 from ibllib.ephys.spikes import ks2_to_alf
-from ruamel import yaml
+from ruamel.yaml import YAML
 
 from pipeline_utils import create_config, extract_LFP, extract_sync, find
 from registration.registration import registration as registration_function
@@ -139,7 +139,10 @@ if config:
 
 # Load config
 print("Using config file " + config_file)
-config = yaml.load(open(config_file, "r"), Loader=yaml.RoundTripLoader)
+# make round-trip loader
+yaml = YAML()
+with open(config_file) as f:
+    config = yaml.load(f)
 
 # Check config for missing information and attempt to auto-fill
 config["folder"] = folder
@@ -177,46 +180,6 @@ else:
     if os.path.isdir(temp_folder[0]):
         config["myomatrix"] = temp_folder[0]
 
-# use -d option to specify which sort folder to post-process
-if "-d" in opts:
-    date_str = args[1]
-    # make sure date_str is in the format YYYYMMDD_HHMMSS
-    assert (
-        (len(date_str) == 15)
-        & date_str[:8].isnumeric()
-        & date_str[9:].isnumeric()
-        & (date_str[8] == "_")
-    ), "Argument after '-d' must be a date string in format: YYYYMMDD_HHMMSS"
-    # check if date_str is present in any of the subfolders in the config["myomatrix"] path
-    subfolder_list = os.listdir(config["myomatrix"])
-    previous_sort_folder_to_use = [iFolder for iFolder in subfolder_list if date_str in iFolder]
-    assert (
-        len(previous_sort_folder_to_use) > 0
-    ), f'No matching subfolder found in {config["myomatrix"]} for the date string provided'
-    assert (
-        len(previous_sort_folder_to_use) < 2
-    ), f'Multiple matching subfolders found in {config["myomatrix"]} for the date string provided'
-    previous_sort_folder_to_use = str(previous_sort_folder_to_use[0])
-else:
-    try:
-        previous_sort_folder_to_use = str(
-            scipy.io.loadmat(f'{config["myomatrix"]}/sorted0/ops.mat')["final_myo_sorted_dir"][0]
-        )
-    except FileNotFoundError:
-        print(
-            "WARNING: No ops.mat file found in sorted0 folder, not able to detect previous sort folder.\n"
-            "         If post-processing, try using the '-d' option to specify a sort folder to post-process,\n"
-            "         or run a new sort to create a new ops.mat file"
-        )
-    except KeyError:
-        print(
-            "WARNING: No 'final_myo_sorted_dir' field found in ops.mat file, not able to detect previous sort folder.\n"
-            "         If post-processing, try using the '-d' option to specify a sort folder to post-process,\n"
-            "         or run a new sort to create a new ops.mat file"
-        )
-    except:
-        raise
-
 # ensure global fields are present in config
 if config["myomatrix"] != "":
     print("Using myomatrix folder " + config["myomatrix"])
@@ -252,6 +215,70 @@ if not "remove_bad_myo_chans" in config["Session"]:
     config["Session"]["remove_bad_myo_chans"] = [False] * len(config["Session"]["myo_chan_list"])
 if not "remove_channel_delays" in config["Session"]:
     config["Session"]["remove_channel_delays"] = [False] * len(config["Session"]["myo_chan_list"])
+
+# input assertions
+assert config["num_KS_jobs"] >= 1, "Number of parallel jobs must be greater than or equal to 1"
+assert config["recordings"][0] == "all" or all(
+    [(item == round(item) >= 1 and isinstance(item, (int, float))) for item in config["recordings"]]
+), "'recordings' field must be a list of positive integers, or 'all' as first element"
+assert all(
+    [(item >= 0 and isinstance(item, int)) for item in config["GPU_to_use"]]
+), "'GPU_to_use' field must be greater than or equal to 0"
+assert config["num_neuropixels"] >= 0, "Number of neuropixels must be greater than or equal to 0"
+assert (
+    config["Sorting"]["num_KS_components"] >= 1
+), "Number of KS components must be greater than or equal to 1"
+assert (
+    config["myo_data_sampling_rate"] >= 1
+), "Myomatrix sampling rate must be greater than or equal to 1"
+
+
+# use -d option to specify which sort folder to post-process
+if "-d" in opts:
+    date_str = args[1]
+    # make sure date_str is in the format YYYYMMDD_HHMMSS, YYYYMMDD_HHMMSSsss, or YYYYMMDD_HHMMSSffffff
+    assert (
+        (len(date_str) == 15 or len(date_str) == 18 or len(date_str) == 21)
+        & date_str[:8].isnumeric()
+        & date_str[9:].isnumeric()
+        & (date_str[8] == "_")
+    ), "Argument after '-d' must be a date string in format: YYYYMMDD_HHMMSS, YYYYMMDD_HHMMSSsss, or YYYYMMDD_HHMMSSffffff"
+    # check if date_str is present in any of the subfolders in the config["myomatrix"] path
+    subfolder_list = os.listdir(config["myomatrix"])
+    previous_sort_folder_to_use = [iFolder for iFolder in subfolder_list if date_str in iFolder]
+    assert (
+        len(previous_sort_folder_to_use) > 0
+    ), f'No matching subfolder found in {config["myomatrix"]} for the date string provided'
+    assert (
+        len(previous_sort_folder_to_use) < 2
+    ), f'Multiple matching subfolders found in {config["myomatrix"]} for the date string provided. Try using a more specific date string, like "YYYYMMDD_HHMMSSffffff"'
+    previous_sort_folder_to_use = str(previous_sort_folder_to_use[0])
+else:
+    if config["num_KS_jobs"] == 1:
+        if "-myo_phy" in opts or "-myo_post" in opts:
+            try:
+                previous_sort_folder_to_use = str(
+                    scipy.io.loadmat(f'{config["myomatrix"]}/sorted0/ops.mat')[
+                        "final_myo_sorted_dir"
+                    ][0]
+                )
+            except FileNotFoundError:
+                print(
+                    "WARNING: No ops.mat file found in sorted0 folder, not able to detect previous sort folder.\n"
+                    "         If using '-myo_phy' or '-myo_post', try using the '-d' flag to specify the datestring\n"
+                )
+            except KeyError:
+                print(
+                    "WARNING: No 'final_myo_sorted_dir' field found in ops.mat file, not able to detect previous sort folder.\n"
+                    "         If using '-myo_phy' or '-myo_post', try using the '-d' flag to specify the datestring\n"
+                )
+            except:
+                raise
+    else:
+        if "-myo_phy" in opts or "-myo_post" in opts:
+            raise SystemExit(
+                "Cannot guess desired previous sort folder after parallel sorting. Please specify manually using the '-d' flag"
+            )
 
 # find MATLAB installation
 if os.path.isfile("/usr/local/MATLAB/R2021a/bin/matlab"):
@@ -380,14 +407,16 @@ else:
 config["registration_final"] = registration_final
 
 # Save config file with up-to-date information
-yaml.dump(config, open(config_file, "w"), Dumper=yaml.RoundTripDumper)
+with open(config_file, "w") as f:
+    yaml.dump(config, f)
 
 # Proceed with registration
 if registration or registration_final:
     registration_function(config)
 
 # Prepare common kilosort config
-config_kilosort = yaml.safe_load(open(config_file, "r"))
+with open(config_file) as f:
+    config_kilosort = yaml.load(f)
 config_kilosort["myomatrix_number"] = 1
 config_kilosort["channel_list"] = 1
 
@@ -625,31 +654,32 @@ if myo_sort:
                         else:
                             print("ERROR: KS params must be a dictionary or a string.")
                             raise TypeError
-
+                        if config["Sorting"]["do_KS_param_gridsearch"] == 1:
+                            command_str = f"Kilosort_run_myo_3_czuba(struct({passable_params}),{worker_id},'{str(worker_dir)}');"
+                        else:
+                            command_str = f"Kilosort_run_myo_3_czuba('{passable_params}',{worker_id},'{str(worker_dir)}');"
                         subprocess.run(
                             [
                                 "matlab",
-                                # "-nodisplay",
                                 "-nosplash",
                                 "-nodesktop",
                                 "-r",
                                 (
                                     "rehash toolboxcache; restoredefaultpath;"
                                     f"addpath(genpath('{path_to_add}'));"
-                                    f"Kilosort_run_myo_3_czuba(struct({passable_params}),{worker_id},'{str(worker_dir)}');"
-                                )
-                                if config["Sorting"]["do_KS_param_gridsearch"] == 1
-                                else (
-                                    "rehash toolboxcache; restoredefaultpath;"
-                                    f"addpath(genpath('{path_to_add}'));"
-                                    f"Kilosort_run_myo_3_czuba('{passable_params}',{worker_id},'{str(worker_dir)}');"
+                                    f"{command_str}"
                                 ),
                             ],
                             check=True,
                         )
                         # extract waveforms for Phy FeatureView
                         subprocess.run(
-                            ["phy", "extract-waveforms", "params.py"],
+                            # "phy extract-waveforms params.py",
+                            [
+                                "phy",
+                                "extract-waveforms",
+                                "params.py",
+                            ],
                             cwd=save_path,
                             check=True,
                         )
@@ -663,10 +693,11 @@ if myo_sort:
                         goodChans_str = ",".join(str(i) for i in goodChans)
 
                         # remove spaces and single quoutes from passable_params string
+                        time_stamp_us = datetime.datetime.now().strftime("%Y%m%d_%H%M%S%f")
                         filename_friendly_params = passable_params.replace("'", "").replace(" ", "")
                         final_filename = (
                             f"sorted{str(myomatrix)}"
-                            f"_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                            f"_{time_stamp_us}"
                             f"_rec-{recordings_str}"
                             f"_chans-{goodChans_str}"
                             f"_{num_good_units}-good-of-{num_KS_clusters}-total"

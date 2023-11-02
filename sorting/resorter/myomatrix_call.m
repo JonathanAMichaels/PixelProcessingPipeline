@@ -2,9 +2,9 @@ script_dir = pwd; % get directory where repo exists
 load(fullfile(script_dir, '/tmp/config.mat'))
 load(fullfile(myo_sorted_dir, 'brokenChan.mat'))
 
-% set GPU to use
-disp(strcat("Setting GPU device to use: ", num2str(GPU_to_use)))
-gpuDevice(GPU_to_use);
+% % set GPU to use
+% disp(strcat("Setting GPU device to use: ", num2str(GPU_to_use)))
+% gpuDevice(GPU_to_use);
 
 % load channel map with broken channels removed if chosen by user
 if length(brokenChan) > 0 && remove_bad_myo_chans(1) ~= false
