@@ -692,6 +692,15 @@ if myo_sort:
                         goodChans = np.setdiff1d(np.arange(1, 17), brokenChan)
                         goodChans_str = ",".join(str(i) for i in goodChans)
 
+                        ## TEMP - remove this later: append git branch name to final_filename
+                        # get git branch name
+                        git_branches = subprocess.run(
+                            ["git", "branch"], capture_output=True, text=True
+                        )
+                        git_branches = git_branches.stdout.split("\n")
+                        git_branches = [i.strip() for i in git_branches]
+                        git_branch = [i for i in git_branches if i.startswith("*")][0][2:]
+
                         # remove spaces and single quoutes from passable_params string
                         time_stamp_us = datetime.datetime.now().strftime("%Y%m%d_%H%M%S%f")
                         filename_friendly_params = passable_params.replace("'", "").replace(" ", "")
@@ -702,6 +711,7 @@ if myo_sort:
                             f"_chans-{goodChans_str}"
                             f"_{num_good_units}-good-of-{num_KS_clusters}-total"
                             f"_{filename_friendly_params}"
+                            f"_{git_branch}"
                         )
                         # remove trailing underscore if present
                         final_filename = (
@@ -722,7 +732,7 @@ if myo_sort:
                     except StopIteration:
                         if config["Sorting"]["do_KS_param_gridsearch"] == 1:
                             print(f"Grid search complete for worker {worker_id}")
-                        break
+                        return  # exit the function
                     except:
                         if config["Sorting"]["do_KS_param_gridsearch"] == 1:
                             print("Error in grid search.")
@@ -903,3 +913,6 @@ print(
         f"{strfdelta(time_elapsed, '{hours} hours, {minutes} minutes, {seconds} seconds')}"
     )
 )
+
+# reset the terminal mode to prevent not printing user input to terminal after program exits
+subprocess.run(["stty", "sane"])
