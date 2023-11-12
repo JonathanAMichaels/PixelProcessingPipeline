@@ -69,7 +69,17 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
     tukey_window = zeros_for_tukey;
 
     dd_windowed = dd .* tukey_window;
-    dd_cpu = double(gather(dd_windowed));
+    % align max absolute peaks to the center of the template (ops.nt0min)
+    [~, peak_indexes] = max(abs(dd_windowed), [], 1);
+    spikes_shifts = peak_indexes - ops.nt0min;
+    dd_aligned = gpuArray(nan(size(dd)));
+    dd_windowed_aligned = gpuArray(nan(size(dd)));
+    for i = 1:size(dd_windowed, 2)
+        dd_windowed_aligned(:, i) = circshift(dd_windowed(:, i), -spikes_shifts(i));
+        dd_aligned(:, i) = circshift(dd(:, i), -spikes_shifts(i));
+    end
+    dd_cpu = double(gather(dd_windowed_aligned));
+
     % PCA is computed on the windowed data
     [U, ~, ~] = svdecon(dd_cpu); % the PCs are just the left singular vectors of the waveforms
     % if ops.fig == 1 % PLOTTING
@@ -86,7 +96,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
     use_kmeans = true;
     % initialize the template clustering
     if use_kmeans
-        dd_pca = wPCA' * dd;
+        dd_pca = wPCA' * dd_aligned;
         % compute k-means clustering of the waveforms
         rng('default'); rng(1); % initializing random number generator for reproducibility
         % stream = RandStream('mlfg6331_64');  % Random number stream
@@ -109,13 +119,13 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
             [cluster_id, ~, ~, Dist_from_K] = kmeans(dd_pca', nPCs, 'Distance', 'sqeuclidean', ...
                 'MaxIter', 10000, 'Replicates', num_jobs, 'Display', 'final');
         end
-        spikes = gpuArray(nan(size(dd)));
+        spikes = gpuArray(nan(size(dd_aligned)));
         number_of_spikes_to_use = nan(nPCs, 1);
         for K = 1:nPCs
             % use 90% of the closest spikes to the cluster center, to avoid outliers
             number_of_close_spikes = floor(sum(cluster_id == K) * 0.9);
             [~, min_dist_idxs] = mink(Dist_from_K(:, K), number_of_close_spikes);
-            spikes_to_use = dd(:, cluster_id == K & ismember(1:length(cluster_id), min_dist_idxs)');
+            spikes_to_use = dd_aligned(:, cluster_id == K & ismember(1:length(cluster_id), min_dist_idxs)');
             number_of_spikes_to_use(K) = size(spikes_to_use, 2);
             % choose closest spikes to the cluster center
             spikes(:, sum(number_of_spikes_to_use(1:K - 1)) + ...
@@ -123,14 +133,11 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         end
         % drop nan values
         spikes = spikes(:, ~isnan(spikes(1, :)));
+
         % dbstop in extractTemplatesfromSnippets.m at 140
         total_num_spikes_used = sum(number_of_spikes_to_use);
         % take max of wave peaks
         [peak_amplitudes, ~] = max(spikes, [], 1);
-        [~, peak_indexes] = max(abs(spikes.*tukey_window), [], 1);
-        % align all max peaks to the center of the template (ops.nt0min)
-        spikes_shifts = peak_indexes - ops.nt0min;
-        spikes = circshift(spikes, -spikes_shifts);
 
         wave_choice_left_bounds = [1; cumsum(number_of_spikes_to_use)];
         wave_choice_right_bounds = wave_choice_left_bounds(2:end);
@@ -241,7 +248,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         end
     end
     if use_kmeans
-        wTEMP = spikes(:, wave_choice_left_bounds); % initialize with a smooth range of amplitudes
+        wTEMP = spikes(:, wave_choice_left_bounds); % start with first spike in each cluster
     else
         plot((1:length(peak_amplitudes)) * ops.nt0, peak_amplitudes, 'm', 'LineWidth', 3);
         wTEMP = dd(:, idx(wave_choice_left_bounds)); % initialize with a smooth range of amplitudes
@@ -290,6 +297,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         highest_template_similarity_penalty = max(highest_template_similarity_penalty, 0); % make sure it is not negative
 
         % compute sum of all similarities with other previous template choices
+        % negative correlations are not penalized
         if largest_CC_idx == 1
             corr_sum_with_other_template_choices = sum(max(CC(largest_CC_idx, 2:end), 0)) + ...
                 sum(max(CC(2:end, largest_CC_idx), 0));
@@ -300,7 +308,7 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
 
         % compute the total cost for this wave choice, cheapest waveform will be chosen
         corr_sum_with_other_template_choices_term = corr_sum_with_other_template_choices;
-        wTEMP_gaussian_residual_term = 2 * nPCs * wTEMP_gaussian_residual;
+        wTEMP_gaussian_residual_term = nPCs * wTEMP_gaussian_residual;
         highest_template_similarity_penalty_term = nPCs * highest_template_similarity_penalty;
         total_cost_for_wave = corr_sum_with_other_template_choices_term + ...
             wTEMP_gaussian_residual_term + highest_template_similarity_penalty_term;
@@ -348,8 +356,8 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
     end
 
     if use_kmeans
-        wTEMP = dd(:, randperm(size(dd, 2), nPCs)); % removing this line will cause KS to not ...
-        % find spikes sometimes... ???
+        wTEMP = dd(:, randperm(size(dd, 2), nPCs)); % removing this line will cause KS to not find
+        % spikes sometimes... variable is overwritten in the next line, so it's inconsequential
         wTEMP(:, 1:nPCs) = spikes(:, best_CC_idxs(1:nPCs));
     else
         wTEMP(:, 1:nPCs) = dd(:, idx(best_CC_idxs(1:nPCs)));
@@ -379,26 +387,29 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
 
     % use k-means isolated spikes for correlation calculation and averaging to ignore outlier spikes
     if use_kmeans
-
-        for i = 1:10
-            % at each iteration, assign the waveform to its most correlated cluster
-            CC = wTEMP' * (spikes .* tukey_window);
-            [amax, imax] = max(CC, [], 1); % find the best cluster for each waveform
-            for j = 1:nPCs % for each initial template cluster
-                wTEMP(:, j) = spikes(:, imax == j) * amax(imax == j)'; % weighted average to get new cluster means
-                % if a template had no matches and therefore has NaN's,
-                % use the mean of top 10th percentile in that k-means cluster instead
-                if sum(abs(wTEMP(:, j))) == 0
-                    % make sure the template is not all zeros after the weighted average, which
-                    % happens when there are no similar spikes in the k-means cluster
-                    % if so, reinitalize it with the mean of closest 1% spikes of this k-means cluster
-                    [~, min_dist_idxs] = mink(Dist_from_K(:, j), ceil(sum(cluster_id == j) / 10));
-                    spikes_to_use = dd(:, cluster_id == j & ismember(1:length(cluster_id), min_dist_idxs)');
-                    wTEMP(:, j) = mean(spikes_to_use, 2);
-                end
+        % just take average of top 10 percent most correlated spikes to the ones chosen in wTEMP
+        % for each cluster. Use wave_choice_left_bounds to get the spikes to use from 'spikes'
+        for iCluster = 1:nPCs
+            % get the spikes that were chosen for this cluster
+            cluster_spikes = spikes(:, wave_choice_left_bounds(iCluster):wave_choice_right_bounds(iCluster));
+            % get the correlation matrix for this cluster
+            cluster_CC = corr(cluster_spikes);
+            % get the top 1 percent most correlated spikes to the chosen spikes, must be at least 10 spikes
+            try
+                [~, top_CC_idxs] = maxk(cluster_CC(:, 1), max(ceil(size(cluster_CC, 1) * 0.01), 10));
+            catch
+                % if there are less than 10 spikes in the cluster, just take the top 1 percent
+                [~, top_CC_idxs] = maxk(cluster_CC(:, 1), ceil(size(cluster_CC, 1) * 0.01));
+                
             end
-            wTEMP = wTEMP ./ sum(wTEMP .^ 2, 1) .^ .5; % standardize the new clusters
+
+            % get the top 10 percent most correlated spikes
+            top_CC_spikes = cluster_spikes(:, top_CC_idxs);
+            % average the top 10 most correlated spikes
+            wTEMP(:, iCluster) = mean(top_CC_spikes, 2);
         end
+
+        wTEMP = wTEMP ./ sum(wTEMP .^ 2, 1) .^ .5; % standardize the new clusters
     else % use all spikes for correlation calculation and averaging
         for i = 1:10
             % at each iteration, assign the waveform to its most correlated cluster
@@ -410,7 +421,6 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
             wTEMP = wTEMP ./ sum(wTEMP .^ 2, 1) .^ .5; % standardize the new clusters
         end
     end
-
     % tukey it
     wTEMP_tukeyed = wTEMP .* tukey_window;
     if ops.fig % PLOTTING
@@ -427,12 +437,10 @@ function [wTEMP, wPCA] = extractTemplatesfromSnippets(rez, nPCs)
         title('prototype templates');
         pbaspect([1 2 1])
     end
-    % wTEMP = wTEMP_tukeyed; % use the tukey windowed templates
-    % if k-means was used, use the k-means isolated spikes for the PCA space
+
     if use_kmeans
-        % use windowing to focus on the central part of the waveforms for correlation calculation
-        spikes_windowed = spikes .* tukey_window;
-        [U, ~, ~] = svdecon(spikes_windowed);
+        % recomputing PCA on the k-means isolated spikes (90% of closest spikes to cluster center)
+        [U, ~, ~] = svdecon(spikes);
         wPCA = gpuArray(single(U(:, 1:nPCs))); % take as many as needed
     end
 end
