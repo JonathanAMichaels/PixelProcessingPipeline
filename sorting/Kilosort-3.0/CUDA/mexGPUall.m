@@ -4,7 +4,7 @@
 
 % Only compile mex files used for Kilosort-3.0:
 %%% -> spikedetector3PC.cu,
-%%% -> mexMPnu8.cu/mexMPnu8_pcTight_czuba.cu
+%%% -> mexMPnu8.cu/mexMPnu8_pcTight.cu
 %%% -> mexWtW2.cu
 
     enableStableMode = true;
@@ -21,10 +21,10 @@
         % be specified. This version will run ~2X slower than the
         % non deterministic version.
         % mexcuda -largeArrayDims -dynamic -DENABLE_STABLEMODE mexMPnu8.cu
-        mexcuda -largeArrayDims -dynamic -DENABLE_STABLEMODE mexMPnu8_pcTight_czuba.cu
+        mexcuda -largeArrayDims -dynamic -DENABLE_STABLEMODE mexMPnu8_pcTight.cu
     else
         % mexcuda -largeArrayDims mexMPnu8.cu
-        mexcuda -largeArrayDims mexMPnu8_pcTight_czuba.cu
+        mexcuda -largeArrayDims mexMPnu8_pcTight.cu
     end
 
     % mexcuda -largeArrayDims mexSVDsmall2.cu

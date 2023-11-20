@@ -3,6 +3,9 @@
 # Auto-generated parameters
 # GPU to use for kilosort, (a list of integers, e.g., [1,2,5,6])
 GPU_to_use: [0]
+# number of Kilosort jobs to run at once (must be <= number of GPUs, will run in parallel if >1)
+# can only be used when do_KS_param_gridsearch is True
+num_KS_jobs: 1
 # path of working directory (must be provided in command line)
 folder:
 # path to neuropixel directory
@@ -37,8 +40,8 @@ Session:
         - 0
         - 0
     myo_chan_map_file:
-        - bipolar_test_kilosortChanMap.mat
-        - bipolar_test_kilosortChanMap.mat
+        - linear_16ch_RF400_kilosortChanMap_unitSpacing.mat
+        - linear_16ch_RF400_kilosortChanMap_unitSpacing.mat
     myo_chan_list:
         - [1, 16]
         - [17, 32]

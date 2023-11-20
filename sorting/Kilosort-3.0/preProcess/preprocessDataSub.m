@@ -296,6 +296,10 @@ function rez = preprocessDataSub(ops)
     load(fullfile(script_dir, '/tmp/config.mat'));
     if remove_channel_delays
         channelDelays = get_channel_delays(rez);
+        % if present, make sure dummy channels are 0 delay
+        if numDummy > 0
+            channelDelays(NchanTOT - numDummy + 1:end) = 0;
+        end
         rez.ops.channelDelays = channelDelays; % save channel delays to rez
         % figure(222); hold on;
         % remove channel delays from proc.dat by seeking through the batches

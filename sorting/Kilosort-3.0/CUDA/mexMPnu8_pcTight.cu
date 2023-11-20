@@ -1,20 +1,23 @@
 /*
- * mexMPnu8_pcTight_czuba.cu
- * Hacked version of core Kilosort spike extraction function mexMPnu8.cu
- * - tightened up window of feature PC calc more closely to waveform center
- %   - PCA & feat calcs used for outputs occur in [computePCfeatures]
- *   - dummy version assumes 61 point waveform length [nt0], aligned to sample 20 [nt0min]
- *   - compute wPCA & featPC on timepoints [6:nt0-15] == [6:45], len=40;
- * - Seemed to work really well at improving usability of template features during
- *   manual curation
- * - Testing expansion to template evaluation by adding same tweaks to [timeFilter] & [timeFilterUpdate]
- %   - this is distinct from changing range of nt0, because its still important for spike subtraction
- *     to include the tails of each waveform...we just want the projections computed on a tighter,
- *     more meaningful range of timepoints w/in the waveform
+ * mexMPnu8_pcTight.cu
+ * 2021  TBC   Modified version of core Kilosort spike extraction function mexMPnu8.cu
+ *              - tightened up window of feature PC calc more closely to waveform center
+ *              - PCA & feat calcs used for outputs occur in [computePCfeatures]
+ *              - version assumes 61 point waveform length [nt0], aligned to sample [nt0min]
+ *              - compute wPCA & featPC on timepoints [6:nt0-15] == [6:45], len=40;
+ *              - Seemed to work really well at improving usability of template features during
+ *                manual curation
+ *              - Testing expansion to template evaluation by adding same tweaks to [timeFilter] & [timeFilterUpdate]
+ *              - this is distinct from changing range of nt0, because its still important for spike subtraction
+ *                to include the tails of each waveform...we just want the projections computed on a tighter,
+ *                more meaningful range of timepoints w/in the waveform
  *
+ * 2023  SMO  Simply changed range of indexing to [10:nt0-10] == [10:50], len=40; because peaks are centered now
+ * 
  * Compile individually with:
- *      mexcuda -largeArrayDims -dynamic -DENABLE_STABLEMODE mexMPnu8_pcTight_czuba.cu
- */
+ *      mexcuda -largeArrayDims -dynamic -DENABLE_STABLEMODE mexMPnu8_pcTight.cu
+ * 
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda.h>
@@ -200,6 +203,12 @@ __global__ void	spaceFilterUpdate_v2(const double *Params, const double *data, c
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	timeFilter(const double *Params, const float *data, const float *W,float *conv_sig){
   volatile __shared__ float  sW2[61*NrankMax], sW[61*NrankMax], sdata[(Nthreads+61)*NrankMax];
+// dynamic shared array here to allow larger shared memory allocation
+//   extern __shared__ float timeFilter_array[];
+//   float* sW2 = (float*)timeFilter_array;
+//   float* sW = (float*)&sW2[61*NrankMax];
+//   float* sdata = (float*)&sW[61*NrankMax];
+
   float x;
   int tid, tid0, bid, i, nid, Nrank, NT, Nfilt, nt0, irank;
 
@@ -243,7 +252,7 @@ __global__ void	timeFilter(const double *Params, const float *data, const float 
             volatile float *pSW = &sW[nid*nt0];
             volatile float *pSD = &sdata[tid + nid*(Nthreads+nt0)];
  		    #pragma unroll 4
-            for(i=6;i<nt0-15;i++)
+            for(i=10;i<nt0-10;i++) // this indexes from 10 to 50 if nt0 = 61
                 x += *pSW++ * *pSD++;
 	    }
         conv_sig[tid0  + tid + NT*bid] = x;
@@ -285,7 +294,7 @@ __global__ void	timeFilterUpdate(const double *Params, const float *data, const 
             if (tid0>=0 && tid0<NT-nt0){
                 x = 0.0f;
                 for (k=0;k<Nrank;k++){
-                    for (t=6;t<nt0-15;t++)
+                    for (t=10;t<nt0-10;t++)
                         x += sW[t + k*nt0] * data[t + tid0 + NT*(bid + Nfilt*k)];
                 }
                 conv_sig[tid0 + NT*bid] = x;
@@ -668,7 +677,7 @@ __global__ void average_snips(const double *Params, const int *st, const unsigne
         const float *mu, const float *z){
 
   //threadIndex.x = 0-nt0-1
-  //threadIndex.y = 0-15
+  //threadIndex.y = 0-10
   double X, xsum;
   float  Th;
   int nt0, tidx, tidy, bid, NT, Nchan,k, Nrank, Nfilt;
@@ -763,7 +772,7 @@ __global__ void	computePCfeatures(const double *Params, const int *counter,
   Y = 0.0f;
   for (k =0; k<Nrank; k++){
       X = 0.0f;
-      for (t=6;t<nt0-15;t++)
+      for (t=10;t<nt0-10;t++)
           X += sW[t + k*nt0] * sPCA[t + tidy * nt0];
       Y += X * sU[tidx + k*NchanU];
   }
@@ -772,7 +781,7 @@ __global__ void	computePCfeatures(const double *Params, const int *counter,
   for(ind=0; ind<counter[0];ind++)
       if (id[ind]==bid){
           X = Y * x[ind]; // - mu[bid]);
-          for (t=6;t<nt0-15; t++)
+          for (t=10;t<nt0-10; t++)
               X  += dataraw[st[ind] + t + NT * iU[tidx]] * sPCA[t + nt0*tidy];
           featPC[tidx + tidy*NchanU + ind * NchanU*Nrank] = X;
       }
@@ -834,6 +843,16 @@ void mexFunction(int nlhs, mxArray *plhs[],
 {
   /* Initialize the MathWorks GPU API. */
   mxInitGPU();
+
+// only increase Shared Memory Size if needed, and the highest choice
+// should be according to the Compute Capability of your GPU
+//   int maxbytes = 232448; // 227 KiB, Compute Capability 9.0
+//   int maxbytes = 166912; // 163 KiB, Compute Capability 8.0, 8.7
+//   int maxbytes = 101376; // 99 KiB, Compute Capability 8.6, 8.9
+//   int maxbytes = 65536; // 64 KiB, Compute Capability 7.5
+//   int maxbytes = 98304; // 96 KiB, Compute Capability 7.0, 7.2
+//   int maxbytes = 49152; // 48 KiB, Compute Capability 5.0-6.2
+//   cudaFuncSetAttribute(timeFilter, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
 
   /* Declare input variables*/
   double *Params, *d_Params;
@@ -949,7 +968,8 @@ void mexFunction(int nlhs, mxArray *plhs[],
   spaceFilter<<<Nfilt, Nthreads>>>(d_Params, d_draw, d_U, d_iC, d_iW, d_data);
 
   // filter the data with the temporal templates
-  timeFilter<<<Nfilt, Nthreads>>>(d_Params, d_data, d_W, d_dout);
+    timeFilter<<<Nfilt, Nthreads>>>(d_Params, d_data, d_W, d_dout);
+    // timeFilter<<<Nfilt, Nthreads, sizeof(float)*(61*NrankMax + 61*NrankMax + (Nthreads+61)*NrankMax)>>>(d_Params, d_data, d_W, d_dout);
 
   // compute the best filter
   bestFilter<<<NT/Nthreads,Nthreads>>>(d_Params, d_dout, d_mu, d_err, d_eloss, d_ftype);

@@ -14,6 +14,7 @@ dependencies:
   - joblib
   - matplotlib
   - numpy=1.23.5
+  - nvitop
   - pandas
   - pillow
   - pip

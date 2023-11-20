@@ -1,5 +1,5 @@
 function [channelDelays] = get_channel_delays(rez)
-% based on a subset of the data, compute a channel whitening matrix
+% based on a subset of the data, compute the channel delays to maximize cross correlations
 % this requires temporal filtering first (gpufilter)
 
 ops = rez.ops;
@@ -30,12 +30,16 @@ while ibatch<=Nbatch
         buff(:, nsampcurr+1:NTbuff) = repmat(buff(:,nsampcurr), 1, NTbuff-nsampcurr);
     end
     buff = gpuArray(buff);
-    chan_CC = chan_CC + xcorr(abs(buff'), maxlag, 'coeff');
+    chan_CC_maybe_nan = xcorr(abs(buff'), maxlag, 'coeff');
+    % change nans to zeros
+    chan_CC_maybe_nan(isnan(chan_CC_maybe_nan)) = 0;
+    chan_CC_this_batch = chan_CC_maybe_nan;
+    chan_CC = chan_CC + chan_CC_this_batch;
 
     ibatch = ibatch + ops.nSkipCov; % skip this many batches
 end
 % normalize result by number of batches
-chan_CC = chan_CC / ceil((Nbatch-1) / ops.nSkipCov);
+chan_CC = chan_CC / ceil((Nbatch-1) / ops.nSkipCov); % chan_CC might be all NaN's because 
 
 fclose(fid);
 
@@ -43,6 +47,7 @@ fclose(fid);
 % last_delays = 2*maxlag*ones(1,Nchan)+1;
 last_maxes = zeros(1,Nchan);
 [chan_corr_peak_maxes, chan_corr_peak_locs] = max(chan_CC, [], 1);
+best_peak_locs = 2*maxlag*ones(1,Nchan)+1; % initialize to maxlag+1, so 
 for iChan = 1:Nchan
     these_maxes = chan_corr_peak_maxes(Nchan*(iChan-1)+1:Nchan*iChan);
     if all(isnan(these_maxes))

@@ -50,7 +50,7 @@ if ~flag
    rez.K_CCG = {};
 end
 
-for j = 1:Nk
+for j = 1:Nk % now we traverse the neurons to find pairs to merge based on template correlation
     s1 = rez.st3(rez.st3(:,2)==isort(j), 1)/ops.fs; % find all spikes from this cluster
     if numel(s1)~=nspk(isort(j))
         fprintf('lost track of spike counts') %this is a check for myself to make sure new cluster are combined correctly into bigger clusters
@@ -60,7 +60,7 @@ for j = 1:Nk
     ienu = find(ccsort<.7, 1) - 1; % find the first pair which has too low of a correlation
 
     
-    % for all pairs above 0.5 correlation
+    % for all pairs above 0.7, check if they are refractory
     for k = 1:ienu
         s2 = rez.st3(rez.st3(:,2)==ix(k), 1)/ops.fs; % find the spikes of the pair
         % compute cross-correlograms, refractoriness scores (Qi and rir), and normalization for these scores

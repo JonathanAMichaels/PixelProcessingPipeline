@@ -77,7 +77,7 @@ function [x, iclust, flag] = bimodal_pursuit(Xd, wroll, ss, rmin, nlow, retry, u
     nmin = min(n1, n2);
     % fprintf('%6.0d, %6.0d, %2.2f, %2.2f, %2.4f \n', n1, n2, rr(1), rr(2), abs(mu1-mu2));
 
-    flag = 1;
+    flag = 1; % this flag is set to 0 if the split is vetoed
     iclust = rs(:, 1) > .5;
     if (min(rr) < rmin || nmin < nlow)
         flag = 0;
