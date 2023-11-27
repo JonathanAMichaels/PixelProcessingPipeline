@@ -221,7 +221,7 @@ print([myo_sorted_dir '/brokenChan.png'], '-dpng')
 %else
 %    brokenChan = int64(union(find(S(:, 2) > unipolarThresh | S(:, 1) < lowThresh), SNR_reject_chans)); %S(:, 3) > unipolarThresh
 %end
-brokenChan = SNR_reject_chans
+brokenChan = SNR_reject_chans';
 disp(['Automatically detected rejectable channels are: ' num2str(brokenChan')])
 
 % now actually remove the detected broken channels if True
