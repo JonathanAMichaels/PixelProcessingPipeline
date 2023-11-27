@@ -176,7 +176,7 @@ for q = 1:4
                 error("Error with 'remove_bad_myo_chans' setting in config.yaml. Numeric value after 'lowest' must be between 0 and " + length(chanList))
             end
             % reject N_reject lowest SNR channels
-            SNR_reject_chans = chanList(idx(1:N_reject));
+            SNR_reject_chans = idx(1:N_reject);
         end
 
         % [~, idx] = sort(SNR, 'ascend');
@@ -215,12 +215,13 @@ for q = 1:4
 end
 print([myo_sorted_dir '/brokenChan.png'], '-dpng')
 
-if length(chanList) == 16
-    % check for broken channels if meeting various criteria, including: high std, low spike rate, low SNR. Eliminate if any true
-    brokenChan = int64(union(find(S(:, 2) > bipolarThresh | S(:, 1) < lowThresh), SNR_reject_chans)); %S(:, 3) > bipolarThresh
-else
-    brokenChan = int64(union(find(S(:, 2) > unipolarThresh | S(:, 1) < lowThresh), SNR_reject_chans)); %S(:, 3) > unipolarThresh
-end
+%if length(chanList) == 16
+%    % check for broken channels if meeting various criteria, including: high std, low spike rate, low SNR. Eliminate if any true
+%    brokenChan = int64(union(find(S(:, 2) > bipolarThresh | S(:, 1) < lowThresh), SNR_reject_chans)); %S(:, 3) > bipolarThresh
+%else
+%    brokenChan = int64(union(find(S(:, 2) > unipolarThresh | S(:, 1) < lowThresh), SNR_reject_chans)); %S(:, 3) > unipolarThresh
+%end
+brokenChan = SNR_reject_chans
 disp(['Automatically detected rejectable channels are: ' num2str(brokenChan')])
 
 % now actually remove the detected broken channels if True
