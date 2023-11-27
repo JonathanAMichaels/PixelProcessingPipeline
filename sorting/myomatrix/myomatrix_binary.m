@@ -153,13 +153,13 @@ for q = 1:4
         % check by what criteria we should reject channels
         if strcmp(rejection_criteria, 'median')
             % reject channels with SNR < median
-            SNR_reject_chans = chanList(SNR < median_SNR);
+            SNR_reject_chans = SNR < median_SNR;
         elseif strcmp(rejection_criteria, 'mean')
             % reject channels with SNR < mean
-            SNR_reject_chans = chanList(SNR < mean_SNR);
+            SNR_reject_chans = SNR < mean_SNR;
         elseif strcmp(rejection_criteria, 'mean-1std')
             % reject channels with SNR < mean - std
-            SNR_reject_chans = chanList(SNR < mean_SNR - std_SNR);
+            SNR_reject_chans = SNR < mean_SNR - std_SNR;
         elseif startsWith(rejection_criteria, 'percentile')
             % ensure that the percentile is numeric and between 0 and 100
             percentile = str2double(rejection_criteria(11:end));
@@ -168,7 +168,7 @@ for q = 1:4
             end
             % reject channels with SNR < Nth percentile
             percentile_SNR = prctile(SNR, percentile);
-            SNR_reject_chans = chanList(SNR < percentile_SNR);
+            SNR_reject_chans = SNR < percentile_SNR;
         elseif startsWith(rejection_criteria, 'lowest')
             % ensure that the number of channels to reject is numeric and less than the number of channels
             N_reject = str2double(rejection_criteria(7:end));
