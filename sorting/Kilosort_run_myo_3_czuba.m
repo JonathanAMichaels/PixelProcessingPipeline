@@ -44,9 +44,8 @@ function rez = Kilosort_run_myo_3_czuba(ops_input_params, worker_id, worker_dir)
     ops.ntbuff = 1024; %ceil(bufferSec * ops.fs / 64) * 64; %  ceil(batchSec/4*ops.fs/64)*64; % (def=64)
     ops.NT = 2048 * 32 + ops.ntbuff; %ceil(batchSec * ops.fs / 32) * 32; % convert to 32 count increments of samples
     ops.sigmaMask = Inf; % we don't want a distance-dependant decay
-    ops.nPCs = double(num_KS_components); % how many PCs to project the spikes into (also used as number of template prototypes)
-    ops.nTEMP = ops.nPCs; % number of templates to use for spike detection
-    ops.nEig = ops.nPCs; % rank of svd for templates, % keep same as nPCs to avoid error
+    ops.nEig = double(num_KS_components); % rank of svd for templates, % keep same as nPCs to avoid error
+    ops.nPCs = ops.nEig; % how many PCs to project the spikes into (also used as number of template prototypes)
     ops.NchanTOT = double(max(num_chans - length(brokenChan), ops.nEig));
     ops.Th = [10 4]; % threshold crossings for pre-clustering (in PCA projection space)
     ops.spkTh = [-6]; % spike threshold in standard deviations (-6 default) (used in isolated_peaks_new/buffered and spikedetector3PC.cu)
