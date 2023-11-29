@@ -96,7 +96,7 @@ Ppen matlab and confirm that all mex files compile by running
 
 ## Usage
 Organize each experiment into one directory with a Neuropixel folder inside (e.g. 041422_g0), a Myomatrix folder (e.g. 2022-04-14_09-48-02_myo, which must have _myo at the end) and any .kinarm data files generated.
-The Myomatrix folder must be organized either as 'folder_myo/recording##/continuous/' for binary open ephys data, or as 'folder_myo/recording##/***.continuous' for open ephys format data.
+The Myomatrix folder must be organized either as 'folder_myo/Record Node ###/continuous/' for binary open ephys data, or as 'folder_myo/Record Node ###/***.continuous' for open ephys format data.
 
 Each time a sort is performed, a new folder will be created in the experiment directory with the date and time of the sort. Inside this folder will be the sorted data, the phy output files, and a copy of the ops used to sort the data. The original OpenEphys data will not be modified.
 
