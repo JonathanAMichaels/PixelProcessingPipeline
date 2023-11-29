@@ -122,7 +122,9 @@ if cluster:
 # Search working folder for existing configuration file
 config_file = find("config.yaml", folder)
 if len(config_file) > 1:
-    raise SystemExit("There shouldn't be more than one config file in here (something went wrong)")
+    raise SystemExit(
+        "There shouldn't be more than one config file in here (something went wrong)"
+    )
 elif len(config_file) == 0:
     print("No config file found - creating one now")
     create_config(script_folder, folder)
@@ -202,7 +204,9 @@ if not "do_KS_param_gridsearch" in config["Sorting"]:
     config["Sorting"]["do_KS_param_gridsearch"] = False
 # ensure Session fields are present in config
 if not "myo_chan_map_file" in config["Session"]:
-    config["myo_chan_map_file"] = [["linear_16ch_RF400_kilosortChanMap_unitSpacing.mat"]]
+    config["myo_chan_map_file"] = [
+        ["linear_16ch_RF400_kilosortChanMap_unitSpacing.mat"]
+    ]
 if not "myo_chan_list" in config["Session"]:
     config["Session"]["myo_chan_list"] = [[1, 16]]
 if not "myo_analog_chan" in config["Session"]:
@@ -212,19 +216,30 @@ if not "myo_muscle_list" in config["Session"]:
         ["Muscle" + str(i) for i in range(len(config["Session"]["myo_chan_list"]))]
     ]
 if not "remove_bad_myo_chans" in config["Session"]:
-    config["Session"]["remove_bad_myo_chans"] = [False] * len(config["Session"]["myo_chan_list"])
+    config["Session"]["remove_bad_myo_chans"] = [False] * len(
+        config["Session"]["myo_chan_list"]
+    )
 if not "remove_channel_delays" in config["Session"]:
-    config["Session"]["remove_channel_delays"] = [False] * len(config["Session"]["myo_chan_list"])
+    config["Session"]["remove_channel_delays"] = [False] * len(
+        config["Session"]["myo_chan_list"]
+    )
 
 # input assertions
-assert config["num_KS_jobs"] >= 1, "Number of parallel jobs must be greater than or equal to 1"
+assert (
+    config["num_KS_jobs"] >= 1
+), "Number of parallel jobs must be greater than or equal to 1"
 assert config["recordings"][0] == "all" or all(
-    [(item == round(item) >= 1 and isinstance(item, (int, float))) for item in config["recordings"]]
+    [
+        (item == round(item) >= 1 and isinstance(item, (int, float)))
+        for item in config["recordings"]
+    ]
 ), "'recordings' field must be a list of positive integers, or 'all' as first element"
 assert all(
     [(item >= 0 and isinstance(item, int)) for item in config["GPU_to_use"]]
 ), "'GPU_to_use' field must be greater than or equal to 0"
-assert config["num_neuropixels"] >= 0, "Number of neuropixels must be greater than or equal to 0"
+assert (
+    config["num_neuropixels"] >= 0
+), "Number of neuropixels must be greater than or equal to 0"
 assert (
     config["Sorting"]["num_KS_components"] >= 1
 ), "Number of KS components must be greater than or equal to 1"
@@ -245,7 +260,9 @@ if "-d" in opts:
     ), "Argument after '-d' must be a date string in format: YYYYMMDD_HHMMSS, YYYYMMDD_HHMMSSsss, or YYYYMMDD_HHMMSSffffff"
     # check if date_str is present in any of the subfolders in the config["myomatrix"] path
     subfolder_list = os.listdir(config["myomatrix"])
-    previous_sort_folder_to_use = [iFolder for iFolder in subfolder_list if date_str in iFolder]
+    previous_sort_folder_to_use = [
+        iFolder for iFolder in subfolder_list if date_str in iFolder
+    ]
     assert (
         len(previous_sort_folder_to_use) > 0
     ), f'No matching subfolder found in {config["myomatrix"]} for the date string provided'
@@ -282,7 +299,9 @@ else:
 
 # find MATLAB installation
 if os.path.isfile("/usr/local/MATLAB/R2021a/bin/matlab"):
-    matlab_root = "/usr/local/MATLAB/R2021a/bin/matlab"  # something else for testing locally
+    matlab_root = (
+        "/usr/local/MATLAB/R2021a/bin/matlab"  # something else for testing locally
+    )
 elif os.path.isfile("/srv/software/matlab/R2021b/bin/matlab"):
     matlab_root = "/srv/software/matlab/R2021b/bin/matlab"
 else:
@@ -301,14 +320,18 @@ if config["concatenate_myo_data"]:
         Record_Node_dir_list = [
             iDir for iDir in os.listdir(config["myomatrix"]) if "Record Node" in iDir
         ]
-        assert len(Record_Node_dir_list) == 1, "Please remove all but one 'Record Node ###' folder"
+        assert (
+            len(Record_Node_dir_list) == 1
+        ), "Please remove all but one 'Record Node ###' folder"
         Record_Node_dir = Record_Node_dir_list[0]
         Experiment_dir_list = [
             iDir
             for iDir in os.listdir(os.path.join(config["myomatrix"], Record_Node_dir))
             if iDir.startswith("experiment")
         ]
-        assert len(Experiment_dir_list) == 1, "Please remove all but one 'experiment#' folder"
+        assert (
+            len(Experiment_dir_list) == 1
+        ), "Please remove all but one 'experiment#' folder"
         Experiment_dir = Experiment_dir_list[0]
         recordings_dir_list = [
             iDir
@@ -317,7 +340,9 @@ if config["concatenate_myo_data"]:
             )
             if iDir.startswith("recording")
         ]
-        recordings_dir_list = [int(i[9:]) for i in recordings_dir_list if i.startswith("recording")]
+        recordings_dir_list = [
+            int(i[9:]) for i in recordings_dir_list if i.startswith("recording")
+        ]
         config["recordings"] = recordings_dir_list
     recordings_str = ",".join([str(i) for i in config["recordings"]])
 
@@ -327,7 +352,9 @@ if config["concatenate_myo_data"]:
         )
     elif len(concatDataPath) == 1:
         exact_match_recording_folder = [
-            iFolder for iFolder in os.listdir(concatDataPath[0]) if recordings_str == iFolder
+            iFolder
+            for iFolder in os.listdir(concatDataPath[0])
+            if recordings_str == iFolder
         ]
         if len(exact_match_recording_folder) == 1:
             # now check in the continuous/ folder for the 'Acquisition_Board-100.Rhythm Data' or
@@ -336,10 +363,14 @@ if config["concatenate_myo_data"]:
                 concatDataPath[0], exact_match_recording_folder[0], "continuous"
             )
             rhythm_folder = [
-                iFolder for iFolder in os.listdir(continuous_folder) if "Rhythm" in iFolder
+                iFolder
+                for iFolder in os.listdir(continuous_folder)
+                if "Rhythm" in iFolder
             ]
             if len(rhythm_folder) == 1:
-                continuous_dat_folder = os.path.join(continuous_folder, rhythm_folder[0])
+                continuous_dat_folder = os.path.join(
+                    continuous_folder, rhythm_folder[0]
+                )
                 # check if continuous.dat file exists in the continuous_dat_folder folder
                 if "continuous.dat" in os.listdir(continuous_dat_folder):
                     continuous_dat_is_present = True
@@ -374,10 +405,14 @@ if config["concatenate_myo_data"]:
             check=True,
         )
         concatDataPath = find("concatenated_data", config["myomatrix"])
-        print(f"Using newly concatenated data at {concatDataPath[0]+'/'+recordings_str}")
+        print(
+            f"Using newly concatenated data at {concatDataPath[0]+'/'+recordings_str}"
+        )
     # elif setting is enabled and concatenated data was found with requested recordings present
     elif recordings_str in os.listdir(concatDataPath[0]):
-        print(f"Using existing concatenated data at {concatDataPath[0]+'/'+recordings_str}")
+        print(
+            f"Using existing concatenated data at {concatDataPath[0]+'/'+recordings_str}"
+        )
     concatDataPath = concatDataPath[0] + "/" + recordings_str
 else:
     print("Not concatenating data")
@@ -463,7 +498,11 @@ if neuro_sort:
         if len(find("sync.mat", config_kilosort["neuropixel_folder"])) > 0:
             print("Found existing sync file")
         else:
-            print("Extracting sync signal from " + config_kilosort["neuropixel"] + " and saving")
+            print(
+                "Extracting sync signal from "
+                + config_kilosort["neuropixel"]
+                + " and saving"
+            )
             extract_sync(config_kilosort)
 
         # print('Starting drift correction of ' + config_kilosort['neuropixel'])
@@ -495,7 +534,9 @@ if neuro_post:
     neuro_folders = glob.glob(config["neuropixel"] + "/*_g*")
     path_to_add = script_folder + "/sorting/"
     for pixel in range(config["num_neuropixels"]):
-        config_kilosort["neuropixel_folder"] = neuro_folders[pixel] + "/kilosort2/sorter_output"
+        config_kilosort["neuropixel_folder"] = (
+            neuro_folders[pixel] + "/kilosort2/sorter_output"
+        )
         scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
         subprocess.run(
             [
@@ -543,7 +584,9 @@ if myo_sort:
         else config["recordings"],
         "myo_data_passband": np.array(config["myo_data_passband"], dtype=float),
         "myo_data_sampling_rate": float(config["myo_data_sampling_rate"]),
-        "num_KS_components": np.array(config["Sorting"]["num_KS_components"], dtype=int),
+        "num_KS_components": np.array(
+            config["Sorting"]["num_KS_components"], dtype=int
+        ),
         "trange": np.array(config["Session"]["trange"]),
         "sync_chan": int(config["Session"]["myo_analog_chan"]),
     }
@@ -565,7 +608,9 @@ if myo_sort:
             "geometries",
             config["Session"]["myo_chan_map_file"][myomatrix],
         )
-        config_kilosort["chans"] = np.array(config["Session"]["myo_chan_list"][myomatrix])
+        config_kilosort["chans"] = np.array(
+            config["Session"]["myo_chan_list"][myomatrix]
+        )
         config_kilosort["remove_bad_myo_chans"] = np.array(
             config["Session"]["remove_bad_myo_chans"][myomatrix]
         )
@@ -598,7 +643,9 @@ if myo_sort:
 
         # check if user wants to do grid search of KS params
         if config["Sorting"]["do_KS_param_gridsearch"] == 1:
-            iParams = list(get_KS_params_grid())  # get iterator of all possible param combinations
+            iParams = list(
+                get_KS_params_grid()
+            )  # get iterator of all possible param combinations
         else:
             # just pass an empty string to run once with chosen params
             iParams = [""]
@@ -631,26 +678,36 @@ if myo_sort:
                 if config["num_KS_jobs"] > 1
                 else config_kilosort["myo_sorted_dir"]
             )
-            print(f"Starting spike sorting of {save_path} on GPU {config['GPU_to_use'][worker_id]}")
+            print(
+                f"Starting spike sorting of {save_path} on GPU {config['GPU_to_use'][worker_id]}"
+            )
             worker_id = str(worker_id)
-            with tempfile.TemporaryDirectory(suffix=f"_worker{worker_id}") as worker_dir:
+            with tempfile.TemporaryDirectory(
+                suffix=f"_worker{worker_id}"
+            ) as worker_dir:
                 while True:
                     # while no exhaustion of iterator
                     try:
                         these_params = next(iParams)
                         if type(these_params) == dict:
-                            print(f"Using these KS params from Kilosort_gridsearch_config.py")
+                            print(
+                                f"Using these KS params from Kilosort_gridsearch_config.py"
+                            )
                             print(these_params)
                             param_keys = list(these_params.keys())
                             param_keys_str = [f"'{k}'" for k in param_keys]
                             param_vals = list(these_params.values())
                             zipped_params = zip(param_keys_str, param_vals)
-                            flattened_params = itertools.chain.from_iterable(zipped_params)
+                            flattened_params = itertools.chain.from_iterable(
+                                zipped_params
+                            )
                             # this is a comma-separated string of key-value pairs
                             passable_params = ",".join(str(p) for p in flattened_params)
                         elif type(these_params) == str:
                             print(f"Using KS params from Kilosort_run_myo_3.m")
-                            passable_params = these_params  # this is a string: 'default'
+                            passable_params = (
+                                these_params  # this is a string: 'default'
+                            )
                         else:
                             print("ERROR: KS params must be a dictionary or a string.")
                             raise TypeError
@@ -688,7 +745,9 @@ if myo_sort:
                         num_KS_clusters = str(len(rez["good"]))
                         # sum the 1's in the good field of ops.mat to get number of good units
                         num_good_units = str(sum(rez["good"])[0])
-                        brokenChan = scipy.io.loadmat(f"{save_path}/brokenChan.mat")["brokenChan"]
+                        brokenChan = scipy.io.loadmat(f"{save_path}/brokenChan.mat")[
+                            "brokenChan"
+                        ]
                         goodChans = np.setdiff1d(np.arange(1, 17), brokenChan)
                         goodChans_str = ",".join(str(i) for i in goodChans)
 
@@ -699,23 +758,31 @@ if myo_sort:
                         )
                         git_branches = git_branches.stdout.split("\n")
                         git_branches = [i.strip() for i in git_branches]
-                        git_branch = [i for i in git_branches if i.startswith("*")][0][2:]
+                        git_branch = [i for i in git_branches if i.startswith("*")][0][
+                            2:
+                        ]
 
                         # remove spaces and single quoutes from passable_params string
-                        time_stamp_us = datetime.datetime.now().strftime("%Y%m%d_%H%M%S%f")
-                        filename_friendly_params = passable_params.replace("'", "").replace(" ", "")
+                        time_stamp_us = datetime.datetime.now().strftime(
+                            "%Y%m%d_%H%M%S%f"
+                        )
+                        filename_friendly_params = passable_params.replace(
+                            "'", ""
+                        ).replace(" ", "")
                         final_filename = (
                             f"sorted{str(myomatrix)}"
                             f"_{time_stamp_us}"
                             f"_rec-{recordings_str}"
-                            f"_chans-{goodChans_str}"
-                            f"_{num_good_units}-good-of-{num_KS_clusters}-total"
+                            # f"_chans-{goodChans_str}"
+                            # f"_{num_good_units}-good-of-{num_KS_clusters}-total"
                             f"_{filename_friendly_params}"
-                            f"_{git_branch}"
+                            # f"_{git_branch}"
                         )
                         # remove trailing underscore if present
                         final_filename = (
-                            final_filename[:-1] if final_filename.endswith("_") else final_filename
+                            final_filename[:-1]
+                            if final_filename.endswith("_")
+                            else final_filename
                         )
                         # store final_filename in a new ops.mat field in the sorted0 folder
                         ops = scipy.io.loadmat(f"{save_path}/ops.mat")
@@ -812,9 +879,9 @@ if myo_post:
         #     # run Phy extract-waveforms on intermediate merges
         #     subprocess.run(["phy", "extract-waveforms", "params.py"], cwd=iDir, check=True)
         # create symlinks to processed data
-        Path(f"{config_kilosort['myo_sorted_dir']}/custom_merges/final_merge/proc.dat").symlink_to(
-            Path("../../proc.dat")
-        )
+        Path(
+            f"{config_kilosort['myo_sorted_dir']}/custom_merges/final_merge/proc.dat"
+        ).symlink_to(Path("../../proc.dat"))
         # run Phy extract-waveforms on final merge
         subprocess.run(
             ["phy", "extract-waveforms", "params.py"],

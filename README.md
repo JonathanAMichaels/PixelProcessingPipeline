@@ -10,7 +10,7 @@ This toolbox will:
 - For Myomatrix data:
   - Combine OpenEphys data into a single binary and automatically remove broken channels
   - Extract and save the sync signal sent from the behavioural task
-  - Perform spike sorting with a modified version of Kilosort 3.0 (wider templates)
+  - Perform spike sorting with a modified version of Kilosort 3.0
   - Combine similar units, calculate motor unit statistics, export back to phy
 
 ## Folder Tree Structure
@@ -18,6 +18,8 @@ This toolbox will:
 
 ## Installation
 ### Requirements
+Currently, using a Linux-based OS is recommended. The code has been tested on Ubuntu and CentOS. Windows support is experimental and may require additional changes.
+
 Many processing steps require a CUDA capable GPU.
   - For Neuropixel data, a GPU with at least 10GB of onboard RAM is recommended
   - For Myomatrix data, currently only GPUs with compute capability >=5.0 are supported due to shared thread memory requirements
