@@ -76,7 +76,7 @@ To set up a conda environment, follow these steps:
     conda activate pipeline
 
 #### Final Installation Steps
-Ppen matlab and confirm that all mex files compile by running
+Open matlab and confirm that all mex files compile by running
     
     WARNING: make sure to activate the pipeline environment before running these commands
 
