@@ -39,7 +39,7 @@ while ibatch<=Nbatch
         buff(:, nsampcurr+1:NTbuff) = repmat(buff(:,nsampcurr), 1, NTbuff-nsampcurr);
     end
 
-    datr    = gpufilter(buff, ops, rez.ops.chanMap); % apply filters and median subtraction
+    datr    = gpufilter(buff, ops, chanMap); % apply filters and median subtraction
 
     CC        = CC + (datr' * datr)/NT; % sample covariance
 

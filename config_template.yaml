@@ -1,6 +1,11 @@
 ---
 # Configuration file
 # Auto-generated parameters
+# GPU to use for kilosort, (a list of integers, e.g., [1,2,5,6])
+GPU_to_use: [0]
+# number of Kilosort jobs to run at once (must be <= number of GPUs, will run in parallel if >1)
+# setting num_KS_jobs > 1 can only be used when do_KS_param_gridsearch is True
+num_KS_jobs: 1
 # path of working directory (must be provided in command line)
 folder:
 # path to neuropixel directory
@@ -9,6 +14,8 @@ neuropixel:
 num_neuropixels:
 # path to myomatrix directory (should end in _myo)
 myomatrix:
+# specify recordings to process (can be [all] or a list of integers, e.g., [1,2,5,6])
+recordings: [1]
 # whether to concatenate myomatrix data
 concatenate_myo_data: False
 # set bandpass filter settings for myomatrix data
@@ -25,22 +32,29 @@ script_dir:
 Registration:
 # Sorting parameters
 Sorting:
+    num_KS_components: 9
+    do_KS_param_gridsearch: False
 # Session-specific parameters
 Session:
     trange:
         - 0
         - 0
-    myo_chan_map_file: 
-        - bipolar_test_kilosortChanMap.mat
-        - bipolar_test_kilosortChanMap.mat
+    myo_chan_map_file:
+        - linear_16ch_RF400_kilosortChanMap_unitSpacing.mat
+        - linear_16ch_RF400_kilosortChanMap_unitSpacing.mat
     myo_chan_list:
         - [1, 16]
         - [17, 32]
-    # Remove bad channels from myomatrix data
-    # This can be a sequence of booleans or a sequence of lists:
-    # True for automatic bad channel removal, False to include all channels.
-    # Provide an integer list of channels to remove those channels for that session, e.g., [1,2,3,4]
+    ## Remove bad channels from myomatrix data
+    # This can be a sequence of booleans, of strings, or of lists:
+    # Booleans: True for automatic bad channel removal (defaults to reject below median), False to include all channels.
+    # Strings: Provide 'median', 'mean', 'mean-1std', 'percentileXX', or 'lowestYY' (XX,YY are numeric, 0<XX<100, and 0<YY<Nchans)
+    #          to remove channels below the corresponding threshold.
+    # Lists: Provide an integer list of channels to remove those channels for that session, e.g., [1,2,3,4]
     remove_bad_myo_chans:
+        - True
+        - True
+    remove_channel_delays:
         - True
         - True
     myo_analog_chan: 33

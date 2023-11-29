@@ -22,10 +22,10 @@ const int nblock = 32;
 
 __global__ void	crossFilter(const double *Params, const float *W1, const float *W2,
         const float *UtU, float *WtW){    
-  //__shared__ float shW1[nblock*201], shW2[nblock*201];
+  //__shared__ float shW1[nblock*61], shW2[nblock*61];
   extern __shared__ float array[];
   float* shW1 = (float*)array;
-  float* shW2 = (float*)&shW1[nblock*201];
+  float* shW2 = (float*)&shW1[nblock*61];
 
   float x;
   int nt0, tidx, tidy , bidx, bidy, i, Nfilt, t, tid1, tid2;
@@ -84,7 +84,14 @@ __global__ void	crossFilter(const double *Params, const float *W1, const float *
 void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, mxArray const *prhs[])
 {
-  int maxbytes = 166912; // 163 KiB
+// only increase Shared Memory Size if needed, and the highest choice
+// should be according to the Compute Capability of your GPU
+//   int maxbytes = 232448; // 227 KiB, Compute Capability 9.0
+//   int maxbytes = 166912; // 163 KiB, Compute Capability 8.0, 8.7
+//   int maxbytes = 101376; // 99 KiB, Compute Capability 8.6, 8.9
+//   int maxbytes = 65536; // 64 KiB, Compute Capability 7.5
+//   int maxbytes = 98304; // 96 KiB, Compute Capability 7.0, 7.2
+int maxbytes = 49152; // 48 KiB, Compute Capability 5.0-6.2
   cudaFuncSetAttribute(crossFilter, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
 
     /* Declare input variables*/
@@ -122,7 +129,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
 
   dim3 grid(1 + (Nfilt/nblock), 1 + (Nfilt/nblock));
   dim3 block(nblock, nblock);
-  crossFilter<<<grid, block, sizeof(float)*(nblock*201*2)>>>(d_Params, d_W1, d_W2, d_UtU, d_WtW);
+  crossFilter<<<grid, block, sizeof(float)*(nblock*61*2)>>>(d_Params, d_W1, d_W2, d_UtU, d_WtW);
 
   plhs[0] 	= mxGPUCreateMxArrayOnGPU(WtW);
 

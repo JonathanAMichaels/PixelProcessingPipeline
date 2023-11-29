@@ -1,4 +1,3 @@
-
 ops = [];
 ops.fs = 30000;
 
@@ -67,7 +66,8 @@ ops.useGit = 0;
 
 
 %% Apply changes to standard ops
-ops.fshigh = 300; % map system has hardware high pass filters at 300
+load(fullfile(script_dir, '/tmp/config.mat'), 'myo_data_passband')
+ops.fshigh = myo_data_passband(1); % map system has hardware high pass filters at 300
 
 % make waveform length independent of sampling rate
 % ops.nt0                 = ceil( 0.002 * ops.fs); % width of waveform templates (makes consistent N-ms either side of spike, regardless of sampling rate)
@@ -98,7 +98,7 @@ ops.minFR = ops.minFR / max([ops.learnRand*2,1]);
 % threshold(s) used when establishing baseline templates from raw data
 % - standard codebase tends to [frustratingly] overwrite this param, but working to straighten out those instances
 ops.spkTh = -6;     % [def= -6]
-ops.ThPre = 8;      % [def= 8]
+% ops.ThPre = 8;      % [def= 8] Not used
 
 % splitting a cluster at the end requires at least this much isolation for each sub-cluster (max = 1)
 % - only relevant if post-hoc merges & splits are used (which is not recommended, see flags above)

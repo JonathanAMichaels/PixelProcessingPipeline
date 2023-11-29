@@ -24,4 +24,4 @@ peaks([1:nt0 end-nt0:end], :) = 0;
 
 [row, col, mu] = find(peaks); % find the non-zero peaks, and take their amplitudes
 
-mu = - mu; % invert the sign of the amplitudes
+mu = abs(mu); % take the absolute value of the amplitudes

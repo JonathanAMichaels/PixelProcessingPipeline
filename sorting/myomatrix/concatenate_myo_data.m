@@ -1,48 +1,66 @@
-function concatenate_myo_data(myomatrix_folder)
+function concatenate_myo_data(myomatrix_folder, recordings_to_concatenate)
     listing = struct2cell(dir(myomatrix_folder));
     subdir = listing(1, :);
-    recordNodeFiles = [];
+    recordNodeFolders = [];
     dbstop if error
     % Determine Record Node folder
     for i = 1:length(subdir)
         if (contains(subdir(i), 'Record Node'))
-            recordNodeFiles = [recordNodeFiles, subdir(i)];
+            recordNodeFolders = [recordNodeFolders, subdir(i)];
         end
     end
-    for i = 1:length(recordNodeFiles)
-        currNode = strcat(myomatrix_folder, '/', recordNodeFiles{i});
+    if length(recordNodeFolders) > 1
+        error("Multiple 'Record Node' folders found in the myomatrix folder. Please remove all but one.")
+    end
+    for i = 1:length(recordNodeFolders)
+        currNode = strcat(myomatrix_folder, '/', recordNodeFolders{i});
         folders = struct2cell(dir(currNode));
         subdir = folders(1, :);
-        experimentFiles = [];
+        experimentFolders = [];
 
         % Determine experiment folders
         for j = 1:length(subdir)
             if (startsWith(subdir(j), 'experiment'))
-                experimentFiles = [experimentFiles, subdir(j)];
+                experimentFolders = [experimentFolders, subdir(j)];
             end
         end
-        for k = 1:length(experimentFiles)
-            currExp = strcat(currNode, '/', experimentFiles{k});
+        if length(experimentFolders) > 1
+            error("Multiple 'experiment' folders found in the Record Node folder. Please remove all but one.")
+        end
+        for k = 1:length(experimentFolders)
+            currExp = strcat(currNode, '/', experimentFolders{k});
             d = dir(currExp);
-            d = d(~ismember({d.name}, {'.', '..'}));
+            d = d(~ismember({d.name}, {'.', '..', 'concatenated_data'}));
             folders = struct2cell(d);
             subdir = folders(1, :);
-            disp("Concatenating: ")
-            disp(subdir)
-            recordingFiles = [];
+            disp("Concatenating recordings: ")
+            disp(recordings_to_concatenate{1})
+            recordingFolders = [];
 
             % Determine recording folders
-            for l = 1:length(subdir)
-                if (startsWith(subdir(l), 'recording') && ~contains(subdir(l), '99'))
-                    recordingFiles = [recordingFiles, subdir(l)];
+            if class(recordings_to_concatenate{1}) == "char" && recordings_to_concatenate{1} == "all"
+                for iRec = 1:length(subdir)
+                    if subdir(iRec)==strcat('recording', iRec)
+                        recordingFolders = [recordingFolders, subdir(iRec)];
+                    end
                 end
+            elseif class(recordings_to_concatenate{1}) == "double"
+                rep_str=repmat('recording',length(recordings_to_concatenate),1);
+                recording_str_array = string(cellstr(strcat(rep_str, num2str(recordings_to_concatenate{1}'))));
+                for iRec = 1:length(subdir)
+                    if ismember(subdir(iRec),recording_str_array)
+                        recordingFolders = [recordingFolders, subdir(iRec)];
+                    end
+                end
+            else
+                error("Recordings to concatenate must be either 'all' or a double array.")
             end
 
             continuousFiles = [];
-            for m = 1:length(recordingFiles)
-                currRecording = strcat(currExp, '/', recordingFiles{m}, '/continuous', '/Acquisition_Board-100.Rhythm Data');
+            for m = 1:length(recordingFolders)
+                currRecording = strcat(currExp, '/', recordingFolders{m}, '/continuous', '/Acquisition_Board-100.Rhythm Data');
                 if ~isfolder(currRecording)
-                    currRecording = strcat(currExp, '/', recordingFiles{m}, '/continuous', '/Rhythm_FPGA-100.0');
+                    currRecording = strcat(currExp, '/', recordingFolders{m}, '/continuous', '/Rhythm_FPGA-100.0');
                     if ~isfolder(currRecording)
                         error('Folder %s does not exist.', currRecording)
                     end
@@ -68,8 +86,8 @@ function concatenate_myo_data(myomatrix_folder)
             % open continuous.dat file for writing
             rhythmFolderNameCellArray = split(currRecording, '/');
             rhythmFolderName = string(rhythmFolderNameCellArray(end)); % get last array element
-            concatenated_data_dir = strcat(currExp, '/concatenated_data/');
-            continuous_folder = strcat(concatenated_data_dir, 'continuous/', rhythmFolderName);
+            concatenated_data_dir = strcat(currExp, '/concatenated_data/', join(string(recordings_to_concatenate{1}),','));
+            continuous_folder = strcat(concatenated_data_dir, '/continuous/', rhythmFolderName);
             [~, ~, ~] = mkdir(continuous_folder);
             fid2 = fopen(strcat(continuous_folder, '/continuous.dat'), 'w');
         end
@@ -78,9 +96,9 @@ function concatenate_myo_data(myomatrix_folder)
         fwrite(fid2, outputDat, 'int16');
         fclose(fid2);
         % copy a structure.oebin into concatenated_data folder
-        lastRecordingFolder = strcat(currExp, '/', recordingFiles{m});
-        copyfile(strcat(lastRecordingFolder, '/structure.oebin'), concatenated_data_dir)
-        disp("Data from " + length(recordingFiles) + " files concatenated together");
-        quit
+        lastRecordingFolder = strcat(currExp, '/', recordingFolders{m});
+        copyfile(strcat(lastRecordingFolder, '/structure.oebin'), strcat(concatenated_data_dir,'/structure.oebin'));
+        disp("Data from " + length(recordingFolders) + " files concatenated together");
     end
+    quit
 end

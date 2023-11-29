@@ -38,7 +38,7 @@ rez = preprocessDataSub(ops);
 
 rez = datashift2(rez, 1);
 
-rez.W = []; rez.U = [];, rez.mu = [];
+rez.W = []; rez.U = []; rez.mu = [];
 rez = learnAndSolve8b(rez, now);
 
 % OPTIONAL: remove double-counted spikes - solves issue in which individual spikes are assigned to multiple templates.
