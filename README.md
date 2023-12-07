@@ -76,7 +76,7 @@ To set up a conda environment, follow these steps:
     conda activate pipeline
 
 #### Final Installation Steps
-If you are processing Myomatrix data, open matlab and confirm that all mex files compile by running
+Open matlab and confirm that all mex files compile by running
     
     WARNING: make sure to activate the pipeline environment before running these commands
 
@@ -84,7 +84,7 @@ If you are processing Myomatrix data, open matlab and confirm that all mex files
     cd PixelProcessingPipeline/sorting/Kilosort-3.0/CUDA/
     mexGPUall
 
-Compile codes necessary for drift estimation and install supplementary packages
+(Optional) Compile codes necessary for drift estimation and install supplementary packages
 
     cd PixelProcessingPipeline/registration/spikes_localization_registration
     python3 setup.py build_ext --inplace
@@ -143,18 +143,6 @@ To run a sort on the Myomatrix data, run
 To run a sort on the Neuropixel data, run
     
     python pipeline.py -f "/path/to/sessionYYYYMMDD" -neuro_sort
-##### Post Processing Commands
-For post processing of the latest myomatrix sort, run
-
-    python pipeline.py -f "/path/to/sessionYYYYMMDD" -myo_post
-
-For post processing of a previously saved myomatrix sort, call below with the corresponding datestring 
-
-    python pipeline.py -f "/path/to/sessionYYYYMMDD" -d YYYYMMDD_HHMMSS -myo_post
-
-For post processing of the latest neuropixel sort, run
-
-    python pipeline.py -f "/path/to/sessionYYYYMMDD" -neuro_post
 
 ##### Plotting with Phy Command
 For plotting the latest myomatrix sort with Phy GUI, run
@@ -179,13 +167,12 @@ Alternatively, you can call any combination of:
     -neuro_post
     -myo_config
     -myo_sort
-    -myo_post
     -myo_phy
     -lfp_extract
 
-to perform only those steps. For example, if you want to configure, immediately spike sort, and post process Myomatrix data, run
+to perform only those steps. For example, if you want to configure and immediately spike sort, run
 
-    python pipeline.py -f "/path/to/sessionYYYYMMDD" -config -myo_config -myo_sort -myo_post
+    python pipeline.py -f "/path/to/sessionYYYYMMDD" -config -myo_config -myo_sort 
 
 If you want to run a grid search over a range of KS parameters, edit the `Kilosort_gridsearch_config.py`
 file under the sorting folder to include all variable combinations you want to try. Be aware of the combinatorics so you don't generate more sorts than you expected. Then open the config file and set the gridsearch parameter to True, for example by running
