@@ -47,6 +47,8 @@ function concatenate_myo_data(myomatrix_folder, recordings_to_concatenate)
             elseif class(recordings_to_concatenate{1}) == "double"
                 rep_str=repmat('recording',length(recordings_to_concatenate),1);
                 recording_str_array = string(cellstr(strcat(rep_str, num2str(recordings_to_concatenate{1}'))));
+                % remove any spaces in the middle of the string
+                recording_str_array = strrep(recording_str_array, ' ', '');
                 for iRec = 1:length(subdir)
                     if ismember(subdir(iRec),recording_str_array)
                         recordingFolders = [recordingFolders, subdir(iRec)];
