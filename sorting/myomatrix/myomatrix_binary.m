@@ -1,7 +1,7 @@
 script_dir = pwd; % get directory where repo exists
 load(fullfile(script_dir, '/tmp/config.mat'))
 
-% for use with monopolar
+% for use with monopolar (% should remove this eventually)
 channelRemap = [23:-1:8 24:31 0:7] + 1;
 % for use with bipolar
 % channelLabelsBipolar = [25, 26; 27, 28; 29, 30; 31, 32; ...
@@ -61,7 +61,7 @@ else
     clear tempdata
 end
 
-if length(dataChan) == 32
+if length(dataChan) == 32 % should remove this eventually
     data = data(:, channelRemap);
 end
 if ~isempty(analogData)    
@@ -78,9 +78,7 @@ disp(['Total recording time: ' num2str(size(data, 1) / myo_data_sampling_rate / 
 
 clf
 S = zeros(size(data, 2), 3);
-bipolarThresh = 90;
-unipolarThresh = 120;
-lowThresh = 0.1;
+
 % bipolar = length(chanList) == 16;
 % when q is 1, we will compute count the number of spikes in the channel and compare to a threshold
 % when q is 2, we will compute the std of the low freq noise in the channel
@@ -236,14 +234,17 @@ if isa(remove_bad_myo_chans(1), 'logical') || isa(remove_bad_myo_chans, 'char')
         data(:, brokenChan) = [];
         chanList(brokenChan) = [];
         disp(['Just removed automatically detected broken/noisy channels: ' num2str(brokenChan')])
-        disp(['New channel list is: ' num2str(chanList)])
+        disp(['New channel list is: ' num2str(chanList(~brokenChan))] )
     end
 elseif isa(remove_bad_myo_chans, 'integer')
+    zero_arr = zeros(1, length(remove_bad_myo_chans));
+    zero_arr(remove_bad_myo_chans) = 1;
+    remove_bad_myo_chans = logical(zero_arr);
     brokenChan = remove_bad_myo_chans; % overwrite brokenChan with manually provided list
     data(:, brokenChan) = [];
     chanList(brokenChan) = [];
     disp(['Just removed manually provided broken/noisy channels: ' num2str(brokenChan)])
-    disp(['New channel list is: ' num2str(chanList)])
+    disp(['New channel list is: ' num2str(chanList(~brokenChan))] )
 else
     error('remove_bad_myo_chans must be a boolean, string with SNR rejection method, or an integer list of channels to remove')
 end
@@ -264,7 +265,7 @@ if ~isempty(brokenChan) && remove_bad_myo_chans(1) ~= false
     % else
     numDummy = max(0, num_KS_components - size(data, 2)); % make sure it's not negative
     dummyData = zeros(size(data, 1), numDummy, 'int16');
-    data = [data dummyData]; % add dummy channels to make size larger than num_KS_components
+    data = [data dummyData]; % add dummy channels to make size match num_KS_components
     chanMap = 1:size(data, 2);
     chanMap0ind = chanMap - 1;
     connected = true(size(data, 2), 1);
