@@ -234,7 +234,7 @@ if isa(remove_bad_myo_chans(1), 'logical') || isa(remove_bad_myo_chans, 'char')
         data(:, brokenChan) = [];
         chanList(brokenChan) = [];
         disp(['Just removed automatically detected broken/noisy channels: ' num2str(brokenChan')])
-        disp(['New channel list is: ' num2str(chanList(~brokenChan))] )
+        disp(['New channel list is: ' num2str(chanList)])
     end
 elseif isa(remove_bad_myo_chans, 'integer')
     zero_arr = zeros(1, length(remove_bad_myo_chans));
@@ -244,7 +244,7 @@ elseif isa(remove_bad_myo_chans, 'integer')
     data(:, brokenChan) = [];
     chanList(brokenChan) = [];
     disp(['Just removed manually provided broken/noisy channels: ' num2str(brokenChan)])
-    disp(['New channel list is: ' num2str(chanList(~brokenChan))] )
+    disp(['New channel list is: ' num2str(chanList)])
 else
     error('remove_bad_myo_chans must be a boolean, string with SNR rejection method, or an integer list of channels to remove')
 end
