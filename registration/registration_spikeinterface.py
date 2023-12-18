@@ -34,8 +34,6 @@ def registration(config):
         stream_names, stream_ids = si.get_neo_streams('spikeglx', spikeglx_folder)
         print(stream_names)
         raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
-        raw_rec
-        raw_rec.get_probe().to_dataframe()
 
         fig, ax = plt.subplots(figsize=(15, 10))
         si.plot_probe_map(raw_rec, ax=ax, with_channel_ids=True)
