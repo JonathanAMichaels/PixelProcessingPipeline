@@ -34,22 +34,23 @@ def registration(config):
         print(stream_names)
         raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
 
-        P = raw_rec.get_probe()
-        from probeinterface import ProbeGroup
-        PRB = ProbeGroup()
-        PRB.add_probe(P)
+        #P = raw_rec.get_probe()
+        #from probeinterface import ProbeGroup
+        #PRB = ProbeGroup()
+        #PRB.add_probe(P)
         #from probeinterface import write_prb, read_prb
         #write_prb('NPnew.prb', PRB)
 
-        # preprocessing 1 : bandpass (this is smoother) + cmr
-        rec1 = si.bandpass_filter(recording=raw_rec, freq_min=300., freq_max=5000.)
-        rec1 = si.phase_shift(rec1)
-        bad_channel_ids, channel_labels = si.detect_bad_channels(rec1, method='mad', std_mad_threshold=1.2,
+        rec_eval_noise = si.highpass_filter(recording=raw_rec, freq_min=400.)
+        bad_channel_ids, channel_labels = si.detect_bad_channels(rec_eval_noise, method='mad', std_mad_threshold=1.5,
                                                                  chunk_duration_s=0.3,
-                                                                 num_random_chunks=20)
+                                                                 num_random_chunks=50)
         print(bad_channel_ids)
-        rec1 = rec1.remove_channels(bad_channel_ids)
+
         # rec_bad = interpolate_bad_channels(rec_shifted, bad_channel_ids)
+        rec1 = raw_rec.remove_channels(bad_channel_ids)
+        rec1 = si.bandpass_filter(recording=rec1, freq_min=300., freq_max=5000.)
+        rec1 = si.phase_shift(rec1)
         rec1 = highpass_spatial_filter(rec1)
 
         # Step 1 : activity profile
