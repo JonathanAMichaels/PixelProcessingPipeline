@@ -61,10 +61,6 @@ def registration(config):
         # preprocessing 2 : highpass + cmr
         rec2 = si.bandpass_filter(recording=raw_rec, freq_min=300.)
         rec2 = si.phase_shift(rec2)
-        bad_channel_ids, channel_labels = si.detect_bad_channels(rec2, noisy_channel_threshold=0.5,
-                                                                 dead_channel_threshold=-0.1, chunk_duration_s=0.5,
-                                                                 num_random_chunks=100)
-        print(bad_channel_ids)
         rec2 = rec2.remove_channels(bad_channel_ids)
         # rec_bad = interpolate_bad_channels(rec_shifted, bad_channel_ids)
         rec2 = highpass_spatial_filter(rec2)
