@@ -42,12 +42,13 @@ def registration(config):
         #write_prb('NPnew.prb', PRB)
 
         rec_eval_noise = si.highpass_filter(recording=raw_rec, freq_min=400.)
-        #bad_channel_ids, channel_labels = si.detect_bad_channels(rec_eval_noise, method='mad', std_mad_threshold=1.5,
-        #                                                         chunk_duration_s=0.3,
-        #                                                         num_random_chunks=50)
-        bad_channel_ids, channel_labels = si.detect_bad_channels(rec_eval_noise,
-                                                                 chunk_duration_s=0.3, psd_hf_threshold=0.001,
-                                                                 num_random_chunks=50)
+        bad_channel_ids1, channel_labels = si.detect_bad_channels(rec_eval_noise, method='mad', std_mad_threshold=1.5,
+                                                                  chunk_duration_s=0.3,
+                                                                  num_random_chunks=100)
+        bad_channel_ids2, channel_labels = si.detect_bad_channels(rec_eval_noise,
+                                                                  chunk_duration_s=0.3,
+                                                                  num_random_chunks=100)
+        bad_channel_ids = np.concatenate((bad_channel_ids1, bad_channel_ids2))
         print(bad_channel_ids)
 
         # rec_bad = interpolate_bad_channels(rec_shifted, bad_channel_ids)
