@@ -35,9 +35,6 @@ def registration(config):
         print(stream_names)
         raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
 
-        fig, ax = plt.subplots(figsize=(15, 10))
-        si.plot_probe_map(raw_rec, ax=ax, with_channel_ids=True)
-        ax.set_ylim(-100, 100)
         P = raw_rec.get_probe()
         from probeinterface import ProbeGroup
         PRB = ProbeGroup()
