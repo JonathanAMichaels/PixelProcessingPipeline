@@ -63,7 +63,6 @@ def registration(config):
 
         # Step 2: motion inference
         motion, temporal_bins, spatial_bins = estimate_motion(recording=rec1,
-                                                              folder=motion_folder,
                                                               peaks=peaks,
                                                               peak_locations=peak_locations,
                                                               method="decentralized",
