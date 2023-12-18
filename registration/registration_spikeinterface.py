@@ -46,7 +46,7 @@ def registration(config):
         rec1 = si.phase_shift(rec1)
         bad_channel_ids, channel_labels = si.detect_bad_channels(rec1, noisy_channel_threshold=0.5,
                                                                  dead_channel_threshold=-0.1, chunk_duration_s=0.5,
-                                                                 num_random_chunks=100)
+                                                                 num_random_chunks=10)
         print(bad_channel_ids)
         rec1 = rec1.remove_channels(bad_channel_ids)
         # rec_bad = interpolate_bad_channels(rec_shifted, bad_channel_ids)
