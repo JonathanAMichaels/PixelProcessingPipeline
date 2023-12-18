@@ -51,7 +51,17 @@ def registration(config):
         # rec_bad = interpolate_bad_channels(rec_shifted, bad_channel_ids)
         rec1 = highpass_spatial_filter(rec1)
 
-        # here the corrected recording is done on the preprocessing 1
-        # rec_corrected1 will not be used for sorting!
-        rec_corrected1 = correct_motion(recording=rec1, preset="nonrigid_accurate",
-                                        detect_kwargs=dict(detect_threshold=6.), folder=motion_folder, **job_kwargs)
+        # Step 1 : activity profile
+        peaks = detect_peaks(recording=rec1, folder=motion_folder, method="locally_exclusive", detect_threshold=8.0, **job_kwargs)
+        peak_locations = localize_peaks(recording=rec1, peaks=peaks, method="monopolar_triangulation", folder=motion_folder, **job_kwargs)
+
+        # Step 2: motion inference
+        motion, temporal_bins, spatial_bins = estimate_motion(recording=rec1,
+                                                              folder=motion_folder,
+                                                              peaks=peaks,
+                                                              peak_locations=peak_locations,
+                                                              method="decentralized",
+                                                              bin_duration_s=5.0,
+                                                              bin_um=5.0,
+                                                              win_step_um=50.0,
+                                                              win_sigma_um=300.0)
