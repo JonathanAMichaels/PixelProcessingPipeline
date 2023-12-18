@@ -71,6 +71,10 @@ def registration(config):
                                                               bin_um=5.0,
                                                               win_step_um=50.0,
                                                               win_sigma_um=300.0)
+        np.save(motion_folder / "temporal_bins.npy", temporal_bins)
+        np.save(motion_folder / "motion.npy", motion)
+        if spatial_bins is not None:
+            np.save(motion_folder / "spatial_bins.npy", spatial_bins)
 
         motion_info = load_motion_info(motion_folder)
         fig = plt.figure(figsize=(14, 8))
