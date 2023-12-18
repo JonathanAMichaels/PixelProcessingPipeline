@@ -48,11 +48,6 @@ def sorting(config):
         temporal_bins=motion_info['temporal_bins'],
         spatial_bins=motion_info['spatial_bins'],
         **motion_info['parameters']['interpolate_motion_kwargs'])
-    # and plot
-    fig = plt.figure(figsize=(14, 8))
-    si.plot_motion(motion_info, figure=fig, depth_lim=(400, 600),
-                   color_amplitude=True, amplitude_cmap='inferno', scatter_decimate=10)
-    plt.savefig(motion_folder / 'motion.png')
 
     params_kilosort2_5 = si.get_default_sorter_params('kilosort2_5')
     params_kilosort2_5['do_correction'] = False

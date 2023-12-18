@@ -53,10 +53,13 @@ def registration(config):
         rec1 = highpass_spatial_filter(rec1)
 
         # Step 1 : activity profile
-        #peaks = detect_peaks(recording=rec1, folder=motion_folder, method="locally_exclusive", detect_threshold=8.0, **job_kwargs)
+        #peaks = detect_peaks(recording=rec1, method="locally_exclusive", detect_threshold=8.0, **job_kwargs)
+        #np.save(motion_folder / 'peaks.npy')
         peaks = np.load(motion_folder / 'peaks.npy')
-        peak_locations = localize_peaks(recording=rec1, peaks=peaks, method="monopolar_triangulation", **job_kwargs)
-        np.save(motion_folder / 'peak_locations.npy', peak_locations)
+        #peaks = select_peaks(peaks, method='smart_sampling_amplitudes', 1000000, **job_kwargs)
+        #peak_locations = localize_peaks(recording=rec1, peaks=peaks, method="monopolar_triangulation", **job_kwargs)
+        #np.save(motion_folder / 'peak_locations.npy', peak_locations)
+        peak_locations = np.load(motion_folder / 'peak_locations.npy')
 
         # Step 2: motion inference
         motion, temporal_bins, spatial_bins = estimate_motion(recording=rec1,
@@ -68,3 +71,9 @@ def registration(config):
                                                               bin_um=5.0,
                                                               win_step_um=50.0,
                                                               win_sigma_um=300.0)
+
+        motion_info = load_motion_info(motion_folder)
+        fig = plt.figure(figsize=(14, 8))
+        si.plot_motion(motion_info, figure=fig,
+                       color_amplitude=True, amplitude_cmap='inferno', scatter_decimate=10)
+        plt.savefig(motion_folder / 'motion.png')
