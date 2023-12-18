@@ -66,10 +66,9 @@ def registration(config):
                                                               peaks=peaks,
                                                               peak_locations=peak_locations,
                                                               method="decentralized",
-                                                              win_step_um=50.0,
+                                                              win_step_um=100.0,
                                                               win_sigma_um=300.0,
                                                               progress_bar=True,
-                                                              verbose=True,
                                                               **{'corr_threshold': 0.6, 'conv_engine': 'torch'})
         np.save(motion_folder / "temporal_bins.npy", temporal_bins)
         np.save(motion_folder / "motion.npy", motion)
