@@ -44,21 +44,21 @@ def registration(config):
         # preprocessing 1 : bandpass (this is smoother) + cmr
         rec1 = si.bandpass_filter(recording=raw_rec, freq_min=300., freq_max=5000.)
         rec1 = si.phase_shift(rec1)
-        bad_channel_ids, channel_labels = si.detect_bad_channels(rec1, noisy_channel_threshold=0.5,
-                                                                 dead_channel_threshold=-0.1, chunk_duration_s=0.5,
-                                                                 num_random_chunks=10)
+        bad_channel_ids, channel_labels = si.detect_bad_channels(rec1, noisy_channel_threshold=0.3,
+                                                                 dead_channel_threshold=-0.01, chunk_duration_s=0.3,
+                                                                 num_random_chunks=20)
         print(bad_channel_ids)
         rec1 = rec1.remove_channels(bad_channel_ids)
         # rec_bad = interpolate_bad_channels(rec_shifted, bad_channel_ids)
         rec1 = highpass_spatial_filter(rec1)
 
         # Step 1 : activity profile
-        #peaks = detect_peaks(recording=rec1, method="locally_exclusive", detect_threshold=8.0, **job_kwargs)
-        #np.save(motion_folder / 'peaks.npy')
+        peaks = detect_peaks(recording=rec1, method="locally_exclusive", detect_threshold=9.0, **job_kwargs)
+        np.save(motion_folder / 'peaks.npy', peaks)
         peaks = np.load(motion_folder / 'peaks.npy')
         #peaks = select_peaks(peaks, method='smart_sampling_amplitudes', 1000000, **job_kwargs)
-        #peak_locations = localize_peaks(recording=rec1, peaks=peaks, method="monopolar_triangulation", **job_kwargs)
-        #np.save(motion_folder / 'peak_locations.npy', peak_locations)
+        peak_locations = localize_peaks(recording=rec1, peaks=peaks, method="monopolar_triangulation", **job_kwargs)
+        np.save(motion_folder / 'peak_locations.npy', peak_locations)
         peak_locations = np.load(motion_folder / 'peak_locations.npy')
 
         # Step 2: motion inference
