@@ -44,7 +44,8 @@ def registration(config):
         # preprocessing 1 : bandpass (this is smoother) + cmr
         rec1 = si.bandpass_filter(recording=raw_rec, freq_min=300., freq_max=5000.)
         rec1 = si.phase_shift(rec1)
-        bad_channel_ids, channel_labels = si.detect_bad_channels(rec1, method='std', chunk_duration_s=0.3,
+        bad_channel_ids, channel_labels = si.detect_bad_channels(rec1, method='std', std_mad_threshold=3,
+                                                                 chunk_duration_s=0.3,
                                                                  num_random_chunks=20)
         print(bad_channel_ids)
         rec1 = rec1.remove_channels(bad_channel_ids)
