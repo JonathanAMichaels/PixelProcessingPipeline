@@ -13,6 +13,7 @@ from spikeinterface.sortingcomponents.motion_estimation import estimate_motion
 from spikeinterface.sortingcomponents.motion_interpolation import interpolate_motion
 from spikeinterface.preprocessing.motion import load_motion_info
 from spikeinterface.sorters import Kilosort2_5Sorter
+import numpy as np
 plt.rcParams["figure.figsize"] = (20, 12)
 
 def registration(config):
@@ -52,8 +53,10 @@ def registration(config):
         rec1 = highpass_spatial_filter(rec1)
 
         # Step 1 : activity profile
-        peaks = detect_peaks(recording=rec1, folder=motion_folder, method="locally_exclusive", detect_threshold=8.0, **job_kwargs)
-        peak_locations = localize_peaks(recording=rec1, peaks=peaks, method="monopolar_triangulation", folder=motion_folder, **job_kwargs)
+        #peaks = detect_peaks(recording=rec1, folder=motion_folder, method="locally_exclusive", detect_threshold=8.0, **job_kwargs)
+        peaks = np.load(motion_folder / 'peaks.npy')
+        peak_locations = localize_peaks(recording=rec1, peaks=peaks, method="monopolar_triangulation", **job_kwargs)
+        np.save(motion_folder / 'peak_locations.npy', peak_locations)
 
         # Step 2: motion inference
         motion, temporal_bins, spatial_bins = estimate_motion(recording=rec1,
