@@ -11,7 +11,7 @@ from pathlib import Path
 
 import numpy as np
 import scipy.io
-from ibllib.ephys.spikes import ks2_to_alf
+#from ibllib.ephys.spikes import ks2_to_alf
 from ruamel.yaml import YAML
 
 from pipeline_utils import create_config, extract_LFP, extract_sync, find
