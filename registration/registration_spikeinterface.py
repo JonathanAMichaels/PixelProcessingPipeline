@@ -46,7 +46,7 @@ def registration(config):
         #                                                         chunk_duration_s=0.3,
         #                                                         num_random_chunks=50)
         bad_channel_ids, channel_labels = si.detect_bad_channels(rec_eval_noise,
-                                                                 chunk_duration_s=0.3, noisy_channel_threshold=0.1,
+                                                                 chunk_duration_s=0.3, psd_hf_threshold=0.01,
                                                                  num_random_chunks=50)
         print(bad_channel_ids)
 
