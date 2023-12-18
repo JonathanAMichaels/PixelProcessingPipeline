@@ -2,6 +2,7 @@ import spikeinterface.full as si
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
+import glob
 from spikeinterface.preprocessing import highpass_spatial_filter
 from spikeinterface.preprocessing import correct_motion
 from spikeinterface.preprocessing.motion import load_motion_info
