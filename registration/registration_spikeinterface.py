@@ -21,8 +21,6 @@ def registration(config):
 
         dataset_folder = Path(folders[pixel] + '/')
         motion_folder = dataset_folder / 'motion'
-        peak_folder = dataset_folder / 'peaks'
-        peak_folder.mkdir(exist_ok=True)
 
         spikeglx_folder = dataset_folder
         # global kwargs for parallel computing
@@ -57,40 +55,3 @@ def registration(config):
         # rec_corrected1 will not be used for sorting!
         rec_corrected1 = correct_motion(recording=rec1, preset="nonrigid_accurate",
                                         detect_kwargs=dict(detect_threshold=6.), folder=motion_folder, **job_kwargs)
-
-        # preprocessing 2 : highpass + cmr
-        rec2 = si.bandpass_filter(recording=raw_rec, freq_min=300.)
-        rec2 = si.phase_shift(rec2)
-        rec2 = rec2.remove_channels(bad_channel_ids)
-        # rec_bad = interpolate_bad_channels(rec_shifted, bad_channel_ids)
-        rec2 = highpass_spatial_filter(rec2)
-        # we use another preprocessing for the final interpolation
-
-        motion_info = load_motion_info(motion_folder)
-        rec_corrected = interpolate_motion(
-            recording=rec2,
-            motion=motion_info['motion'],
-            temporal_bins=motion_info['temporal_bins'],
-            spatial_bins=motion_info['spatial_bins'],
-            **motion_info['parameters']['interpolate_motion_kwargs'])
-        # and plot
-        fig = plt.figure(figsize=(14, 8))
-        si.plot_motion(motion_info, figure=fig, depth_lim=(400, 600),
-                       color_amplitude=True, amplitude_cmap='inferno', scatter_decimate=10)
-        # rec_corrected.save(folder=corrected_folder, format='binary', **job_kwargs)
-
-        params_kilosort2_5 = si.get_default_sorter_params('kilosort2_5')
-        params_kilosort2_5['do_correction'] = False
-        params_kilosort2_5['skip_kilosort_preprocessing'] = False
-        print(params_kilosort2_5)
-        Kilosort2_5Sorter.set_kilosort2_5_path('Kilosort-2.5')
-        sorting = si.run_sorter('kilosort2_5', rec_corrected, output_folder=dataset_folder / 'kilosort2.5_output',
-                                verbose=True, **params_kilosort2_5)
-
-        we = si.extract_waveforms(rec_corrected, sorting, folder=dataset_folder / 'waveforms_kilosort2.5',
-                                  sparse=True, max_spikes_per_unit=500, ms_before=1.5, ms_after=2.,
-                                  **job_kwargs)
-
-        metrics = si.compute_quality_metrics(we, metric_names=['firing_rate', 'presence_ratio', 'snr',
-                                                               'isi_violation', 'amplitude_cutoff'])
-        metrics

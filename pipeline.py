@@ -16,6 +16,7 @@ from ruamel.yaml import YAML
 
 from pipeline_utils import create_config, extract_LFP, extract_sync, find
 from registration.registration_spikeinterface import registration as registration_function
+from sorting.sorting_spikeinterface import sorting as sorting_function
 from sorting.Kilosort_gridsearch_config import get_KS_params_grid
 
 # calculate time taken to run each pipeline call
@@ -505,22 +506,8 @@ if neuro_sort:
             )
             extract_sync(config_kilosort)
 
-        # print('Starting drift correction of ' + config_kilosort['neuropixel'])
-        # kilosort(config_kilosort)
-
         print("Starting spike sorting of " + config_kilosort["neuropixel"])
-        scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
-        subprocess.run(
-            [
-                "matlab",
-                "-nodisplay",
-                "-nosplash",
-                "-nodesktop",
-                "-r",
-                f"addpath(genpath('{path_to_add}')); Kilosort_run_czuba",
-            ],
-            check=True,
-        )
+        sorting_function(config_kilosort)
 
         print("Starting alf post-processing of " + config_kilosort["neuropixel"])
         alf_dir = Path(config_kilosort["neuropixel_folder"] + "/sorted/alf")
