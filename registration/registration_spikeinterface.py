@@ -78,7 +78,7 @@ def registration(config):
                                                               peak_locations=peak_locations,
                                                               method="decentralized",
                                                               win_step_um=300.0,
-                                                              win_sigma_um=600.0,
+                                                              win_sigma_um=300.0,
                                                               bin_duration_s=30.,
                                                               post_clean=True,
                                                               progress_bar=True,
