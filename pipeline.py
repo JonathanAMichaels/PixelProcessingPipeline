@@ -512,8 +512,8 @@ if neuro_sort:
         print("Starting alf post-processing of " + config_kilosort["neuropixel"])
         alf_dir = Path(config_kilosort["neuropixel_folder"] + "/sorted/alf")
         shutil.rmtree(alf_dir, ignore_errors=True)
-        ks_dir = Path(config_kilosort["neuropixel_folder"] + "/sorted")
-        ks2_to_alf(ks_dir, Path(config_kilosort["neuropixel"]), alf_dir)
+        #ks_dir = Path(config_kilosort["neuropixel_folder"] + "/sorted")
+        #ks2_to_alf(ks_dir, Path(config_kilosort["neuropixel"]), alf_dir)
 
 # Proceed with neuro post-processing
 if neuro_post:
