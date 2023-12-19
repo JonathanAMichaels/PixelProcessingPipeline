@@ -79,6 +79,7 @@ def registration(config):
                                                               method="decentralized",
                                                               win_step_um=200.0,
                                                               win_sigma_um=400.0,
+                                                              bin_duration_s=30.,
                                                               post_clean=False,
                                                               progress_bar=True,
                                                               **{'corr_threshold': 0.3, 'conv_engine': 'torch'})
