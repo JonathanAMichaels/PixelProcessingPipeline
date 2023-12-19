@@ -22,6 +22,7 @@ def registration(config):
 
         dataset_folder = Path(folders[pixel] + '/')
         motion_folder = dataset_folder / 'motion'
+        motion_folder.mkdir(exist_ok=True)
 
         spikeglx_folder = dataset_folder
         # global kwargs for parallel computing
@@ -58,12 +59,12 @@ def registration(config):
         rec1 = highpass_spatial_filter(rec1)
 
         # Step 1 : activity profile
-        peaks = detect_peaks(recording=rec1, method="locally_exclusive", detect_threshold=9.0, **job_kwargs)
-        np.save(motion_folder / 'peaks.npy', peaks)
+        #peaks = detect_peaks(recording=rec1, method="locally_exclusive", detect_threshold=9.0, **job_kwargs)
+        #np.save(motion_folder / 'peaks.npy', peaks)
         peaks = np.load(motion_folder / 'peaks.npy')
         #peaks = select_peaks(peaks, method='smart_sampling_amplitudes', 1000000, **job_kwargs)
-        peak_locations = localize_peaks(recording=rec1, peaks=peaks, method="monopolar_triangulation", **job_kwargs)
-        np.save(motion_folder / 'peak_locations.npy', peak_locations)
+        #peak_locations = localize_peaks(recording=rec1, peaks=peaks, method="monopolar_triangulation", **job_kwargs)
+        #np.save(motion_folder / 'peak_locations.npy', peak_locations)
         peak_locations = np.load(motion_folder / 'peak_locations.npy')
 
         # Step 2: motion inference
@@ -73,9 +74,9 @@ def registration(config):
                                                               method="decentralized",
                                                               win_step_um=100.0,
                                                               win_sigma_um=300.0,
-                                                              post_clean=True,
+                                                              post_clean=False,
                                                               progress_bar=True,
-                                                              **{'corr_threshold': 0.6, 'conv_engine': 'torch'})
+                                                              **{'corr_threshold': 0, 'conv_engine': 'torch'})
         np.save(motion_folder / "temporal_bins.npy", temporal_bins)
         np.save(motion_folder / "motion.npy", motion)
         if spatial_bins is not None:
