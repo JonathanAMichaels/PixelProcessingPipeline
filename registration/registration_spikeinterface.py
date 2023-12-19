@@ -80,6 +80,7 @@ def registration(config):
                                                               win_step_um=300.0,  # 300 best
                                                               win_sigma_um=500.0,  # 600 best
                                                               bin_duration_s=30.,  # 30 best
+                                                              speed_threshold=10,
                                                               post_clean=True,  # True best
                                                               progress_bar=True,
                                                               **{'corr_threshold': 0.3, 'conv_engine': 'torch'})  # 0.3 best
