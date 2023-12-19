@@ -11,10 +11,9 @@ def sorting(config):
     dataset_folder = Path(config['neuropixel_folder'])
     motion_folder = dataset_folder / 'motion'
     sorting_folder = dataset_folder / 'kilosort2.5_output'
-    shutil.rmtree(sorting_folder)
     waveform_folder = sorting_folder / 'waveforms_kilosort2.5'
-    shutil.rmtree(waveform_folder)
-    waveform_folder.mkdir(exist_ok=True)
+    if sorting_folder.exists() and sorting_folder.is_dir():
+        shutil.rmtree(sorting_folder)
 
     spikeglx_folder = dataset_folder
     # global kwargs for parallel computing
