@@ -82,7 +82,7 @@ def registration(config):
                                                               bin_duration_s=30.,  # 30 best
                                                               post_clean=True,  # True best
                                                               progress_bar=True,
-                                                              **{'corr_threshold': 0.2, 'conv_engine': 'torch'})  # 0.2 best
+                                                              **{'corr_threshold': 0.3, 'conv_engine': 'torch'})  # 0.2 best
         np.save(motion_folder / "temporal_bins.npy", temporal_bins)
         np.save(motion_folder / "motion.npy", motion)
         if spatial_bins is not None:
