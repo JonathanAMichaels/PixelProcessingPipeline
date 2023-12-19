@@ -64,7 +64,7 @@ def registration(config):
         peaks = np.load(motion_folder / 'peaks.npy')
         noise_levels = si.get_noise_levels(rec1, return_scaled=False)
         peaks, peak_inds = select_peaks(peaks, method='smart_sampling_amplitudes', n_peaks=5000000,
-                                        noise_levels=noise_levels,**job_kwargs)
+                                        noise_levels=noise_levels, return_indices=True, **job_kwargs)
         peak_locations = localize_peaks(recording=rec1, peaks=peaks, method="monopolar_triangulation",
                                         noise_levels=noise_levels, **job_kwargs)
         np.save(motion_folder / 'peak_locations.npy', peak_locations)
