@@ -78,10 +78,10 @@ def registration(config):
                                                               peak_locations=peak_locations,
                                                               method="decentralized",
                                                               win_step_um=200.0,
-                                                              win_sigma_um=400.0,
-                                                              post_clean=False,
+                                                              win_sigma_um=600.0,
+                                                              post_clean=True,
                                                               progress_bar=True,
-                                                              **{'corr_threshold': 0.6, 'conv_engine': 'torch'})
+                                                              **{'corr_threshold': 0.8, 'conv_engine': 'torch'})
         np.save(motion_folder / "temporal_bins.npy", temporal_bins)
         np.save(motion_folder / "motion.npy", motion)
         if spatial_bins is not None:
