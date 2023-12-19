@@ -1,23 +1,17 @@
 import spikeinterface.full as si
 import numpy as np
-import matplotlib.pyplot as plt
 from pathlib import Path
-import glob
 from spikeinterface.preprocessing import highpass_spatial_filter
-from spikeinterface.preprocessing import correct_motion
-from spikeinterface.preprocessing.motion import load_motion_info
-from spikeinterface.sortingcomponents.peak_detection import detect_peaks
-from spikeinterface.sortingcomponents.peak_selection import select_peaks
-from spikeinterface.sortingcomponents.peak_localization import localize_peaks
-from spikeinterface.sortingcomponents.motion_estimation import estimate_motion
 from spikeinterface.sortingcomponents.motion_interpolation import interpolate_motion
 from spikeinterface.preprocessing.motion import load_motion_info
 from spikeinterface.sorters import Kilosort2_5Sorter
-plt.rcParams["figure.figsize"] = (20, 12)
+import shutil
 
 def sorting(config):
     dataset_folder = Path(config['neuropixel_folder'])
     motion_folder = dataset_folder / 'motion'
+    sorting_folder = dataset_folder / 'kilosort2.5_output'
+    shutil.rmtree(sorting_folder)
 
     spikeglx_folder = dataset_folder
     # global kwargs for parallel computing
@@ -58,7 +52,7 @@ def sorting(config):
     params_kilosort2_5['skip_kilosort_preprocessing'] = False
     print(params_kilosort2_5)
     Kilosort2_5Sorter.set_kilosort2_5_path('sorting/Kilosort-2.5')
-    sorting = si.run_sorter('kilosort2_5', rec_corrected, output_folder=dataset_folder / 'kilosort2.5_output',
+    sorting = si.run_sorter('kilosort2_5', rec_corrected, output_folder=sorting_folder,
                             verbose=True, **params_kilosort2_5)
 
     we = si.extract_waveforms(rec_corrected, sorting, folder=dataset_folder / 'waveforms_kilosort2.5',
