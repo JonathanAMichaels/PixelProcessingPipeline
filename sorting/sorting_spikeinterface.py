@@ -28,22 +28,26 @@ def sorting(config):
     )
     stream_names, stream_ids = si.get_neo_streams('spikeglx', spikeglx_folder)
     print(stream_names)
+
     raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
-    # preprocessing 2 : highpass + cmr
-    rec = si.bandpass_filter(recording=raw_rec, freq_min=300.)
-    rec = si.phase_shift(rec)
-    bad_channel_ids, channel_labels = si.detect_bad_channels(rec, noisy_channel_threshold=0.5,
-                                                             dead_channel_threshold=-0.1, chunk_duration_s=0.5,
-                                                             num_random_chunks=100)
+    rec_eval_noise = si.highpass_filter(recording=raw_rec, freq_min=400.)
+    bad_channel_ids1, channel_labels = si.detect_bad_channels(rec_eval_noise, method='mad', std_mad_threshold=1.5,
+                                                              chunk_duration_s=0.3,
+                                                              num_random_chunks=100)
+    bad_channel_ids2, channel_labels = si.detect_bad_channels(rec_eval_noise,
+                                                              chunk_duration_s=0.3,
+                                                              num_random_chunks=100)
+    bad_channel_ids = np.concatenate((bad_channel_ids1, bad_channel_ids2))
     print(bad_channel_ids)
-    rec = rec.remove_channels(bad_channel_ids)
-    # rec_bad = interpolate_bad_channels(rec_shifted, bad_channel_ids)
-    rec = highpass_spatial_filter(rec)
-    # we use another preprocessing for the final interpolation
+
+    rec1 = raw_rec.remove_channels(bad_channel_ids)
+    rec1 = si.bandpass_filter(recording=rec1, freq_min=300., freq_max=10000.)
+    rec1 = si.phase_shift(rec1)
+    rec1 = highpass_spatial_filter(rec1)
 
     motion_info = load_motion_info(motion_folder)
     rec_corrected = interpolate_motion(
-        recording=rec,
+        recording=rec1,
         motion=motion_info['motion'],
         temporal_bins=motion_info['temporal_bins'],
         spatial_bins=motion_info['spatial_bins'],
