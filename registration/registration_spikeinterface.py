@@ -81,7 +81,7 @@ def registration(config):
                                                               win_sigma_um=600.0,
                                                               post_clean=True,
                                                               progress_bar=True,
-                                                              **{'corr_threshold': 0.8, 'conv_engine': 'torch'})
+                                                              **{'corr_threshold': 0.3, 'conv_engine': 'torch'})
         np.save(motion_folder / "temporal_bins.npy", temporal_bins)
         np.save(motion_folder / "motion.npy", motion)
         if spatial_bins is not None:
