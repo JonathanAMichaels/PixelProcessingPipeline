@@ -70,6 +70,7 @@ def registration(config):
         #np.save(motion_folder / 'peak_inds.npy', peak_inds)
         peak_locations = np.load(motion_folder / 'peak_locations.npy')
         peak_inds = np.load(motion_folder / 'peak_inds.npy')
+        peaks = peaks[peak_inds]
 
         # Step 2: motion inference
         motion, temporal_bins, spatial_bins = estimate_motion(recording=rec1,
