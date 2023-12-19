@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-const int  Nthreads = 1024, maxFR = 5000, NrankMax = 12, nt0max = 151;
+const int  Nthreads = 1024, maxFR = 5000, NrankMax = 6;
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void  sumChannels(const double *Params, const float *data, 
 	float *datasum, int *kkmax, const int *iC){
@@ -58,7 +58,7 @@ __global__ void  sumChannels(const double *Params, const float *data,
 
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void	Conv1D(const double *Params, const float *data, const float *W, float *conv_sig){
-    volatile __shared__ float  sW[nt0max*NrankMax], sdata[(Nthreads+nt0max)];
+    volatile __shared__ float  sW[81*NrankMax], sdata[(Nthreads+81)];
     float y;
     int tid, tid0, bid, i, nid, Nrank, NT, nt0,  Nchan;
 
@@ -127,7 +127,7 @@ __global__ void	cleanup_spikes(const double *Params, const float *err,
 	const int *ftype, float *x, int *st, int *id, int *counter){
     
   int lockout, indx, tid, bid, NT, tid0,  j, t0;
-  volatile __shared__ float sdata[Nthreads+2*nt0max+1];
+  volatile __shared__ float sdata[Nthreads+2*81+1];
   bool flag=0;
   float err0, Th;
   
@@ -295,7 +295,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
   Nnearest  = (unsigned int) Params[5];
   Nrank     = (unsigned int) Params[14];
   
-  dim3 tpB(2, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 4);
+  dim3 tpB(8, 2*nt0-1), tpF(16, Nnearest), tpS(nt0, 16);
         
   cudaMalloc(&d_Params,      sizeof(double)*mxGetNumberOfElements(prhs[0]));
   cudaMemcpy(d_Params,Params,sizeof(double)*mxGetNumberOfElements(prhs[0]),cudaMemcpyHostToDevice);
