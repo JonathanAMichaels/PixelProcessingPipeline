@@ -78,8 +78,8 @@ def registration(config):
                                                               peak_locations=peak_locations,
                                                               method="decentralized",
                                                               win_step_um=200.0,
-                                                              win_sigma_um=600.0,
-                                                              post_clean=True,
+                                                              win_sigma_um=400.0,
+                                                              post_clean=False,
                                                               progress_bar=True,
                                                               **{'corr_threshold': 0.6, 'conv_engine': 'torch'})
         np.save(motion_folder / "temporal_bins.npy", temporal_bins)
