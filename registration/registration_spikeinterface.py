@@ -77,8 +77,8 @@ def registration(config):
                                                               peaks=peaks,
                                                               peak_locations=peak_locations,
                                                               method="decentralized",
-                                                              win_step_um=200.0,
-                                                              win_sigma_um=600.0,
+                                                              win_step_um=50.0,
+                                                              win_sigma_um=150.0,
                                                               post_clean=True,
                                                               progress_bar=True,
                                                               **{'corr_threshold': 0.3, 'conv_engine': 'torch'})
