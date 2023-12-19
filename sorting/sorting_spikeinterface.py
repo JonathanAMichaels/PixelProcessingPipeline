@@ -14,6 +14,7 @@ def sorting(config):
     shutil.rmtree(sorting_folder)
     waveform_folder = sorting_folder / 'waveforms_kilosort2.5'
     shutil.rmtree(waveform_folder)
+    waveform_folder.mkdir(exist_ok=True)
 
     spikeglx_folder = dataset_folder
     # global kwargs for parallel computing
