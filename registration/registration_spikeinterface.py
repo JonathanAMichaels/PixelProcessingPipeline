@@ -62,13 +62,14 @@ def registration(config):
         #peaks = detect_peaks(recording=rec1, method="locally_exclusive", detect_threshold=5, **job_kwargs)
         #np.save(motion_folder / 'peaks.npy', peaks)
         peaks = np.load(motion_folder / 'peaks.npy')
-        noise_levels = si.get_noise_levels(rec1, return_scaled=False)
-        peaks, peak_inds = select_peaks(peaks, method='smart_sampling_amplitudes', n_peaks=5000000,
-                                        noise_levels=noise_levels, return_indices=True, **job_kwargs)
-        peak_locations = localize_peaks(recording=rec1, peaks=peaks, method="monopolar_triangulation", **job_kwargs)
-        np.save(motion_folder / 'peak_locations.npy', peak_locations)
-        np.save(motion_folder / 'peak_inds.npy', peak_inds)
+        #noise_levels = si.get_noise_levels(rec1, return_scaled=False)
+        #peaks, peak_inds = select_peaks(peaks, method='smart_sampling_amplitudes', n_peaks=5000000,
+        #                                noise_levels=noise_levels, return_indices=True, **job_kwargs)
+        #peak_locations = localize_peaks(recording=rec1, peaks=peaks, method="monopolar_triangulation", **job_kwargs)
+        #np.save(motion_folder / 'peak_locations.npy', peak_locations)
+        #np.save(motion_folder / 'peak_inds.npy', peak_inds)
         peak_locations = np.load(motion_folder / 'peak_locations.npy')
+        peak_inds = np.load(motion_folder / 'peak_inds.npy')
 
         # Step 2: motion inference
         motion, temporal_bins, spatial_bins = estimate_motion(recording=rec1,
@@ -86,6 +87,7 @@ def registration(config):
             np.save(motion_folder / "spatial_bins.npy", spatial_bins)
 
         motion_info = load_motion_info(motion_folder)
+        motion_info['peaks'] = peaks[peak_inds]
         fig = plt.figure(figsize=(14, 8))
         si.plot_motion(motion_info, figure=fig,
                        color_amplitude=True, amplitude_cmap='inferno', scatter_decimate=10)
