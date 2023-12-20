@@ -204,9 +204,9 @@ else:
 
 
 # set chosen GPUs in environment variable
-GPU_str = ",".join([str(i) for i in config["GPU_to_use"]])
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = GPU_str
+#GPU_str = ",".join([str(i) for i in config["GPU_to_use"]])
+#os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+#os.environ["CUDA_VISIBLE_DEVICES"] = GPU_str
 
 temp = glob.glob(folder + "/*.kinarm")
 if len(temp) == 0:
