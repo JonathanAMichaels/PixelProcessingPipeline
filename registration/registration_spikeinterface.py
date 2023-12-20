@@ -87,8 +87,15 @@ def registration(config):
         if spatial_bins is not None:
             np.save(motion_folder / "spatial_bins.npy", spatial_bins)
 
-        motion_info = load_motion_info(motion_folder)
+        array_names = ("peaks", "peak_locations", "temporal_bins", "spatial_bins", "motion")
+        motion_info = {}
+        for name in array_names:
+            if (motion_folder / f"{name}.npy").exists():
+                motion_info[name] = np.load(motion_folder / f"{name}.npy")
+            else:
+                motion_info[name] = None
         motion_info['peaks'] = some_peaks
+
         fig = plt.figure(figsize=(14, 8))
         si.plot_motion(motion_info, figure=fig,
                        color_amplitude=True, amplitude_cmap='inferno', scatter_decimate=10)
