@@ -186,67 +186,10 @@ else:
 # ensure global fields are present in config
 if config["myomatrix"] != "":
     print("Using myomatrix folder " + config["myomatrix"])
-if not "GPU_to_use" in config:
-    config["GPU_to_use"] = [0]
-if not "num_KS_jobs" in config:
-    config["num_KS_jobs"] = 1
-if not "recordings" in config:
-    config["recordings"] = [1]
-if not "concatenate_myo_data" in config:
-    config["concatenate_myo_data"] = False
-if not "myo_data_passband" in config:
-    config["myo_data_passband"] = [250, 5000]
-if not "myo_data_sampling_rate" in config:
-    config["myo_data_sampling_rate"] = 30000
-# ensure Sorting fields are present in config
-if not "num_KS_components" in config["Sorting"]:
-    config["Sorting"]["num_KS_components"] = 9
-if not "do_KS_param_gridsearch" in config["Sorting"]:
-    config["Sorting"]["do_KS_param_gridsearch"] = False
-# ensure Session fields are present in config
-if not "myo_chan_map_file" in config["Session"]:
-    config["myo_chan_map_file"] = [
-        ["linear_16ch_RF400_kilosortChanMap_unitSpacing.mat"]
-    ]
-if not "myo_chan_list" in config["Session"]:
-    config["Session"]["myo_chan_list"] = [[1, 16]]
-if not "myo_analog_chan" in config["Session"]:
-    config["Session"]["myo_analog_chan"] = 17
-if not "myo_muscle_list" in config["Session"]:
-    config["Session"]["myo_muscle_list"] = [
-        ["Muscle" + str(i) for i in range(len(config["Session"]["myo_chan_list"]))]
-    ]
-if not "remove_bad_myo_chans" in config["Session"]:
-    config["Session"]["remove_bad_myo_chans"] = [False] * len(
-        config["Session"]["myo_chan_list"]
-    )
-if not "remove_channel_delays" in config["Session"]:
-    config["Session"]["remove_channel_delays"] = [False] * len(
-        config["Session"]["myo_chan_list"]
-    )
 
-# input assertions
-assert (
-    config["num_KS_jobs"] >= 1
-), "Number of parallel jobs must be greater than or equal to 1"
-assert config["recordings"][0] == "all" or all(
-    [
-        (item == round(item) >= 1 and isinstance(item, (int, float)))
-        for item in config["recordings"]
-    ]
-), "'recordings' field must be a list of positive integers, or 'all' as first element"
-assert all(
-    [(item >= 0 and isinstance(item, int)) for item in config["GPU_to_use"]]
-), "'GPU_to_use' field must be greater than or equal to 0"
 assert (
     config["num_neuropixels"] >= 0
 ), "Number of neuropixels must be greater than or equal to 0"
-assert (
-    config["Sorting"]["num_KS_components"] >= 1
-), "Number of KS components must be greater than or equal to 1"
-assert (
-    config["myo_data_sampling_rate"] >= 1
-), "Myomatrix sampling rate must be greater than or equal to 1"
 
 
 # use -d option to specify which sort folder to post-process
