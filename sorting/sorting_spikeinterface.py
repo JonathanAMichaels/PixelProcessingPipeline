@@ -14,7 +14,7 @@ def sorting(config):
     sorting_folder = dataset_folder / 'kilosort2.5_output'
     waveform_folder = sorting_folder / 'waveforms_kilosort2.5'
     if sorting_folder.exists() and sorting_folder.is_dir():
-        shutil.rmtree(sorting_folder, ignore_errors=True)
+        shutil.rmtree(sorting_folder)
 
     spikeglx_folder = dataset_folder
     # global kwargs for parallel computing
@@ -54,7 +54,6 @@ def sorting(config):
     params_kilosort2_5 = si.get_default_sorter_params('kilosort2_5')
     params_kilosort2_5['do_correction'] = False
     params_kilosort2_5['skip_kilosort_preprocessing'] = False
-    print(params_kilosort2_5)
     params_kilosort2_5['scaleproc'] = 1.  # don't scale data any further
     print(params_kilosort2_5)
     Kilosort2_5Sorter.set_kilosort2_5_path('sorting/Kilosort-2.5')
