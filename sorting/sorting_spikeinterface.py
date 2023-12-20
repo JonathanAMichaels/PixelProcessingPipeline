@@ -38,7 +38,7 @@ def sorting(config):
     print(bad_channel_ids)
 
     rec1 = raw_rec.remove_channels(bad_channel_ids)
-    rec1 = scale(rec1, 100)
+    rec1 = scale(rec1, 20)
     rec1 = si.bandpass_filter(recording=rec1, freq_min=300., freq_max=10000.)
     rec1 = si.phase_shift(rec1)
     rec1 = highpass_spatial_filter(rec1)
