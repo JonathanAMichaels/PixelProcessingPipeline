@@ -94,6 +94,7 @@ def registration(config):
             else:
                 motion_info[name] = None
         motion_info['peaks'] = some_peaks
+        motion_info['parameters']['sampling_frequency'] = rec1.sampling_frequency
 
         fig = plt.figure(figsize=(14, 8))
         si.plot_motion(motion_info, figure=fig,
