@@ -74,6 +74,7 @@ def registration(config):
         motion, temporal_bins, spatial_bins = estimate_motion(recording=rec1,
                                                               peaks=some_peaks,
                                                               peak_locations=peak_locations,
+                                                              folder=motion_folder,
                                                               method="decentralized",
                                                               win_step_um=300.0,  # 300 best
                                                               win_sigma_um=600.0,  # 600 best
