@@ -4,6 +4,7 @@ from pathlib import Path
 from spikeinterface.preprocessing import highpass_spatial_filter
 from spikeinterface.sortingcomponents.motion_interpolation import interpolate_motion
 from spikeinterface.preprocessing.motion import load_motion_info
+from spikeinterface.preprocessing.normalize_scale import scale
 from spikeinterface.sorters import Kilosort2_5Sorter
 import shutil
 
@@ -37,6 +38,7 @@ def sorting(config):
     print(bad_channel_ids)
 
     rec1 = raw_rec.remove_channels(bad_channel_ids)
+    rec1 = scale(rec1, 100)
     rec1 = si.bandpass_filter(recording=rec1, freq_min=300., freq_max=10000.)
     rec1 = si.phase_shift(rec1)
     rec1 = highpass_spatial_filter(rec1)
