@@ -191,56 +191,6 @@ assert (
     config["num_neuropixels"] >= 0
 ), "Number of neuropixels must be greater than or equal to 0"
 
-
-# use -d option to specify which sort folder to post-process
-if "-d" in opts:
-    date_str = args[1]
-    # make sure date_str is in the format YYYYMMDD_HHMMSS, YYYYMMDD_HHMMSSsss, or YYYYMMDD_HHMMSSffffff
-    assert (
-        (len(date_str) == 15 or len(date_str) == 18 or len(date_str) == 21)
-        & date_str[:8].isnumeric()
-        & date_str[9:].isnumeric()
-        & (date_str[8] == "_")
-    ), "Argument after '-d' must be a date string in format: YYYYMMDD_HHMMSS, YYYYMMDD_HHMMSSsss, or YYYYMMDD_HHMMSSffffff"
-    # check if date_str is present in any of the subfolders in the config["myomatrix"] path
-    subfolder_list = os.listdir(config["myomatrix"])
-    previous_sort_folder_to_use = [
-        iFolder for iFolder in subfolder_list if date_str in iFolder
-    ]
-    assert (
-        len(previous_sort_folder_to_use) > 0
-    ), f'No matching subfolder found in {config["myomatrix"]} for the date string provided'
-    assert (
-        len(previous_sort_folder_to_use) < 2
-    ), f'Multiple matching subfolders found in {config["myomatrix"]} for the date string provided. Try using a more specific date string, like "YYYYMMDD_HHMMSSffffff"'
-    previous_sort_folder_to_use = str(previous_sort_folder_to_use[0])
-else:
-    if config["num_KS_jobs"] == 1:
-        if "-myo_phy" in opts or "-myo_post" in opts:
-            try:
-                previous_sort_folder_to_use = str(
-                    scipy.io.loadmat(f'{config["myomatrix"]}/sorted0/ops.mat')[
-                        "final_myo_sorted_dir"
-                    ][0]
-                )
-            except FileNotFoundError:
-                print(
-                    "WARNING: No ops.mat file found in sorted0 folder, not able to detect previous sort folder.\n"
-                    "         If using '-myo_phy' or '-myo_post', try using the '-d' flag to specify the datestring\n"
-                )
-            except KeyError:
-                print(
-                    "WARNING: No 'final_myo_sorted_dir' field found in ops.mat file, not able to detect previous sort folder.\n"
-                    "         If using '-myo_phy' or '-myo_post', try using the '-d' flag to specify the datestring\n"
-                )
-            except:
-                raise
-    else:
-        if "-myo_phy" in opts or "-myo_post" in opts:
-            raise SystemExit(
-                "Cannot guess desired previous sort folder after parallel sorting. Please specify manually using the '-d' flag"
-            )
-
 # find MATLAB installation
 if os.path.isfile("/usr/local/MATLAB/R2021a/bin/matlab"):
     matlab_root = (
