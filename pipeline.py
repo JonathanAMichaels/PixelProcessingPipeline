@@ -8,13 +8,10 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-
 import numpy as np
 import scipy.io
-#from ibllib.ephys.spikes import ks2_to_alf
 from ruamel.yaml import YAML
-
-from pipeline_utils import create_config, extract_LFP, extract_sync, find
+from pipeline_utils import create_config, extract_sync, find
 from registration.registration_spikeinterface import registration as registration_function
 from sorting.sorting_spikeinterface import sorting as sorting_function
 from sorting.sorting_post import sorting_post as sorting_post_function
