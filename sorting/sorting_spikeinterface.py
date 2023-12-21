@@ -52,7 +52,7 @@ def robust_rmtree(path, max_retries=5, delay=1):
 def sorting(config):
     dataset_folder = Path(config['neuropixel_folder'])
     motion_folder = dataset_folder / 'motion'
-    sorting_folder = dataset_folder / 'kilosort2.5_new'
+    sorting_folder = dataset_folder / 'kilosort2.5_new1'
     waveform_folder = sorting_folder / 'waveforms_kilosort2.5'
     if sorting_folder.exists() and sorting_folder.is_dir():
         #shutil.rmtree(sorting_folder)
