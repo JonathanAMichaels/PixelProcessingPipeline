@@ -54,7 +54,7 @@ def sorting(config):
     params_kilosort2_5 = si.get_default_sorter_params('kilosort2_5')
     params_kilosort2_5['do_correction'] = False
     params_kilosort2_5['skip_kilosort_preprocessing'] = False
-    params_kilosort2_5['scaleproc'] = 10
+    params_kilosort2_5['scaleproc'] = 50
     print(params_kilosort2_5)
     Kilosort2_5Sorter.set_kilosort2_5_path('sorting/Kilosort-2.5')
     sorting = si.run_sorter('kilosort2_5', rec_corrected, output_folder=str(sorting_folder),
