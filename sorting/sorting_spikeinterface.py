@@ -8,13 +8,55 @@ from spikeinterface.preprocessing.normalize_scale import scale
 from spikeinterface.sorters import Kilosort2_5Sorter
 import shutil
 
+import shutil
+import time
+import os
+import errno
+
+def is_dir_locked(directory):
+    """Check if any file within the directory is locked/open."""
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            try:
+                # Try to open the file in append mode and close it immediately
+                with open(file_path, 'a'):
+                    pass
+            except IOError as e:
+                # If file is in use, it will throw an IOError
+                return True
+    return False
+
+def robust_rmtree(path, max_retries=5, delay=1):
+    """Attempt to delete a directory tree multiple times, waiting between retries."""
+    for i in range(max_retries):
+        if is_dir_locked(path):
+            print("Directory is locked or files are in use, waiting to retry...")
+            time.sleep(delay)
+            continue
+
+        try:
+            shutil.rmtree(path)
+            print("Directory successfully deleted.")
+            break
+        except OSError as e:
+            if e.errno == errno.ENOTEMPTY:
+                # Directory not empty
+                print("Directory not empty, retrying...")
+                time.sleep(delay)
+            else:
+                raise
+
+
+
 def sorting(config):
     dataset_folder = Path(config['neuropixel_folder'])
     motion_folder = dataset_folder / 'motion'
     sorting_folder = dataset_folder / 'kilosort2.5_new'
     waveform_folder = sorting_folder / 'waveforms_kilosort2.5'
     if sorting_folder.exists() and sorting_folder.is_dir():
-        shutil.rmtree(sorting_folder)
+        #shutil.rmtree(sorting_folder)
+        robust_rmtree(sorting_folder)
 
     spikeglx_folder = dataset_folder
     # global kwargs for parallel computing
