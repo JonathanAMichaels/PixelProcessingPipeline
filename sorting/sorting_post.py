@@ -14,7 +14,7 @@ def sorting_post(config):
     sorting_folder = dataset_folder / 'kilosort2.5'
     waveform_folder = sorting_folder / 'waveforms_kilosort2.5'
     we = si.WaveformExtractor.load(waveform_folder)
-
+    si.compute_spike_locations(we)
     metrics = si.compute_quality_metrics(we, metric_names=['firing_rate', 'presence_ratio', 'snr', 'isi_violation',
                                                            'drift', 'amplitude_median', 'amplitude_cutoff'])
     metrics.to_csv(sorting_folder / 'metrics.csv')
