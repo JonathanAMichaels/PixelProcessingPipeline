@@ -100,7 +100,7 @@ def sorting(config):
     print(params_kilosort2_5)
     Kilosort2_5Sorter.set_kilosort2_5_path('sorting/Kilosort-2.5')
     sorting = si.run_sorter('kilosort2_5', rec_corrected, output_folder=str(sorting_folder),
-                            verbose=True, **params_kilosort2_5)
+                            verbose=True, remove_existing_folder=True, **params_kilosort2_5)
 
     we = si.extract_waveforms(rec_corrected, sorting, folder=str(waveform_folder),
                               sparse=True, max_spikes_per_unit=500, ms_before=1.5, ms_after=2.,
