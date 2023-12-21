@@ -5,7 +5,7 @@ from spikeinterface.preprocessing import highpass_spatial_filter
 from spikeinterface.sortingcomponents.motion_interpolation import interpolate_motion
 from spikeinterface.preprocessing.motion import load_motion_info
 from spikeinterface.preprocessing.normalize_scale import scale
-from spikeinterface.sorters import Kilosort2_5Sorter
+from spikeinterface.sorters import Kilosort2Sorter
 import shutil
 import subprocess
 
@@ -26,8 +26,8 @@ def unlock_files(directory):
 def sorting(config):
     dataset_folder = Path(config['neuropixel_folder'])
     motion_folder = dataset_folder / 'motion'
-    sorting_folder = dataset_folder / 'kilosort2.5'
-    waveform_folder = sorting_folder / 'waveforms_kilosort2.5'
+    sorting_folder = dataset_folder / 'kilosort2.0'
+    waveform_folder = sorting_folder / 'waveforms_kilosort2.0'
     if sorting_folder.exists() and sorting_folder.is_dir():
         unlock_files(sorting_folder)
         shutil.rmtree(sorting_folder)
@@ -67,14 +67,14 @@ def sorting(config):
         spatial_bins=motion_info['spatial_bins'],
         **motion_info['parameters']['interpolate_motion_kwargs'])
 
-    params_kilosort2_5 = si.get_default_sorter_params('kilosort2_5')
-    params_kilosort2_5['do_correction'] = False
-    params_kilosort2_5['skip_kilosort_preprocessing'] = False
-    params_kilosort2_5['scaleproc'] = 50
-    print(params_kilosort2_5)
-    Kilosort2_5Sorter.set_kilosort2_5_path('sorting/Kilosort-2.5')
-    sorting = si.run_sorter('kilosort2_5', rec_corrected, output_folder=str(sorting_folder),
-                            verbose=True, remove_existing_folder=True, **params_kilosort2_5)
+    params_kilosort2 = si.get_default_sorter_params('kilosort2')
+    params_kilosort2['do_correction'] = False
+    params_kilosort2['skip_kilosort_preprocessing'] = False
+    params_kilosort2['scaleproc'] = 50
+    print(params_kilosort2)
+    Kilosort2Sorter.set_kilosort2_path('sorting/Kilosort-2.0')
+    sorting = si.run_sorter('kilosort2', rec_corrected, output_folder=str(sorting_folder),
+                            verbose=True, remove_existing_folder=True, **params_kilosort2)
 
     we = si.extract_waveforms(rec_corrected, sorting, folder=str(waveform_folder),
                               sparse=True, max_spikes_per_unit=500, ms_before=1.5, ms_after=2.,
