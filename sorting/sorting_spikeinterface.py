@@ -26,7 +26,7 @@ def unlock_files(directory):
 def sorting(config):
     dataset_folder = Path(config['neuropixel_folder'])
     motion_folder = dataset_folder / 'motion'
-    sorting_folder = dataset_folder / 'kilosort2.5_new1'
+    sorting_folder = dataset_folder / 'kilosort2.5'
     waveform_folder = sorting_folder / 'waveforms_kilosort2.5'
     if sorting_folder.exists() and sorting_folder.is_dir():
         unlock_files(sorting_folder)
