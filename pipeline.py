@@ -17,7 +17,7 @@ from ruamel.yaml import YAML
 from pipeline_utils import create_config, extract_LFP, extract_sync, find
 from registration.registration_spikeinterface import registration as registration_function
 from sorting.sorting_spikeinterface import sorting as sorting_function
-from sorting.Kilosort_gridsearch_config import get_KS_params_grid
+from sorting.sorting_post import sorting_post as sorting_post_function
 
 # calculate time taken to run each pipeline call
 start_time = datetime.datetime.now()
@@ -266,17 +266,10 @@ if neuro_config:
 
 # Proceed with neural spike sorting
 if neuro_sort:
-    config_kilosort = {
-        "script_dir": config["script_dir"],
-        "trange": np.array(config["Session"]["trange"]),
-    }
-    config_kilosort["type"] = 1
     neuro_folders = glob.glob(config["neuropixel"] + "/*_g*")
-    path_to_add = script_folder + "/sorting/"
     for pixel in range(config["num_neuropixels"]):
-        config_kilosort["neuropixel_folder"] = neuro_folders[pixel]
         tmp = glob.glob(neuro_folders[pixel] + "/*_t*.imec" + str(pixel) + ".ap.bin")
-        config_kilosort["neuropixel"] = tmp[0]
+        config_kilosort = {"neuropixel_folder": neuro_folders[pixel], "neuropixel": tmp[0]}
         if len(find("sync.mat", config_kilosort["neuropixel_folder"])) > 0:
             print("Found existing sync file")
         else:
@@ -290,33 +283,15 @@ if neuro_sort:
         print("Starting spike sorting of " + config_kilosort["neuropixel"])
         sorting_function(config_kilosort)
 
-        print("Starting alf post-processing of " + config_kilosort["neuropixel"])
-        alf_dir = Path(config_kilosort["neuropixel_folder"] + "/sorted/alf")
-        shutil.rmtree(alf_dir, ignore_errors=True)
-        #ks_dir = Path(config_kilosort["neuropixel_folder"] + "/sorted")
-        #ks2_to_alf(ks_dir, Path(config_kilosort["neuropixel"]), alf_dir)
-
 # Proceed with neuro post-processing
 if neuro_post:
-    config_kilosort = {"script_dir": config["script_dir"]}
     neuro_folders = glob.glob(config["neuropixel"] + "/*_g*")
-    path_to_add = script_folder + "/sorting/"
     for pixel in range(config["num_neuropixels"]):
-        config_kilosort["neuropixel_folder"] = (
-            neuro_folders[pixel] + "/kilosort2/sorter_output"
-        )
-        scipy.io.savemat(f"{config['script_dir']}/tmp/config.mat", config_kilosort)
-        subprocess.run(
-            [
-                "matlab",
-                "-nodisplay",
-                "-nosplash",
-                "-nodesktop",
-                "-r",
-                f"addpath(genpath('{path_to_add}')); neuropixel_call",
-            ],
-            check=True,
-        )
+        tmp = glob.glob(neuro_folders[pixel] + "/*_t*.imec" + str(pixel) + ".ap.bin")
+        config_kilosort = {"neuropixel_folder": neuro_folders[pixel], "neuropixel": tmp[0]}
+
+        print("Starting post spike sorting of " + config_kilosort["neuropixel"])
+        sorting_post_function(config_kilosort)
 
 if myo_config:
     if os.name == "posix":  # detect Unix

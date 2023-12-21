@@ -79,7 +79,3 @@ def sorting(config):
     we = si.extract_waveforms(rec_corrected, sorting, folder=str(waveform_folder),
                               sparse=True, max_spikes_per_unit=500, ms_before=1.5, ms_after=2.,
                               **job_kwargs)
-
-    metrics = si.compute_quality_metrics(we, metric_names=['firing_rate', 'presence_ratio', 'snr',
-                                                           'isi_violation', 'amplitude_cutoff'])
-    metrics
