@@ -68,7 +68,6 @@ def sorting(config):
         **motion_info['parameters']['interpolate_motion_kwargs'])
 
     params_kilosort2 = si.get_default_sorter_params('kilosort2')
-    params_kilosort2['do_correction'] = False
     params_kilosort2['skip_kilosort_preprocessing'] = False
     params_kilosort2['scaleproc'] = 50
     print(params_kilosort2)
