@@ -35,12 +35,12 @@ def registration(config):
         print(stream_names)
         raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
 
-        #P = raw_rec.get_probe()
-        #from probeinterface import ProbeGroup
-        #PRB = ProbeGroup()
-        #PRB.add_probe(P)
-        #from probeinterface import write_prb, read_prb
-        #write_prb('NPnew.prb', PRB)
+        P = raw_rec.get_probe()
+        from probeinterface import ProbeGroup
+        PRB = ProbeGroup()
+        PRB.add_probe(P)
+        from probeinterface import write_prb, read_prb
+        write_prb(str(dataset_folder / 'probemap.prb'), PRB)
 
         rec_eval_noise = si.highpass_filter(recording=raw_rec, freq_min=400.)
         bad_channel_ids1, channel_labels = si.detect_bad_channels(rec_eval_noise, method='mad', std_mad_threshold=1.5,
