@@ -54,7 +54,7 @@ def sorting(config):
     print(bad_channel_ids)
 
     rec1 = raw_rec.remove_channels(bad_channel_ids)
-    rec1 = scale(rec1, 20)
+    #rec1 = scale(rec1, 20)
     rec1 = si.bandpass_filter(recording=rec1, freq_min=300., freq_max=10000.)
     rec1 = si.phase_shift(rec1)
     rec1 = highpass_spatial_filter(rec1)
@@ -69,7 +69,7 @@ def sorting(config):
 
     params_kilosort2 = si.get_default_sorter_params('kilosort2')
     params_kilosort2['skip_kilosort_preprocessing'] = False
-    params_kilosort2['scaleproc'] = 50
+    #params_kilosort2['scaleproc'] = 50
     print(params_kilosort2)
     Kilosort2Sorter.set_kilosort2_path('sorting/Kilosort-2.0')
     sorting = si.run_sorter('kilosort2', rec_corrected, output_folder=str(sorting_folder),
