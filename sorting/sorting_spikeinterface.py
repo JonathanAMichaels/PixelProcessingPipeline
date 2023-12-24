@@ -59,13 +59,19 @@ def sorting(config):
     rec1 = si.phase_shift(rec1)
     rec1 = highpass_spatial_filter(rec1)
 
-    motion_info = load_motion_info(motion_folder)
+    array_names = ("temporal_bins", "spatial_bins", "motion")
+    motion_info = {}
+    for name in array_names:
+        if (motion_folder / f"{name}.npy").exists():
+            motion_info[name] = np.load(motion_folder / f"{name}.npy")
+        else:
+            motion_info[name] = None
+
     rec_corrected = interpolate_motion(
         recording=rec1,
         motion=motion_info['motion'],
         temporal_bins=motion_info['temporal_bins'],
-        spatial_bins=motion_info['spatial_bins'],
-        **motion_info['parameters']['interpolate_motion_kwargs'])
+        spatial_bins=motion_info['spatial_bins'])
 
     params_kilosort2 = si.get_default_sorter_params('kilosort2')
     params_kilosort2['skip_kilosort_preprocessing'] = False
