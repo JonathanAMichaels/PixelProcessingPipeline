@@ -44,4 +44,4 @@ dependencies:
   - urllib3=1.26.15
   - wheel
   - pip:
-      - git+"https://github.com/SpikeInterface/spikeinterface.git"
+      - git+https://www.github.com/SpikeInterface/spikeinterface.git
