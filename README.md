@@ -77,7 +77,7 @@ To run a sort on the Neuropixel data, run:
     python pipeline.py -f "/path/to/sessionYYYYMMDD" -neuro_sort
 
 ##### Chaining Commands Together
-If the `config.yaml` is correct, you can run the pipeline with all steps, for example
+If the `config.yaml` is correct, you can run the pipeline with both steps (registration and sorting), for example
 
     python pipeline.py -f "/path/to/sessionYYYYMMDD" -full
 
