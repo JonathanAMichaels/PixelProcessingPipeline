@@ -75,7 +75,7 @@ def sorting(config):
 
     params_kilosort2 = si.get_default_sorter_params('kilosort2')
     params_kilosort2['skip_kilosort_preprocessing'] = False
-    #params_kilosort2['scaleproc'] = 50
+    params_kilosort2['delete_recording_dat'] = True
     print(params_kilosort2)
     Kilosort2Sorter.set_kilosort2_path('sorting/Kilosort-2.0')
     sorting = si.run_sorter('kilosort2', rec_corrected, output_folder=str(sorting_folder),

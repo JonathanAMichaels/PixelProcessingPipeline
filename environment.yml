@@ -12,6 +12,7 @@ dependencies:
   - jupyter
   - pip
   - ruamel.yaml
+  - numba
   - cudatoolkit=11.3  # Use the CUDA version compatible with your GPU drivers
   - pip:
       - git+https://github.com/SpikeInterface/spikeinterface.git
