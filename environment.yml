@@ -1,47 +1,19 @@
----
 name: pipeline
 channels:
+  - pytorch
   - conda-forge
-  - nvidia/label/cuda-11.3.1
-  - pytorch
+  - defaults
 dependencies:
-  - cuda-nvcc
-  - cudatoolkit-dev=11.3
-  - cupy
-  - cython
-  - dask
-  - h5py
-  - joblib
-  - matplotlib
-  - numpy=1.23.5
-  - nvitop
-  - pandas
-  - pillow
-  - pip
-  - pyopengl
-  - pyopenssl
-  - pyqt
-  - pyqt5-sip
-  - pyqtgraph
-  - pyqtwebengine
-  - pytest
   - python=3.9
-  - pytorch
-  - pywavelets
-  - pyyaml
-  - qtconsole
-  - readline
-  - requests
-  - responses
-  - ruamel.yaml
-  - scikit-image
+  - numpy
+  - matplotlib
+  - pandas
   - scikit-learn
-  - scikit-video
-  - scipy
-  - setuptools
+  - jupyter
+  - pip
+  - cudatoolkit=11.3  # Use the CUDA version compatible with your GPU drivers
+  - pytorch
   - torchvision
-  - traitlets
-  - urllib3=1.26.15
-  - wheel
+  - torchaudio
   - pip:
-      - git+https://www.github.com/SpikeInterface/spikeinterface.git
+      - git+https://github.com/SpikeInterface/spikeinterface.git
