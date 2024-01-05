@@ -1,7 +1,0 @@
-PyWavelets
-cython
-h5py
-ibl-neuropixel
-parmap
-scikit-image
-viewephys

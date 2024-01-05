@@ -7,8 +7,8 @@ rez.ops.fig = getOr(rez.ops, 'fig', 1); % whether to show plots every N batches
 rez.ops.useStableMode = getOr(rez.ops, 'useStableMode', 1);
 useStableMode = rez.ops.useStableMode;
 
-NrankPC = rez.ops.nPCs; % this one is the rank of the PCs, used to detect spikes with threshold crossings
-Nrank = rez.ops.nEig; % this one is the rank of the templates
+NrankPC = 6; % this one is the rank of the PCs, used to detect spikes with threshold crossings
+Nrank = 3; % this one is the rank of the templates
 
 rez.ops.LTseed = getOr(rez.ops, 'LTseed', 1);
 rng('default'); rng(rez.ops.LTseed);

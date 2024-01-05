@@ -127,8 +127,8 @@ while ik<Nfilt
     end
 
     % now decide if the split would result in waveforms that are too similar
-    c1  = wPCA * reshape(mean(clp0(ilow,:),1), size(wPCA,2), []); %  the reconstructed mean waveforms for putatiev cluster 1
-    c2  = wPCA * reshape(mean(clp0(~ilow,:),1), size(wPCA,2), []); %  the reconstructed mean waveforms for putative cluster 2
+    c1  = wPCA * reshape(mean(clp0(ilow,:),1), 3, []); %  the reconstructed mean waveforms for putatiev cluster 1
+    c2  = wPCA * reshape(mean(clp0(~ilow,:),1), 3, []); %  the reconstructed mean waveforms for putative cluster 2
     cc = corrcoef(c1, c2); % correlation of mean waveforms
     n1 =sqrt(sum(c1(:).^2)); % the amplitude estimate 1
     n2 =sqrt(sum(c2(:).^2)); % the amplitude estimate 2
@@ -177,7 +177,7 @@ fprintf('Finished splitting. Found %d splits, checked %d/%d clusters, nccg %d \n
 
 
 Nfilt = size(rez.W,2); % new number of templates
-Nrank = ops.nEig;
+Nrank = 3;
 Nchan = ops.Nchan;
 Params     = double([0 Nfilt 0 0 size(rez.W,1) Nnearest ...
     Nrank 0 0 Nchan NchanNear ops.nt0min 0]); % make a new Params to pass on parameters to CUDA
@@ -196,7 +196,8 @@ rez.simScore(isplit) = 1; % 1 means they come from the same parent
 rez.iNeigh   = gather(iList(:, 1:Nfilt)); % get the new neighbor templates
 rez.iNeighPC    = gather(iC(:, iW(1:Nfilt))); % get the new neighbor channels
 
-rez.Wphy = cat(1, zeros(int16(((ops.nt0-ops.nt0min)/ops.nt0-0.5)*ops.nt0), Nfilt, Nrank), rez.W); % for Phy, we need to pad the spikes with zeros so the spikes are aligned to the center of the window
+rez.Wphy = cat(1, zeros(1+ops.nt0min, Nfilt, Nrank), rez.W); % for Phy, we need to pad the spikes with zeros so the spikes are aligned to the center of the window
+
 rez.isplit = isplit; % keep track of origins for each cluster
 
 
