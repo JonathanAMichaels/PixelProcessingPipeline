@@ -44,5 +44,4 @@ dependencies:
   - urllib3=1.26.15
   - wheel
   - pip:
-      - git+https://github.com/cortex-lab/phy.git
       - git+https://github.com/SpikeInterface/spikeinterface.git
