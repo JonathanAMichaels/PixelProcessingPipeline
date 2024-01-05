@@ -36,20 +36,23 @@ CUDA Toolkit (Automatically installed with micromamba/conda environment):
   - 11.3
 
 ### Instructions
-These installation instructions were tested on the Computational Brain Science Group Server 'CBS GPU 10GB' image, and the Compute Canada servers. They may need to be adjusted if running on another machine type.
-
 Clone a copy of the repository on your local machine (for example, in the home directory)
 
     git clone https://github.com/JonathanAMichaels/PixelProcessingPipeline.git
-    
-After cloning, you can either configure a virtualenv, conda, or micromamba environment to run the pipeline
 
-#### Micromamba Environment (Option 1, recommended)
-To install micromamba and set up a micromamba environment, follow these steps:
 
-    "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
-    micromamba env create -f environment.yml
-    micromamba activate pipeline
+#### Conda Environment
+ss
+
+    wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+    bash Miniforge3-Linux-x86_64.sh
+
+To install using a conda environment, follow these steps:
+
+
+    conda env create -f environment.yml
+    conda activate pipeline
+    conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
 
 
 #### Final Installation Steps
@@ -68,10 +71,10 @@ The Myomatrix folder must be organized either as 'folder_myo/Record Node ###/con
 
 Each time a sort is performed, a new folder will be created in the experiment directory with the date and time of the sort. Inside this folder will be the sorted data, the phy output files, and a copy of the ops used to sort the data. The original OpenEphys data will not be modified.
 
-#### Micromamba Activation
-Every time you open a new terminal, you must activate the environment. If micromamba was used, activate the environment using
+#### Conda Activation
+Every time you open a new terminal, you must activate the environment.
 
-    micromamba activate pipeline
+    conda activate pipeline
 
 #### Final Usage Steps
 The first time you process an experiment, call

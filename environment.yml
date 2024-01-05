@@ -11,9 +11,7 @@ dependencies:
   - scikit-learn
   - jupyter
   - pip
+  - ruamel.yaml
   - cudatoolkit=11.3  # Use the CUDA version compatible with your GPU drivers
-  - pytorch
-  - torchvision
-  - torchaudio
   - pip:
       - git+https://github.com/SpikeInterface/spikeinterface.git
