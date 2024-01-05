@@ -69,10 +69,7 @@ The first time you process an experiment, call
 
     python pipeline.py -f "/path/to/sessionYYYYMMDD"
 
-This will generate a `config.yaml` file in that directory with all the relevant parameters for that experiment generated automatically. Open that file with any text editor and add any session specific information to the Session parameter section. For example, if you collected Myomatrix data you must specify which channels belong to which electrode and which channel contains the sync information, since this information cannot be generated automatically.
-
-##### Configuration Commands
-Edit your config file using any basic text editor to specify brain areas and recording coordinates
+This will generate a `config.yaml` file in that directory with all the relevant parameters for that experiment generated automatically. Open that file with any text editor and add any session specific information to the Session parameter section. For example, for Neuropixels data you need to specify the brain area of each electrode and the recording coordinates.
 
 ##### Spike Sorting Commands
 To run a sort on the Neuropixel data, run:
