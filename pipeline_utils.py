@@ -3,6 +3,7 @@ import fnmatch
 import numpy as np
 from sorting.readSGLX import readMeta, SampRate, makeMemMapRaw, ExtractDigital
 import scipy.io
+import shutil
 
 def find(pattern, path):
     result = []
