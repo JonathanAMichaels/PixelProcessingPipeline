@@ -4,6 +4,7 @@ import numpy as np
 from sorting.readSGLX import readMeta, SampRate, makeMemMapRaw, ExtractDigital
 import scipy.io
 import shutil
+import Path
 
 def find(pattern, path):
     result = []
