@@ -1,11 +1,8 @@
 import os
 import fnmatch
-import shutil
-from pathlib import Path
 import numpy as np
 from sorting.readSGLX import readMeta, SampRate, makeMemMapRaw, ExtractDigital
 import scipy.io
-
 
 def find(pattern, path):
     result = []
