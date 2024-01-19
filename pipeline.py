@@ -1,15 +1,9 @@
-import concurrent.futures
 import datetime
 import glob
-import itertools
 import os
-import shutil
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
-import numpy as np
-import scipy.io
 from ruamel.yaml import YAML
 from pipeline_utils import create_config, extract_sync, find
 from registration.registration_spikeinterface import registration as registration_function
@@ -208,6 +202,7 @@ if neuro_sort:
 
         print("Starting spike sorting of " + config_kilosort["neuropixel"])
         sorting_function(config_kilosort)
+        sorting_post_function(config_kilosort)
 
 # Proceed with LFP extraction
 if lfp_extract:

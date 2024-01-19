@@ -67,11 +67,14 @@ def sorting(config):
         else:
             motion_info[name] = None
 
-    rec_corrected = interpolate_motion(
-        recording=rec1,
-        motion=motion_info['motion'],
-        temporal_bins=motion_info['temporal_bins'],
-        spatial_bins=motion_info['spatial_bins'])
+    if motion_info['motion'] is None:
+        rec_corrected = rec1
+    else:
+        rec_corrected = interpolate_motion(
+            recording=rec1,
+            motion=motion_info['motion'],
+            temporal_bins=motion_info['temporal_bins'],
+            spatial_bins=motion_info['spatial_bins'])
 
     params_kilosort2 = si.get_default_sorter_params('kilosort2')
     params_kilosort2['skip_kilosort_preprocessing'] = False

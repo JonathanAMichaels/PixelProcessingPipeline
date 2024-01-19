@@ -3,6 +3,8 @@ import fnmatch
 import numpy as np
 from sorting.readSGLX import readMeta, SampRate, makeMemMapRaw, ExtractDigital
 import scipy.io
+import shutil
+from pathlib import Path
 
 def find(pattern, path):
     result = []
