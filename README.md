@@ -43,7 +43,6 @@ To install using a conda environment, follow these steps:
 
     conda env create -f environment.yml
     conda activate pipeline
-    conda install pytorch torchvision cudatoolkit=11.8 pytorch-cuda=11.8 -c pytorch -c nvidia
 
 
 #### Final Installation Steps
