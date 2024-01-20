@@ -24,9 +24,6 @@ Nvidia Driver:
   - Linux:      >=450.80.02
   - Windows:    >=452.39
 
-CUDA Toolkit (Automatically installed with conda environment):
-  - 11.3
-
 ### Instructions
 Clone a copy of the repository on your local machine (for example, in the home directory)
 
