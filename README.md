@@ -45,10 +45,8 @@ To install using a conda environment, follow these steps:
     conda activate pipeline
 
 
-#### Final Installation Steps
+#### Final Installation Step
 Open matlab and confirm that all mex files compile by running
-    
-    WARNING: make sure to activate the pipeline environment before running these commands
 
     matlab -nodesktop
     cd PixelProcessingPipeline/sorting/Kilosort-2.0/CUDA/
