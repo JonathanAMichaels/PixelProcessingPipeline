@@ -33,7 +33,7 @@ def sorting(config):
     PRB.add_probe(P)
     write_prb(str(dataset_folder / 'probemap.prb'), PRB)
 
-    SAVE_PATH = Path(glob.glob(str(dataset_folder) + "/*_t*.imec*.ap.bin"))
+    SAVE_PATH = Path(glob.glob(str(dataset_folder) + "/*_t*.imec*.ap.bin")[0])
 
     # NOTE: 'n_chan_bin' is a required setting, and should reflect the total number
     #       of channels in the binary file. For information on other available
