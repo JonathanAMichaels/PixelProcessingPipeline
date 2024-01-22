@@ -17,6 +17,7 @@ from probeinterface import write_prb, read_prb
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import gridspec, rcParams
+import glob
 
 def sorting(config):
     dataset_folder = Path(config['neuropixel_folder'])
