@@ -112,4 +112,4 @@ def sorting(config):
             ax.set_yscale('log')
             ax.set_title('loglog')
 
-    plt.savefig('results_fig.png')
+    plt.savefig(sorting_folder / 'results_fig.png')
