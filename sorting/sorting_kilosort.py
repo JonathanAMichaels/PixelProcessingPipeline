@@ -18,6 +18,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import gridspec, rcParams
 import glob
+import torch
+
+torch.cuda.empty_cache()
 
 def sorting(config):
     dataset_folder = Path(config['neuropixel_folder'])

@@ -187,7 +187,7 @@ if not os.path.isdir(f"{config['script_dir']}/tmp"):
 # Proceed with neural spike sorting
 if neuro_sort:
     neuro_folders = glob.glob(config["neuropixel"] + "/*_g*")
-    for pixel in range(config["num_neuropixels"]):
+    for pixel in [1]:#range(config["num_neuropixels"]):
         tmp = glob.glob(neuro_folders[pixel] + "/*_t*.imec" + str(pixel) + ".ap.bin")
         config_kilosort = {"neuropixel_folder": neuro_folders[pixel], "neuropixel": tmp[0]}
         if len(find("sync.mat", config_kilosort["neuropixel_folder"])) > 0:
