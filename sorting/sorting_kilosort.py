@@ -41,7 +41,7 @@ def sorting(config):
     # NOTE: 'n_chan_bin' is a required setting, and should reflect the total number
     #       of channels in the binary file. For information on other available
     #       settings, see `kilosort.run_kilosort.default_settings`.
-    settings = {'data_dir': SAVE_PATH.parent, 'n_chan_bin': 385, 'nblocks': 3, 'batch_size': 210000}
+    settings = {'data_dir': SAVE_PATH.parent, 'n_chan_bin': 385, 'nblocks': 3, 'batch_size': 180000}
 
     ops, st, clu, tF, Wall, similar_templates, is_ref, est_contam_rate = \
         run_kilosort(settings=settings, probe_name=SAVE_PATH.parent / 'probemap.prb')
