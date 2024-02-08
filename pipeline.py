@@ -200,8 +200,8 @@ if neuro_sort:
             )
             extract_sync(config_kilosort)
 
-        #print("Starting spike sorting of " + config_kilosort["neuropixel"])
-        #sorting_function(config_kilosort)
+        print("Starting spike sorting of " + config_kilosort["neuropixel"])
+        sorting_function(config_kilosort)
 
 # Proceed with LFP extraction
 if lfp_extract:
