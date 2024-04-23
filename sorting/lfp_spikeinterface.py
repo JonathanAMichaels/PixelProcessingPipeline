@@ -36,8 +36,7 @@ def lfp_extract(config):
     print(stream_names)
 
     raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
-    rec1 = si.bandpass_filter(recording=raw_rec, freq_min=0.1, freq_max=300.)
-    rec1 = si.phase_shift(rec1)
-    rec1 = si.scale(rec1, gain=100)
+    rec1 = si.phase_shift(raw_rec)
+    rec1 = si.bandpass_filter(recording=rec1, freq_min=1., freq_max=300.)
     rec1 = si.resample(rec1, 1000)
     rec1.save(folder=lfp_folder, format='binary', **job_kwargs)
