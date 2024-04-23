@@ -39,13 +39,16 @@ def lfp_extract(config):
 
     raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
 
-    P = raw_rec.get_probe()
-    PRB = ProbeGroup()
-    PRB.add_probe(P)
-    write_prb(str(dataset_folder / 'probemap.prb'), PRB)
+    meta = raw_rec
+    params = {'LFP_filter_type': 'si.bandpass_filter', 'bandpass_frequency': (1, 300),
+              'sampling_rate': 1000, 'gain': 100}
+    savemat(lfp_folder / 'LFP_params.mat',
+            {'electrode_x_um': meta['x'], 'electrode_y_um': meta['y'], 'params': params})
 
     rec1 = si.phase_shift(raw_rec)
-    rec1 = si.bandpass_filter(recording=rec1, freq_min=1., freq_max=300., dtype='float32')
-    rec1 = si.resample(rec1, 1000)
-    rec1 = si.scale(rec1, gain=100, dtype='int16')
+    rec1 = si.bandpass_filter(recording=rec1, freq_min=params['bandpass_frequency'][0],
+                              freq_max=params['bandpass_frequency'][1], dtype='float32')
+    rec1 = si.resample(rec1, params['sampling_rate'])
+    rec1 = si.scale(rec1, rec1.get_channel_gains())
+    rec1 = si.scale(rec1, gain=params['gain'], dtype='int16')
     rec1.save(folder=lfp_folder, format='binary', **job_kwargs)
