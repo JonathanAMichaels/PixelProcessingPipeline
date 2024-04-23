@@ -45,6 +45,8 @@ def lfp_extract(config):
     print(P)
     PRB = ProbeGroup()
     PRB.add_probe(P)
+    A = PRB.to_dict()
+    print(A)
 
     params = {'LFP_filter_type': 'si.bandpass_filter', 'bandpass_frequency': (1, 300),
               'sampling_rate': 1000, 'gain': 100}
