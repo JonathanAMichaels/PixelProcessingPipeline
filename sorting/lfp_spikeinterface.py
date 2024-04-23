@@ -3,6 +3,8 @@ import numpy as np
 from pathlib import Path
 import shutil
 import subprocess
+from probeinterface import ProbeGroup
+from probeinterface import write_prb, read_prb
 
 def unlock_files(directory):
     # Find the process IDs using the files in the directory
@@ -36,7 +38,14 @@ def lfp_extract(config):
     print(stream_names)
 
     raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
+
+    P = raw_rec.get_probe()
+    PRB = ProbeGroup()
+    PRB.add_probe(P)
+    write_prb(str(dataset_folder / 'probemap.prb'), PRB)
+
     rec1 = si.phase_shift(raw_rec)
     rec1 = si.bandpass_filter(recording=rec1, freq_min=1., freq_max=300.)
     rec1 = si.resample(rec1, 1000)
+    rec1 = si.scale(rec1, gain=100)
     rec1.save(folder=lfp_folder, format='binary', **job_kwargs)
