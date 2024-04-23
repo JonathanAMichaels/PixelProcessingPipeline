@@ -44,8 +44,6 @@ def lfp_extract(config):
     P = raw_rec.get_probe()
     PRB = ProbeGroup()
     PRB.add_probe(P)
-    A = PRB.to_dict()
-    print(A['probes'][0]['contact_positions'])
 
     params = {'LFP_filter_type': 'si.bandpass_filter', 'bandpass_frequency': (1, 300),
               'sampling_rate': 1000, 'gain': 100}
@@ -57,6 +55,5 @@ def lfp_extract(config):
     rec1 = si.scale(rec1, rec1.get_channel_gains())
     rec1 = si.scale(rec1, gain=params['gain'], dtype='int16')
     rec1.save(folder=lfp_folder, format='binary', **job_kwargs)
-    write_prb(str(lfp_folder / 'probemap.csv'), PRB)
     savemat(lfp_folder / 'LFP_params.mat',
-            {'electrode_x_um': meta['x'], 'electrode_y_um': meta['y'], 'params': params})
+            {'electrode_contacts_um': PRB.to_dict()['probes'][0]['contact_positions'], 'params': params})
