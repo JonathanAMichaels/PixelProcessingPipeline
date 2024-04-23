@@ -5,6 +5,7 @@ import shutil
 import subprocess
 from probeinterface import ProbeGroup
 from probeinterface import write_prb, read_prb
+from scipy.io import savemat
 
 def unlock_files(directory):
     # Find the process IDs using the files in the directory
