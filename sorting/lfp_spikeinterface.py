@@ -45,8 +45,6 @@ def lfp_extract(config):
     meta = data.geometry
     params = {'LFP_filter_type': 'si.bandpass_filter', 'bandpass_frequency': (1, 300),
               'sampling_rate': 1000, 'gain': 100}
-    savemat(lfp_folder / 'LFP_params.mat',
-            {'electrode_x_um': meta['x'], 'electrode_y_um': meta['y'], 'params': params})
 
     rec1 = si.phase_shift(raw_rec)
     rec1 = si.bandpass_filter(recording=rec1, freq_min=params['bandpass_frequency'][0],
@@ -55,3 +53,5 @@ def lfp_extract(config):
     rec1 = si.scale(rec1, rec1.get_channel_gains())
     rec1 = si.scale(rec1, gain=params['gain'], dtype='int16')
     rec1.save(folder=lfp_folder, format='binary', **job_kwargs)
+    savemat(lfp_folder / 'LFP_params.mat',
+            {'electrode_x_um': meta['x'], 'electrode_y_um': meta['y'], 'params': params})
