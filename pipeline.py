@@ -8,7 +8,7 @@ from ruamel.yaml import YAML
 from pipeline_utils import create_config, extract_sync, find
 from registration.registration_spikeinterface import registration as registration_function
 from sorting.sorting_kilosort import sorting as sorting_function
-from sorting.sorting_kilosort import lfp_spikeinterface as lfp_function
+from sorting.lfp_spikeinterface import lfp_extract as lfp_function
 from sorting.sorting_post import sorting_post as sorting_post_function
 
 # calculate time taken to run each pipeline call

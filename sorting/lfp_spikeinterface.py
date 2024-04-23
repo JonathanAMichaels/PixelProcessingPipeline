@@ -18,7 +18,7 @@ def unlock_files(directory):
         print(f"Killing process {pid}")
         subprocess.run(['kill', '-9', pid])
 
-def sorting(config):
+def lfp_extract(config):
     dataset_folder = Path(config['neuropixel_folder'])
     lfp_folder = dataset_folder / 'LFP'
     if lfp_folder.exists() and lfp_folder.is_dir():
