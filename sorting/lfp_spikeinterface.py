@@ -42,12 +42,8 @@ def lfp_extract(config):
     raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
 
     P = raw_rec.get_probe()
-    print(P)
-    PRB = ProbeGroup()
-    PRB.add_probe(P)
-    A = PRB.to_dict()
-    print(A)
-
+    meta = P.contact_positions()
+    print(meta)
     params = {'LFP_filter_type': 'si.bandpass_filter', 'bandpass_frequency': (1, 300),
               'sampling_rate': 1000, 'gain': 100}
 
@@ -60,4 +56,4 @@ def lfp_extract(config):
     rec1.save(folder=lfp_folder, format='binary', **job_kwargs)
     write_prb(str(lfp_folder / 'probemap.csv'), PRB)
     savemat(lfp_folder / 'LFP_params.mat',
-            {'electrode_x_um': meta['x'], 'electrode_y_um': meta['y'], 'params': params})
+            {'electrode_x_um': meta[:,0], 'electrode_y_um': meta[:,1], 'params': params})
