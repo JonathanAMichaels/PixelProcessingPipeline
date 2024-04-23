@@ -41,7 +41,7 @@ def lfp_extract(config):
 
     raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
 
-    meta = readMeta(Path(config_kilosort['neuropixel']))
+    meta = readMeta(Path(config['neuropixel']))
     print(meta)
     meta = meta['geometry']
     params = {'LFP_filter_type': 'si.bandpass_filter', 'bandpass_frequency': (1, 300),
