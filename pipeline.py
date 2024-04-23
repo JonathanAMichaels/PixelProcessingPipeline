@@ -8,6 +8,7 @@ from ruamel.yaml import YAML
 from pipeline_utils import create_config, extract_sync, find
 from registration.registration_spikeinterface import registration as registration_function
 from sorting.sorting_kilosort import sorting as sorting_function
+from sorting.sorting_kilosort import lfp_spikeinterface as lfp_function
 from sorting.sorting_post import sorting_post as sorting_post_function
 
 # calculate time taken to run each pipeline call
@@ -209,11 +210,8 @@ if lfp_extract:
     for pixel in range(config["num_neuropixels"]):
         tmp = glob.glob(neuro_folders[pixel] + "/*_t*.imec" + str(pixel) + ".ap.bin")
         config_kilosort = {"neuropixel_folder": neuro_folders[pixel], "neuropixel": tmp[0]}
-        if len(find("lfp.mat", config_kilosort["neuropixel_folder"])) > 0:
-            print("Found existing LFP file")
-        else:
-            print(f"Extracting LFP from {config_kilosort['neuropixel']} and saving")
-            extract_LFP(config_kilosort)
+        print(f"Extracting LFP from {config_kilosort['neuropixel']} and saving")
+        lfp_function(config_kilosort)
 
 
 print("Pipeline finished! You've earned a break.")
