@@ -6,7 +6,7 @@ import subprocess
 from probeinterface import ProbeGroup
 from probeinterface import write_prb, read_prb
 from scipy.io import savemat
-import spikeglx
+from sorting.readSGLX import readMeta
 
 def unlock_files(directory):
     # Find the process IDs using the files in the directory
@@ -41,8 +41,9 @@ def lfp_extract(config):
 
     raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
 
-    data = spikeglx.Reader(Path(config['neuropixel']))
-    meta = data.geometry
+    meta = readMeta(Path(config_kilosort['neuropixel']))
+    print(meta)
+    meta = meta['geometry']
     params = {'LFP_filter_type': 'si.bandpass_filter', 'bandpass_frequency': (1, 300),
               'sampling_rate': 1000, 'gain': 100}
 
