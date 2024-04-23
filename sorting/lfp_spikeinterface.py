@@ -39,4 +39,5 @@ def lfp_extract(config):
     rec1 = si.bandpass_filter(recording=raw_rec, freq_min=0.1, freq_max=300.)
     rec1 = si.phase_shift(rec1)
     rec1 = si.scale(rec1, gain=100)
+    rec1 = si.resample(rec1, sampling_rate=1000)
     rec1.save(folder=lfp_folder, format='binary', **job_kwargs)
