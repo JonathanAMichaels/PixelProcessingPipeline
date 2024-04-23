@@ -42,6 +42,7 @@ def lfp_extract(config):
     raw_rec = si.read_spikeglx(spikeglx_folder, stream_name=stream_names[0], load_sync_channel=False)
 
     P = raw_rec.get_probe()
+    print(P)
     PRB = ProbeGroup()
     PRB.add_probe(P)
 
