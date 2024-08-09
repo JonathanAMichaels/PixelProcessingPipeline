@@ -25,6 +25,7 @@ Clone a copy of the repository on your local machine (for example, in the home d
 
 ## Installation
 Install spikeinterface from https://github.com/SpikeInterface/spikeinterface
+
 Install Kilosort 4 from https://github.com/MouseLand/Kilosort
 
 ## Usage
